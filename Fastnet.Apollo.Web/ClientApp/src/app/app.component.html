@@ -1,0 +1,41 @@
+<div class='component-container'>
+  <div class="body-panel">
+    <!--<ng-container *ngIf="!isIpad(); else ipad">-->
+    <ng-container *ngIf="isMobileDevice() === false">
+      <div class="two-column">
+        <div class="catalogue-panel">
+          <menu-panel></menu-panel>
+          <router-outlet></router-outlet>
+        </div>
+        <div class="player-panel">
+          <device-menu></device-menu>
+          <audio-controller></audio-controller>
+          <device-playlist></device-playlist>
+          <!--<audio-player></audio-player>-->
+        </div>
+      </div>
+    </ng-container>
+    <ng-container *ngIf="isMobileDevice() === true">
+      <sliding-panels [activePanelNumber]="1" (swipeleft)="onSwipeLeft($event)" (swiperight)="onSwipeRight($event)">
+        <sliding-panel>
+          <div class="catalogue-panel  mobile-device">
+            <menu-panel></menu-panel>
+            <router-outlet></router-outlet>
+          </div>
+        </sliding-panel>
+        <sliding-panel>
+          <div class="player-panel mobile-device">
+            <device-menu></device-menu>
+            <audio-controller></audio-controller>
+          </div>
+        </sliding-panel>
+        <sliding-panel>
+          <div class="player-panel  mobile-device">
+            <device-menu></device-menu>
+            <device-playlist></device-playlist>
+          </div>
+        </sliding-panel>
+      </sliding-panels>
+    </ng-container>
+  </div>
+</div>

@@ -1,0 +1,137 @@
+
+@import "../base-catalog.component.scss";
+
+:host ::ng-deep {
+  background-color: theme-colour('background', 'dark');
+  display: flex;
+  height: 100%;
+  overflow-y: auto;
+}
+
+:host(.is-edge) {
+  /* there is hard coded 111px here because overflow-y on Edge does not work with a height set to 100%
+        the 111px is the result of summing
+        48px for the menu-panel
+        31px for the search input
+        16px of margins
+        16px of 'fudge' - don't know why I need it!
+    */
+  height: calc(100vh - 111px);
+}
+
+
+
+.performance-origin {
+  font-size: 0.8rem;
+  font-style: italic;
+  color: $high-accent-colour; // theme-colour('primary');
+  display: grid;
+  grid-template-columns: 1fr auto auto;
+  grid-column-gap: $theme-gutter-narrow;
+  justify-content: flex-end;
+  align-items: start;
+
+  &.is-highlit {
+    color: theme-colour('accent');
+  }
+}
+
+.component-container {
+  $composition-background-colour: theme-colour('primary', 'dark');
+  $composition-name-colour: theme-colour('surface');
+  $section-separator-colour: darken($high-accent-colour, 35%); // darken(theme-colour('surface', 'light'), 30%);
+  $section-width: $theme-gutter-narrow;
+  /*height: 100%;*/
+  width: 100%;
+
+
+
+  .composer {
+    border-left: solid $section-width $section-separator-colour;
+    margin-bottom: $theme-gutter-fine;
+    margin-top: $theme-gutter-fine;
+    margin-left: $theme-gutter;
+    padding-left: $theme-gutter;
+
+    .identity {
+      display: grid;
+      grid-template-columns: auto 1fr;
+      color: $high-accent-colour;
+      background-color: $section-separator-colour;
+      margin-right: $theme-gutter;
+
+      .image-container {
+        .image {
+          @include set-image(48px);
+        }
+      }
+
+      .details {
+        padding-left: $theme-gutter-narrow;
+        padding-right: $theme-gutter-narrow;
+        display: grid;
+        grid-template-rows: 15px auto;
+        font-size: 12px;
+        font-style: italic;
+
+        .name {
+          font-size: 12px;
+          font-style: italic;
+        }
+      }
+    }
+
+    .compositions {
+      .composition-container {
+        .composition {
+          .composition-name {
+            background-color: $composition-background-colour;
+            color: $composition-name-colour;
+            margin-top: $theme-gutter-fine;
+            //margin-bottom: $theme-gutter-narrow;
+            margin-right: $theme-gutter;
+            padding: $theme-gutter;
+            font-size: 1rem;
+            font-style: italic;
+            display: grid;
+            grid-template-columns: auto 1fr;
+            align-items: center;
+            grid-gap: $theme-gutter;
+          }
+
+          .performances {
+            padding-right: $theme-gutter;
+
+            .performance-container {
+              display: grid;
+              grid-template-rows: auto minmax(0, 1fr);
+
+              .name-row {
+                padding-top: $theme-gutter-fine;
+                display: grid;
+                grid-template-columns: auto 1fr;
+                grid-column-gap: $theme-gutter-narrow;
+                justify-content: left;
+                align-items: start;
+              }
+
+
+            }
+          }
+        }
+      }
+    }
+
+    .composer-commands {
+      color: theme-colour('primary');
+      display: grid;
+      grid-template-columns: 1fr auto;
+      justify-content: end;
+      grid-column-gap: $theme-gutter;
+
+      i {
+        @extend %icon-button;
+      }
+    }
+  }
+}

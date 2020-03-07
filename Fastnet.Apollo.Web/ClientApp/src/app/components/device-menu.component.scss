@@ -1,0 +1,49 @@
+@import "../../fastnet/themes/_themes";
+
+$device-menu-height: 48px;
+
+:host {
+    display: block;
+}
+
+.device-menu {
+    height: $device-menu-height;
+    width: 100%;
+    z-index: 999;
+    font-size: 24px;
+    color: theme-colour('surface');
+    background-color: theme-colour('primary', 'dark');
+    display: grid;
+    grid-template-columns: 1fr auto;
+    align-items: center;
+
+    .device-name {
+        margin: $theme-gutter;
+    }
+}
+.menu-items {
+    background-color: theme-colour('primary', 'dark');
+    border: 1px solid theme-colour('surface');
+    border-radius: 2px;
+
+    .menu-item {
+        margin: 0;
+        padding: $theme-gutter;
+        overflow: hidden;
+        white-space: nowrap;
+        text-overflow: ellipsis;
+
+        &:not(:last-child) {
+            border-bottom: 1px solid theme-colour('surface');
+        }
+
+        &.separation {
+            border-top: $theme-gutter solid theme-colour('surface');
+        }
+
+        &:hover {
+            background-color: theme-colour('surface');
+            color: theme-colour('primary', 'dark')
+        }
+    }
+}

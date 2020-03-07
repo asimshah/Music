@@ -1,0 +1,8 @@
+<div class="component-container" [ngClass]="{'is-mobile': isMobile(), 'is-ipad': isIpad()}">
+  <div class="search-container">
+    <search-input placeHolderText="Search for ..." [(ngModel)]="searchText" (searchClick)="onSearchClick()" (clearClick)="onClearClick()"></search-input>
+  </div>
+  <div class="catalog">
+    <ng-template #catalogComponent></ng-template>
+  </div>
+</div>

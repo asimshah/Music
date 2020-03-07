@@ -1,0 +1,76 @@
+div {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+}
+$std-duration: 1s;
+.parked {
+    left: -200%;
+}
+.infromleft {
+    animation-duration: $std-duration;
+    animation-name: slideinFromLeft;
+    animation-fill-mode: forwards;
+}
+.infromright {
+    animation-duration: $std-duration;
+    animation-name: slideinFromRight;
+    animation-fill-mode: forwards;
+}
+.outtoleft {
+    animation-duration: $std-duration;
+    animation-name: slideoutToLeft;
+    animation-fill-mode: forwards;
+}
+.outtoright {
+    animation-duration: $std-duration;
+    animation-name: slideoutToRight;
+    animation-fill-mode: forwards;
+}
+
+@keyframes slideinFromLeft {
+    from {
+        height: 100%;
+        left: -100%;
+    }
+    to {
+        height: 100%;
+        left: 0;
+    }
+}
+
+@keyframes slideinFromRight {
+    from {
+        height: 100%;
+        left: 100%;
+    }
+
+    to {
+        height: 100%;
+        left: 0;
+    }
+}
+
+@keyframes slideoutToLeft {
+    from {
+        height: 100%;
+        left: 0;
+    }
+
+    to {
+        height: 100%;
+        left: -100%;
+    }
+}
+
+@keyframes slideoutToRight {
+    from {
+        height: 100%;
+        left: 0;
+    }
+
+    to {
+        height: 100%;
+        left: 100%;
+    }
+}

@@ -1,0 +1,120 @@
+@import "../../fastnet/themes/_themes.scss";
+@include theme-buttons();
+$main-background-colour: theme-colour('background', 'dark' );
+$main-border-colour: theme-colour('surface' );
+$caption-background-colour: theme-colour('primary', 'light');
+
+$background-stripe-odd: theme-colour('background');
+$background-stripe-even: theme-colour('background', 'dark');
+
+button.hide {
+   display: none;
+}
+
+.main-container {
+   .not-valid {
+      color: red;
+   }
+
+   .main-body {
+      font-size: 10pt;
+      height: 88%;
+
+      .no-edit {
+         padding: $theme-gutter-narrow;
+
+         .no-edit-reasons {
+            font-style: italic;
+         }
+      }
+
+      .file-info {
+         padding: $theme-gutter-narrow;
+         display: grid;
+         grid-template-columns: 1fr auto;
+         align-items: flex-start;
+         background-color: $caption-background-colour;
+      }
+
+      .tag-form, .movement-container {
+         margin: $theme-gutter;
+         padding: $theme-gutter;
+      }
+
+      .tag-form {
+         display: grid;
+         grid-template-columns: 2fr 1fr 100px;
+         grid-row-gap: $theme-gutter-fine;
+
+         .message-container {
+            margin-top: 18px;
+            display: grid;
+            grid-template-columns: 1fr;
+            align-items: start;
+
+            .message {
+               margin-left: $theme-gutter;
+               line-height: 12px;
+            }
+         }
+
+         .span-2 {
+            grid-area: auto / 1 / auto / 3;
+         }
+
+         > * {
+            padding-bottom: $theme-gutter-narrow;
+            border-bottom: 1px solid #ffffff63;
+         }
+
+         .no-bottom-border {
+            border-bottom: none;
+         }
+
+         .button-column {
+            display: flex;
+            flex-direction: column;
+            align-items: flex-end;
+         }
+
+
+         .performance-info {
+            div:first-child {
+               font-weight: 600;
+            }
+
+            div:last-child {
+               margin-left: $theme-gutter;
+               font-style: italic;
+               font-size: 11px;
+            }
+         }
+      }
+
+      .movement-list, .track-list {
+         border: 1px solid theme-colour('surface', 'light');
+         margin-top: $theme-gutter-narrow;
+         padding: $theme-gutter-narrow;
+         border-radius: $theme-gutter-narrow;
+         max-height: 200px;
+         overflow-y: auto;
+
+         .movement, .track {
+            display: grid;
+            grid-template-columns: 24px 1fr;
+            grid-gap: $theme-gutter-narrow;
+
+            .track-number {
+               width: 24px;
+               text-align: right;
+            }
+
+            .track-title {
+               white-space: nowrap;
+               text-overflow: ellipsis;
+               overflow-x: hidden;
+            }
+         }
+      }
+   }
+}

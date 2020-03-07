@@ -1,0 +1,12 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <TargetFramework>netstandard2.1</TargetFramework>
+    <Version>2.0.215</Version>
+  </PropertyGroup>
+  <Target Name="PreBuild" BeforeTargets="PreBuildEvent">
+    <Exec Command="powershell .\BumpProjectVersion.ps1 $(ProjectPath)" />
+  </Target>
+  <ItemGroup>
+    <ProjectReference Include="..\Fastnet.Music.Core\Fastnet.Music.Core.csproj" />
+  </ItemGroup>
+</Project>

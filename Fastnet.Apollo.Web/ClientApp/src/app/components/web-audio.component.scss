@@ -1,0 +1,12 @@
+:host {
+    display: grid;
+}
+
+button {
+    height: 36px;
+    margin-left: auto;
+    margin-right: auto;
+    &.hidden {
+        display: none;
+    }
+}

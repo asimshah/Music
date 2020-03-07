@@ -1,0 +1,55 @@
+<popup-dialog>
+  <div windowcaption>
+    <div *ngIf="isReady()" class="caption">
+      <div>Tag Editor</div>
+    </div>
+  </div>
+  <div dialogbody>
+    <div class="main-container" *ngIf="isReady()">
+      <div class="main-body">
+        <ng-container>
+          <div class="file-info">
+            <div>{{am.pathToMusicFiles}}</div>
+            <div>{{am.fileCount}} files</div>
+          </div>
+           <div class="artist-name">{{am.artist}}</div>
+           <div class="tag-form">
+              <text-input label="Album" title="Album" [(ngModel)]="am.album"></text-input>
+              <div class="message-container">
+                 <div *ngFor="let vm of getValidationMessages('album')" class="message" [ngClass]="{'not-valid': vm.isError}" [innerHTML]="vm.text"></div>
+              </div>
+              <div>
+              </div>
+              <text-input label="Year" title="Year" [(ngModel)]="am.year"></text-input>
+              <div class="message-container">
+                 <div *ngFor="let vm of getValidationMessages('year')" class="message" [ngClass]="{'not-valid': vm.isError}" [innerHTML]="vm.text"></div>
+              </div>
+              <div>
+              </div>
+              <div class="span-2 no-bottom-border">
+                 <div>Tracks</div>
+                 <div class="track-list">
+                    <ng-container *ngFor="let f of am.fileList">
+                       <div class="track" [title]="f.file">
+                          <div class="track-number">{{getSingleSelected(f.trackNumberTag.values)}}</div>
+                          <div class="track-title">{{getSingleSelected(f.titleTag.values)}}</div>
+                       </div>
+                    </ng-container>
+                 </div>
+              </div>
+              <div class="button-column no-bottom-border">
+                 <button class="small" (click)="onEditTracks()" >Edit Tracks ...</button>
+              </div>
+           </div>
+        </ng-container>
+      </div>
+    </div>
+  </div>
+  <div dialogcommands right>
+    <button [ngClass]="{'disabled': !hasChanges()}" (click)="onSaveChanges()">Save Changes</button>
+    <button [ngClass]="{'hide': !hasChanges()}" (click)="onCancel()">Cancel Changes</button>
+    <button [ngClass]="{'hide': hasChanges()}" (click)="onClose()">Close</button>
+  </div>
+</popup-dialog>
+<musicfile-editor></musicfile-editor>
+<busy-indicator [busy]="isBusy"></busy-indicator>

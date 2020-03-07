@@ -1,0 +1,5 @@
+<div #sliderparent class="sliding-panels" >
+    <ng-container *ngFor="let panel of panels; let i = index" >
+        <ng-container *ngTemplateOutlet="panel.template"></ng-container>
+    </ng-container>
+</div>

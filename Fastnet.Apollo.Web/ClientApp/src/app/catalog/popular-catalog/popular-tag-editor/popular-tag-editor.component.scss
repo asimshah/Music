@@ -1,0 +1,14 @@
+@import "../../tag-editor.component.scss";
+
+.main-container {
+   .main-body {
+      .artist-name {
+         margin: $theme-gutter;
+         padding-left: $theme-gutter;
+         padding-right: $theme-gutter;
+         font-size: 1.5em;
+         color: darken(theme-colour('accent', 'light'), 25%);
+         font-style: italic;
+      }
+   }
+}

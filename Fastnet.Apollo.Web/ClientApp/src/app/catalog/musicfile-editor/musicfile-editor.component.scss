@@ -1,0 +1,53 @@
+@import "../../../fastnet/themes/_themes.scss";
+@include theme-buttons();
+
+.span-all {
+    grid-area: auto / 1 / auto / 4;
+}
+
+.editor-commands {
+    padding: $theme-gutter-fine;
+    background-color: theme-colour('background', 'light');
+    display: grid;
+    grid-template-columns: auto auto 1fr;
+    grid-column-gap: $theme-gutter-narrow;
+
+    .stack-horizontally {
+        display: grid;
+        grid-template-columns: auto auto auto auto auto;
+    }
+    .strip-command {
+        border-radius: 0.25em;
+        border: 1px solid theme-colour('surface');
+        background-color: theme-colour('background');
+    }
+}
+
+.file-list {
+    margin: $theme-gutter;
+    max-height: 410px;
+    overflow-y: auto;
+
+    .file {
+        margin-bottom: $theme-gutter-narrow;
+        display: grid;
+        grid-template-columns: 32px 1fr;
+        grid-gap: $theme-gutter-narrow;
+
+        .track-number {
+            input {
+                text-align: right;
+            }
+        }
+
+        .title {
+        }
+
+        .filename {
+            margin-left: $theme-gutter;
+            font-size: 8pt;
+            font-style: italic;
+            color: $high-accent-colour;
+        }
+    }
+}

@@ -1,0 +1,59 @@
+@import "../../fastnet/themes/_themes";
+
+
+.menu-panel {
+    height: 48px;
+    font-size: 24px;
+    color: theme-colour('surface');
+    background-color: theme-colour('primary', 'dark');
+    display: grid;
+    grid-template-columns: auto 1fr;
+    align-items: center;
+    justify-content: center;
+
+    .title {
+        cursor: pointer;
+    }
+    /*.style-name {
+        text-align: center;
+    }*/
+    .top-button, .title, .style-name {
+        margin: $theme-gutter;
+    }
+
+    .top-button {
+        cursor: pointer;
+
+        &:hover {
+            color: theme-colour('warning');
+        }
+    }
+
+    .current-style {
+        text-align: right;
+    }
+}
+
+.menu-items {
+    background-color: theme-colour('primary', 'dark');
+    border: 1px solid theme-colour('surface');
+    border-radius: 2px;
+
+    .menu-item {
+        margin: 0;
+        padding: $theme-gutter;
+
+        &:not(:last-child) {
+            border-bottom: 1px solid theme-colour('surface');
+        }
+
+        &.separation {
+            border-top: $theme-gutter solid theme-colour('surface');
+        }
+
+        &:hover {
+            background-color: theme-colour('surface');
+            color: theme-colour('primary', 'dark')
+        }
+    }
+}

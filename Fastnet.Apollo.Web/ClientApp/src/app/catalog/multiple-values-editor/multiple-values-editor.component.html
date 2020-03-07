@@ -1,0 +1,13 @@
+<popup-dialog [caption]="caption">
+    <div dialogbody class="main-container">
+        <div *ngIf="isReady" class="main-body">
+            <ng-container *ngFor="let p of choices">
+                <bool-input [(ngModel)]="p.selected" [label]="p.value" (change)="onChange(p)"></bool-input>
+            </ng-container>
+        </div>
+    </div>
+    <div dialogcommands right>
+        <button (click)="ok()" [ngClass]="{'disabled': !hasChanged()}">OK</button>
+        <button (click)="cancel()">Cancel</button>
+    </div>
+</popup-dialog>

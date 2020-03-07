@@ -1,0 +1,100 @@
+<popup-dialog>
+    <div windowcaption>
+        <div *ngIf="isReady()" class="caption">
+            <div>Tag Editor</div>
+        </div>
+    </div>
+    <div dialogbody>
+        <div class="main-container" *ngIf="isReady()">
+            <div class="main-body">
+               <ng-container>
+                  <div class="file-info">
+                     <div>{{getPathToMusicFiles()}}</div>
+                     <div>{{getFileCount()}}</div>
+                  </div>
+
+                  <div class="" *ngFor="let pm of pmList; let i = index">
+                     <ng-container *ngIf="i === currentModel">
+                        <div class="album-name">
+                           <span>{{getAlbumName()}}</span><span>, {{getPerformanceIdentifier()}}</span>
+                        </div>
+                        <div class="tag-form">
+                           <text-input label="Composer" title="Composer" [(ngModel)]="pm.composer"></text-input>
+                           <div class="message-container">
+                              <div *ngFor="let vm of getValidationMessages('composer')" class="message" [ngClass]="{'not-valid': vm.isError}" [innerHTML]="vm.text"></div>
+                           </div>
+                           <div>
+
+                           </div>
+                           <text-input label="Composition" title="Composition" [(ngModel)]="pm.composition"></text-input>
+                           <div class="message-container">
+                              <div *ngFor="let vm of getValidationMessages('composition')" class="message" [ngClass]="{'not-valid': vm.isError}" [innerHTML]="vm.text"></div>
+                           </div>
+                           <div>
+                           </div>
+
+                           <text-input label="Orchestra" title="Orchestra" [(ngModel)]="pm.orchestra"></text-input>
+                           <div class="message-container">
+                              <div *ngFor="let vm of getValidationMessages('orchestra')" class="message" [ngClass]="{'not-valid': vm.isError}" [innerHTML]="vm.text"></div>
+                           </div>
+                           <div>
+                           </div>
+
+                           <text-input label="Conductor" title="Conductor" [(ngModel)]="pm.conductor"></text-input>
+                           <div class="message-container">
+                              <div *ngFor="let vm of getValidationMessages('conductor')" class="message" [ngClass]="{'not-valid': vm.isError}" [innerHTML]="vm.text"></div>
+                           </div>
+                           <div>
+                           </div>
+
+                           <div class="span-2 performance-info">
+                              <div>Performance by</div>
+                              <div>{{getPerformersCSV()}}</div>
+                           </div>
+                           <div class="button-column">
+                              <button class="small" (click)="editPerformers()">Edit Performers ...</button>
+                           </div>
+
+                           <!--<text-input label="Year" title="Year" [(ngModel)]="pm.year"></text-input>
+                           <div class="message-container">
+                              <div *ngFor="let vm of getValidationMessages('year')" class="message" [ngClass]="{'not-valid': vm.isError}" [innerHTML]="vm.text"></div>
+                           </div>
+                           <div>
+                           </div>-->
+
+                           <div class="span-2 no-bottom-border">
+                              <div>Movements</div>
+                              <div class="movement-list">
+                                 <ng-container *ngFor="let f of pm.movementList">
+                                    <div class="movement" [title]="f.file">
+                                       <div class="track-number">{{getSingleSelected(f.movementNumberTag.values)}}</div>
+                                       <div class="track-title">{{getSingleSelected(f.titleTag.values)}}</div>
+                                    </div>
+                                 </ng-container>
+                              </div>
+                           </div>
+                           <div class="button-column no-bottom-border">
+                              <button class="small" (click)="onEditMovements()">Edit Movements ...</button>
+                           </div>
+                        </div>
+                     </ng-container>
+                  </div>
+               </ng-container>
+            </div>
+                   </div>
+    </div>
+    <div dialogcommands left>
+        <ng-container *ngIf="getPerformanceCount() > 1">
+            <button [ngClass]="{'disabled': currentModel === 0}" (click)="onPrevious()">Previous</button>
+            <button [ngClass]="{'disabled': currentModel === pmList.length - 1}" (click)="onNext()">Next</button>
+        </ng-container>
+    </div>
+    <div dialogcommands right>
+        <button [ngClass]="{'disabled': !hasChanges()}" (click)="onSaveChanges()">Save Changes</button>
+        <button [ngClass]="{'hide': !hasChanges()}" (click)="onCancel()">Cancel Changes</button>
+        <button [ngClass]="{'hide': hasChanges()}"(click)="onClose()">Close</button>
+    </div>
+    <multiple-values-editor></multiple-values-editor>
+</popup-dialog>
+<musicfile-editor></musicfile-editor>
+<busy-indicator [busy]="isBusy"></busy-indicator>

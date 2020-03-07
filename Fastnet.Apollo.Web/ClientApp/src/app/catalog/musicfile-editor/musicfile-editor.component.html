@@ -1,0 +1,24 @@
+<popup-dialog caption="Track Editor">
+    <div dialogbody>
+        <div class="editor-commands">
+            <button class="small" (click)="onRenumberTracks()">Renumber Tracks</button>
+            <div class="stack-horizontally strip-command" (click)="onLeadingStrip()">
+                <button class="small" [ngClass]="{'disabled': stringToStrip.trim().length === 0}">Strip leading:</button>
+                <text-input noborder [(ngModel)]="stringToStrip"></text-input>
+            </div>
+        </div>
+        <div *ngIf="isReady" class="file-list">
+            <div class="file" *ngFor="let f of files">
+                <text-input alignright class="track-number" [(ngModel)]="f.trackNumber"></text-input>
+                <text-input [(ngModel)]="f.title"></text-input>
+                <!--<div></div>-->
+                <div class="filename span-all">{{f.file}}</div>
+                <div></div>
+            </div>
+        </div>
+    </div>
+    <div dialogcommands>
+        <button (click)="onOK()">OK</button>
+        <button (click)="onClose()">Cancel</button>
+    </div>
+</popup-dialog>

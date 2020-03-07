@@ -1,0 +1,23 @@
+<div class="play-list" [ngClass]="{'mobile-device': isMobileDevice()}">
+    <ng-container *ngFor="let item of playlist">
+        <div *ngIf="item.type === PlaylistItemType.SingleItem" class="play-list-single-item list-item">
+            <div class="fa fa-caret-right is-playing-icon" [ngClass]="{visible: isPlayingIconVisible(item)}"></div>
+            <div [title]="getFullTitle(item)" class="item-title" (click)="playItem(item)" [ngClass]="{'is-playable': isPlayable(item)}">{{getTitle(item)}}</div>
+            <div class="item-time">{{item.formattedTotalTime}}</div>
+        </div>
+        <div *ngIf="item.type === PlaylistItemType.MultipleItems" class="play-list-multiple-items  list-item">
+            <div class="fa fa-caret-right is-playing-icon" [ngClass]="{visible: isPlayingIconVisible(item)}"></div>
+            <div class="fa fa-eject open-close-icon" [ngClass]="{'fa-rotate-180': item.isOpen === false}" (click)="toggleMultipleItems(item)"></div>
+            <div class="item-title" (click)="toggleMultipleItems(item)">{{getTitle(item)}}</div>
+            <div class="item-time">{{item.formattedTotalTime}}</div>
+        </div>
+        <ng-container *ngIf="item.isOpen">
+            <div *ngFor="let subItem of item.subItems" class="play-list-sub-item  list-item">
+                <div class="fa fa-caret-right space-icon"></div>
+                <div class="fa fa-caret-right is-playing-icon" [ngClass]="{visible: isPlayingIconVisible(subItem)}"></div>
+                <div class="item-title" (click)="playItem(subItem)" [ngClass]="{'is-playable': isPlayable(subItem)}">{{getTitle(subItem)}}</div>
+                <div class="item-time">{{subItem.formattedTotalTime}}</div>
+            </div>
+        </ng-container>
+    </ng-container>
+</div>

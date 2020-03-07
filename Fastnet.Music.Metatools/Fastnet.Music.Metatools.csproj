@@ -1,0 +1,17 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <TargetFramework>netstandard2.1</TargetFramework>
+    <Version>2.0.578</Version>
+  </PropertyGroup>
+  <Target Name="PreBuild" BeforeTargets="PreBuildEvent">
+    <Exec Command="powershell .\BumpProjectVersion.ps1 $(ProjectPath) $(DeployOnBuild)" />
+  </Target>
+  <ItemGroup>
+    <PackageReference Include="Fastnet.Music.Taglib" Version="2.0.161" />
+    <PackageReference Include="FlacLibSharp" Version="3.2.0" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\Fastnet.Music.Data\Fastnet.Music.Data.csproj" />
+    <ProjectReference Include="..\Fastnet.Music.MediaTools\Fastnet.Music.MediaTools.csproj" />
+  </ItemGroup>
+</Project>

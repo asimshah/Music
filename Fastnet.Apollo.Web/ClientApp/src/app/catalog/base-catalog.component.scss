@@ -1,0 +1,221 @@
+@import "../../fastnet/themes/_themes";
+@include theme-buttons();
+
+
+@mixin set-max-width-with-ellipsis($size: 200px) {
+    max-width: $size;
+    overflow: hidden;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+    display: block;
+}
+%properties-duration-style {
+    color: $high-accent-colour;
+    font-size: 0.6rem;
+    font-style: italic;
+    margin-top: 3px;
+}
+
+%icon-button {
+    cursor: pointer;
+
+    &:hover {
+        color: theme-colour('accent');
+    }
+}
+
+$background-stripe-odd: theme-colour('background');
+$background-stripe-even: theme-colour('background', 'dark');
+
+.striped-rows {
+    > * {
+        &:nth-child(odd) {
+            background-color: $background-stripe-odd;
+        }
+
+        &:nth-child(even) {
+            background-color: $background-stripe-even;
+        }
+    }
+}
+
+.is-highlit {
+    color: theme-colour('accent');
+}
+.image-container {
+    text-align: center;
+
+    .image {
+        width: 100px;
+        object-fit: contain;
+
+        &.small {
+            @include set-image(64px);
+        }
+    }
+
+    .name {
+        font-size: smaller;
+    }
+}
+.editable-name {
+    /* ie a name followed by an editing icon such as dots (...)*/
+    /* i am no longer proposing to allow editing in this way ...*/
+    display: grid;
+    grid-template-columns: 1fr;
+    align-items: flex-end;
+
+    .edit-icon {
+        margin-left: $theme-gutter;
+        font-size: 20px;
+        color: theme-colour('primary');
+    }
+}
+
+.movements, .tracks {
+   display: grid;
+   grid-template-columns: 1fr;
+   align-items: flex-start;
+
+   .movement, .audio-files {
+   }
+
+   .movement, .track {
+      margin-top: $theme-gutter-fine;
+      display: grid;
+      grid-template-columns: auto auto 1fr auto;
+      justify-content: end;
+      align-items: start;
+
+      .command-panel {
+         margin-top: 0.5em;
+         font-size: 0.7rem; // 11.2px;
+      }
+
+      .movement-number, .movement-title, .track-number, .track-title {
+         &.is-touch-device {
+            padding-top: $theme-gutter;
+            padding-bottom: $theme-gutter;
+         }
+      }
+      /*&.even-row {
+                                        background-color: theme-colour('background', 'dark');
+                                    }*/
+   }
+}
+.track-number, .track-title, .movement-number, .movement-title {
+    font-size: 0.8rem;
+
+}
+.track-number, .movement-number {
+    text-align: right;
+    margin-right: $theme-gutter-narrow;
+
+    &.hide-text {
+        visibility: hidden;
+    }
+}
+
+
+.duration {
+    @extend %properties-duration-style;
+}
+
+
+.audio-details {
+   margin-right: $theme-gutter-narrow;
+   display: grid;
+   grid-template-columns: 1fr auto;
+   grid-column-gap: $theme-gutter-narrow;
+   justify-items: right;
+
+   .audio-properties {
+      @extend %properties-duration-style;
+      color: #949494;
+   }
+}
+
+.command-panel {
+    color: $high-accent-colour;
+    font-size: 0.875rem;
+    margin-right: 0.25em;
+    display: grid;
+    grid-template-columns: auto auto;
+    grid-column-gap: $theme-gutter-narrow;
+    align-items: start;
+
+    .rebuild {
+        justify-self: left;
+    }
+
+    i {
+        @extend %icon-button;
+
+        &.toggle-content {
+            font-size: 0.8em;
+        }
+
+        &:not(:hover) {
+            &.edit-toggle {
+                color: theme-colour('disabled');
+
+                &.is-editing {
+                    color: theme-colour('primary');
+                }
+            }
+
+            &.toggle-content {
+                color: theme-colour('primary');
+            }
+        }
+        &:first-child {
+            margin-right: 3px;
+        }
+    }
+}
+.audio-files {
+    //justify-self: right;
+    display: grid;
+    grid-template-columns: auto auto;
+    align-items: start;
+    justify-content: end;
+
+    .command-panel {
+        margin-top: 0.25em;
+        font-size: 0.7rem;// 11.2px;
+    }
+}
+
+.artists-panel {
+  display: grid;
+  grid-gap: 4px;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+
+  .artist-descr {
+    $image-size: 100px;
+    font-size: 10px;
+    text-align: center;
+    .artist-stats {
+        font-style: italic;
+        color: #949494;
+    }
+    .artist-name {
+      text-align: center;
+      font-size: 14px;
+    }
+
+    .artist-image {
+      text-align: center;
+      height: $image-size;
+
+
+      img {
+        height: 100%;
+      }
+
+      &:hover {
+        background-color: theme-colour('primary', 'dark');
+      }
+    }
+  }
+}

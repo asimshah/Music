@@ -1,0 +1,10 @@
+@import "../../../fastnet/themes/_themes.scss";
+@include theme-buttons();
+
+
+.main-container {
+    margin: 2em;
+    height: 100%;
+    display: grid;
+    grid-template-rows: auto 1fr auto;
+}

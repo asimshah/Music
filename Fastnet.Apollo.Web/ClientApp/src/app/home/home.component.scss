@@ -1,0 +1,21 @@
+@import "../../fastnet/themes/_themes";
+@include theme-page();
+
+:host {
+    display: flex;
+    flex-flow: column;
+    height: 100%;
+}
+.component-container {
+    display: grid;
+    grid-template-rows: auto minmax(0, 1fr);
+    height: 100%;
+    .search-container {
+        padding: $theme-gutter-narrow;
+    }
+    .catalog {
+        /*overflow-y: auto;*/
+        margin-bottom: 3em;
+        margin-top: 0.75em;
+    }
+}

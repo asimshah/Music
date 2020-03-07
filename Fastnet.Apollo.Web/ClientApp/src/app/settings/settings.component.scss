@@ -1,0 +1,185 @@
+@import "../../fastnet/themes/_themes.scss";
+
+popup-dialog {
+    @include theme-buttons(13px);
+    @include theme-dialog-commands;
+}
+
+.settings-dialog {
+    display: grid;
+    grid-template-columns: 1fr 4fr;
+
+    .selector-panel {
+        border: 2px solid theme-colour('primary', 'light');
+        margin: $theme-gutter-fine;
+        display: grid;
+        grid-auto-rows: min-content;
+    }
+
+    .settings-panel {
+        border: 2px solid theme-colour('primary', 'light');
+        margin: $theme-gutter-fine;
+        /*padding-left: $theme-gutter;
+        padding-right: $theme-gutter;*/
+        .setting-header {
+            padding: $theme-gutter-fine;
+            font-style: italic;
+            background-color: darken(theme-colour('primary', 'dark'), 5%);
+            color: theme-colour('surface');
+            margin-bottom: $theme-gutter-narrow;
+        }
+
+        .device-list {
+            display: grid;
+            grid-template-columns: auto 24px 1fr auto;
+            align-items: center;
+            padding: $theme-gutter-fine;
+
+            .machine-name {
+                font-size: small;
+            }
+
+            .update-button {
+                font-size: 14px;
+            }
+        }
+    }
+
+    .popular-settings {
+        table {
+            width: 100%;
+
+            tr {
+                background-color: theme-colour('primary', 'light');
+            }
+
+            td {
+                padding-left: $theme-gutter-narrow;
+                padding-right: $theme-gutter-narrow;
+            }
+        }
+
+        .toggle-show-artists {
+            font-size: 32px;
+
+            &:hover {
+                color: theme-button-colour('primary', 'hover-foreground');
+            }
+        }
+    }
+
+    .colour-panel {
+        margin: 8px;
+        display: grid;
+        grid-template-columns: 400px 100px;
+
+        .spacer {
+            border-top: 1px solid white;
+            height: 4px;
+            background-color: transparent;
+        }
+
+        .swatch {
+            margin-top: 2px;
+            margin-bottom: 2px;
+            /*height: 20px;
+            width: 100px;*/
+        }
+
+        .theme-background {
+            background-color: theme-colour('background');
+        }
+
+        .theme-background-light {
+            background-color: theme-colour('background', 'light');
+        }
+
+        .theme-background-dark {
+            background-color: theme-colour('background', 'dark');
+        }
+
+        .theme-background-dark-20 {
+            background-color: darken(theme-colour('background', 'dark'), 20%);
+        }
+
+
+
+        .theme-surface {
+            background-color: theme-colour('surface');
+        }
+
+        .theme-surface-light {
+            background-color: theme-colour('surface', 'light');
+        }
+
+        .theme-surface-dark {
+            background-color: theme-colour('surface', 'dark');
+        }
+
+        .theme-surface-dark-20 {
+            background-color: darken( theme-colour('surface', 'dark'), 20%);
+        }
+
+
+        .theme-primary {
+            background-color: theme-colour('primary');
+        }
+
+        .theme-primary-light {
+            background-color: theme-colour('primary', 'light');
+        }
+
+        .theme-primary-dark {
+            background-color: theme-colour('primary', 'dark');
+        }
+
+        .theme-primary-dark-5 {
+            background-color: darken( theme-colour('primary', 'dark'), 5%);
+        }
+
+        .theme-primary-dark-10 {
+            background-color: darken( theme-colour('primary', 'dark'), 10%);
+        }
+
+        .theme-primary-light-20 {
+            background-color: lighten( theme-colour('primary', 'light'), 20%);
+        }
+
+
+        .theme-accent {
+            background-color: theme-colour('accent');
+        }
+
+        .theme-accent-light {
+            background-color: theme-colour('accent', 'light');
+        }
+
+        .theme-accent-dark {
+            background-color: theme-colour('accent', 'dark');
+        }
+
+        .theme-accent-dark-5 {
+            background-color: darken( theme-colour('accent', 'dark'), 5%);
+        }
+
+        .theme-accent-dark-10 {
+            background-color: darken( theme-colour('accent', 'dark'), 10%);
+        }
+
+        .theme-accent-light-25 {
+            background-color: lighten( theme-colour('accent', 'light'), 25%);
+        }
+
+        .theme-accent-light-dark-25 {
+            background-color: darken( theme-colour('accent', 'light'), 25%);
+        }
+
+        .high-accent-colour {
+            background-color: $high-accent-colour;
+        }
+
+        .high-accent-colour-dark-35 {
+            background-color: darken($high-accent-colour, 35%)
+        }
+    }
+}

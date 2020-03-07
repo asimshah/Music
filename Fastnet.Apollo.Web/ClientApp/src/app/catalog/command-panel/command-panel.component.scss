@@ -1,0 +1,52 @@
+@import "../../../fastnet/themes/_themes.scss";
+
+$insideBorder: 1px solid theme-colour('surface');
+$section-separator-colour: darken($high-accent-colour, 35%);
+.banner {
+    background-color: $section-separator-colour;
+
+    border-bottom: $insideBorder;
+    display: grid;
+    grid-template-columns: 48px auto;
+    align-items: center;
+
+    .image-container {
+        .image {
+            margin: $theme-gutter-fine;
+            vertical-align: middle;
+            @include set-image(48px);
+        }
+    }
+
+    .description {
+
+        padding: $theme-gutter;
+        font-style: italic;
+        font-size: 12px;
+    }
+}
+
+.menu-items {
+    background-color: theme-colour('primary', 'dark');
+
+    .menu-item {
+        margin: 0;
+        padding: $theme-gutter * 1.5;
+        cursor: pointer;
+
+        &:not(:last-child) {
+            border-bottom: $insideBorder;
+        }
+
+        &:hover {
+            background-color: theme-colour('surface');
+            color: theme-colour('primary', 'dark');
+        }
+
+        &.disabled {
+            pointer-events: none;
+            cursor: default;
+            background-color: theme-colour('disabled', 'dark');
+        }
+    }
+}

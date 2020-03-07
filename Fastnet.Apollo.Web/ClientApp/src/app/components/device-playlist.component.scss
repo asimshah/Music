@@ -1,0 +1,95 @@
+@import "../../fastnet/themes/_themes";
+:host {
+    display: flex;
+    flex-grow: 1;
+    overflow-y: auto;
+}
+.play-list {
+    flex-grow: 1;
+    padding: $theme-gutter;
+    //overflow-y: auto;
+    .is-playing-icon {
+        margin-top: $theme-gutter-fine;
+        /*align-self: center;*/
+        color: theme-colour('accent');
+        visibility: hidden;
+
+        &.visible {
+            visibility: visible;
+        }
+    }
+
+    .play-list-single-item {
+        display: grid;
+        grid-template-columns: auto 1fr auto;
+        grid-column-gap: $theme-gutter-narrow;
+        align-items: flex-start;
+
+        .item-title {
+            color: grey;
+
+            &.is-playable {
+                color: inherit;
+                cursor: pointer;
+
+                &:hover {
+                    color: theme-colour('accent');
+                }
+            }
+        }
+    }
+
+    .play-list-multiple-items {
+        display: grid;
+        grid-template-columns: auto auto 1fr auto;
+        grid-column-gap: $theme-gutter-narrow;
+        align-items: flex-start;
+
+        .open-close-icon {
+            margin-top: $theme-gutter-narrow;
+            align-self: start;
+            color: #909eab;
+            cursor: pointer;
+        }
+    }
+
+    .play-list-sub-item {
+        font-size: smaller;
+        display: grid;
+        grid-template-columns: auto auto 1fr auto;
+        grid-column-gap: $theme-gutter-narrow;
+        align-items: flex-start;
+
+        .is-playing-icon {
+            align-self: center;
+        }
+
+        .space-icon {
+            visibility: hidden;
+        }
+
+        .item-title {
+            color: grey;
+            pointer-events: none;
+
+            &.is-playable {
+                color: inherit;
+                cursor: pointer;
+                pointer-events: all;
+
+                &:hover {
+                    color: theme-colour('accent');
+                }
+            }
+        }
+    }
+
+    &.mobile-device {
+        .list-item {
+            margin-top: $theme-gutter;
+            margin-bottom: $theme-gutter;
+        }
+    }
+}
+
+

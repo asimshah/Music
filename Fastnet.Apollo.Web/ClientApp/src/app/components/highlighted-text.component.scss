@@ -1,0 +1,8 @@
+@import "../../fastnet/themes/_themes";
+
+.matched-text {
+    text-decoration: underline;
+    //color: #a09a2a;
+    color: darken(theme-colour('accent', 'light'), 25%);
+
+}

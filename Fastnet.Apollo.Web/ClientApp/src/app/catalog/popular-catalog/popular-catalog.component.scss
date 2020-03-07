@@ -1,0 +1,113 @@
+@import "../../../fastnet/themes/_themes";
+@include theme-buttons();
+@import "../base-catalog.component.scss";
+
+
+:host {
+    display: flex;
+    height: 100%;
+    overflow-y: auto;
+}
+
+:host(.is-edge) {
+    /* there is hard coded 111px here because overflow-y on Edge does not work with a height set to 100%
+        the 111px is the result of summing
+        48px for the menu-panel
+        31px for the search input
+        16px of margins
+        16px of 'fudge' - don't know why I need it!
+    */
+    height: calc(100vh - 111px);
+}
+
+
+.track-origin, .editable-name {
+    font-size: 0.8rem;
+    font-style: italic;
+    color: $high-accent-colour; // theme-colour('primary');
+}
+
+.track-number, .track-title {
+    &.is-touch-device {
+        padding-top: $theme-gutter;
+        padding-bottom: $theme-gutter;
+    }
+}
+
+.component-container {
+   $section-separator-colour: darken($high-accent-colour, 35%);
+   width: 100%;
+
+
+   .albums {
+
+      .album {
+         display: grid;
+         grid-template-rows: auto minmax(0, 1fr);
+
+         .name-row {
+            display: grid;
+            grid-template-columns: auto 1fr;
+            grid-column-gap: $theme-gutter-narrow;
+            justify-content: left;
+            margin-bottom: $theme-gutter-narrow;
+
+            .album-name {
+               font-size: 16px;
+               display: grid;
+               grid-template-columns: 1fr auto auto;
+               grid-column-gap: $theme-gutter-narrow;
+               justify-content: flex-end;
+               align-items: start;
+               /*&.is-touch-device {
+                    font-size: 16px * 1.5;
+                }*/
+            }
+
+            .toggle-edit-mode {
+               font-size: larger;
+               color: theme-colour('primary');
+
+               &.fa-rotate-180 {
+                  color: darken( theme-colour('surface', 'dark'), 20%);
+               }
+
+               &:hover {
+                  color: theme-button-colour('primary', 'hover-foreground');
+               }
+            }
+
+            .album-identifier {
+               margin-left: $theme-gutter-narrow;
+               border-top: $section-separator-colour; //solid 1px theme-colour('primary', 'dark');
+            }
+         }
+      }
+   }
+
+   .track {
+
+      &.layout-as-singles {
+         display: grid;
+         grid-template-columns: auto 1fr auto;
+         grid-column-gap: $theme-gutter-fine;
+         align-items: start;
+      }
+
+      &.layout-as-albums {
+         display: grid;
+         grid-template-columns: auto 16px 1fr auto;
+         grid-column-gap: $theme-gutter-narrow;
+         align-items: start;
+
+         > div {
+            &:first-child {
+               margin: $theme-gutter-narrow;
+            }
+         }
+      }
+      /*&.even-row {
+        background-color: theme-colour('background', 'dark');
+    }*/
+   }
+}
