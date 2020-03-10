@@ -33,7 +33,7 @@ function log
 }
 
 $MajorVersion = 2
-$MinorVersion = 0
+$MinorVersion = 1
 $projectFile = $args[0] # macro ProjectPath in VS Build Events
 log "started, base version will be $MajorVersion.$MinorVersion (edit BumpProjectVersion.ps1 to change this)"
 #log $projectFile

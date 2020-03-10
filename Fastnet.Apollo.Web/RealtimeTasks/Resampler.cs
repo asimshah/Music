@@ -7,6 +7,7 @@ using Fastnet.Music.Resampler;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using System;
@@ -19,6 +20,7 @@ namespace Fastnet.Apollo.Web
 {
     public class Resampler : HostedService
     {
+        private readonly bool isProduction;
         private CancellationToken cancellationToken;
         private readonly MusicOptions musicOptions;
         private readonly string connectionString;
@@ -26,18 +28,36 @@ namespace Fastnet.Apollo.Web
         {
             this.musicOptions = options.Value;
             connectionString = environment.LocaliseConnectionString(cfg.GetConnectionString("MusicDb"));
+            isProduction = environment.IsProduction();
         }
         protected async override Task ExecuteAsync(CancellationToken cancellationToken)
         {
             this.cancellationToken = cancellationToken;
-            await Start();
+            try
+            {
+                await Start();
+            }
+            catch (AggregateException ae)
+            {
+                foreach(var xe in ae.InnerExceptions)
+                {
+                    log.Error($"Aggregated exception {xe.GetType().Name}, {xe.Message}");
+                }
+            }
+            catch(Exception xe)
+            {
+                log.Error(xe);
+            }
         }
         private async Task Start()
         {
             log.Information($"started");
-            while(!cancellationToken.IsCancellationRequested)
+            var stillAliveMessageCounter = isProduction? 30 * 5 : 30; // 5 mins or 1 min
+            var counter = 0;
+            while (!cancellationToken.IsCancellationRequested)
             {
                 await Task.Delay(2000);
+                ++ counter;
                 try
                 {
                     TaskItem taskItem = null;
@@ -61,9 +81,14 @@ namespace Fastnet.Apollo.Web
                 catch (Exception xe)
                 {
                     log.Error(xe);
-                }            
+                }
+                if(counter >= stillAliveMessageCounter)
+                {
+                    counter = 0;
+                    log.Information($"still alive");
+                }
             }
-            log.Error($"finished!!!!!!!!!!!!!!!!!!!!!");
+            log.Information($"cancellation requested");
         }
         private async Task ResampleAsync(long taskId)
         {

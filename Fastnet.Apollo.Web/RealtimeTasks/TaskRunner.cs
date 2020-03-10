@@ -59,8 +59,11 @@ namespace Fastnet.Apollo.Web
                 var th = new TaskHost(this.serviceProvider, options, TaskQueue, connectionString, cancellationToken);
                 var t = Task.Run(async () =>
                 {
-                    await th.Execute();
-                    log.Information("host has died .........................");
+                    while (!cancellationToken.IsCancellationRequested)
+                    {
+                        await th.Execute();
+                        log.Information("task host finished - restarting");
+                    }
                 });
                 consumerTasks.Add(th);
             }

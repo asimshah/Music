@@ -61,7 +61,7 @@ namespace Fastnet.Apollo.Web
                     }
                 }
             }
-
+            log.Information($"cancellationToken.IsCancellationRequested = {cancellationToken.IsCancellationRequested}");
         }
         private async Task ProcessTaskQueue()
         {

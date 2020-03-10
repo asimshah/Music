@@ -90,7 +90,7 @@ namespace Fastnet.Apollo.Web
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
-        public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
+        public void Configure(IApplicationBuilder app, IWebHostEnvironment env, IHostApplicationLifetime lifetime)
         {
             CheckAddBinPath();// for lame mp3 stuff
             if (env.IsDevelopment())
@@ -164,8 +164,10 @@ namespace Fastnet.Apollo.Web
                         }
                     }
                 }
-
             }
+            lifetime.ApplicationStarted.Register(OnStarted);
+            lifetime.ApplicationStopping.Register(OnStopping);
+            lifetime.ApplicationStopped.Register(OnStopped);
         }
         public void CheckAddBinPath()
         {
@@ -181,6 +183,18 @@ namespace Fastnet.Apollo.Web
                 path = string.Join(Path.PathSeparator.ToString(), new string[] { path, binPath });
                 Environment.SetEnvironmentVariable("PATH", path);
             }
+        }
+        private void OnStarted()
+        {
+            log.Information("OnStarted()");
+        }
+        private void OnStopping()
+        {
+            log.Information("OnStopping()");
+        }
+        private void OnStopped()
+        {
+            log.Information("OnStopped()");
         }
     }
 }

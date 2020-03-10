@@ -63,8 +63,14 @@ namespace Fastnet.Music.Metatools
             Debug.Assert(!string.IsNullOrWhiteSpace(ArtistName));
             Debug.Assert(!string.IsNullOrWhiteSpace(AlbumName));
             var artist = await GetArtistAsync(ArtistName);
-            var album = await GetWorkAsync(artist, AlbumName, YearNumber);
+            var album = GetWork(artist, AlbumName, YearNumber);
             var (result, tracks) = CatalogueTracks(artist, album);
+            var cover = album.GetMostRecentOpusCoverFile(MusicOptions);
+            if (cover != null)
+            {
+                album.Cover = await cover.GetImage();
+                album.LastModified = DateTimeOffset.Now;
+            }
             var cr = new CatalogueResult { MusicSet = this, Status = result, Artist = artist, Work = album, Tracks = tracks };
             if (this.MusicFiles.All(f => f.Encoding == EncodingType.flac))
             {

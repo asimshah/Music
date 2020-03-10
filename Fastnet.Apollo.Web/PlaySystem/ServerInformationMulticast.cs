@@ -62,7 +62,7 @@ namespace Fastnet.Apollo.Web
             }
             else
             {
-                log.Warning($"did not expect to be here!!!!!");
+                log.Warning($"did not expect to be here!!!!! task status is {task.Status}");
             }
         }
         private async Task SendServerInformation()

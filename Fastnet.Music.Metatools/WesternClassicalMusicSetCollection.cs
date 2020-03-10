@@ -26,8 +26,15 @@ namespace Fastnet.Music.Metatools
             result.Add(wcalbumSet);
             if (!(files.First().IsGenerated))
             {
-                var artistAndWorkGroups = files.Select(f => new { file = f, artist = f.GetArtistName(), alphaMericWorkname = f.GetWorkName().ToAlphaNumerics(),  work = f.GetWorkName() })
-                    .GroupBy(gb => new { gb.artist, gb.alphaMericWorkname });
+                string getArtistName(MusicFile mf) {
+                    return musicOptions.ReplaceAlias(mf.GetArtistName());
+                }
+                string getWorkName(MusicFile mf)
+                {
+                    return musicOptions.ReplaceAlias(mf.GetWorkName());
+                }
+                var artistAndWorkGroups = files.Select(f => new { file = f, artist = getArtistName(f), /*alphaMericWorkname = getWorkName(f).ToAlphaNumerics(),*/  work = getWorkName(f) })
+                    .GroupBy(gb => new { gb.artist, alphaMericWorkname = gb.work.ToAlphaNumerics() });
                 foreach (var group in artistAndWorkGroups.OrderBy(k => k.Key.artist))
                 {
                     var musicStyle = group.First().file.Style;

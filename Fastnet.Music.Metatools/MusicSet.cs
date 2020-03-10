@@ -111,7 +111,7 @@ namespace Fastnet.Music.Metatools
             artist.LastModified = DateTimeOffset.Now;
             return artist;
         }
-        protected async Task<Work> GetWorkAsync(Artist artist, string name, int year)
+        protected Work GetWork(Artist artist, string name, int year)
         {
             Debug.Assert(MusicDb != null);
             try
@@ -136,13 +136,12 @@ namespace Fastnet.Music.Metatools
                     };
                     artist.Works.Add(work);
                 }
-                work.LastModified = DateTimeOffset.Now;
-                //var cover = GetOpusCoverFile(artist);
-                var cover = work.GetMostRecentOpusCoverFile(MusicOptions);
-                if (cover != null)
-                {
-                    work.Cover = await cover.GetImage();
-                }
+                
+                //var cover = work.GetMostRecentOpusCoverFile(MusicOptions);
+                //if (cover != null)
+                //{
+                //    work.Cover = await cover.GetImage();
+                //}
                 return work;
             }
             catch (Exception xe)
