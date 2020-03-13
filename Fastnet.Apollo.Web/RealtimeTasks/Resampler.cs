@@ -104,7 +104,6 @@ namespace Fastnet.Apollo.Web
                     var work = await db.Works.SingleOrDefaultAsync(x => x.UID.ToString() == taskItem.TaskString);
                     if (work != null)
                     {
-                        //log.Information($"Resampling {work.Artist.Name}, {work.Name}");
                         int resampledCount = 0;
                         foreach (var track in work.Tracks)
                         {
@@ -113,15 +112,20 @@ namespace Fastnet.Apollo.Web
                             destinationFile = destinationFile.Replace(".flac", ".mp3", StringComparison.CurrentCultureIgnoreCase);
                             var srcFi = new FileInfo(mf.File);
                             var vbrFi = new FileInfo(destinationFile);
+                            bool vbrIsGood = true;
                             if (!vbrFi.Exists || srcFi.LastWriteTimeUtc > vbrFi.LastWriteTimeUtc)
                             {
-                                await Resample(taskItem, srcFi.FullName, vbrFi.FullName);
-                                vbrFi.Refresh();
-                                resampledCount++;
+                                vbrIsGood = await Resample(taskItem, srcFi.FullName, vbrFi.FullName);
+                                if (vbrIsGood)
+                                {
+                                    vbrFi.Refresh();
+                                    resampledCount++;
+                                    log.Information($"{taskItem} resampled {resampledCount}/{work.Tracks.Count()} {vbrFi.Name} ");
+                                }
                             }
                             else
                             {
-                                log.Debug($"{taskItem} {vbrFi.Name} is up to date");
+                                log.Information($"{taskItem} {vbrFi.Name} is up to date");
                             }
                             var existingVbr = track.MusicFiles.FirstOrDefault(f => f.IsGenerated);
                             if (existingVbr != null)
@@ -129,7 +133,10 @@ namespace Fastnet.Apollo.Web
                                 track.MusicFiles.Remove(existingVbr);
                                 db.MusicFiles.Remove(existingVbr);
                             }
-                            AddToTrack(vbrDestination, track, mf, vbrFi);
+                            if (vbrIsGood)
+                            {
+                                AddToTrack(vbrDestination, track, mf, vbrFi);
+                            }
                             await db.SaveChangesAsync();
                         }
                         log.Information($"{taskItem} resampling completed {work.Artist.Name}, {work.Name}, {resampledCount}/{work.Tracks.Count()} files");
@@ -189,7 +196,7 @@ namespace Fastnet.Apollo.Web
             };
             track.MusicFiles.Add(musicFile);
         }
-        private async Task<string> Resample(TaskItem taskItem, string sourceFile, string destinationFile)
+        private async Task<bool> Resample(TaskItem taskItem, string sourceFile, string destinationFile)
         {
             if (File.Exists(destinationFile))
             {
@@ -203,9 +210,16 @@ namespace Fastnet.Apollo.Web
                 log.Information($"{taskItem} {parentDirectory} created");
             }
             var resampler = new FlacResampler();
-            await resampler.Resample(sourceFile, destinationFile);
-            log.Debug($"{taskItem} {destinationFile} created");
-            return destinationFile;
+            var result = await resampler.Resample(sourceFile, destinationFile);
+            if (!result)
+            {
+                log.Error($"{taskItem} {sourceFile} resampling failed");
+            }
+            else
+            {
+                log.Debug($"{taskItem} {destinationFile} created");
+            }
+            return result;// destinationFile;
         }
     }
 

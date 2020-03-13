@@ -1,4 +1,7 @@
-﻿using NAudio.Lame;
+﻿using Fastnet.Core;
+using Fastnet.Core.Logging;
+using Microsoft.Extensions.Logging;
+using NAudio.Lame;
 using NAudio.Wave;
 using NAudio.Wave.SampleProviders;
 using System;
@@ -8,33 +11,50 @@ namespace Fastnet.Music.Resampler
 {
     public class FlacResampler
     {
-        public async Task Resample(string srcFile, string destFile)
+        private readonly ILogger log;
+        public FlacResampler()
         {
-
-            var wavFile = System.IO.Path.Combine(System.IO.Path.GetDirectoryName(destFile), $"{System.IO.Path.GetFileNameWithoutExtension(destFile)}.wav");
-            if (System.IO.File.Exists(wavFile))
+            log = ApplicationLoggerFactory.CreateLogger<FlacResampler>();
+        }
+        public async Task<bool> Resample(string srcFile, string destFile)
+        {
+            //srcFile = @"\\?\" + srcFile;
+            //destFile = @"\\?\" + destFile;
+            bool result = false;
+            try
             {
+                var wavFile = System.IO.Path.Combine(System.IO.Path.GetDirectoryName(destFile), $"{System.IO.Path.GetFileNameWithoutExtension(destFile)}.wav");
+                //wavFile = @"\\?\" + wavFile;
+                if (System.IO.File.Exists(wavFile))
+                {
+                    System.IO.File.Delete(wavFile);
+                }
+                using (var reader = new AudioFileReader(srcFile))
+                {
+                    var resampler = new WdlResamplingSampleProvider(reader, 44100);
+                    WaveFileWriter.CreateWaveFile16(wavFile, resampler);
+                }
+                using (var reader = new WaveFileReader(wavFile))
+                {
+                    if (System.IO.File.Exists(destFile))
+                    {
+                        System.IO.File.Delete(destFile);
+                    }
+                    using (var writer = new LameMP3FileWriter(destFile, reader.WaveFormat, LAMEPreset.EXTREME))
+                    {
+                        //reader.CopyTo(writer);
+                        await reader.CopyToAsync(writer);
+                        await writer.FlushAsync();
+                    }
+                }
                 System.IO.File.Delete(wavFile);
+                result = true;
             }
-            using (var reader = new AudioFileReader(srcFile))
+            catch (Exception xe)
             {
-                var resampler = new WdlResamplingSampleProvider(reader, 44100);
-                WaveFileWriter.CreateWaveFile16(wavFile, resampler);
+                log.Error(xe, $"trying to resample {srcFile}");
             }
-            using (var reader = new WaveFileReader(wavFile))
-            {
-                if (System.IO.File.Exists(destFile))
-                {
-                    System.IO.File.Delete(destFile);
-                }
-                using (var writer = new LameMP3FileWriter(destFile, reader.WaveFormat, LAMEPreset.EXTREME))
-                {
-                    //reader.CopyTo(writer);
-                    await reader.CopyToAsync(writer);
-                    await writer.FlushAsync();
-                }
-            }
-            System.IO.File.Delete(wavFile);
+            return result;
         }
     }
 }

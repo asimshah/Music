@@ -13,6 +13,7 @@ using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using System;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Reflection;
@@ -30,7 +31,8 @@ namespace Fastnet.Apollo.Web
             this.log = logger;
             this.environment = env;
             var version = typeof(Startup).Assembly.GetCustomAttribute<AssemblyInformationalVersionAttribute>().InformationalVersion;
-            log.Information($"Music {version.ToString()} site started");
+            var name = Process.GetCurrentProcess().ProcessName;
+            log.Information($"Music {version.ToString()} site started ({name})");
         }
 
         public IConfiguration Configuration { get; }

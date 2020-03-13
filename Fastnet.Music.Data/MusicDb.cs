@@ -182,29 +182,6 @@ namespace Fastnet.Music.Data
             log.Information($"{toBeRemoved.Count()} task items removed");
             TaskItems.ToList().ForEach(x => x.Status = Core.TaskStatus.Pending);
             SaveChanges();
-//#if DEBUG
-//            var allItems = TaskItems.ToArray();
-//            TaskItems.RemoveRange(allItems);
-//            log.Warning($"{allItems.Count()} task items removed");
-//#else
-//            var staleTaskItemDate = DateTimeOffset.Now - TimeSpan.FromDays(5);
-//            foreach (var item in TaskItems.Where(t => t.CreatedAt < staleTaskItemDate).ToArray())
-//            {
-//                switch(item.Status)
-//                {
-//                    case Core.TaskStatus.Finished:
-//                        break;
-//                    case Core.TaskStatus.Failed:
-//                        log.Warning($"Task {item.Type} created on {item.CreatedAt.ToDefaultWithTime()} for {item.TaskString} failed - removed");
-//                        break;
-//                    default:
-//                        log.Warning($"Task {item.Type} created on {item.CreatedAt.ToDefaultWithTime()} for {item.TaskString}, status {item.Status} - removed");
-//                        break;
-//                }
-//                TaskItems.Remove(item);
-//            }
-//#endif
-//            SaveChanges();
         }
     }
 #pragma warning restore CS1591 // Missing XML comment for publicly visible type or member
