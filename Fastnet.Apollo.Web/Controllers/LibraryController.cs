@@ -233,7 +233,8 @@ namespace Fastnet.Apollo.Web.Controllers
             if (performances.Count() > 0)
             {
                 var result = performances.Select(x => x.ToDTO(full))
-                    .OrderBy(x => x.Performers);
+                    .OrderByDescending(x => x.MovementCount)
+                    .ThenBy(x => x.Performers);
                 return SuccessResult(result);
             }
             else

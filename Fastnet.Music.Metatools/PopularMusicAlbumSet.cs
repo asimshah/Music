@@ -72,19 +72,22 @@ namespace Fastnet.Music.Metatools
                 album.LastModified = DateTimeOffset.Now;
             }
             var cr = new CatalogueResult { MusicSet = this, Status = result, Artist = artist, Work = album, Tracks = tracks };
-            if (this.MusicFiles.All(f => f.Encoding == EncodingType.flac))
+            if (!MusicOptions.DisableResampling)
             {
-                var now = DateTimeOffset.Now;
-                cr.TaskItem = new TaskItem
+                if (this.MusicFiles.All(f => f.Encoding == EncodingType.flac))
                 {
-                    Status = Core.TaskStatus.Pending,
-                    Type = TaskType.ResampleWork,
-                    CreatedAt = now,
-                    ScheduledAt = now,
-                    MusicStyle = this.MusicStyle,
-                    TaskString = album.UID.ToString()
-                };
-                await MusicDb.TaskItems.AddAsync(cr.TaskItem);
+                    var now = DateTimeOffset.Now;
+                    cr.TaskItem = new TaskItem
+                    {
+                        Status = Core.TaskStatus.Pending,
+                        Type = TaskType.ResampleWork,
+                        CreatedAt = now,
+                        ScheduledAt = now,
+                        MusicStyle = this.MusicStyle,
+                        TaskString = album.UID.ToString()
+                    };
+                    await MusicDb.TaskItems.AddAsync(cr.TaskItem);
+                } 
             }
             return cr;
         }

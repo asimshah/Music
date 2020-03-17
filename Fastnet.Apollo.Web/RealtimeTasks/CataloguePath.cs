@@ -78,9 +78,11 @@ namespace Fastnet.Apollo.Web
             taskItem = await db.TaskItems.FindAsync(taskId);
             try
             {
+                ChangesDetected cd = ChangesDetected.None;
                 bool changesPresent(OpusFolder folder)
                 {
                     var (result, changes) = folder.CheckForChanges(db);
+                    cd = changes;
                     if(result)
                     {
                         log.Information($"{folder}, change {changes}");
@@ -95,7 +97,7 @@ namespace Fastnet.Apollo.Web
                     var delay = GetRandomDelay();
                     log.Debug($"{taskItem} starting {folder.ToString()} after delay of {delay}ms");
                     await Task.Delay(TimeSpan.FromMilliseconds(delay));
-                    results = await ProcessFolderAsync(db, folder);
+                    results = await ProcessFolderAsync(db, folder, cd);
                     var success = results.All(x => x.Status == CatalogueStatus.Success || x.Status == CatalogueStatus.GeneratedFilesOutOfDate);
                     taskItem.Status = success ? Music.Core.TaskStatus.Finished : Music.Core.TaskStatus.Failed;
                 }
@@ -115,7 +117,7 @@ namespace Fastnet.Apollo.Web
                 throw new CatalogueFailed { TaskId = taskId };
             }
         }
-        private async Task<List<CatalogueResult>> ProcessFolderAsync(MusicDb db, OpusFolder folder)
+        private async Task<List<CatalogueResult>> ProcessFolderAsync(MusicDb db, OpusFolder folder, ChangesDetected changes)
         {
             var results = new List<CatalogueResult>();
             db.Database.SetCommandTimeout(TimeSpan.FromMinutes(10));
@@ -125,7 +127,15 @@ namespace Fastnet.Apollo.Web
                 st = new StepTimer();
                 st.Start();
             }
-            if (/*true ||*/ taskItem.Force)
+            var shouldDeleteMusicFiles = false;
+            switch(changes)
+            {
+                case ChangesDetected.AtLeastOneFileNotCatalogued:
+                case ChangesDetected.AtLeastOneFileModifiedOnDisk:
+                    shouldDeleteMusicFiles = true;
+                    break;
+            }
+            if (/*true ||*/ taskItem.Force || shouldDeleteMusicFiles)
             {
                 var deletedFilesCount = folder.RemoveCurrentMusicFiles(db); st?.Time("Removal");
                 if (deletedFilesCount > 0)

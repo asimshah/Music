@@ -88,6 +88,7 @@ namespace Fastnet.Music.Core
     /// </summary>
     public class MusicOptions
     {
+        public bool DisableResampling { get; set; }
         /// <summary>
         /// Interval to wait for change notifications to stop (after they start!), default is 10 secs
         /// </summary>

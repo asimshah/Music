@@ -275,6 +275,7 @@ namespace Fastnet.Music.Metatools
         private IEnumerable<string> RemoveName(IEnumerable<string> names, string name)
         {
             //var comparer = new AccentAndCaseInsensitiveComparer();
+            name = name.GetLastName();
             var namesToRemove = new List<string>();
             foreach(var n in names.Where(x => x.StartsWithIgnoreAccentsAndCase(name) || x.EndsWithIgnoreAccentsAndCase(name)))
             {

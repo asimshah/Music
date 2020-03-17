@@ -98,6 +98,16 @@ namespace Fastnet.Music.Metatools
                 }
                 await MusicDb.Artists.AddAsync(artist);
                 await MusicDb.SaveChangesAsync();
+                //try
+                //{
+                //    await MusicDb.Artists.AddAsync(artist);
+                //    await MusicDb.SaveChangesAsync();
+                //}
+                //catch (Exception)
+                //{
+                //    Debugger.Break();
+                //    throw;
+                //}
             }
             if (artist.Type != ArtistType.Various)
             {
