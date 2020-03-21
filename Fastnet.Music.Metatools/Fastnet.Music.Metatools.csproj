@@ -2,9 +2,10 @@
   <PropertyGroup>
     <TargetFramework>netstandard2.1</TargetFramework>
     <Version>2.0.86</Version>
+    <AssemblyVersion>2.0.89.4</AssemblyVersion>
   </PropertyGroup>
   <Target Name="PreBuild" BeforeTargets="PreBuildEvent">
-    <Exec Command="powershell .\BumpProjectVersion.ps1 $(ProjectPath) $(DeployOnBuild)" />
+    <Exec Command="rem powershell .\BumpProjectVersion.ps1 $(ProjectPath) $(DeployOnBuild)" />
   </Target>
   <ItemGroup>
     <PackageReference Include="Fastnet.Music.Taglib" Version="2.0.161" />
