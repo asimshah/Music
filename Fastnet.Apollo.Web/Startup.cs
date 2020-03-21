@@ -30,9 +30,11 @@ namespace Fastnet.Apollo.Web
             Configuration = configuration;
             this.log = logger;
             this.environment = env;
+            var packageVersion = GetPackageVersion();
+            var assemblyVersion = GetAssemblyVersion();
             var version = typeof(Startup).Assembly.GetCustomAttribute<AssemblyInformationalVersionAttribute>().InformationalVersion;
             var name = Process.GetCurrentProcess().ProcessName;
-            log.Information($"Music {version.ToString()} site started ({name})");
+            log.Information($"Music {packageVersion} [{assemblyVersion}] site started ({name})");
         }
 
         public IConfiguration Configuration { get; }
@@ -197,6 +199,15 @@ namespace Fastnet.Apollo.Web
         private void OnStopped()
         {
             log.Information("OnStopped()");
+        }
+        private string GetPackageVersion()
+        {
+            var assemblyLocation = System.Reflection.Assembly.GetExecutingAssembly().Location;
+            return System.Diagnostics.FileVersionInfo.GetVersionInfo(assemblyLocation).ProductVersion;
+        }
+        private string GetAssemblyVersion()
+        {
+            return System.Reflection.Assembly.GetExecutingAssembly().GetName().Version.ToString();
         }
     }
 }
