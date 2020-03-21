@@ -30,14 +30,6 @@
                <div *ngIf="composer.showWorks" class="compositions">
                   <div class="composition-container" *ngFor="let composition of composer.compositions">
                      <div class="composition">
-                        <!--<ng-container *ngIf="isTouchDevice()">
-                            <div *ngIf="composition.performances.length === 1" class="composition-name" (tap)="onTapPerformance(composition, composition.performances[0])">
-                                <highlighted-text [searchText]="searchText" [text]="composition.name" [prefixMode]="prefixMode"></highlighted-text>
-                            </div>
-                            <div *ngIf="composition.performances.length > 1" class="composition-name">
-                                <highlighted-text [searchText]="searchText" [text]="composition.name" [prefixMode]="prefixMode"></highlighted-text>
-                            </div>
-                        </ng-container>-->
                         <ng-container>
                            <div class="composition-name" (tap)="onTapComposition(composition)">
                               <i class="fa " [ngClass]="{'fa-chevron-circle-down': !composition.showPerformances, 'fa-chevron-circle-up': composition.showPerformances}"></i>
@@ -51,8 +43,7 @@
                                     <img class="image" *ngIf="performance.albumCoverArt" [ngClass]="{'small': isTouchDevice()}" [src]="performance.albumCoverArt" />
                                  </div>
                                  <div class="performance-origin" [ngClass]="{'is-highlit': performance.isHighLit}" (tap)="onTapPerformance(composition, performance)" (contextmenu)="onRightClick($event, composition, performance)">
-                                    <highlighted-text [searchText]="searchText" [text]="getPerformanceSource(performance)" [prefixMode]="prefixMode"></highlighted-text>
-                                    <!--<ng-container *ngIf="performance.movements.length > 1">-->
+                                    <highlighted-text class="performers" [searchText]="searchText" [text]="getPerformanceSource(performance)" [prefixMode]="prefixMode"></highlighted-text>
                                     <div class="duration">{{performance.formattedDuration}}</div>
                                     <div class="command-panel" (mouseenter)="onPerformanceMouse(performance, true)" (mouseleave)="onPerformanceMouse(performance, false)">
                                        <ng-container *ngIf="!isTouchDevice()">

@@ -28,24 +28,16 @@ namespace Fastnet.Music.Metatools
         internal PopularMusicAlbumSet(MusicDb db, MusicOptions musicOptions, string artistName, string albumName,
             IEnumerable<MusicFile> musicFiles, TaskItem taskItem) : base(db, musicOptions, MusicStyles.Popular, musicFiles, taskItem)
         {
-            this.ArtistName = FirstFile.GetArtistName() ?? artistName;
-            this.AlbumName = FirstFile.GetWorkName() ?? albumName;
+            this.ArtistName = OpusType == OpusType.Collection ?
+                "Various Artists"
+                : MusicOptions.ReplaceAlias(FirstFile.GetArtistName() ?? artistName);
+            this.AlbumName = FirstFile.GetAlbumName() ?? albumName;
             this.YearNumber = FirstFile.GetYear() ?? 0;
 
             if (string.Compare(this.AlbumName, "Greatest Hits", true) == 0)
             {
                 // prefix with artist name as there are so many called "Greatest Hits"
                 this.AlbumName = $"{ArtistName} Greatest Hits";
-            }
-        }
-        protected override async Task LoadMusicTags()
-        {
-            var json = await ReadMusicTagJson();
-            if (json != null)
-            {
-                WorkTEO = json.ToInstance<PopularAlbumTEO>();
-                this.AlbumName = (WorkTEO as PopularAlbumTEO).AlbumTag.GetValue<string>();
-                this.YearNumber = (WorkTEO as PopularAlbumTEO).YearTag.GetValue<int>();
             }
         }
         protected override string GetName()
@@ -59,7 +51,7 @@ namespace Fastnet.Music.Metatools
         /// <returns></returns>
         public override async Task<CatalogueResult> CatalogueAsync()
         {
-            await LoadMusicTags();
+            //await LoadMusicTags();
             Debug.Assert(!string.IsNullOrWhiteSpace(ArtistName));
             Debug.Assert(!string.IsNullOrWhiteSpace(AlbumName));
             var artist = await GetArtistAsync(ArtistName);
@@ -94,17 +86,6 @@ namespace Fastnet.Music.Metatools
         public override string ToString()
         {
             return $"{this.GetType().Name}::{ArtistName}::{AlbumName}::{MusicFiles.Count()} files";
-        }
-        private string GetTrackContentString(Work album)
-        {
-            var strings = new List<string>();
-            var musicFiles = album.Tracks.First().MusicFiles;
-            foreach (var mf in musicFiles)
-            {
-                var text = $"{mf.Encoding}{(mf.IsGenerated ? " (generated)" : string.Empty)}";
-                strings.Add(text);
-            }
-            return $"({string.Join(", ", strings)})";
         }
     }
 }

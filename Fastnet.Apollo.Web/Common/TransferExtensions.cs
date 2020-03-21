@@ -231,17 +231,25 @@ namespace Fastnet.Apollo.Web
         /// <summary>
         /// use ONLY for movements as tracks are renumbered
         /// </summary>
-        /// <param name="tracks"></param>
+        /// <param name="movements"></param>
         /// <returns></returns>
-        public static TrackDTO[] ToDTO(this IEnumerable<Track> tracks)
+        public static TrackDTO[] ToDTO(this IEnumerable<Track> movements)
         {
-            // Note: this version renumbers tracks and is only useful for movements
+            // Note: this version is only for movements
             var list = new List<TrackDTO>();
-            foreach (var track in tracks.OrderBy((t) => t.Number))
+            foreach (var movement in movements.OrderBy((t) => t.Number))
             {
-                var dto = track.ToDTO();
+                var dto = movement.ToDTO();
+                if (dto.Title.Contains(":"))
+                {
+                    var parts = dto.Title.Split(":");
+                    if (parts[0].IsEqualIgnoreAccentsAndCase(movement.CompositionName))
+                    {
+                        dto.Title = string.Join(":", parts.Skip(1));
+                    }
+                }
                 list.Add(dto);
-                dto.Number = list.Count();
+                dto.Number = movement.MovementNumber;// list.Count();
             }
             return list.ToArray();
         }

@@ -94,27 +94,23 @@ namespace Fastnet.Music.Metatools
             }
             return default;
         }
-        public IEnumerable<string> GetValues<T>()
+        public IEnumerable<string> GetValues<T>(bool selectedOnly = true)
         {
             if (typeof(T) == typeof(int))
             {
-                return Values.Where(x => x.Selected).Select(x => x.Value.ToString());
-                //var r = Values.FirstOrDefault(x => x.Selected)?.Value.ToNumber() ?? 0;
-                //return string.Join(", ", r);
+                return Values.Where(x => selectedOnly == false || x.Selected).Select(x => x.Value.ToString());
             }
             else if (typeof(T) == typeof(string))
             {
-                return Values.Where(x => x.Selected).Select(x => x.Value);
-                //var r = Values.FirstOrDefault(x => x.Selected)?.Value ?? string.Empty;
-                //return string.Join(", ", r);
+                return Values.Where(x => selectedOnly == false || x.Selected).Select(x => x.Value);
             }
             return default;
         }
-        private void SetValue(int number)
+        public void SetValue(int number)
         {
             Values = new List<TagValue> { new TagValue { Selected = true, Value = number.ToString() } };
         }
-        private void SetValue(string text)
+        public void SetValue(string text)
         {
             Values = new List<TagValue> { new TagValue { Selected = true, Value = text } };
         }

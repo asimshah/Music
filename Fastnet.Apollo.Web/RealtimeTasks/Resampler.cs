@@ -85,7 +85,7 @@ namespace Fastnet.Apollo.Web
                 if(counter >= stillAliveMessageCounter)
                 {
                     counter = 0;
-                    log.Information($"still alive");
+                    log.Trace($"still alive");
                 }
             }
             log.Information($"cancellation requested");
@@ -125,7 +125,7 @@ namespace Fastnet.Apollo.Web
                             }
                             else
                             {
-                                log.Information($"{taskItem} {vbrFi.Name} is up to date");
+                                log.Trace($"{taskItem} {vbrFi.Name} is up to date");
                             }
                             var existingVbr = track.MusicFiles.FirstOrDefault(f => f.IsGenerated);
                             if (existingVbr != null)

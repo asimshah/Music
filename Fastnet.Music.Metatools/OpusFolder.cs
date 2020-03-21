@@ -116,11 +116,11 @@ namespace Fastnet.Music.Metatools
             }
             return musicFiles;
         }
-        private bool HasMusicTags()
-        {
-            var tagfile = Path.Combine(Folderpath, ITEOBase.TagFile);
-            return File.Exists(tagfile);
-        }
+        //private bool HasMusicTags()
+        //{
+        //    var tagfile = Path.Combine(Folderpath, ITEOBase.TagFile);
+        //    return File.Exists(tagfile);
+        //}
         public (bool result, ChangesDetected changes) CheckForChanges(MusicDb db)
         {
             ChangesDetected changesDetected = ChangesDetected.None;
@@ -158,23 +158,23 @@ namespace Fastnet.Music.Metatools
                 }
                 return r;
             }
-            bool musicTagsAreNew()
-            {
-                bool r = false;
-                if (HasMusicTags())
-                {
-                    var tagFile = Path.Combine(Folderpath, ITEOBase.TagFile);
-                    var tagTime = new DateTimeOffset(new FileInfo(tagFile).LastWriteTimeUtc, TimeSpan.Zero);
-                    r = currentMusicFiles.Any(mf => mf.LastCataloguedAt < tagTime);
-                }
-                st.Time();
-                if (r)
-                {
-                    changesDetected = ChangesDetected.MusicTagsAreNewer;
-                    //log.Trace($"customTagsAreNew() returns true");
-                }
-                return r;
-            }
+            //bool musicTagsAreNew()
+            //{
+            //    bool r = false;
+            //    if (HasMusicTags())
+            //    {
+            //        var tagFile = Path.Combine(Folderpath, ITEOBase.TagFile);
+            //        var tagTime = new DateTimeOffset(new FileInfo(tagFile).LastWriteTimeUtc, TimeSpan.Zero);
+            //        r = currentMusicFiles.Any(mf => mf.LastCataloguedAt < tagTime);
+            //    }
+            //    st.Time();
+            //    if (r)
+            //    {
+            //        changesDetected = ChangesDetected.MusicTagsAreNewer;
+            //        //log.Trace($"customTagsAreNew() returns true");
+            //    }
+            //    return r;
+            //}
             bool additionsOrDeletionsExist()
             {
                 var differences = filesOnDisk.Select(f => f.fi.FullName).Except(currentMusicFiles.Select(mf => mf.File), StringComparer.CurrentCultureIgnoreCase);
@@ -229,7 +229,7 @@ namespace Fastnet.Music.Metatools
                 }
                 return r;
             }
-            if (additionsOrDeletionsExist() || musicTagsAreNew() || anyFilesRewritten() || anyFilesNotCatalogued() || anyImageChanged())
+            if (additionsOrDeletionsExist() /*|| musicTagsAreNew()*/ || anyFilesRewritten() || anyFilesNotCatalogued() || anyImageChanged())
             {
                 result = true;
             }
@@ -339,7 +339,7 @@ namespace Fastnet.Music.Metatools
                     Debug.Assert(mf.OpusPath == pd.ArtistPath);
                     break;
                 default:
-                    Debugger.Break();
+                    //Debugger.Break();
                     break;
             }
 
@@ -361,7 +361,7 @@ namespace Fastnet.Music.Metatools
         None,
         AtLeastOneFileNotCatalogued,
         AtLeastOneFileModifiedOnDisk,
-        MusicTagsAreNewer,
+        //MusicTagsAreNewer,
         MusicFileCountHasChanged,
         CoverArtHasChanged
     }

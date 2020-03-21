@@ -218,8 +218,7 @@ namespace Fastnet.Apollo.Web.Controllers
             var id = teo.Id;
             var work = await musicDb.Works.FindAsync(id);
             teo.AfterDeserialisation(work);
-            teo.SaveChanges(work);
-            await teo.SaveMusicTags();
+            teo.SaveChanges(musicDb, work);
             work.LastModified = DateTimeOffset.Now;
             await musicDb.SaveChangesAsync();
             return SuccessResult();
@@ -431,10 +430,11 @@ namespace Fastnet.Apollo.Web.Controllers
                 var tracks = work.Tracks;// artist.Works.SelectMany(x => x.Tracks);
                 var musicFiles = tracks.SelectMany(x => x.MusicFiles)
                     .Where(x => x.IsGenerated == false);
-                var paths = work.Type == OpusType.Collection ?
-                    musicFiles.Select(x => Path.Combine(x.DiskRoot, x.StylePath, "Collections", x.OpusPath)).Distinct(StringComparer.CurrentCultureIgnoreCase)
-                    : musicFiles.Select(x => Path.Combine(x.DiskRoot, x.StylePath, x.OpusPath)).Distinct(StringComparer.CurrentCultureIgnoreCase);
-                foreach(var path in paths)
+                //var paths = work.Type == OpusType.Collection ?
+                //    musicFiles.Select(x => Path.Combine(x.DiskRoot, x.StylePath, "Collections", x.OpusPath)).Distinct(StringComparer.CurrentCultureIgnoreCase)
+                //    : musicFiles.Select(x => Path.Combine(x.DiskRoot, x.StylePath, x.OpusPath)).Distinct(StringComparer.CurrentCultureIgnoreCase);
+                var paths = musicFiles.Select(x => x.GetRootPath()).Distinct(StringComparer.CurrentCultureIgnoreCase);
+                foreach (var path in paths)
                 {
                     await taskPublisher.AddTask(work.StyleId, TaskType.DiskPath, path, true);
                     log.Information($"[A-{work.Artist.Id}] {work.Artist.Name} [W-{work.Id}] {work.Name} {path} forcibly recatalogued");
@@ -583,9 +583,9 @@ namespace Fastnet.Apollo.Web.Controllers
                 case 10:
                     await TestPopularAlbumTEO();
                     break;
-                case 11:
-                    await TestWesternClassicalAlbumTEO();
-                    break;
+                //case 11:
+                //    await TestWesternClassicalAlbumTEO();
+                //    break;
             }
 
             return new EmptyResult();
@@ -599,17 +599,17 @@ namespace Fastnet.Apollo.Web.Controllers
                 
             }
         }
-        private async Task TestWesternClassicalAlbumTEO()
-        {
-            var work = await musicDb.Works.FirstAsync(w => w.StyleId == MusicStyles.WesternClassical);
-            if (work != null)
-            {
-                var teo = await work.ToWesternClassicalAlbumTEO(musicOptions);
-                await teo.SaveMusicTags();
-                var text = await teo.TestTags();
-                var teo2 = text.ToInstance<WesternClassicalAlbumTEO>();
-            }
-        }
+        //private async Task TestWesternClassicalAlbumTEO()
+        //{
+        //    var work = await musicDb.Works.FirstAsync(w => w.StyleId == MusicStyles.WesternClassical);
+        //    if (work != null)
+        //    {
+        //        var teo = await work.ToWesternClassicalAlbumTEO(musicOptions);
+        //        await teo.SaveMusicTags();
+        //        var text = await teo.TestTags();
+        //        var teo2 = text.ToInstance<WesternClassicalAlbumTEO>();
+        //    }
+        //}
         private async Task CatalogueJoanBaez(string artistName)
         {
             await taskPublisher.AddTask(MusicStyles.Popular, "Joan Baez",   true);

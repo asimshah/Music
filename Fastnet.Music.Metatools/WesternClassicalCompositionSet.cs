@@ -18,7 +18,7 @@ namespace Fastnet.Music.Metatools
     public class WesternClassicalCompositionSet : MusicSet //<WesternClassicalMusicTags>
     {
         private AccentAndCaseInsensitiveComparer comparer = new AccentAndCaseInsensitiveComparer();
-        private PerformanceTEO performanceTEO;
+        //private PerformanceTEO performanceTEO;
         private IEnumerable<string> conductors;
         private IEnumerable<string> orchestras;
         private IEnumerable<string> otherPerformers;
@@ -35,22 +35,22 @@ namespace Fastnet.Music.Metatools
             orchestras = GetOrchestras();
             otherPerformers = GetOtherPerformers();
         }
-        protected override async Task LoadMusicTags()
-        {
-            var json = await ReadMusicTagJson();
-            if (json != null)
-            {
-                var teo = json.ToInstance<WesternClassicalAlbumTEO>();
-                performanceTEO = teo.PerformanceList.Single(x =>
-                    x.MovementFilenames.All(f => MusicFiles.Select(mf => mf.File).SingleOrDefault(x => x.EndsWith(f, System.Globalization.CompareOptions.IgnoreCase)) != null)
-                );
-                ComposerName = performanceTEO.ComposerTag.GetValue<string>();
-                CompositionName = performanceTEO.CompositionTag.GetValue<string>();
-                orchestras = performanceTEO.OrchestraTag.GetValues<string>();
-                conductors = performanceTEO.ConductorTag.GetValues<string>();
-                otherPerformers = performanceTEO.PerformerTag.GetValues<string>();
-            }
-        }
+        //protected override async Task LoadMusicTags()
+        //{
+        //    var json = await ReadMusicTagJson();
+        //    if (json != null)
+        //    {
+        //        var teo = json.ToInstance<WesternClassicalAlbumTEO>();
+        //        performanceTEO = teo.PerformanceList.Single(x =>
+        //            x.MovementFilenames.All(f => MusicFiles.Select(mf => mf.File).SingleOrDefault(x => x.EndsWith(f, System.Globalization.CompareOptions.IgnoreCase)) != null)
+        //        );
+        //        ComposerName = performanceTEO.ComposerTag.GetValue<string>();
+        //        CompositionName = performanceTEO.CompositionTag.GetValue<string>();
+        //        orchestras = performanceTEO.OrchestraTag.GetValues<string>();
+        //        conductors = performanceTEO.ConductorTag.GetValues<string>();
+        //        otherPerformers = performanceTEO.PerformerTag.GetValues<string>();
+        //    }
+        //}
         protected override string GetName()
         {
             return $"{ComposerName}:{CompositionName}";
@@ -58,16 +58,18 @@ namespace Fastnet.Music.Metatools
         private IEnumerable<string> GetConductors()
         {
             return MusicFiles
-                .Where(x => x.GetConductor() != null)
-                .Select(x => MusicOptions.ReplaceAlias(x.GetConductor()))
+                //.Where(x => x.GetConductor() != null)
+                .SelectMany(x => x.GetConductors())
+                .Select(x => MusicOptions.ReplaceAlias(x))
                 .Distinct(comparer)
                 .OrderBy(x => x.GetLastName());
         }
         private IEnumerable<string> GetOrchestras()
         {
             return MusicFiles
-                .Where(x => x.GetOrchestra() != null)
-                .Select(x => MusicOptions.ReplaceAlias(x.GetOrchestra()))
+                //.Where(x => x.GetOrchestra() != null)
+                .SelectMany(x => x.GetOrchestras())
+                .Select(x => MusicOptions.ReplaceAlias(x))
                 .Distinct(comparer)
                 .OrderBy(x => x);
         }
@@ -82,7 +84,6 @@ namespace Fastnet.Music.Metatools
                     ;
                 _names.AddRange(list);
             }
-            //names = names.Distinct(comparer).ToList();
             _names = _names.Distinct(comparer).ToList();
             var g1 = _names.GroupBy(x => x.GetLastName());
             var names = new List<string>();
@@ -94,9 +95,7 @@ namespace Fastnet.Music.Metatools
                 }
             }
             names = names
-                //.Distinct(comparer)
                 .OrderBy(x => x.GetLastName())
-                //.ThenBy(x => x)
                 .ToList();
             foreach (var orchestra in orchestras)
             {
@@ -109,26 +108,24 @@ namespace Fastnet.Music.Metatools
             
             return names;
         }
-        private string BuildPerformerCSV()
-        {
-            var comparer = new AccentAndCaseInsensitiveComparer();
-            try
-            {
-                var names = new List<string>();
-                names.AddRange(otherPerformers);
-                //names.AddRange(orchestras);
-                //names.AddRange(conductors);
-                return string.Join(", ", names);
-            }
-            catch (Exception)
-            {
-                Debugger.Break();
-                throw;
-            }
-        }
+        //private string BuildPerformerCSV()
+        //{
+        //    var comparer = new AccentAndCaseInsensitiveComparer();
+        //    try
+        //    {
+        //        var names = new List<string>();
+        //        names.AddRange(otherPerformers);
+        //        return string.Join(", ", names);
+        //    }
+        //    catch (Exception)
+        //    {
+        //        Debugger.Break();
+        //        throw;
+        //    }
+        //}
         public override async Task<CatalogueResult> CatalogueAsync()
         {
-            await LoadMusicTags();
+            //await LoadMusicTags();
             Debug.Assert(!string.IsNullOrWhiteSpace(ComposerName));
             Debug.Assert(!string.IsNullOrWhiteSpace(CompositionName));
             Debug.Assert(FirstFile != null);
@@ -140,18 +137,13 @@ namespace Fastnet.Music.Metatools
                 var composer = await GetArtistAsync(ComposerName);
                 var composition = GetComposition(composer, CompositionName);
                 RemoveCurrentPerformance();
-                //var performers = otherPerformers ?? new string[] { !string.IsNullOrWhiteSpace(FirstFile.PartName) ? $"from {FirstFile.OpusName}, {FirstFile.PartName}" : $"from {FirstFile.OpusName}" };
-                //var performers = otherPerformers.Count() > 0 ? otherPerformers : 
-                //    new string[] { !string.IsNullOrWhiteSpace(FirstFile.PartName) ? $"from {FirstFile.OpusName}, {FirstFile.PartName}" :  $"from {FirstFile.OpusName}" };
-                //var performers = otherPerformers;
-                var performance = GetPerformance(composition, orchestras.ToCSV(), conductors.ToCSV(), otherPerformers.ToCSV());
-                return new CatalogueResult { MusicSet = this,/* MusicSetType = this.GetType(),*/ Status = CatalogueStatus.Success, Artist = composer, Composition = composition, Performance = performance };
+                var performance = GetPerformance(composition, orchestras, conductors, otherPerformers);
+                return new CatalogueResult { MusicSet = this, Status = CatalogueStatus.Success, Artist = composer, Composition = composition, Performance = performance };
             }
             else
             {
                 var performance = FirstFile.Track.Performance;
-                return new CatalogueResult { MusicSet = this,/* MusicSetType = this.GetType(),*/ Status = CatalogueStatus.Success, Artist = performance.Composition.Artist, Composition = performance.Composition, Performance = performance };
-                //Debugger.Break();
+                return new CatalogueResult { MusicSet = this, Status = CatalogueStatus.Success, Artist = performance.Composition.Artist, Composition = performance.Composition, Performance = performance };
             }
         }
 
@@ -181,9 +173,6 @@ namespace Fastnet.Music.Metatools
             try
             {
                 var alphaNumericName = name.ToAlphaNumerics();
-                //MusicDb.Entry(artist).Collection(c => c.Compositions).Load();
-                //return MusicDb.Compositions.Local.ToArray()
-                //    .SingleOrDefault(w => string.Compare(w.Name.ToAlphaNumerics(), alphaNumericName, true) == 0);// w.Name.IsEqualIgnoreAccentsAndCase(name));
                 return artist.Compositions.SingleOrDefault(w => string.Compare(w.Name.ToAlphaNumerics(), alphaNumericName, true) == 0);
             }
             catch (Exception xe)
@@ -195,10 +184,10 @@ namespace Fastnet.Music.Metatools
         private Composition GetComposition(Artist artist, string name)
         {
             Debug.Assert(MusicDb != null);
-            if(name.ToAlphaNumerics() == "SevenSongsOp95")
-            {
-                Debugger.Break();
-            }
+            //if(name.ToAlphaNumerics() == "SevenSongsOp95")
+            //{
+            //    Debugger.Break();
+            //}
             var composition = FindComposition(artist, name);// artist.Compositions.SingleOrDefault(w => w.Name.IsEqualIgnoreAccentsAndCase(name));
             if (composition == null)
             {
@@ -212,34 +201,39 @@ namespace Fastnet.Music.Metatools
             }
             return composition;
         }
-        private Performance GetPerformance(Composition composition, string orchestras, string conductors, string performers)
+        private Performance GetPerformance(Composition composition, IEnumerable<string> orchestraList, IEnumerable<string> conductorList, IEnumerable<string> performerList)
         {
             Debug.Assert(MusicDb != null);
+            string orchestras = orchestraList.ToCSV();
+            string conductors = conductorList.ToCSV();
+            string performers = performerList.ToCSV();
+            int year = FirstFile.GetYear() ?? 0;
             var performance = composition.Performances.SingleOrDefault(p =>
                 p.Orchestras.IsEqualIgnoreAccentsAndCase(orchestras)
                 && p.Conductors.IsEqualIgnoreAccentsAndCase(conductors)
-                && p.Performers.IsEqualIgnoreAccentsAndCase(performers));
-            if (performance != null)
-            {
-                // find a unique name for this performance
-                var index = 1;
-                var found = false;
-                while (!found)
-                {
-                    var name = $"{performers} ({++index})";
-                    performance = composition.Performances.SingleOrDefault(p => p.Performers.IsEqualIgnoreAccentsAndCase(name));
-                    found = performance == null;
-                }
-            }
-
+                && p.Performers.IsEqualIgnoreAccentsAndCase(performers)
+                && p.Year == year);
+            //if (performance != null)
+            //{
+            //    // find a unique name for this performance
+            //    var index = 1;
+            //    var found = false;
+            //    while (!found)
+            //    {
+            //        var name = $"{performers} ({++index})";
+            //        performance = composition.Performances.SingleOrDefault(p => p.Performers.IsEqualIgnoreAccentsAndCase(name));
+            //        found = performance == null;
+            //    }
+            //}
+            var alphaMeric = performerList.Union(orchestraList).Union(conductorList).ToCSV().ToAlphaNumerics();
             performance = new Performance
             {
                 Composition = composition,
                 Orchestras = orchestras,
                 Conductors = conductors,
                 Performers = performers,
-                AlphamericPerformers = performers.ToAlphaNumerics(),
-                Year = FirstFile.GetYear() ?? 0
+                AlphamericPerformers = alphaMeric,// performers.ToAlphaNumerics(),
+                Year = year //FirstFile.GetYear() ?? 0
             };
             var movementNumber = 0;
             foreach (var track in MusicFiles.Select(mf => mf.Track).OrderBy(x => x.Number))
@@ -274,7 +268,6 @@ namespace Fastnet.Music.Metatools
         }
         private IEnumerable<string> RemoveName(IEnumerable<string> names, string name)
         {
-            //var comparer = new AccentAndCaseInsensitiveComparer();
             name = name.GetLastName();
             var namesToRemove = new List<string>();
             foreach(var n in names.Where(x => x.StartsWithIgnoreAccentsAndCase(name) || x.EndsWithIgnoreAccentsAndCase(name)))

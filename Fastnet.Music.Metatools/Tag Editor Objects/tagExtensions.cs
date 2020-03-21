@@ -7,6 +7,7 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
+using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 
 namespace Fastnet.Music.Metatools
@@ -70,6 +71,11 @@ namespace Fastnet.Music.Metatools
             var works = performance.Movements.Select(x => x.Work).Distinct();
             var work = works.First();
             return await work.ToWesternClassicalAlbumTEO(musicOptions);
+        }
+        private static readonly Regex bracketedContent = new Regex(@"\(.*?\)", RegexOptions.IgnoreCase);
+        public static string StripBracketedContent(this string text)
+        {
+            return bracketedContent.Replace(text, "").Trim();
         }
     }
 

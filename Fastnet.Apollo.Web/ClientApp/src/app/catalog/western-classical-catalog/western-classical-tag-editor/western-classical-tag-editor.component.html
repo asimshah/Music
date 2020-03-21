@@ -33,14 +33,20 @@
                            <div>
                            </div>
 
-                           <text-input label="Orchestra" title="Orchestra" [(ngModel)]="pm.orchestra"></text-input>
+                           <div>
+                              <text-input label="Orchestra" title="Orchestra" [(ngModel)]="pm.orchestras[0]"></text-input>
+                              <div>{{getCSV2(pm.orchestras)}}</div>
+                           </div>
                            <div class="message-container">
                               <div *ngFor="let vm of getValidationMessages('orchestra')" class="message" [ngClass]="{'not-valid': vm.isError}" [innerHTML]="vm.text"></div>
                            </div>
                            <div>
                            </div>
 
-                           <text-input label="Conductor" title="Conductor" [(ngModel)]="pm.conductor"></text-input>
+                           <div>
+                              <text-input label="Conductor" title="Conductor" [(ngModel)]="pm.conductors[0]"></text-input>
+                              <div>{{getCSV2(pm.conductors)}}</div>
+                           </div>
                            <div class="message-container">
                               <div *ngFor="let vm of getValidationMessages('conductor')" class="message" [ngClass]="{'not-valid': vm.isError}" [innerHTML]="vm.text"></div>
                            </div>

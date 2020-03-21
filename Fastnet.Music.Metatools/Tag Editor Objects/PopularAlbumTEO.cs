@@ -15,9 +15,9 @@ namespace Fastnet.Music.Metatools
         {
         }
 
-        public override void SaveChanges(Work work)
+        public override void SaveChanges(MusicDb db, Work work)
         {
-            base.SaveChanges(work);
+            base.SaveChanges(db, work);
             foreach (var track in TrackList)
             {
                 var t = work.Tracks.First(x => track.TrackId == x.Id);
@@ -39,7 +39,8 @@ namespace Fastnet.Music.Metatools
 
         protected override MusicFileTEO CreateMusicFileTeo(MusicFile mf)
         {
-            return new PopularMusicFileTEO(musicOptions) { MusicFile = mf };
+            //return new PopularMusicFileTEO(musicOptions) { MusicFile = mf };
+            return new MusicFileTEO(musicOptions) { MusicFile = mf };
         }
     }    
 }

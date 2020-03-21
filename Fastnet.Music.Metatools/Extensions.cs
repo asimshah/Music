@@ -175,11 +175,20 @@ namespace Fastnet.Music.Metatools
                                 name = mf.GetTagValue<string>("Composition") ?? mf.GetTagValue<string>("Album") ?? name;
                                 break;
                             default:
-                                name = mf.GetTagValue<string>("Album") ?? name;
+                                name = mf.GetAlbumName();// mf.GetTagValue<string>("Album") ?? name;
                                 break;
                         }
                         break;
                 }
+            }
+            return name;
+        }
+        public static string GetAlbumName(this MusicFile mf/*, MusicDb db*/)
+        {
+            var name = mf.OpusName;
+            if (!(mf.OpusType == OpusType.Singles))
+            {
+                name = mf.GetTagValue<string>("Album") ?? name;
             }
             return name;
         }
@@ -215,18 +224,29 @@ namespace Fastnet.Music.Metatools
             return performerText.Split(new char[] { '|', ';', ',', ':' }, StringSplitOptions.RemoveEmptyEntries)
                 .Select(t => Regex.Replace(t, @"\(.*?\)", "").Trim());
         }
-        public static string GetOrchestra(this MusicFile mf)
+        public static IEnumerable<string> GetOrchestras(this MusicFile mf)
         {
-            return mf.GetTagValue<string>("Orchestra");
+            return GetSplittableTag(mf, "Orchestra");
+            //return mf.GetTagValue<string>("Orchestra");
         }
-        public static string GetConductor(this MusicFile mf)
+        public static IEnumerable<string> GetConductors(this MusicFile mf)
         {
-            var conductor = mf.GetTagValue<string>("Conductor");
-            if (conductor != null && conductor.Contains('|'))
+            return GetSplittableTag(mf, "Conductor");
+            //var conductor = mf.GetTagValue<string>("Conductor");
+            //if (conductor != null && conductor.Contains('|'))
+            //{
+            //    conductor = conductor.Split('|', StringSplitOptions.RemoveEmptyEntries).First();
+            //}
+            //return conductor;// mf.GetTagValue<string>("Conductor");
+        }
+        private static IEnumerable<string> GetSplittableTag(this MusicFile mf, string tagName)
+        {
+            var r = mf.GetTagValue<string>(tagName);
+            if (r != null)
             {
-                conductor = conductor.Split('|', StringSplitOptions.RemoveEmptyEntries).First();
+                return r.Split('|', StringSplitOptions.RemoveEmptyEntries);
             }
-            return conductor;// mf.GetTagValue<string>("Conductor");
+            return new string[0];// mf.GetTagValue<string>("Conductor");
         }
         public static bool ValidateTags(this MusicDb db, MusicFile mf)
         {
@@ -344,7 +364,7 @@ namespace Fastnet.Music.Metatools
             var imageFiles = allArtistPaths.SelectMany(x => Directory.EnumerateFiles(x, "*.jpg")
                 .Union(Directory.EnumerateFiles(x, "*.jpeg"))
                 .Union(Directory.EnumerateFiles(x, "*.png")));
-            var matchedFiles =  imageFiles.Where(f => matchImageFilename(f, artist.Name));
+            var matchedFiles = imageFiles.Where(f => matchImageFilename(f, artist.Name));
             return matchedFiles.OrderByDescending(x => new FileInfo(x).LastWriteTime).FirstOrDefault();
         }
 
@@ -602,7 +622,7 @@ namespace Fastnet.Music.Metatools
             }
             catch (Exception)
             {
-                Debugger.Break();
+                //Debugger.Break();
                 throw;
             }
         }

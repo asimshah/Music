@@ -149,6 +149,12 @@ namespace Fastnet.Music.Data
             //tmd.TrackNumber = tnTag != null ? Int32.Parse(tnTag.Value) : 0;
             return tag == null ? default(T) : (T)Convert.ChangeType(tag.Value, typeof(T));
         }
+        public static string GetRootPath(this MusicFile mf)
+        {
+            return mf.OpusType == OpusType.Collection ?
+                Path.Combine(mf.DiskRoot, mf.StylePath, "Collections", mf.OpusPath)
+                : Path.Combine(mf.DiskRoot, mf.StylePath, mf.OpusPath);
+        }
         public static T GetTagValue<T>(this MusicFile mf, string tagName)
         {
             var tag = mf.GetTag(tagName);
@@ -231,17 +237,14 @@ namespace Fastnet.Music.Data
             foreach(var mf in work.Tracks.SelectMany(t => t.MusicFiles)
                 .Where(mf => !mf.IsGenerated))
             {
-                var pathFragments = new List<string>(new string[] { mf.DiskRoot, mf.StylePath });
-                if(work.Type == OpusType.Collection)
-                {
-                    pathFragments.Add("Collections");
-                }
-                pathFragments.AddRange(mf.OpusPath.Split("\\"));
-                //if(mf.IsMultiPart)
+                //var pathFragments = new List<string>(new string[] { mf.DiskRoot, mf.StylePath });
+                //if(work.Type == OpusType.Collection)
                 //{
-                //    pathFragments.Add(mf.PartName);
+                //    pathFragments.Add("Collections");
                 //}
-                folders.Add(Path.Combine(pathFragments.ToArray()));
+                //pathFragments.AddRange(mf.OpusPath.Split("\\"));
+                //folders.Add(Path.Combine(pathFragments.ToArray()));
+                folders.Add(mf.GetRootPath());
             }
             IEnumerable<string> imageFiles = null;
             try

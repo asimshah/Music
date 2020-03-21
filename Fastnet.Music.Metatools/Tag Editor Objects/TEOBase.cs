@@ -16,15 +16,14 @@ namespace Fastnet.Music.Metatools
 {
     public interface ITEOBase
     {
-        public const string TagFile = "$TagFile.json";
+        //public const string TagFile = "$TagFile.json";
         long Id { get; }
         string PathToMusicFiles { get; }
         public MusicFileTEO[] TrackList { get; }
         void AfterDeserialisation(Work work);
-        void SaveChanges(Work work);
-        Task SaveMusicTags();
+        void SaveChanges(MusicDb db, Work work);
+        //Task SaveMusicTags();
     }
-    //public abstract class TEOBase<MFTEO/*, CFT*/> : ITEOBase where MFTEO : MusicFileTEO, new()/* where CFT : MusicTags*/
     public abstract class TEOBase : ITEOBase //where MFTEO : MusicFileTEO, new()/* where CFT : MusicTags*/
     {
 
@@ -58,28 +57,28 @@ namespace Fastnet.Music.Metatools
         public bool TrackNumbersValid { get; set; }
         MusicFileTEO[] ITEOBase.TrackList { get => TrackList;  }
 
-        public async Task SaveMusicTags()
-        {
-            var filename = Path.Combine(PathToMusicFiles, ITEOBase.TagFile);
-            var text = this.ToJson(true);//, new JsonSerializerSettings { TypeNameHandling = TypeNameHandling.All, ReferenceLoopHandling = ReferenceLoopHandling.Ignore });
-            await System.IO.File.WriteAllTextAsync(filename, text);
+        //public async Task SaveMusicTags()
+        //{
+        //    var filename = Path.Combine(PathToMusicFiles, ITEOBase.TagFile);
+        //    var text = this.ToJson(true);//, new JsonSerializerSettings { TypeNameHandling = TypeNameHandling.All, ReferenceLoopHandling = ReferenceLoopHandling.Ignore });
+        //    await System.IO.File.WriteAllTextAsync(filename, text);
 
-        }
-        [Obsolete]
-        public async Task<string> TestTags()
-        {
-            var filename = Path.Combine(PathToMusicFiles, ITEOBase.TagFile);
-            var jsonText = await File.ReadAllTextAsync(filename);
-            return jsonText;
-        }
+        //}
+        //[Obsolete]
+        //public async Task<string> TestTags()
+        //{
+        //    var filename = Path.Combine(PathToMusicFiles, ITEOBase.TagFile);
+        //    var jsonText = await File.ReadAllTextAsync(filename);
+        //    return jsonText;
+        //}
         protected abstract MusicFileTEO CreateMusicFileTeo(MusicFile mf);
-        public virtual async Task Load(Work work)
+        public virtual async Task Load( Work work)
         {
+            await Task.Delay(0);
             Id = work.Id;
             var files = work.Tracks
                 .Select(x => (trackNumber: x.Number, musicFile: x.GetBestQuality()));
             TrackList = files
-                //.Select(f => new MFTEO { MusicFile = f.musicFile })
                 .Select(f => CreateMusicFileTeo(f.musicFile))
                 .ToArray();
             foreach(var trackteo in TrackList)
@@ -87,28 +86,33 @@ namespace Fastnet.Music.Metatools
                 trackteo.ResetMetadata();
             }
             TrackList = TrackList.OrderBy(x => x.MusicFile.PartNumber).ThenBy(x => x.TrackNumberTag.GetValue<int>()).ToArray();
-            var filePaths = TrackList.Select(f =>
-                Path.Combine(f.MusicFile.DiskRoot, f.MusicFile.StylePath, f.MusicFile.OpusPath))
+            //var filePaths = TrackList.Select(f =>
+            //    Path.Combine(f.MusicFile.DiskRoot, f.MusicFile.StylePath, f.MusicFile.OpusPath))
+            //    .Distinct(StringComparer.CurrentCultureIgnoreCase);
+            var filePaths = TrackList.Select(f => f.MusicFile.GetRootPath())
                 .Distinct(StringComparer.CurrentCultureIgnoreCase);
             Debug.Assert(filePaths.Count() == 1);
             PathToMusicFiles = filePaths.First();
-            var filename = Path.Combine(PathToMusicFiles, ITEOBase.TagFile);
-            if (File.Exists(filename))
-            {
-                var jsonText = await File.ReadAllTextAsync(filename);
-                JsonConvert.PopulateObject(jsonText, this);
-                AfterDeserialisation(work);
-            }
-            else
-            {
-                LoadCommonMetadata();
-                LoadTags();
-            }
-
+            //var filename = Path.Combine(PathToMusicFiles, ITEOBase.TagFile);
+            //if (File.Exists(filename))
+            //{
+            //    var jsonText = await File.ReadAllTextAsync(filename);
+            //    JsonConvert.PopulateObject(jsonText, this);
+            //    Id = work.Id; // put id back as it may have changed since the tagfile was created
+            //    AfterDeserialisation(work);
+            //}
+            //else
+            //{
+            //    LoadCommonMetadata();
+            //    LoadTags();
+            //}
+            LoadCommonMetadata();
+            LoadTags();
         }
-        public virtual void SaveChanges(Work work)
+        public virtual void SaveChanges(MusicDb db,Work work)
         {
-            if (ArtistTag.GetValue<string>() != work.Artist.Name)
+            //if (ArtistTag.GetValue<string>() != work.Artist.Name)
+            if (work.Artist.Type != ArtistType.Various && !ArtistTag.GetValue<string>().IsEqualIgnoreAccentsAndCase(work.Artist.Name))
             {
                 log.Information($"{work.Artist.Name}, \"{work.Name}\": Artist changed from {work.Artist.Name} to {ArtistTag.GetValue<string>()}");
                 log.Warning("Artist name changes are not supported");
@@ -150,7 +154,7 @@ namespace Fastnet.Music.Metatools
             foreach (var item in TrackList)
             {
                 var teoFile = Path.Combine(PathToMusicFiles, item.File);
-                var file = musicFiles.Single(x => string.Compare(teoFile, x.File) == 0);
+                var file = musicFiles.Single(x => string.Compare(teoFile, x.File, true) == 0);
                 item.MusicFile = file;
             }
         }
@@ -159,6 +163,23 @@ namespace Fastnet.Music.Metatools
             ArtistTag = new TagValueStatus(TagNames.Artist, TrackList.SelectMany(x => x.ArtistTag.Values));
             AlbumTag = new TagValueStatus(TagNames.Album, TrackList.SelectMany(x => x.AlbumTag.Values));
             YearTag = new TagValueStatus(TagNames.Year, TrackList.SelectMany(x => x.YearTag.Values));
+        }
+    }
+    public class TracklistConverter : JsonConverter
+    {
+        public override bool CanConvert(Type objectType)
+        {
+            throw new NotImplementedException();
+        }
+
+        public override object ReadJson(JsonReader reader, Type objectType,  object existingValue, JsonSerializer serializer)
+        {
+            throw new NotImplementedException();
+        }
+
+        public override void WriteJson(JsonWriter writer,  object value, JsonSerializer serializer)
+        {
+            throw new NotImplementedException();
         }
     }
 

@@ -20,7 +20,7 @@ namespace Fastnet.Music.Metatools
     //public abstract class MusicSet<MT> : IMusicSet where MT : MusicTags
     public abstract class MusicSet : IMusicSet
     {
-        protected abstract Task LoadMusicTags();
+        //protected abstract Task LoadMusicTags();
         public string Name => GetName();
         public ITEOBase WorkTEO { get; protected set; }
         protected MusicDb MusicDb { get; private set; }
@@ -53,16 +53,17 @@ namespace Fastnet.Music.Metatools
         }
         protected abstract string GetName();
         public abstract Task<CatalogueResult> CatalogueAsync();
-        protected async Task<string> ReadMusicTagJson()
-        {
-            var diskPath = Path.Combine(FirstFile.DiskRoot, FirstFile.StylePath, FirstFile.OpusPath);
-            var filename = Path.Combine(diskPath, ITEOBase.TagFile);
-            if (File.Exists(filename))
-            {
-                return await File.ReadAllTextAsync(filename);
-            }
-            return null;
-        }
+        //protected async Task<string> ReadMusicTagJson()
+        //{
+        //    //var diskPath = Path.Combine(FirstFile.DiskRoot, FirstFile.StylePath, FirstFile.OpusPath);  //**NB** should this be FirstFile.GetRootPath()
+        //    var diskPath = FirstFile.GetRootPath();
+        //    var filename = Path.Combine(diskPath, ITEOBase.TagFile);
+        //    if (File.Exists(filename))
+        //    {
+        //        return await File.ReadAllTextAsync(filename);
+        //    }
+        //    return null;
+        //}
         private Artist FindArtist(string name)
         {
             MusicDb.Artists.Load();
@@ -98,16 +99,6 @@ namespace Fastnet.Music.Metatools
                 }
                 await MusicDb.Artists.AddAsync(artist);
                 await MusicDb.SaveChangesAsync();
-                //try
-                //{
-                //    await MusicDb.Artists.AddAsync(artist);
-                //    await MusicDb.SaveChangesAsync();
-                //}
-                //catch (Exception)
-                //{
-                //    Debugger.Break();
-                //    throw;
-                //}
             }
             if (artist.Type != ArtistType.Various)
             {
@@ -191,7 +182,7 @@ namespace Fastnet.Music.Metatools
             {
                 // generated files are older than the album record
                 // and may be out of date
-                var path = Path.Combine(FirstFile.DiskRoot, FirstFile.StylePath, FirstFile.OpusPath);
+                var path = Path.Combine(FirstFile.DiskRoot, FirstFile.StylePath, FirstFile.OpusPath); ////**NB** should this be FirstFile.GetRootPath()
                 log.Warning($"{MusicFiles.Count()} files in {path} are generated and possibly out-of-date - files not catalogued");
                 result = CatalogueStatus.GeneratedFilesOutOfDate;
                 if (album.Tracks.Count() == 0)
@@ -209,11 +200,12 @@ namespace Fastnet.Music.Metatools
         {
             try
             {
-                var basePath = Path.Combine(mf.DiskRoot, mf.StylePath, mf.OpusPath);
-                if (mf.OpusType == OpusType.Collection)
-                {
-                    basePath = Path.Combine(mf.DiskRoot, mf.StylePath, mf.Musician, mf.OpusPath);
-                }
+                //var basePath = Path.Combine(mf.DiskRoot, mf.StylePath, mf.OpusPath);
+                //if (mf.OpusType == OpusType.Collection)
+                //{
+                //    basePath = Path.Combine(mf.DiskRoot, mf.StylePath, mf.Musician, mf.OpusPath);
+                //}
+                var basePath = mf.GetRootPath();
                 var relativePath = Path.GetRelativePath(basePath, mf.File);
                 MusicFileTEO fileteo = WorkTEO?.TrackList.Single(t => string.Compare(Path.Combine(WorkTEO.PathToMusicFiles, t.File), mf.File, true) == 0);
                 var trackNumber = fileteo?.TrackNumberTag.GetValue<int>() ?? mf.GetTagIntValue("TrackNumber") ?? 0;

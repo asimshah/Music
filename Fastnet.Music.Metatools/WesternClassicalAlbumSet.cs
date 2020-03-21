@@ -16,7 +16,10 @@ namespace Fastnet.Music.Metatools
             : base(db, musicOptions, MusicStyles.WesternClassical, musicFiles, taskItem)
         {
             this.ArtistName = OpusType == OpusType.Collection ? "Various Composers" : MusicOptions.ReplaceAlias(FirstFile.Musician);
-            this.AlbumName = FirstFile.OpusName;
+            this.ArtistName = OpusType == OpusType.Collection ?
+                "Various Composers"
+                : MusicOptions.ReplaceAlias(FirstFile.GetArtistName() ?? FirstFile.Musician);
+            this.AlbumName = FirstFile.GetAlbumName() ?? FirstFile.OpusName;
             this.YearNumber = FirstFile.GetYear() ?? 0;
         }
     }
