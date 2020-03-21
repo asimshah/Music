@@ -7,70 +7,71 @@ import { AudioDevice } from '../shared/common.types';
 import { PopularSettings, ParameterService } from '../shared/parameter.service';
 
 enum SettingsSelector {
-    Popular,
-    WesternClassical,
-    CatalogMethods,
-    AudioDevices,
-    Colours
+   Popular,
+   WesternClassical,
+   CatalogMethods,
+   AudioDevices,
+   Colours
 }
 
 @Component({
-  selector: 'app-settings',
-  templateUrl: './settings.component.html',
-  styleUrls: ['./settings.component.scss']
+   selector: 'app-settings',
+   templateUrl: './settings.component.html',
+   styleUrls: ['./settings.component.scss']
 })
 export class SettingsComponent implements OnInit {
-    SettingsSelector = SettingsSelector;
-    @ViewChild('settingsdialog', { static: false }) popup: PopupDialogComponent;
+   SettingsSelector = SettingsSelector;
+   @ViewChild('settingsdialog', { static: false }) popup: PopupDialogComponent;
+   version: string = "(unknown)";
+   currentSettings: SettingsSelector = SettingsSelector.Popular;
+   popularSettings: PopularSettings;
 
-    currentSettings: SettingsSelector = SettingsSelector.Popular;
-    popularSettings: PopularSettings;
+   devices: AudioDevice[] = [];
+   private closeHandler: (r: EditorResult) => void;
+   constructor(private parameterService: ParameterService, private ls: LibraryService, private playerService: PlayerService) {
+      this.popularSettings = this.parameterService.getPopularSettings();
+   }
 
-    devices: AudioDevice[] = [];
-    private closeHandler: (r: EditorResult) => void;
-    constructor(private parameterService: ParameterService, private ls: LibraryService, private playerService: PlayerService) {
-        this.popularSettings = this.parameterService.getPopularSettings();
-    }
-
-    ngOnInit() {
-
-    }
-    open(onClose: PopupCloseHandler) {
-        this.currentSettings = SettingsSelector.Popular;
-        this.closeHandler = onClose;
-        this.popup.open((r: EditorResult) => { this.popupClosed(r) });
-    }
-    popupClosed(r: EditorResult): void {
-        this.closeHandler(r);
-    }
-    onClose() {
-        this.popup.close(EditorResult.cancel);
-    }
-    async onResetDatabase() {
-        await this.ls.resetDatabase();
-    }
-    async onStartMusicScanner() {
-        await this.ls.startMusicScanner();
-    }
-    async onStartCatalogueValidator() {
-        await this.ls.startCatalogueValidator();
-    }
-    async changeSettings(value: SettingsSelector) {
-        this.currentSettings = value;
-        switch (this.currentSettings) {
-            case SettingsSelector.AudioDevices:
-                await this.loadDevices();
-                break;
-        }
-    }
-    async onDeviceUpdate(d: AudioDevice) {
-        await this.playerService.updateDevice(d);
-    }
-    togglePopularShowArtists() {
-        this.popularSettings.showArtists = !this.popularSettings.showArtists;
-        this.parameterService.setPopularSettings(this.popularSettings);
-    }
-    private async loadDevices() {
-        this.devices = await this.playerService.getDevices(true);
-    }
+   ngOnInit() {
+      let para = this.parameterService.getParameters();
+      this.version = para.version;
+   }
+   open(onClose: PopupCloseHandler) {
+      this.currentSettings = SettingsSelector.Popular;
+      this.closeHandler = onClose;
+      this.popup.open((r: EditorResult) => { this.popupClosed(r) });
+   }
+   popupClosed(r: EditorResult): void {
+      this.closeHandler(r);
+   }
+   onClose() {
+      this.popup.close(EditorResult.cancel);
+   }
+   async onResetDatabase() {
+      await this.ls.resetDatabase();
+   }
+   async onStartMusicScanner() {
+      await this.ls.startMusicScanner();
+   }
+   async onStartCatalogueValidator() {
+      await this.ls.startCatalogueValidator();
+   }
+   async changeSettings(value: SettingsSelector) {
+      this.currentSettings = value;
+      switch (this.currentSettings) {
+         case SettingsSelector.AudioDevices:
+            await this.loadDevices();
+            break;
+      }
+   }
+   async onDeviceUpdate(d: AudioDevice) {
+      await this.playerService.updateDevice(d);
+   }
+   togglePopularShowArtists() {
+      this.popularSettings.showArtists = !this.popularSettings.showArtists;
+      this.parameterService.setPopularSettings(this.popularSettings);
+   }
+   private async loadDevices() {
+      this.devices = await this.playerService.getDevices(true);
+   }
 }

@@ -200,11 +200,13 @@ namespace Fastnet.Apollo.Web
         {
             log.Information("OnStopped()");
         }
+        // move this to Fastnet.Core
         private string GetPackageVersion()
         {
             var assemblyLocation = System.Reflection.Assembly.GetExecutingAssembly().Location;
             return System.Diagnostics.FileVersionInfo.GetVersionInfo(assemblyLocation).ProductVersion;
         }
+        // move this to Fastnet.Core
         private string GetAssemblyVersion()
         {
             return System.Reflection.Assembly.GetExecutingAssembly().GetName().Version.ToString();

@@ -10,11 +10,11 @@
 
     <!-- Set this to true if you enable server-side prerendering -->
     <BuildServerSideRenderer>false</BuildServerSideRenderer>
-    <Version>2.4.0-alpha-01</Version>
+    <Version>2.4.0-alpha-02</Version>
     <Authors>Asim Shah</Authors>
     <Product>Apollo Music Server</Product>
     <Copyright>@2020</Copyright>
-    <AssemblyVersion>2.4.1.7</AssemblyVersion>
+    <AssemblyVersion>2.4.2.8</AssemblyVersion>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">

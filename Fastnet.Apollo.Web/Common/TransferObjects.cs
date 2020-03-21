@@ -6,6 +6,7 @@ namespace Fastnet.Apollo.Web
 {
     public class ParametersDTO
     {
+        public string Version {get; set;}
         public string BrowserKey { get; set; }
         public string AppName { get; set; }
         public bool IsMobile { get; set; }

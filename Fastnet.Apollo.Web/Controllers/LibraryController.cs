@@ -69,6 +69,7 @@ namespace Fastnet.Apollo.Web.Controllers
             var styles = this.musicOptions.Styles.Select(s => new StyleDTO { Id = s.Style, Enabled = s.Enabled, DisplayName = s.Style.ToDescription() }).ToArray();
             var dto = new ParametersDTO
             {
+                Version = GetPackageVersion(),
                 BrowserKey = key,
                 AppName = this.environment.IsDevelopment() ? "Apollo Dev" : "Apollo",
                 IsMobile = this.Request.IsMobileBrowser(),
@@ -830,6 +831,12 @@ namespace Fastnet.Apollo.Web.Controllers
                 }
             }
             return result;
+        }
+        // move this to Fastnet.Core
+        private string GetPackageVersion()
+        {
+            var assemblyLocation = System.Reflection.Assembly.GetExecutingAssembly().Location;
+            return System.Diagnostics.FileVersionInfo.GetVersionInfo(assemblyLocation).ProductVersion;
         }
     }
 }
