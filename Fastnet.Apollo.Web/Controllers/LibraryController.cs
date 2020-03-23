@@ -455,7 +455,7 @@ namespace Fastnet.Apollo.Web.Controllers
                     await ResetWork(work.Id);
                 }
             }
-            log.Information($"[A-{performance.Composition.Artist.Id}] {performance.Composition.Artist.Name}, [C-{performance.Composition.Id}] {performance.Composition.Name}, [P-{performance.Id}] {performance.Performers} reset");
+            log.Information($"[A-{performance.Composition.Artist.Id}] {performance.Composition.Artist.Name}, [C-{performance.Composition.Id}] {performance.Composition.Name}, [P-{performance.Id}] {performance.GetAllPerformersCSV()} reset");
             return SuccessResult();
         }
         [HttpGet("start/musicfilescanner")]
@@ -818,7 +818,7 @@ namespace Fastnet.Apollo.Web.Controllers
                 result = false;
                 foreach (var performance in performancesWithoutMovements)
                 {
-                    log.Error($"Artist {performance.Composition.Artist.Name}, composition {performance.Composition.Name},  {performance.Performers} has no movemenents");
+                    log.Error($"Artist {performance.Composition.Artist.Name}, composition {performance.Composition.Name},  {performance.GetAllPerformersCSV()} has no movemenents");
                 }
             }
             var performancesWhereMovementsAreInvalid = db.Performances.Where(p => p.Movements.Where(m => m.Performance != p).Count() > 0);
@@ -827,7 +827,7 @@ namespace Fastnet.Apollo.Web.Controllers
                 result = false;
                 foreach (var performance in performancesWhereMovementsAreInvalid)
                 {
-                    log.Error($"Artist {performance.Composition.Artist.Name}, composition {performance.Composition.Name},  {performance.Performers} has suspect movements");
+                    log.Error($"Artist {performance.Composition.Artist.Name}, composition {performance.Composition.Name},  {performance.GetAllPerformersCSV()} has suspect movements");
                 }
             }
             return result;

@@ -561,7 +561,7 @@ namespace Fastnet.Music.Metatools
                 var r = movementCount > 0;
                 if (!r)
                 {
-                    log.Warning($"{performance.Composition.Artist.Name} [A-{performance.Composition.Artist.Id}], \"{performance.Composition.Name}\" [C-{performance.Composition.Id}] performed by \"{performance.Performers}\" [P-{performance.Id}] has no movements");
+                    log.Warning($"{performance.Composition.Artist.Name} [A-{performance.Composition.Artist.Id}], \"{performance.Composition.Name}\" [C-{performance.Composition.Id}] performed by \"{performance.GetAllPerformersCSV()}\" [P-{performance.Id}] has no movements");
                     if (result == true)
                     {
                         result = false;
@@ -573,7 +573,7 @@ namespace Fastnet.Music.Metatools
                     r = workCount == 1;
                     if (!r)
                     {
-                        log.Warning($"{performance.Composition.Artist.Name} [A-{performance.Composition.Artist.Id}], \"{performance.Composition.Name} [C-{performance.Composition.Id}] movements\" in performance by {performance.Performers} [P-{performance.Id}] have a work count of {workCount}");
+                        log.Warning($"{performance.Composition.Artist.Name} [A-{performance.Composition.Artist.Id}], \"{performance.Composition.Name} [C-{performance.Composition.Id}] movements\" in performance by {performance.GetAllPerformersCSV()} [P-{performance.Id}] have a work count of {workCount}");
                         if (result == true)
                         {
                             result = false;
@@ -667,7 +667,7 @@ namespace Fastnet.Music.Metatools
             context.SetModifiedArtistId(artistId);
             log.Information($"{context}: Composition [C-{composition.Id}] deleted: {composition.Name}");
         }
-        private static void Delete(this MusicDb musicDb, Performance performance, DeleteContext context)
+        public static void Delete(this MusicDb musicDb, Performance performance, DeleteContext context)
         {
             long artistId = performance.Composition.ArtistId;
             foreach (var movement in performance.Movements)
@@ -683,9 +683,11 @@ namespace Fastnet.Music.Metatools
             {
                 musicDb.Delete(composition, context);
             }
+            var performers = performance.GetAllPerformersCSV();
+            musicDb.PerformancePerformers.RemoveRange(performance.PerformancePerformers);
             musicDb.Performances.Remove(performance);
             context.SetModifiedArtistId(artistId);
-            log.Information($"{context}: Performance [P-{performance.Id}] deleted: {performance.Performers}");
+            log.Information($"{context}: Performance [P-{performance.Id}] deleted: {performers}");
         }
         private static void Delete(this MusicDb musicDb, Work work, DeleteContext context)
         {

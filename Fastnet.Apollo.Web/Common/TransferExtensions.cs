@@ -144,29 +144,29 @@ namespace Fastnet.Apollo.Web
         /// <returns></returns>
         public static PerformanceDTO ToDTO(this Performance p, bool full = false)
         {
-            string getFullPerformersText()
-            {
-                var list = new List<string>();
-                if(p.Performers != null && p.Performers.Length > 0)
-                {
-                    list.Add(p.Performers);
-                }
-                if (p.Orchestras != null && p.Orchestras.Length > 0)
-                {
-                    list.Add(p.Orchestras);
-                }
-                if (p.Conductors != null && p.Conductors.Length > 0)
-                {
-                    list.Add(p.Conductors);
-                }
-                return string.Join(", ", list.Where(x => x.Trim().Length > 0));
-            }
+            //string getFullPerformersText()
+            //{
+            //    var list = new List<string>();
+            //    if(p.Performers != null && p.Performers.Length > 0)
+            //    {
+            //        list.Add(p.Performers);
+            //    }
+            //    if (p.Orchestras != null && p.Orchestras.Length > 0)
+            //    {
+            //        list.Add(p.Orchestras);
+            //    }
+            //    if (p.Conductors != null && p.Conductors.Length > 0)
+            //    {
+            //        list.Add(p.Conductors);
+            //    }
+            //    return string.Join(", ", list.Where(x => x.Trim().Length > 0));
+            //}
             if (!full)
             {
                 return new PerformanceDTO
                 {
                     Id = p.Id,
-                    Performers = getFullPerformersText(),// p.Performers,
+                    Performers = p.GetAllPerformersCSV(),// getFullPerformersText(),// p.Performers,
                     Year = p.Year,
                     AlbumName = p.Movements.First().Work.Name,
                     DisplayName = p.Movements.First().Work.Name,
@@ -180,7 +180,7 @@ namespace Fastnet.Apollo.Web
             return new PerformanceDTO
             {
                 Id = p.Id,
-                Performers = getFullPerformersText(), //p.Performers,
+                Performers = p.GetAllPerformersCSV(),// getFullPerformersText(), //p.Performers,
                 Year = p.Year,
                 AlbumName = p.Movements.First().Work.Name,
                 DisplayName = p.Movements.First().Work.Name,

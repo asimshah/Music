@@ -21,6 +21,11 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Fastnet.Music.Taglib", "Fas
 EndProject
 Project("{D954291E-2A0B-460D-934E-DC6B0785DB48}") = "SharedWeb", "..\SharedWeb\SharedWeb.shproj", "{080852F5-8880-42CD-8A4C-03C8F0B69E2B}"
 EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{9358C008-2BAD-4521-8DFD-A65723A8D3BF}"
+	ProjectSection(SolutionItems) = preProject
+		.editorconfig = .editorconfig
+	EndProjectSection
+EndProject
 Global
 	GlobalSection(SharedMSBuildProjectFiles) = preSolution
 		..\SharedWeb\SharedWeb.projitems*{080852f5-8880-42cd-8a4c-03c8f0b69e2b}*SharedItemsImports = 13

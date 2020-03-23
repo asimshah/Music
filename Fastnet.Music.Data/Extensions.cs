@@ -1,9 +1,12 @@
 ﻿using Fastnet.Core;
 using Fastnet.Core.Logging;
 using Fastnet.Music.Core;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.ChangeTracking;
 using Microsoft.Extensions.Logging;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Text;
@@ -143,12 +146,12 @@ namespace Fastnet.Music.Data
             }
             return sb.ToString();
         }
-        [Obsolete]
-        public static T GetValue<T>(this IdTag tag)
-        {
-            //tmd.TrackNumber = tnTag != null ? Int32.Parse(tnTag.Value) : 0;
-            return tag == null ? default(T) : (T)Convert.ChangeType(tag.Value, typeof(T));
-        }
+        //[Obsolete]
+        //public static T GetValue<T>(this IdTag tag)
+        //{
+        //    //tmd.TrackNumber = tnTag != null ? Int32.Parse(tnTag.Value) : 0;
+        //    return tag == null ? default(T) : (T)Convert.ChangeType(tag.Value, typeof(T));
+        //}
         public static string GetRootPath(this MusicFile mf)
         {
             return mf.OpusType == OpusType.Collection ?
@@ -169,12 +172,11 @@ namespace Fastnet.Music.Data
             }
             return result;
         }
-        [Obsolete]
-        public static T GetTag<T>(this MusicFile mf, string tagName)
-        {
-            //tmd.TrackNumber = mf.IdTags.SingleOrDefault(x => x.Name == "Track").GetValue<int>();// extension methods can be called on null!
-            return mf.IdTags.SingleOrDefault(x => string.Compare(x.Name, tagName, true) == 0).GetValue<T>();
-        }
+        //[Obsolete]
+        //public static T GetTag<T>(this MusicFile mf, string tagName)
+        //{
+        //    return mf.IdTags.SingleOrDefault(x => string.Compare(x.Name, tagName, true) == 0).GetValue<T>();
+        //}
         public static IdTag GetTag(this MusicFile mf, string tagName)
         {
             return mf.IdTags.FirstOrDefault(t => string.Compare(t.Name, tagName, true) == 0);
@@ -265,6 +267,80 @@ namespace Fastnet.Music.Data
             return null;
         }
 
+        /// <summary>
+        /// Gets a collection of Performer entries, creating any that are new
+        /// </summary>
+        /// <param name="db"></param>
+        /// <param name="names"></param>
+        /// <param name="type"></param>
+        /// <returns></returns>
+        public static IEnumerable<Performer> GetPerformers(this MusicDb db, IEnumerable<string> names, PerformerType type)
+        {
+            return names.Select(n => db.GetPerformer(n, type));            
+        }
+        /// <summary>
+        /// Gets the correspnding Performer nentry, creating one if required
+        /// </summary>
+        /// <param name="db"></param>
+        /// <param name="name"></param>
+        /// <param name="type"></param>
+        /// <returns></returns>
+        public static Performer GetPerformer(this MusicDb db, string name, PerformerType type)
+        {
+            var performer = db.Performers
+                .Where(p => p.Type == type)
+                .ToArray()
+                .SingleOrDefault(p => p.Name.IsEqualIgnoreAccentsAndCase(name));
+            if (performer == null)
+            {
+                performer = db.Performers.Local
+                    .Where(p => p.Type == type)
+                    .SingleOrDefault(p => p.Name.IsEqualIgnoreAccentsAndCase(name));
+                if (performer == null)
+                {
+                    performer = new Performer
+                    {
+                        Name = name,
+                        Type = type
+                    };
+                    db.Performers.Add(performer);
+                    log.Information($"new performer {name}");
+                } 
+            }
+            return performer;
+        }
+        /// <summary>
+        /// returns a collection of performers that exist in the database
+        /// i.e. the collection may not conatin all the names asked for (as they were not found in the db)
+        /// </summary>
+        /// <param name="db"></param>
+        /// <param name="names"></param>
+        /// <param name="type"></param>
+        /// <returns></returns>
+        public static IEnumerable<Performer> FindPerformers(this MusicDb db, IEnumerable<string> names, PerformerType type)
+        {
+            var list = new List<Performer>();
+            foreach (var name in names)
+            {
+                try
+                {
+                    var performer = db.Performers
+                .Where(p => p.Type == type)
+                .ToArray()
+                .SingleOrDefault(p => p.Name.IsEqualIgnoreAccentsAndCase(name));
+                    if (performer != null)
+                    {
+                        list.Add(performer);
+                    }
+                }
+                catch (Exception)
+                {
+                    Debugger.Break();
+                    throw;
+                }
+            }
+            return list;
+        }
     }
     public static class plExtensions
     {

@@ -56,10 +56,10 @@ namespace Fastnet.Apollo.Web
                                 case Type T when T == typeof(WesternClassicalCompositionSet):
                                     if (cr.Performance.Movements.Count() == 0)
                                     {
-                                        log.Warning($"{cr.Composition.Name} [C-{cr.Composition.Id}], \"{cr.Performance.Performers}\" [P-{cr.Performance.Id}] has no movements");
+                                        log.Warning($"{cr.Composition.Name} [C-{cr.Composition.Id}], \"{cr.Performance.GetAllPerformersCSV()}\" [P-{cr.Performance.Id}] has no movements");
                                     }
                                     var work = cr.Performance.Movements.Select(m => m.Work).First();
-                                    log.Information($"{taskItem} {T.Name} {cr.Artist.Name} [A-{cr.Artist.Id}], {cr.Composition.Name} [C-{cr.Composition.Id}], {cr.Performance.Movements.Count()} movements, \"{cr.Performance.Performers}\" [P-{cr.Performance.Id}] (from {work.Name} [W-{work.Id}])");
+                                    log.Information($"{taskItem} {T.Name} {cr.Artist.Name} [A-{cr.Artist.Id}], {cr.Composition.Name} [C-{cr.Composition.Id}], {cr.Performance.Movements.Count()} movements, \"{cr.Performance.GetAllPerformersCSV()}\" [P-{cr.Performance.Id}] (from {work.Name} [W-{work.Id}])");
                                     break;
                             }
                             // send hub message that artist is new/modified

@@ -137,17 +137,18 @@ namespace Fastnet.Apollo.Web
             });
             using (var scope = app.ApplicationServices.GetRequiredService<IServiceScopeFactory>().CreateScope())
             {
+                var options = scope.ServiceProvider.GetService<IOptions<MusicOptions>>().Value;
                 try
                 {
                     //var t = scope.ServiceProvider.GetService<IOptions<test>>();
                     var musicDb = scope.ServiceProvider.GetService<MusicDb>();
-                    MusicDbInitialiser.Initialise(musicDb);
+                    MusicDbInitialiser.Initialise(musicDb, options);
                 }
                 catch (System.Exception xe)
                 {
                     log.Error(xe, $"Error initialising MusicDb");
                 }
-                var options = scope.ServiceProvider.GetService<IOptions<MusicOptions>>().Value;
+                
                 foreach (var source in new MusicSources(options, true))
                 {
                     if (!Directory.Exists(source.DiskRoot))

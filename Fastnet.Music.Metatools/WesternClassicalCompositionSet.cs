@@ -158,13 +158,15 @@ namespace Fastnet.Music.Metatools
                 log.Warning($"Music files {idlist} have more than one performance - this is unexpected!");
                 foreach(var performance in performances)
                 {
-                    log.Warning($"  {performance.Composition.Artist.Name}, {performance.Composition.Name}, {performance.Performers}");
+                    log.Warning($"  {performance.Composition.Artist.Name}, {performance.Composition.Name}, {performance.GetAllPerformersCSV()}");
                 }
             }
             foreach(var performance in performances.ToArray())
             {
+                var performers = performance.GetAllPerformersCSV();
+                MusicDb.PerformancePerformers.RemoveRange(performance.PerformancePerformers);
                 MusicDb.Performances.Remove(performance);
-                log.Information($"{performance.Composition.Artist.Name}, {performance.Composition.Name}, {performance.Performers} removed");
+                log.Information($"{performance.Composition.Artist.Name}, {performance.Composition.Name}, {performance.GetAllPerformersCSV()} removed");
             }
         }
 
@@ -201,40 +203,70 @@ namespace Fastnet.Music.Metatools
             }
             return composition;
         }
-        private Performance GetPerformance(Composition composition, IEnumerable<string> orchestraList, IEnumerable<string> conductorList, IEnumerable<string> performerList)
+        private IEnumerable<Performer> GetPerformers(IEnumerable<string> names, PerformerType type)
+        {
+            var list = new List<Performer>();
+            foreach(var name in names)
+            {
+                var performer = MusicDb.Performers
+                    .Where(p => p.Type == type)
+                    .ToArray()
+                    .SingleOrDefault(p => p.Name.IsEqualIgnoreAccentsAndCase(name));
+                if(performer == null)
+                {
+                    performer = new Performer
+                    {
+                        Name = name,
+                        Type = type
+                    };
+                    MusicDb.Performers.Add(performer);
+                }
+                list.Add(performer);
+            }
+            return list;
+        }
+        private Performance GetPerformance(Composition composition, IEnumerable<string> orchestraNames, IEnumerable<string> conductorNames, IEnumerable<string> otherNames)
         {
             Debug.Assert(MusicDb != null);
-            string orchestras = orchestraList.ToCSV();
-            string conductors = conductorList.ToCSV();
-            string performers = performerList.ToCSV();
+            var performers = otherNames.Union(orchestraNames).Union(conductorNames).ToCSV();
+            var conductors = MusicDb.FindPerformers(conductorNames, PerformerType.Conductor);
+            var orchestras = MusicDb.FindPerformers(orchestraNames, PerformerType.Orchestra);
+            var others = MusicDb.FindPerformers(otherNames, PerformerType.Other);
             int year = FirstFile.GetYear() ?? 0;
-            var performance = composition.Performances.SingleOrDefault(p =>
-                p.Orchestras.IsEqualIgnoreAccentsAndCase(orchestras)
-                && p.Conductors.IsEqualIgnoreAccentsAndCase(conductors)
-                && p.Performers.IsEqualIgnoreAccentsAndCase(performers)
-                && p.Year == year);
-            //if (performance != null)
-            //{
-            //    // find a unique name for this performance
-            //    var index = 1;
-            //    var found = false;
-            //    while (!found)
-            //    {
-            //        var name = $"{performers} ({++index})";
-            //        performance = composition.Performances.SingleOrDefault(p => p.Performers.IsEqualIgnoreAccentsAndCase(name));
-            //        found = performance == null;
-            //    }
-            //}
-            var alphaMeric = performerList.Union(orchestraList).Union(conductorList).ToCSV().ToAlphaNumerics();
-            performance = new Performance
+            if(conductors.Count() == conductorNames.Count() && orchestras.Count() == orchestraNames.Count() && others.Count() == otherNames.Count())
+            {
+                var performances = composition.Performances
+                    .Where(p => p.Year == year)
+                    .ToArray()
+                    .Where(p => p.GetPerformancePerformerSubSet(PerformerType.Conductor).Select(x => x.Performer).Union(conductors).Count() == 0
+                    && p.GetPerformancePerformerSubSet(PerformerType.Orchestra).Select(x => x.Performer).Union(orchestras).Count() == 0
+                    && p.GetPerformancePerformerSubSet(PerformerType.Other).Select(x => x.Performer).Union(others).Count() == 0);
+                if (performances.Count() > 0)
+                {
+                    log.Warning($"[C-{composition.Id}] performers {performers}, {performances.Count()} existing performance(s) found:");
+                    foreach (var p in performances)
+                    {
+                        log.Warning($"   [P-{p.Id}]");
+                    }
+                }
+            }
+            var performance = new Performance
             {
                 Composition = composition,
-                Orchestras = orchestras,
-                Conductors = conductors,
-                Performers = performers,
-                AlphamericPerformers = alphaMeric,// performers.ToAlphaNumerics(),
-                Year = year //FirstFile.GetYear() ?? 0
+                AlphamericPerformers = performers.ToAlphaNumerics(),
+                Year = year
             };
+
+            performance.PerformancePerformers
+                .AddRange(MusicDb.GetPerformers(conductorNames, PerformerType.Conductor)
+                    .Select(p => new PerformancePerformer { Performer = p, Performance = performance, Selected = true }));
+            performance.PerformancePerformers
+                .AddRange(MusicDb.GetPerformers(orchestraNames, PerformerType.Orchestra)
+                    .Select(p => new PerformancePerformer { Performer = p, Performance = performance, Selected = true }));
+            performance.PerformancePerformers
+                .AddRange(MusicDb.GetPerformers(otherNames, PerformerType.Other)
+                    .Select(p => new PerformancePerformer { Performer = p, Performance = performance, Selected = true }));
+
             var movementNumber = 0;
             foreach (var track in MusicFiles.Select(mf => mf.Track).OrderBy(x => x.Number))
             {

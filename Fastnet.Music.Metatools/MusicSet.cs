@@ -30,7 +30,7 @@ namespace Fastnet.Music.Metatools
         protected MusicFile FirstFile { get; private set; }
         protected IEnumerable<MusicFile> MusicFiles { get; private set; }
         protected OpusType OpusType { get; private set; }
-        private readonly TaskItem taskItem;
+        protected readonly TaskItem taskItem;
         private readonly bool generated;
         /// <summary>
         /// create a a music set for the given music files in the given music style

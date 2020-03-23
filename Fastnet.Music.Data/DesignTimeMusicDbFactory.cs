@@ -1,7 +1,7 @@
-﻿using Microsoft.EntityFrameworkCore;
+﻿using Microsoft.Data.SqlClient;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Design;
-using System.Data.SqlClient;
-using System.Diagnostics;
+
 using System.IO;
 
 namespace Fastnet.Music.Data

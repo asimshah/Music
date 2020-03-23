@@ -7,27 +7,27 @@ using System.Linq;
 
 namespace Fastnet.Music.Data
 {
-    public static class wcs_extensions
-    {
-        //public static string ToCSV(this ICollection<Artist> performers)
-        //{
-        //    return string.Join(", ", performers.Select(x => x.Name).ToArray());
-        //}
-        //public static string ToSortable(this string text)
-        //{
-        //    var words = text.Split(' ');
-        //    for(int i = 0;i < words.Length;++i)
-        //    //foreach(var word in words)
-        //    {
-        //        var isNumeric = int.TryParse(words[i], out int n);
-        //        if(isNumeric)
-        //        {
-        //            words[i] = $"00000{words[i]}";
-        //        }
-        //    }
-        //    return string.Join("", words);
-        //}
-    }
+    //public static class wcs_extensions
+    //{
+    //    //public static string ToCSV(this ICollection<Artist> performers)
+    //    //{
+    //    //    return string.Join(", ", performers.Select(x => x.Name).ToArray());
+    //    //}
+    //    //public static string ToSortable(this string text)
+    //    //{
+    //    //    var words = text.Split(' ');
+    //    //    for(int i = 0;i < words.Length;++i)
+    //    //    //foreach(var word in words)
+    //    //    {
+    //    //        var isNumeric = int.TryParse(words[i], out int n);
+    //    //        if(isNumeric)
+    //    //        {
+    //    //            words[i] = $"00000{words[i]}";
+    //    //        }
+    //    //    }
+    //    //    return string.Join("", words);
+    //    //}
+    //}
     public class WesternClassicalSearcher : CatalogueSearcher
     {
         private static NaturalStringComparer naturalComparer = new NaturalStringComparer();
@@ -219,7 +219,6 @@ namespace Fastnet.Music.Data
         }
         private IEnumerable<PerformanceQueryResult> GetMatchingPerformaces(string loweredSearch)
         {
-            //var performances = MusicDb.Performances.Where(p => p.Performers.ToAlphaNumerics().ToLower().Contains(loweredSearch.ToAlphaNumerics()));
             var performances = MusicDb.Performances.Where(p => p.AlphamericPerformers.Contains(loweredSearch.ToAlphaNumerics()));
             return performances.Select(x => new PerformanceQueryResult
             {
@@ -236,7 +235,7 @@ namespace Fastnet.Music.Data
                 Performance = new SearchKey
                 {
                     Key = x.Id,
-                    Name = x.Performers //.ToCSV()
+                    Name = x.GetAllPerformersCSV(false) //  x.Performers //.ToCSV()
                 }
             });
         }
@@ -285,7 +284,7 @@ namespace Fastnet.Music.Data
                 Performance = new SearchKey
                 {
                     Key = x.Performance.Id,
-                    Name = x.Performance.Performers //.ToCSV()
+                    Name = x.Performance.GetAllPerformersCSV(false) // x.Performance.Performers //.ToCSV()
                 },
                 Movement = new TrackKey
                 {

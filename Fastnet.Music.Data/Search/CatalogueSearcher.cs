@@ -9,79 +9,11 @@ using System.Text.RegularExpressions;
 
 namespace Fastnet.Music.Data
 {
-    //[Flags]
-    //public enum StringMatchingOptions
-    //{
-    //    IgnoreNonAlphaNumerics = 1,
-    //    IgnoreAccents = 2,
-    //}
     public static class __xxx
     {
         private static Regex inan = new Regex(@"[^a-zA-Z0-9\p{L}]", RegexOptions.IgnoreCase);
         private static Regex splitToWords = new Regex(@"(\b[^\s]+\b)", RegexOptions.IgnoreCase);
-        //// use ToAlphaNumerics() instead
-        //public static string FilterAlphaNumerics(this string text)
-        //{
-        //    return inan.Replace(text, string.Empty);
-        //}
-        //// use ToWords() instead
-        //public static string[] SplitToWords(this string text)
-        //{
-        //    return splitToWords.Split(text);
-        //}
-
-        //internal static bool StartsWith(this string text, string value, StringMatchingOptions options)
-        //{
-        //    var tc = text;
-        //    if (options.HasFlag(StringMatchingOptions.IgnoreNonAlphaNumerics))
-        //    {
-        //        tc = text.ToAlphaNumerics();// .FilterAlphaNumerics();
-        //        value = value.ToAlphaNumerics();// .FilterAlphaNumerics();
-        //    }
-        //    if (options.HasFlag(StringMatchingOptions.IgnoreAccents))
-        //    {
-        //        return CultureInfo.CurrentCulture.CompareInfo.IndexOf(tc, value, CompareOptions.IgnoreCase | CompareOptions.IgnoreNonSpace | CompareOptions.IgnoreSymbols) == 0;
-        //    }
-        //    else
-        //    {
-        //        return CultureInfo.CurrentCulture.CompareInfo.IndexOf(tc, value, CompareOptions.IgnoreCase | CompareOptions.IgnoreSymbols) == 0;// tc.Contains(value);
-        //    }
-        //}
-        //internal static bool Contains(this string text, string value, StringMatchingOptions options)
-        //{
-        //    var tc = text;
-        //    if(options.HasFlag(StringMatchingOptions.IgnoreNonAlphaNumerics))
-        //    {
-        //        tc = text.FilterAlphaNumerics();// inan.Replace(tc, string.Empty);
-        //        value = value.FilterAlphaNumerics();// inan.Replace(value, string.Empty);
-        //    }
-        //    if (options.HasFlag(StringMatchingOptions.IgnoreAccents))
-        //    {
-        //        return CultureInfo.CurrentCulture.CompareInfo.IndexOf(tc, value, CompareOptions.IgnoreCase | CompareOptions.IgnoreNonSpace | CompareOptions.IgnoreSymbols) > -1;
-        //    }
-        //    else
-        //    {
-        //        return CultureInfo.CurrentCulture.CompareInfo.IndexOf(tc, value, CompareOptions.IgnoreCase | CompareOptions.IgnoreSymbols) > -1;// tc.Contains(value);
-        //    }
-        //}
     }
-    //public class AccentInsensitiveComparer : StringComparer
-    //{
-    //    public override int Compare(string x, string y)
-    //    {
-    //        return string.Compare(x, y, CultureInfo.CurrentCulture, CompareOptions.IgnoreNonSpace);
-    //    }
-
-    //    public override bool Equals(string x, string y)
-    //    {
-    //        return Compare(x, y) == 0;
-    //    }
-
-    //    public override int GetHashCode(string obj)
-    //    {
-    //        return obj.GetHashCode();
-    //    }
-    //}
     public class SearchKey
     {
         public long Key { get; set; }
@@ -201,8 +133,7 @@ namespace Fastnet.Music.Data
         }
         private bool prefixMatchAnyWord(string text, string search)
         {
-            var parts = text.ToWords();// .SplitToWords();
-            //return parts.Any(w => w.StartsWith(search, StringMatchingOptions.IgnoreAccents));
+            var parts = text.ToWords();
             return parts.Any(w => w.StartsWithIgnoreAccentsAndCase(search));
         }
         internal IEnumerable<ArtistQueryResult> GetMatchingArtists(string loweredSearch)
@@ -218,9 +149,6 @@ namespace Fastnet.Music.Data
             }
             else
             {
-                //artists = artists
-                //    .Where(x => x.Name.Contains(loweredSearch, StringMatchingOptions.IgnoreNonAlphaNumerics | StringMatchingOptions.IgnoreAccents))
-                //    ;
                 artists = artists
                     .Where(x => x.Name.Contains(loweredSearch, CultureInfo.CurrentCulture, CompareOptions.IgnoreCase | CompareOptions.IgnoreNonSpace | CompareOptions.IgnoreSymbols))
                     .ToArray();

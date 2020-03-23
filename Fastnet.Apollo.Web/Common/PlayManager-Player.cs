@@ -38,7 +38,7 @@ namespace Fastnet.Apollo.Web
                 var dto = track.ToRuntime(dr, majorSequence);
                 dto.Sequence = ++index;
                 dto.Position = new PlaylistPosition(majorSequence, dto.Sequence);
-                dto.Titles = new string[] { track.Performance.Composition.Artist.Name, track.Performance.Composition.Name, track.Performance.Performers, track.Title };
+                dto.Titles = new string[] { track.Performance.Composition.Artist.Name, track.Performance.Composition.Name, track.Performance.GetAllPerformersCSV(), track.Title };
                 result.Add(dto);
             }
             return result.ToArray();

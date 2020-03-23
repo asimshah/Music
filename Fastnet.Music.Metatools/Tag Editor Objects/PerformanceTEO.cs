@@ -121,10 +121,29 @@ namespace Fastnet.Music.Metatools
         }
         public void RecordChanges(MusicDb db)
         {
-            IEnumerable<string> SplitString(string text)
+            bool compareTagsWithPerformers(TagValueStatus tvs, IEnumerable<PerformancePerformer> performerSet)
             {
-                return text.Split(",", StringSplitOptions.RemoveEmptyEntries).Select(x => x.Trim());
+                var r = CompareTwoArrays(tvs.Values.Select(x => x.Value), performerSet.Select(x => x.Performer.Name));
+                if(r)
+                {
+                    // the names are the same though not necessarily in the same order
+                    // so now compare selection state
+                    foreach(var ps in performerSet)
+                    {
+                        var tv = tvs.Values.Single(x => string.Compare(x.Value, ps.Performer.Name, true) == 0);
+                        if(tv.Selected != ps.Selected)
+                        {
+                            r = false;
+                            break;
+                        }
+                    }
+                }
+                return r;
             }
+            //IEnumerable<string> SplitString(string text)
+            //{
+            //    return text.Split(",", StringSplitOptions.RemoveEmptyEntries).Select(x => x.Trim());
+            //}
             bool CompareTwoArrays(IEnumerable<string> left, IEnumerable<string> right)
             {
                 if(left.Count() == right.Count())
@@ -134,33 +153,45 @@ namespace Fastnet.Music.Metatools
                 }
                 return false;
             }
-            //bool CompareTagValueStatus(TagValueStatus left, TagValueStatus right)
-            //{
-            //    var result = CompareTwoArrays(left.GetValues<string>(false), right.GetValues<string>(false));
-            //    if(result)
-            //    {
-            //        // now compare selected
-            //        for(int index = 0;index < left.Values.Count();++index)
-            //        {
-            //            var ltv = left.Values.Skip(index).First();
-            //            var rtv = right.Values.Single(x => x.Value == ltv.Value);
-            //            if(ltv.Selected != rtv.Selected)
-            //            {
-            //                result = false;
-            //                break;
-            //            }
-            //        }
-            //    }
-            //    return result;
-            //}
+            void updatePerformerSet(Performance performance, TagValueStatus tvs, PerformerType type)
+            {
+                //var subSet = performance.GetPerformerSubSet(type);
+                foreach (var tv in tvs.Values)
+                {
+                    var pp = performance.GetPerformancePerformerSubSet(type).SingleOrDefault(x => string.Compare(x.Performer.Name, tv.Value) == 0);                    
+                    if(pp != null)
+                    {
+                        pp.Selected = tv.Selected;
+                    }
+                    else
+                    {
+                        // this is a new name for this performance
+                        var performer  = db.GetPerformer(tv.Value, type);
+                        performance.PerformancePerformers.Add(new PerformancePerformer { Performance = performance, Performer = performer, Selected = tv.Selected });
+                    }
+                }
+                // now check if any performers have been removed
+                // *NB* at present there is no feature planned that allows performers to be removed via tag editing...
+                var missingNames = performance.PerformancePerformers
+                    .Select(pp => pp.Performer.Name)
+                    .Except(tvs.GetValues<string>(), StringComparer.CurrentCultureIgnoreCase);
+                foreach(var name in missingNames)
+                {
+                    var pp = performance.PerformancePerformers.Single(x => string.Compare(x.Performer.Name, name, true) == 0);
+                    var performer = pp.Performer;
+                    performance.PerformancePerformers.Remove(pp);
+                    db.PerformancePerformers.Remove(pp);
+                    if (db.PerformancePerformers.Where(x => x.Performer == performer).Count() == 0)
+                    {
+                        db.Performers.Remove(performer);
+                    }
+                }
+            }
             var tracks = MovementList.Select(x => x.MusicFile.Track);
             var performancesInDb = tracks.Select(t => t.Performance).Distinct();
             Debug.Assert(performancesInDb.Count() == 1);
             var performance = performancesInDb.First();
-            //if (performance.Id == 131)
-            //{
-            //    Debugger.Break();
-            //}
+
             var composition = performance.Composition;
             if (!ComposerTag.GetValue<string>().IsEqualIgnoreAccentsAndCase(composition.Artist.Name))
             {
@@ -195,7 +226,7 @@ namespace Fastnet.Music.Metatools
                     log.Information($"composition [C-{existingComposition.Id}] now has {existingComposition.Performances.Count()} performances:");
                     foreach(var p in existingComposition.Performances)
                     {
-                        log.Information($"performance [P-{p.Id}] \"{p.Performers}\"");
+                        log.Information($"performance [P-{p.Id}] \"{p.GetAllPerformersCSV()}\"");
                     }
                     foreach(var m in performance.Movements)
                     {
@@ -215,35 +246,41 @@ namespace Fastnet.Music.Metatools
                     composition.Name = newName; // CompositionTag.GetValue<string>();
                 }
             }
-            if(!CompareTwoArrays(OrchestraTag.GetValues<string>(false), SplitString(performance.Orchestras)))
+            //if(!CompareTwoArrays(OrchestraTag.GetValues<string>(false), SplitString(performance.Orchestras)))
+            if(!compareTagsWithPerformers(OrchestraTag, performance.GetPerformancePerformerSubSet(PerformerType.Orchestra)))
             {
-                var orchestras = string.Join(", ", OrchestraTag.GetValues<string>(false));
-                log.Information($"[A-{composition.Artist.Id}] {composition.Artist.Name}, [C-{composition.Id}] \"{composition.Name}\" [P-{performance.Id}]: Orchestras changed from {performance.Orchestras} to {orchestras}");
-                performance.Orchestras = orchestras;
+                updatePerformerSet(performance, OrchestraTag, PerformerType.Orchestra);
+                //var orchestras = string.Join(", ", OrchestraTag.GetValues<string>(false));
+                //log.Information($"[A-{composition.Artist.Id}] {composition.Artist.Name}, [C-{composition.Id}] \"{composition.Name}\" [P-{performance.Id}]: Orchestras changed from {performance.Orchestras} to {orchestras}");
+                //performance.Orchestras = orchestras;
             }
-            if (!CompareTwoArrays(ConductorTag.GetValues<string>(false), SplitString(performance.Conductors)))
+            //if (!CompareTwoArrays(ConductorTag.GetValues<string>(false), SplitString(performance.Conductors)))
+            if (!compareTagsWithPerformers(ConductorTag, performance.GetPerformancePerformerSubSet(PerformerType.Conductor)))
             {
-                var conductors = string.Join(", ", ConductorTag.GetValues<string>(false));
-                log.Information($"[A-{composition.Artist.Id}] {composition.Artist.Name}, [C-{composition.Id}] \"{composition.Name}\" [P-{performance.Id}]: Conductors changed from {performance.Conductors} to {conductors}");
-                performance.Conductors = conductors;
+                updatePerformerSet(performance, ConductorTag, PerformerType.Conductor);
+                //var conductors = string.Join(", ", ConductorTag.GetValues<string>(false));
+                //log.Information($"[A-{composition.Artist.Id}] {composition.Artist.Name}, [C-{composition.Id}] \"{composition.Name}\" [P-{performance.Id}]: Conductors changed from {performance.Conductors} to {conductors}");
+                //performance.Conductors = conductors;
             }
-            if (!CompareTwoArrays(PerformerTag.GetValues<string>(false), SplitString(performance.Performers)))
+            //if (!CompareTwoArrays(PerformerTag.GetValues<string>(false), SplitString(performance.Performers)))
+            if (!compareTagsWithPerformers(PerformerTag, performance.GetPerformancePerformerSubSet(PerformerType.Other)))
             {
-                var performers = string.Join(", ", PerformerTag.GetValues<string>());
-                log.Information($"[A-{composition.Artist.Id}] {composition.Artist.Name}, [C-{composition.Id}] \"{composition.Name}\" [P-{performance.Id}]: Performers changed from {performance.Performers} to {performers}");
-                performance.Performers = performers;
+                updatePerformerSet(performance, PerformerTag, PerformerType.Other);
+                //var performers = string.Join(", ", PerformerTag.GetValues<string>());
+                //log.Information($"[A-{composition.Artist.Id}] {composition.Artist.Name}, [C-{composition.Id}] \"{composition.Name}\" [P-{performance.Id}]: Performers changed from {performance.Performers} to {performers}");
+                //performance.Performers = performers;
             }
             foreach (var m in MovementList)
             {
                 var t = tracks.First(x => m.TrackId == x.Id);
                 if(m.MovementNumberTag.GetValue<int>() != t.MovementNumber)
                 {
-                    log.Information($"[A-{composition.Artist.Id}] {composition.Artist.Name}, [C-{composition.Id}] \"{composition.Name}\",  [P-{performance.Id}] \"{performance.Performers}\": movement number changed from {t.MovementNumber} to {m.MovementNumberTag.GetValue<int>()}");
+                    log.Information($"[A-{composition.Artist.Id}] {composition.Artist.Name}, [C-{composition.Id}] \"{composition.Name}\",  [P-{performance.Id}] \"{performance.GetAllPerformersCSV()}\": movement number changed from {t.MovementNumber} to {m.MovementNumberTag.GetValue<int>()}");
                     log.Warning("Movement number changes are not supported");
                 }
                 if (m.TitleTag.GetValue<string>() != t.Title)
                 {
-                    log.Information($"[A-{composition.Artist.Id}] {composition.Artist.Name}, [C-{composition.Id}] \"{composition.Name}\",  [P-{performance.Id}] \"{performance.Performers}\": title changed changed from {t.Title} to {m.TitleTag.GetValue<string>()}");
+                    log.Information($"[A-{composition.Artist.Id}] {composition.Artist.Name}, [C-{composition.Id}] \"{composition.Name}\",  [P-{performance.Id}] \"{performance.GetAllPerformersCSV()}\": title changed changed from {t.Title} to {m.TitleTag.GetValue<string>()}");
                     t.Title = m.TitleTag.GetValue<string>();
                 }
             }
