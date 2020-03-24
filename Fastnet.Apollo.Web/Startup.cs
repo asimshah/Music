@@ -212,5 +212,6 @@ namespace Fastnet.Apollo.Web
         {
             return System.Reflection.Assembly.GetExecutingAssembly().GetName().Version.ToString();
         }
+
     }
 }
