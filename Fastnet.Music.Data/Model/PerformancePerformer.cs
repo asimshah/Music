@@ -7,5 +7,9 @@
         public long PerformerId { get; set; }
         public virtual Performer Performer { get; set; }
         public bool Selected { get; set; } = true;
+        public override string ToString()
+        {
+            return $"[Pf-{PerformerId}+P-{PerformanceId}]";
+        }
     }
 }

@@ -10,7 +10,7 @@
 
     <!-- Set this to true if you enable server-side prerendering -->
     <BuildServerSideRenderer>false</BuildServerSideRenderer>
-    <Version>2.4.1</Version>
+    <Version>2.4.4</Version>
     <Authors>Asim Shah</Authors>
     <Product>Apollo Music Server</Product>
     <Copyright>@2020</Copyright>
@@ -19,7 +19,7 @@
 
 
   <ItemGroup>
-    <PackageReference Include="Fastnet.Core.Web" Version="2.2.4" />
+    <PackageReference Include="Fastnet.Core.Web" Version="2.2.5" />
     <PackageReference Include="Microsoft.AspNetCore.Mvc.NewtonsoftJson" Version="3.1.2" />
     <PackageReference Include="Microsoft.AspNetCore.SpaServices.Extensions" Version="3.1.2" />
     <PackageReference Include="Microsoft.EntityFrameworkCore.Tools" Version="3.1.2">

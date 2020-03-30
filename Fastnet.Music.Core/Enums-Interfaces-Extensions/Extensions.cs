@@ -82,7 +82,7 @@ namespace Fastnet.Music.Core
                 {
                     AddToList(opusPath, artistFolder);
                 }
-                else if(type != ArtistType.Various)
+                else if (type != ArtistType.Various)
                 {
                     if (artistName.StartsWith("The ", StringComparison.CurrentCultureIgnoreCase))
                     {
@@ -92,7 +92,7 @@ namespace Fastnet.Music.Core
                     {
                         artistFolder = getArtistFolder(stylePath, $"The {artistName}");
                     }
-                    if(artistFolder != null)
+                    if (artistFolder != null)
                     {
                         AddToList(opusPath, artistFolder);
                     }
@@ -100,36 +100,6 @@ namespace Fastnet.Music.Core
             }
             return list;
         }
-        ///// <summary>
-        ///// Finds the most recent applicable cover file across all enabled sources
-        ///// </summary>
-        ///// <param name="musicStyle"></param>
-        ///// <param name="musicOptions"></param>
-        ///// <param name="type"></param>
-        ///// <param name="artistName"></param>
-        ///// <param name="opusPath"></param>
-        ///// <returns></returns>
-        //public static string GetMostRecentOpusCoverFile2(this MusicStyles musicStyle, MusicOptions musicOptions, ArtistType type, string artistName, string opusPath)
-        //{
-        //    IEnumerable<string> imageFiles = null;
-        //    try
-        //    {
-        //        var paths = musicStyle.GetOpusFolders(musicOptions, type, artistName, opusPath);
-        //        foreach (var pattern in musicOptions.CoverFilePatterns)
-        //        {
-        //            foreach (var path in paths)
-        //            {
-        //                imageFiles = imageFiles?.Union(Directory.EnumerateFiles(path, pattern, SearchOption.AllDirectories)) ?? Directory.EnumerateFiles(path, pattern, SearchOption.AllDirectories);
-        //            }
-        //        }
-        //        return imageFiles.OrderByDescending(x => new FileInfo(x).LastWriteTime).FirstOrDefault();
-        //    }
-        //    catch (Exception xe)
-        //    {
-        //        log.Error(xe, $"called with opusPath = {opusPath}, imagefiles: {imageFiles?.Count().ToString() ?? "null"}");
-        //    }
-        //    return null;
-        //}
         public static IEnumerable<FileInfo> GetMusicFiles(this MusicOptions mo, string srcPath, bool deep = false)
         {
             var search = mo.MusicFileExtensions;// new string[] { ".mp3", ".flac", ".m4a" };
@@ -148,9 +118,11 @@ namespace Fastnet.Music.Core
             var result = name;
             foreach (var list in mo.Aliases)
             {
-                if (list.Any(x => x.IsEqualIgnoreAccentsAndCase(name)))
+                var targetName = list.First();
+
+                if (name.IsEqualIgnoreAccentsAndCase(targetName) || list.Any(x => x.IsEqualIgnoreAccentsAndCase(name)))
                 {
-                    name = list.First();
+                    name = targetName;// list.First();
                     break;
                 }
             }

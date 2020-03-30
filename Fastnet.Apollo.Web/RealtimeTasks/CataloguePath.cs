@@ -148,59 +148,62 @@ namespace Fastnet.Apollo.Web
             {
                 await UpdateTagsAsync(db, musicFiles); st?.Time("Extract tags");
                 var musicSets = GetMusicSets(db, folder, musicFiles); st?.Time("Split into sets");
-                int i = 0;
-                foreach (var set in musicSets)
+                if (musicSets != null)
                 {
-                    var cr = await set.CatalogueAsync(); st?.Time($"Set {i++ + 1}");
-                    results.Add(cr);
-                    if (cr.Status == CatalogueStatus.Success)
+                    int i = 0;
+                    foreach (var set in musicSets)
                     {
-                        if (cr.Artist == null)
+                        var cr = await set.CatalogueAsync(); st?.Time($"Set {i++ + 1}");
+                        results.Add(cr);
+                        if (cr.Status == CatalogueStatus.Success)
                         {
-                            log.Trace($"Artist missing");
-                        }
-                        switch (cr.MusicSetType)
-                        {
-                            case Type T when T == typeof(PopularMusicAlbumSet) || T == typeof(WesternClassicalAlbumSet):
-                                if (cr.Work == null)
-                                {
-                                    log.Trace($"Album missing");
-                                }
-                                else if (cr.Work.Tracks == null || cr.Work.Tracks.Count() == 0)
-                                {
-                                    log.Trace($"Work has no tracks");
-                                }
-                                if (cr.Tracks == null)
-                                {
-                                    log.Trace($"Tracks missing");
-                                }
-                                else if (cr.Tracks.Count() == 0)
-                                {
-                                    log.Trace($"Track count is 0");
-                                }
-                                //if(cr.TaskItem != null)
-                                //{
-                                //    QueueTask(cr.TaskItem);
-                                //}
-                                break;
-                            case Type T when T == typeof(WesternClassicalCompositionSet):
-                                if (cr.Composition == null)
-                                {
-                                    log.Trace($"Composition missing");
-                                }
-                                if (cr.Performance == null)
-                                {
-                                    log.Trace($"Performance missing");
-                                }
-                                else if (cr.Performance.Movements == null || cr.Performance.Movements.Count() == 0)
-                                {
-                                    log.Trace($"Performance has no movements");
-                                }
+                            if (cr.Artist == null)
+                            {
+                                log.Trace($"Artist missing");
+                            }
+                            switch (cr.MusicSetType)
+                            {
+                                case Type T when T == typeof(PopularMusicAlbumSet) || T == typeof(WesternClassicalAlbumSet):
+                                    if (cr.Work == null)
+                                    {
+                                        log.Trace($"Album missing");
+                                    }
+                                    else if (cr.Work.Tracks == null || cr.Work.Tracks.Count() == 0)
+                                    {
+                                        log.Trace($"Work has no tracks");
+                                    }
+                                    if (cr.Tracks == null)
+                                    {
+                                        log.Trace($"Tracks missing");
+                                    }
+                                    else if (cr.Tracks.Count() == 0)
+                                    {
+                                        log.Trace($"Track count is 0");
+                                    }
+                                    //if(cr.TaskItem != null)
+                                    //{
+                                    //    QueueTask(cr.TaskItem);
+                                    //}
+                                    break;
+                                case Type T when T == typeof(WesternClassicalCompositionSet):
+                                    if (cr.Composition == null)
+                                    {
+                                        log.Trace($"Composition missing");
+                                    }
+                                    if (cr.Performance == null)
+                                    {
+                                        log.Trace($"Performance missing");
+                                    }
+                                    else if (cr.Performance.Movements == null || cr.Performance.Movements.Count() == 0)
+                                    {
+                                        log.Trace($"Performance has no movements");
+                                    }
 
-                                break;
+                                    break;
+                            }
                         }
-                    }
-                }
+                    } 
+                }                
             }
             else
             {
@@ -210,17 +213,24 @@ namespace Fastnet.Apollo.Web
         }
         private IEnumerable<IMusicSet> GetMusicSets(MusicDb db, OpusFolder musicFolder, List<MusicFile> files)
         {
-            Debug.Assert(ValidateMusicFileSet(db, files) == true);
-            var style = files.First().Style;
-            switch (style)
+            //Debug.Assert(ValidateMusicFileSet(db, files) == true);
+            if (ValidateMusicFileSet(db, files))
             {
-                default:
-                case MusicStyles.Popular:
-                    return new PopularMusicSetCollection(musicOptions, db, musicFolder, files, taskItem);
-                case MusicStyles.WesternClassical:
-                    return new WesternClassicalMusicSetCollection(musicOptions, db, musicFolder, files, taskItem);
+                var style = files.First().Style;
+                switch (style)
+                {
+                    default:
+                    case MusicStyles.Popular:
+                        return new PopularMusicSetCollection(musicOptions, db, musicFolder, files, taskItem);
+                    case MusicStyles.WesternClassical:
+                        return new WesternClassicalMusicSetCollection(musicOptions, db, musicFolder, files, taskItem);
+                }
             }
-
+            else
+            {
+                log.Warning($"{musicFolder.ToString()} not catalogued");
+                return null;
+            }
         }
         private bool ValidateMusicFileSet(MusicDb db, List<MusicFile> files)
         {

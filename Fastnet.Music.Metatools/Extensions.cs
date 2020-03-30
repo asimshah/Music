@@ -21,81 +21,10 @@ namespace Fastnet.Music.Metatools
     public static partial class Extensions
     {
         private static readonly ILogger log = ApplicationLoggerFactory.CreateLogger("Fastnet.Music.Metatools.Extensions");
-        /// <summary>
-        /// returns true if the image does not use the given filename
-        /// or the length or last write time have changed
-        /// </summary>
-        /// <param name="image"></param>
-        /// <param name="filename"></param>
-        /// <returns></returns>
-        public static bool HasChanged(this Image image, string filename)
-        {
-            if (image == null && filename == null)
-            {
-                return false;
-            }
-            if (image == null && filename != null || image != null && filename == null)
-            {
-                return true;
-            }
-            var result = true;
-            if (image != null && string.Compare(image.Sourcefile, filename, true) == 0)
-            {
-                var fi = new FileInfo(filename);
-                if (fi.Length == image.Filelength && fi.LastWriteTime == image.LastModified)
-                {
-                    result = false;
-                }
-            }
-            return result;
-        }
-        public static CollectionsFolder GetCollectionsFolder(this MusicStyles musicStyle, MusicOptions musicOptions)
-        {
-            return new CollectionsFolder(musicOptions, musicStyle);
-        }
-        public static IEnumerable<ArtistFolder> GetArtistFolders(this MusicStyles musicStyle, MusicOptions musicOptions, string selectedRootFolder = null)
-        {
-            var folderList = new List<ArtistFolder>();
-
-            var style = MusicMetaDataMethods.GetStyleInfo(musicOptions, musicStyle);
-            if (style != null)
-            {
-                var list = new List<string>();
-                //foreach (var rootFolder in new MusicSources(musicOptions).Where(s => !s.IsGenerated).OrderBy(s => s.DiskRoot))
-                foreach (var rootFolder in new MusicSources(musicOptions))
-                {
-                    foreach (var setting in style.Settings)
-                    {
-                        var path = Path.Combine(rootFolder.DiskRoot, setting.Path);
-                        if (selectedRootFolder == null || path.StartsWithIgnoreAccentsAndCase(selectedRootFolder))
-                        {
-                            if (Directory.Exists(path))
-                            {
-                                list.AddRange(Directory.EnumerateDirectories(path).Select(d => Path.GetFileName(d)));
-                            }
-                        }
-                    }
-                }
-                var list2 = list.Except(new string[] { "collections", "$portraits" }, StringComparer.CurrentCultureIgnoreCase);
-                if (style.Filter)
-                {
-                    list2 = list2.Intersect(style.IncludeArtists, new AccentAndCaseInsensitiveComparer());
-                }
-                list2 = list2.Distinct(new AccentAndCaseInsensitiveComparer()).OrderBy(x => x);
-                folderList = list2.Select(n => new ArtistFolder(musicOptions, musicStyle, n)).ToList();
-            }
-            return folderList;
-        }
-        /// <summary>
-        /// returns a list of directories found in all sources that match either the artist, or the work
-        /// Note that a directory will match if the name matches ignoring accents or case
-        /// </summary>
-        /// <param name="musicStyle"></param>
-        /// <param name="musicOptions"></param>
-        /// <param name="artistName"></param>
-        /// <param name="workName"></param>
-        /// <returns></returns>
-
+    }
+    public static partial class Extensions
+    {
+        // musicdb extensions
         /// <summary>
         /// Reads all the tags in the audio file and adds them to the database
         /// (Not all the tags are used)
@@ -127,126 +56,6 @@ namespace Fastnet.Music.Metatools
                 }
                 mf.ParsingStage = MusicFileParsingStage.IdTagsComplete;
             }
-        }
-        public static string GetArtistName(this MusicFile mf/*, MusicDb db*/)
-        {
-            var name = mf.Musician;
-            switch (mf.Encoding)
-            {
-                case EncodingType.flac:
-                    Debug.Assert(mf.IsGenerated == false);
-                    switch (mf.Style)
-                    {
-                        case MusicStyles.WesternClassical:
-                            name = mf.GetTagValue<string>("Composer") ?? mf.GetTagValue<string>("Artist") ?? name;
-                            break;
-                        default:
-                            name = mf.GetTagValue<string>("Artist") ?? name;
-                            break;
-                    }
-                    break;
-                default:
-                    if (mf.IsGenerated)
-                    {
-                        name = mf.GetTagValue<string>("Artist");
-                    }
-                    else
-                    {
-                        name = mf.GetTagValue<string>("Artist") ?? mf.GetTagValue<string>("AlbumArtists") ?? name;
-                        name = name.Split('|', ';', ',', ':')[0].Trim();
-                    }
-                    break;
-            }
-            return name;
-        }
-        public static string GetWorkName(this MusicFile mf/*, MusicDb db*/)
-        {
-            var name = mf.OpusName;
-            if (!(mf.OpusType == OpusType.Singles))
-            {
-                switch (mf.Encoding)
-                {
-                    case EncodingType.flac:
-                    default:
-                        //Debug.Assert(mf.IsGenerated == false);
-                        switch (mf.Style)
-                        {
-                            case MusicStyles.WesternClassical:
-                                name = mf.GetTagValue<string>("Composition") ?? mf.GetTagValue<string>("Album") ?? name;
-                                break;
-                            default:
-                                name = mf.GetAlbumName();// mf.GetTagValue<string>("Album") ?? name;
-                                break;
-                        }
-                        break;
-                }
-            }
-            return name;
-        }
-        public static string GetAlbumName(this MusicFile mf/*, MusicDb db*/)
-        {
-            var name = mf.OpusName;
-            if (!(mf.OpusType == OpusType.Singles))
-            {
-                name = mf.GetTagValue<string>("Album") ?? name;
-            }
-            return name;
-        }
-        public static int? GetYear(this MusicFile mf)
-        {
-            int? year;
-            switch (mf.Encoding)
-            {
-                case EncodingType.flac:
-                    Debug.Assert(mf.IsGenerated == false);
-                    //year = mf.GetTagIntValue("Date") ?? mf.GetTagIntValue("OriginalDate") ?? mf.GetTagIntValue("OriginalYear") ?? 0;
-                    year = mf.GetTagIntValue("OriginalYear") ?? mf.GetTagIntValue("OriginalDate") ?? mf.GetTagIntValue("Date") ?? 0;
-                    break;
-                default:
-                    year = mf.GetTagIntValue("OriginalYear") ?? mf.GetTagIntValue("Year") ?? 0;
-                    break;
-            }
-            return year;
-        }
-        public static IEnumerable<string> GetPerformers(this MusicFile mf)
-        {
-            var performerText = mf.GetTagValue<string>("Performer")
-                ?? mf.GetTagValue<string>("Performers")
-                ?? string.Empty;
-            if (mf.MusicianType != ArtistType.Various)
-            {
-                var artistText = $"{mf.GetTagValue<string>("Album Artist") ?? string.Empty}|{mf.GetTagValue<string>("AlbumArtist") ?? string.Empty}";
-                if (artistText.Length > 0)
-                {
-                    performerText = $"{performerText}|{artistText}";
-                }
-            }
-            return performerText.Split(new char[] { '|', ';', ',', ':' }, StringSplitOptions.RemoveEmptyEntries)
-                .Select(t => Regex.Replace(t, @"\(.*?\)", "").Trim());
-        }
-        public static IEnumerable<string> GetOrchestras(this MusicFile mf)
-        {
-            return GetSplittableTag(mf, "Orchestra");
-            //return mf.GetTagValue<string>("Orchestra");
-        }
-        public static IEnumerable<string> GetConductors(this MusicFile mf)
-        {
-            return GetSplittableTag(mf, "Conductor");
-            //var conductor = mf.GetTagValue<string>("Conductor");
-            //if (conductor != null && conductor.Contains('|'))
-            //{
-            //    conductor = conductor.Split('|', StringSplitOptions.RemoveEmptyEntries).First();
-            //}
-            //return conductor;// mf.GetTagValue<string>("Conductor");
-        }
-        private static IEnumerable<string> GetSplittableTag(this MusicFile mf, string tagName)
-        {
-            var r = mf.GetTagValue<string>(tagName);
-            if (r != null)
-            {
-                return r.Split('|', StringSplitOptions.RemoveEmptyEntries);
-            }
-            return new string[0];// mf.GetTagValue<string>("Conductor");
         }
         public static bool ValidateTags(this MusicDb db, MusicFile mf)
         {
@@ -292,159 +101,6 @@ namespace Fastnet.Music.Metatools
                 }
             }
             return result;
-        }
-        /// <summary>
-        /// get the most applicable cover file for the work, according to the rules
-        /// i) jpg is preferred to jpeg which is preferred to png (.xxx below)
-        /// ii) *cover.xxx is preferred to *front.xxx which is preferred *folder.xxx
-        /// </summary>
-        /// <param name="work"></param>
-        /// <param name="musicOptions"></param>
-        /// <param name="musicStyle"></param>
-        /// <param name="folderName"></param>
-        /// <returns></returns>
-        public static string GetCoverFile(this Work work, MusicOptions musicOptions, string folderName = null)
-        {
-            folderName ??= work.Name;
-            string coverFile = null;
-            //var allworkFolders = work.StyleId.FindAllDirectories(musicOptions, work.Artist.Name, work.Name);
-            var allworkFolders = work.StyleId.GetOpusFolders(musicOptions, work.Artist.Type, work.Artist.Name, work.Name);
-
-            foreach (var pattern in musicOptions.CoverFilePatterns)
-            {
-                coverFile = allworkFolders.SelectMany(p => IO.Directory.EnumerateFiles(p, pattern, IO.SearchOption.AllDirectories)).FirstOrDefault(cf => IO.File.Exists(cf));
-                if (coverFile != null)
-                {
-                    break;
-                }
-            }
-            return coverFile;
-        }
-        public static string GetPortraitFile(this Artist artist, MusicOptions musicOptions)
-        {
-            var ln = artist.Name.GetLastName();
-            bool matchImageFilename(string imageFileName, string artistName)
-            {
-                var imagename = Path.GetFileNameWithoutExtension(imageFileName).ToLower();
-                return "portrait" == imagename || artist.Name.IsEqualIgnoreAccentsAndCase(imagename) || ln.IsEqualIgnoreAccentsAndCase(imagename);
-            }
-            bool matchArtistFolder(string sp, string artistName, string folder)
-            {
-                bool _match(string sp, string name)
-                {
-                    var artistFolder = Path.Combine(sp, name);
-                    if (artistFolder.IsEqualIgnoreAccentsAndCase(folder))
-                    {
-                        return true;
-                    }
-                    return false;
-                }
-                if (_match(sp, artistName))
-                {
-                    return true;
-                }
-                else
-                {
-                    if (artistName.StartsWith("The ", StringComparison.CurrentCultureIgnoreCase))
-                    {
-                        artistName = artistName.Substring(4);
-                    }
-                    else
-                    {
-                        artistName = $"The {artistName}";
-                    }
-                    return _match(sp, artistName);
-                }
-            }
-            var allStylePaths = artist.ArtistStyles.ToArray()
-                .SelectMany(x => x.StyleId.GetPaths(musicOptions, false, false));
-            var allArtistPaths = allStylePaths.SelectMany(
-                sp => Directory.EnumerateDirectories(sp)
-                .Where(d => matchArtistFolder(sp, artist.Name, d) || Path.GetFileNameWithoutExtension(d).ToLower() == "$portraits"));
-            var imageFiles = allArtistPaths.SelectMany(x => Directory.EnumerateFiles(x, "*.jpg")
-                .Union(Directory.EnumerateFiles(x, "*.jpeg"))
-                .Union(Directory.EnumerateFiles(x, "*.png")));
-            var matchedFiles = imageFiles.Where(f => matchImageFilename(f, artist.Name));
-            return matchedFiles.OrderByDescending(x => new FileInfo(x).LastWriteTime).FirstOrDefault();
-        }
-
-        public static async Task<Image> GetImage(this string filename)
-        {
-            (var data, var mimeType, var lastWriteTimeUtc, var length) = await GetImageDetails(filename);
-            var image = new Image
-            {
-                Sourcefile = filename,
-                Filelength = length,
-                LastModified = lastWriteTimeUtc,
-                Data = data,
-                MimeType = mimeType
-            };
-            return image;
-        }
-        public static void Delete(this MusicDb musicDb, MusicFile mf, DeleteContext context)
-        {
-            void clearRelatedEntities(MusicFile file)
-            {
-                musicDb.RemovePlaylistItems(file);
-                var tags = file.IdTags.ToArray();
-                musicDb.IdTags.RemoveRange(tags);
-            }
-            clearRelatedEntities(mf);
-            var track = mf.Track;
-            track?.MusicFiles.Remove(mf);
-            if (track?.MusicFiles.All(x => x.IsGenerated) ?? false)
-            {
-                foreach (var f in track.MusicFiles.ToArray())
-                {
-                    clearRelatedEntities(f);
-                    f.Track = null;
-                    track.MusicFiles.Remove(f);
-                    musicDb.MusicFiles.Remove(f);
-                    log.Information($"{context}: Musicfile [MF-{f.Id}] deleted: {f.File}");
-                }
-            }
-            if (track?.MusicFiles.Count() == 0)
-            {
-                musicDb.Delete(track, context);
-            }
-            musicDb.MusicFiles.Remove(mf);
-            log.Information($"{context}: Musicfile [MF-{mf.Id}] deleted: {mf.File}");
-        }
-        public static void RemovePlaylistItems<T>(this MusicDb musicDb, T entity)
-        {
-            PlaylistItemType itemType = PlaylistItemType.MusicFile;
-            long itemId = 0;
-            switch (entity)
-            {
-                case Performance p:
-                    itemType = PlaylistItemType.Performance;
-                    itemId = p.Id;
-                    break;
-                case Work w:
-                    itemType = PlaylistItemType.Work;
-                    itemId = w.Id;
-                    break;
-                case Track t:
-                    itemType = PlaylistItemType.Track;
-                    itemId = t.Id;
-                    break;
-                case MusicFile mf:
-                    itemType = PlaylistItemType.MusicFile;
-                    itemId = mf.Id;
-                    break;
-            }
-            var items = musicDb.PlaylistItems.Where(x => x.Type == itemType && x.ItemId == itemId).ToArray();
-            foreach (var item in items)
-            {
-                var playlist = item.Playlist;
-                item.Playlist = null;
-                playlist.Items.Remove(item);
-                musicDb.PlaylistItems.Remove(item);
-                if (playlist.Items.Count() == 0)
-                {
-                    musicDb.Playlists.Remove(playlist);
-                }
-            }
         }
         public static bool ValidateArtists(this MusicDb db)
         {
@@ -583,156 +239,6 @@ namespace Fastnet.Music.Metatools
             }
             log.Information("ValidatePerformances() completed");
             return result;
-        }
-        private static async Task<(byte[] data, string mimeType, DateTimeOffset lastWriteTimeUtc, long length)> GetImageDetails(string imageFile)
-        {
-            var fi = new IO.FileInfo(imageFile);
-            var data = await IO.File.ReadAllBytesAsync(fi.FullName);
-            var mimeType = string.Empty;
-
-            switch (fi.Extension.ToLower())
-            {
-                case ".jpeg":
-                    mimeType = "image/jpeg";
-                    break;
-                case ".jpg":
-                    mimeType = "image/jpg";
-                    break;
-                case ".png":
-                    mimeType = "image/png";
-                    break;
-            }
-            return (data, mimeType, fi.LastWriteTimeUtc, fi.Length);
-        }
-        private static IEnumerable<string> GetFoldersAcrossStyles(MusicOptions musicOptions, IEnumerable<MusicStyles> musicStyles, string folderName)
-        {
-            try
-            {
-                var stylePaths = new List<string>();
-                foreach (var ms in musicStyles)
-                {
-                    stylePaths.AddRange(ms.GetPaths(musicOptions, false, false));
-                }
-                var t1 = stylePaths.Select(x => IO.Path.Combine(x, folderName));
-                var t2 = t1.Where(x => IO.Directory.Exists(x));
-                var t3 = stylePaths.Select(x => IO.Path.Combine(x, folderName))
-                    .Where(x => IO.Directory.Exists(x));
-                return stylePaths.Select(x => IO.Path.Combine(x, folderName))
-                    .Where(x => IO.Directory.Exists(x));
-            }
-            catch (Exception)
-            {
-                //Debugger.Break();
-                throw;
-            }
-        }
-        private static void Delete(this MusicDb musicDb, Artist artist, DeleteContext context)
-        {
-            long artistId = artist.Id;
-            foreach (var composition in artist.Compositions)
-            {
-                composition.Artist = null;
-                musicDb.Delete(composition, context);
-            }
-            foreach (var work in artist.Works)
-            {
-                work.Artist = null;
-                musicDb.Delete(work, context);
-            }
-            var styles = artist.ArtistStyles.ToArray();
-            musicDb.ArtistStyles.RemoveRange(styles);
-            musicDb.Artists.Remove(artist);
-            context.SetDeletedArtistId(artistId);
-            log.Information($"{context}: Artist [A-{artist.Id}] deleted: {artist.Name}");
-        }
-        private static void Delete(this MusicDb musicDb, Composition composition, DeleteContext context)
-        {
-            long artistId = composition.ArtistId;
-            foreach (var performance in composition.Performances)
-            {
-                performance.Composition = null;
-                musicDb.Delete(performance, context);
-            }
-            composition.Performances.Clear();
-            musicDb.Compositions.Remove(composition);
-            var artist = composition.Artist;
-            artist?.Compositions.Remove(composition);
-            if (artist != null)
-            {
-                if (artist.Works.Count() == 0 && artist.Compositions.Count() == 0)
-                {
-                    musicDb.Delete(artist, context);
-                }
-            }
-            context.SetModifiedArtistId(artistId);
-            log.Information($"{context}: Composition [C-{composition.Id}] deleted: {composition.Name}");
-        }
-        public static void Delete(this MusicDb musicDb, Performance performance, DeleteContext context)
-        {
-            long artistId = performance.Composition.ArtistId;
-            foreach (var movement in performance.Movements)
-            {
-                movement.Performance = null;
-                // we do not delete movements here because
-                // a movement is a track and tracks are also in an album
-            }
-            performance.Movements.Clear();
-            var composition = performance.Composition;
-            composition?.Performances.Remove(performance);
-            if (composition?.Performances.Count() == 0)
-            {
-                musicDb.Delete(composition, context);
-            }
-            var performers = performance.GetAllPerformersCSV();
-            musicDb.PerformancePerformers.RemoveRange(performance.PerformancePerformers);
-            musicDb.Performances.Remove(performance);
-            context.SetModifiedArtistId(artistId);
-            log.Information($"{context}: Performance [P-{performance.Id}] deleted: {performers}");
-        }
-        private static void Delete(this MusicDb musicDb, Work work, DeleteContext context)
-        {
-            long artistId = work.ArtistId;
-            foreach (var track in work.Tracks)
-            {
-                track.Work = null;
-                musicDb.Delete(track, context);
-            }
-            var artist = work.Artist;
-            artist?.Works.Remove(work);
-            if (artist != null)
-            {
-                if (artist.Works.Count() == 0 && artist.Compositions.Count() == 0)
-                {
-                    musicDb.Delete(artist, context);
-                }
-            }
-            musicDb.Works.Remove(work);
-            context.SetModifiedArtistId(artistId);
-            log.Information($"{context}: Work [W-{work.Id}] deleted: {work.Name}");
-        }
-        private static void Delete(this MusicDb musicDb, Track track, DeleteContext context)
-        {
-            long artistId = track.Work.ArtistId;
-            foreach (var musicFile in track.MusicFiles.ToArray())
-            {
-                musicFile.Track = null;
-                musicDb.Delete(musicFile, context);
-            }
-            var performance = track.Performance;
-            performance?.Movements.Remove(track);
-            if (performance?.Movements.Count() == 0)
-            {
-                musicDb.Delete(performance, context);
-            }
-            var work = track.Work;
-            work?.Tracks.Remove(track);
-            if (work?.Tracks.Count() == 0)
-            {
-                musicDb.Delete(work, context);
-            }
-            musicDb.Tracks.Remove(track);
-            context.SetModifiedArtistId(artistId);
-            log.Information($"{context}: Track [T-{track.Id}] deleted: {track.Title}");
         }
         private static void UpdateFlacTagsAsync(this MusicDb musicDb, MusicFile mf)
         {
@@ -1047,6 +553,356 @@ namespace Fastnet.Music.Metatools
                 }
             }
             //return allowStyleTags;
+        }
+    }
+    public static partial class Extensions
+    {
+        public static string GetArtistName(this MusicFile mf/*, MusicDb db*/)
+        {
+            var name = mf.Musician;
+            switch (mf.Encoding)
+            {
+                case EncodingType.flac:
+                    Debug.Assert(mf.IsGenerated == false);
+                    switch (mf.Style)
+                    {
+                        case MusicStyles.WesternClassical:
+                            name = mf.GetTagValue<string>("Composer") ?? mf.GetTagValue<string>("Artist") ?? name;
+                            break;
+                        default:
+                            name = mf.GetTagValue<string>("Artist") ?? name;
+                            break;
+                    }
+                    break;
+                default:
+                    if (mf.IsGenerated)
+                    {
+                        name = mf.GetTagValue<string>("Artist");
+                    }
+                    else
+                    {
+                        name = mf.GetTagValue<string>("Artist") ?? mf.GetTagValue<string>("AlbumArtists") ?? name;
+                        name = name.Split('|', ';', ',', ':')[0].Trim();
+                    }
+                    break;
+            }
+            return name;
+        }
+        public static string GetWorkName(this MusicFile mf/*, MusicDb db*/)
+        {
+            var name = mf.OpusName;
+            if (!(mf.OpusType == OpusType.Singles))
+            {
+                switch (mf.Encoding)
+                {
+                    case EncodingType.flac:
+                    default:
+                        //Debug.Assert(mf.IsGenerated == false);
+                        switch (mf.Style)
+                        {
+                            case MusicStyles.WesternClassical:
+                                name = mf.GetTagValue<string>("Composition") ?? mf.GetTagValue<string>("Album") ?? name;
+                                break;
+                            default:
+                                name = mf.GetAlbumName();// mf.GetTagValue<string>("Album") ?? name;
+                                break;
+                        }
+                        break;
+                }
+            }
+            return name;
+        }
+        public static string GetAlbumName(this MusicFile mf/*, MusicDb db*/)
+        {
+            var name = mf.OpusName;
+            if (!(mf.OpusType == OpusType.Singles))
+            {
+                name = mf.GetTagValue<string>("Album") ?? name;
+            }
+            return name;
+        }
+        public static int? GetYear(this MusicFile mf)
+        {
+            int? year;
+            switch (mf.Encoding)
+            {
+                case EncodingType.flac:
+                    Debug.Assert(mf.IsGenerated == false);
+                    //year = mf.GetTagIntValue("Date") ?? mf.GetTagIntValue("OriginalDate") ?? mf.GetTagIntValue("OriginalYear") ?? 0;
+                    year = mf.GetTagIntValue("OriginalYear") ?? mf.GetTagIntValue("OriginalDate") ?? mf.GetTagIntValue("Date") ?? 0;
+                    break;
+                default:
+                    year = mf.GetTagIntValue("OriginalYear") ?? mf.GetTagIntValue("Year") ?? 0;
+                    break;
+            }
+            return year;
+        }
+        public static IEnumerable<string> GetPerformers(this MusicFile mf)
+        {
+            var performerText = mf.GetTagValue<string>("Performer")
+                ?? mf.GetTagValue<string>("Performers")
+                ?? string.Empty;
+            if (mf.MusicianType != ArtistType.Various)
+            {
+                var artistText = $"{mf.GetTagValue<string>("Album Artist") ?? string.Empty}|{mf.GetTagValue<string>("AlbumArtist") ?? string.Empty}";
+                if (artistText.Length > 0)
+                {
+                    performerText = $"{performerText}|{artistText}";
+                }
+            }
+            return performerText.Split(new char[] { '|', ';', ',', ':' }, StringSplitOptions.RemoveEmptyEntries)
+                .Select(t => Regex.Replace(t, @"\(.*?\)", "").Trim());
+        }
+        public static IEnumerable<string> GetOrchestras(this MusicFile mf)
+        {
+            return GetSplittableTag(mf, "Orchestra");
+            //return mf.GetTagValue<string>("Orchestra");
+        }
+        public static IEnumerable<string> GetConductors(this MusicFile mf)
+        {
+            return GetSplittableTag(mf, "Conductor");
+        }
+        private static IEnumerable<string> GetSplittableTag(this MusicFile mf, string tagName)
+        {
+            var r = mf.GetTagValue<string>(tagName);
+            if (r != null)
+            {
+                return r.Split('|', StringSplitOptions.RemoveEmptyEntries);
+            }
+            return new string[0];// mf.GetTagValue<string>("Conductor");
+        }
+    }
+    public static partial class Extensions
+    {
+        /// <summary>
+        /// returns true if the image does not use the given filename
+        /// or the length or last write time have changed
+        /// </summary>
+        /// <param name="image"></param>
+        /// <param name="filename"></param>
+        /// <returns></returns>
+        public static bool HasChanged(this Image image, string filename)
+        {
+            if (image == null && filename == null)
+            {
+                return false;
+            }
+            if (image == null && filename != null || image != null && filename == null)
+            {
+                return true;
+            }
+            var result = true;
+            if (image != null && string.Compare(image.Sourcefile, filename, true) == 0)
+            {
+                var fi = new FileInfo(filename);
+                if (fi.Length == image.Filelength && fi.LastWriteTime == image.LastModified)
+                {
+                    result = false;
+                }
+            }
+            return result;
+        }
+        public static CollectionsFolder GetCollectionsFolder(this MusicStyles musicStyle, MusicOptions musicOptions)
+        {
+            return new CollectionsFolder(musicOptions, musicStyle);
+        }
+        public static IEnumerable<ArtistFolder> GetArtistFolders(this MusicStyles musicStyle, MusicOptions musicOptions, string selectedRootFolder = null)
+        {
+            var folderList = new List<ArtistFolder>();
+
+            var style = MusicMetaDataMethods.GetStyleInfo(musicOptions, musicStyle);
+            if (style != null)
+            {
+                var list = new List<string>();
+                //foreach (var rootFolder in new MusicSources(musicOptions).Where(s => !s.IsGenerated).OrderBy(s => s.DiskRoot))
+                foreach (var rootFolder in new MusicSources(musicOptions))
+                {
+                    foreach (var setting in style.Settings)
+                    {
+                        var path = Path.Combine(rootFolder.DiskRoot, setting.Path);
+                        if (selectedRootFolder == null || path.StartsWithIgnoreAccentsAndCase(selectedRootFolder))
+                        {
+                            if (Directory.Exists(path))
+                            {
+                                list.AddRange(Directory.EnumerateDirectories(path).Select(d => Path.GetFileName(d)));
+                            }
+                        }
+                    }
+                }
+                var list2 = list.Except(new string[] { "collections", "$portraits" }, StringComparer.CurrentCultureIgnoreCase);
+                if (style.Filter)
+                {
+                    list2 = list2.Intersect(style.IncludeArtists, new AccentAndCaseInsensitiveComparer());
+                }
+                list2 = list2.Distinct(new AccentAndCaseInsensitiveComparer()).OrderBy(x => x);
+                folderList = list2.Select(n => new ArtistFolder(musicOptions, musicStyle, n)).ToList();
+            }
+            return folderList;
+        }
+        /// <summary>
+        /// get the most applicable cover file for the work, according to the rules
+        /// i) jpg is preferred to jpeg which is preferred to png (.xxx below)
+        /// ii) *cover.xxx is preferred to *front.xxx which is preferred *folder.xxx
+        /// </summary>
+        /// <param name="work"></param>
+        /// <param name="musicOptions"></param>
+        /// <param name="musicStyle"></param>
+        /// <param name="folderName"></param>
+        /// <returns></returns>
+        public static string GetCoverFile(this Work work, MusicOptions musicOptions, string folderName = null)
+        {
+            folderName ??= work.Name;
+            string coverFile = null;
+            //var allworkFolders = work.StyleId.FindAllDirectories(musicOptions, work.Artist.Name, work.Name);
+            var allworkFolders = work.StyleId.GetOpusFolders(musicOptions, work.Artist.Type, work.Artist.Name, work.Name);
+
+            foreach (var pattern in musicOptions.CoverFilePatterns)
+            {
+                coverFile = allworkFolders.SelectMany(p => IO.Directory.EnumerateFiles(p, pattern, IO.SearchOption.AllDirectories)).FirstOrDefault(cf => IO.File.Exists(cf));
+                if (coverFile != null)
+                {
+                    break;
+                }
+            }
+            return coverFile;
+        }
+        public static string GetPortraitFile(this Artist artist, MusicOptions musicOptions)
+        {
+            var ln = artist.Name.GetLastName();
+            bool matchImageFilename(string imageFileName, string artistName)
+            {
+                var imagename = Path.GetFileNameWithoutExtension(imageFileName).ToLower();
+                return "portrait" == imagename || artist.Name.IsEqualIgnoreAccentsAndCase(imagename) || ln.IsEqualIgnoreAccentsAndCase(imagename);
+            }
+            bool matchArtistFolder(string sp, string artistName, string folder)
+            {
+                bool _match(string sp, string name)
+                {
+                    var artistFolder = Path.Combine(sp, name);
+                    if (artistFolder.IsEqualIgnoreAccentsAndCase(folder))
+                    {
+                        return true;
+                    }
+                    return false;
+                }
+                if (_match(sp, artistName))
+                {
+                    return true;
+                }
+                else
+                {
+                    if (artistName.StartsWith("The ", StringComparison.CurrentCultureIgnoreCase))
+                    {
+                        artistName = artistName.Substring(4);
+                    }
+                    else
+                    {
+                        artistName = $"The {artistName}";
+                    }
+                    return _match(sp, artistName);
+                }
+            }
+            var allStylePaths = artist.ArtistStyles.ToArray()
+                .SelectMany(x => x.StyleId.GetPaths(musicOptions, false, false));
+            var allArtistPaths = allStylePaths.SelectMany(
+                sp => Directory.EnumerateDirectories(sp)
+                .Where(d => matchArtistFolder(sp, artist.Name, d) || Path.GetFileNameWithoutExtension(d).ToLower() == "$portraits"));
+            var imageFiles = allArtistPaths.SelectMany(x => Directory.EnumerateFiles(x, "*.jpg")
+                .Union(Directory.EnumerateFiles(x, "*.jpeg"))
+                .Union(Directory.EnumerateFiles(x, "*.png")));
+            var matchedFiles = imageFiles.Where(f => matchImageFilename(f, artist.Name));
+            return matchedFiles.OrderByDescending(x => new FileInfo(x).LastWriteTime).FirstOrDefault();
+        }
+        public static async Task<Image> GetImage(this string filename)
+        {
+            (var data, var mimeType, var lastWriteTimeUtc, var length) = await GetImageDetails(filename);
+            var image = new Image
+            {
+                Sourcefile = filename,
+                Filelength = length,
+                LastModified = lastWriteTimeUtc,
+                Data = data,
+                MimeType = mimeType
+            };
+            return image;
+        }
+        //public static void RemovePlaylistItems<T>(this MusicDb musicDb, T entity)
+        //{
+        //    PlaylistItemType itemType = PlaylistItemType.MusicFile;
+        //    long itemId = 0;
+        //    switch (entity)
+        //    {
+        //        case Performance p:
+        //            itemType = PlaylistItemType.Performance;
+        //            itemId = p.Id;
+        //            break;
+        //        case Work w:
+        //            itemType = PlaylistItemType.Work;
+        //            itemId = w.Id;
+        //            break;
+        //        case Track t:
+        //            itemType = PlaylistItemType.Track;
+        //            itemId = t.Id;
+        //            break;
+        //        case MusicFile mf:
+        //            itemType = PlaylistItemType.MusicFile;
+        //            itemId = mf.Id;
+        //            break;
+        //    }
+        //    var items = musicDb.PlaylistItems.Where(x => x.Type == itemType && x.ItemId == itemId).ToArray();
+        //    foreach (var item in items)
+        //    {
+        //        var playlist = item.Playlist;
+        //        item.Playlist = null;
+        //        playlist.Items.Remove(item);
+        //        musicDb.PlaylistItems.Remove(item);
+        //        if (playlist.Items.Count() == 0)
+        //        {
+        //            musicDb.Playlists.Remove(playlist);
+        //        }
+        //    }
+        //}
+        private static async Task<(byte[] data, string mimeType, DateTimeOffset lastWriteTimeUtc, long length)> GetImageDetails(string imageFile)
+        {
+            var fi = new IO.FileInfo(imageFile);
+            var data = await IO.File.ReadAllBytesAsync(fi.FullName);
+            var mimeType = string.Empty;
+
+            switch (fi.Extension.ToLower())
+            {
+                case ".jpeg":
+                    mimeType = "image/jpeg";
+                    break;
+                case ".jpg":
+                    mimeType = "image/jpg";
+                    break;
+                case ".png":
+                    mimeType = "image/png";
+                    break;
+            }
+            return (data, mimeType, fi.LastWriteTimeUtc, fi.Length);
+        }
+        private static IEnumerable<string> GetFoldersAcrossStyles(MusicOptions musicOptions, IEnumerable<MusicStyles> musicStyles, string folderName)
+        {
+            try
+            {
+                var stylePaths = new List<string>();
+                foreach (var ms in musicStyles)
+                {
+                    stylePaths.AddRange(ms.GetPaths(musicOptions, false, false));
+                }
+                var t1 = stylePaths.Select(x => IO.Path.Combine(x, folderName));
+                var t2 = t1.Where(x => IO.Directory.Exists(x));
+                var t3 = stylePaths.Select(x => IO.Path.Combine(x, folderName))
+                    .Where(x => IO.Directory.Exists(x));
+                return stylePaths.Select(x => IO.Path.Combine(x, folderName))
+                    .Where(x => IO.Directory.Exists(x));
+            }
+            catch (Exception)
+            {
+                //Debugger.Break();
+                throw;
+            }
         }
         private static string CleanName(this string name)
         {

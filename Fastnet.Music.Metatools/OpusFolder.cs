@@ -60,7 +60,7 @@ namespace Fastnet.Music.Metatools
             foreach (var mf in filesInDb.ToArray())
             {
                 ++count;
-                var dc = new DeleteContext(this);
+                var dc = new OpusDeleteContext(this);
                 db.Delete(mf, dc);
             }
             return count;

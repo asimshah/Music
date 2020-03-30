@@ -63,13 +63,11 @@ namespace Fastnet.Music.Data
         }
         private string GetPerformerCSV(PerformerType? type = null, bool includeAll = false)
         {
-            //var r = PerformancePerformers
-            //    .Where(pp => (pp.Selected || includeAll == true) && (type == null || pp.Performer.Type == type))
             var r = GetPerformancePerformerSubSet(type)
                 .Where(pp => (pp.Selected || includeAll == true))
                 .OrderBy(pp => pp.Performer.Type)
-                .Select(pp => pp.Performer.Name)
-                .OrderBy(x => x.GetLastName());
+                .ThenBy(x => x.Performer.Name.GetLastName())
+                .Select(pp => pp.Performer.Name);
             return string.Join(", ", r);
         }
     }

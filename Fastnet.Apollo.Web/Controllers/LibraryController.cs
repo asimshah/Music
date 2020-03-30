@@ -458,6 +458,68 @@ namespace Fastnet.Apollo.Web.Controllers
             log.Information($"[A-{performance.Composition.Artist.Id}] {performance.Composition.Artist.Name}, [C-{performance.Composition.Id}] {performance.Composition.Name}, [P-{performance.Id}] {performance.GetAllPerformersCSV()} reset");
             return SuccessResult();
         }
+        [HttpGet("repair/performers")]
+        public async Task<IActionResult> RepairPerformers()
+        {
+            SqlServerRetryingExecutionStrategy? strategy = musicDb.Database.CreateExecutionStrategy() as SqlServerRetryingExecutionStrategy;
+            if (strategy != null)
+            {
+                await strategy.ExecuteAsync(async () =>
+                {
+                    try
+                    {
+                        using (var tran = musicDb.Database.BeginTransaction())
+                        {
+                            var allPerformers = musicDb.Performers.ToArray();
+                            // first find all names that are duplicated and remove all but one
+                            var duplicates = allPerformers
+                                .GroupBy(x => x.Name, new AccentAndCaseInsensitiveComparer())
+                                .Select(g => new { name = g.Key, performers = g.Select(x => x), Count = g.Count() });
+                            foreach (var item in duplicates.Where(x => x.Count > 1))
+                            {
+                                var highest = (PerformerType)item.performers.Max(x => (int)x.Type);
+                                var retained = item.performers.Single(x => x.Type == highest);
+                                var replaced = item.performers.Where(x => x.Type != highest);
+                                foreach (var r in replaced)
+                                {
+                                    await musicDb.ReplacePerformer(r, retained);
+                                }
+                            }
+                            await musicDb.SaveChangesAsync();
+                            allPerformers = musicDb.Performers.ToArray();
+                            // second check all names against the alias list
+                            foreach (var performer in allPerformers)
+                            {
+                                var aliasName = musicOptions.ReplaceAlias(performer.Name);
+                                if (aliasName != performer.Name)
+                                {
+                                    if (aliasName.IsEqualIgnoreAccentsAndCase(performer.Name))
+                                    {
+                                        // change is restricted to case and/or accent differences
+                                        var oldName = performer.Name;
+                                        performer.Name = aliasName;
+                                        log.Information($"[Pf-{performer.Id}] {performer} name changed from {oldName} to {performer.Name}");
+                                    }
+                                    else
+                                    {
+                                        var alias = musicDb.GetPerformer(aliasName, performer.Type);
+                                        await musicDb.ReplacePerformer(performer, alias);
+                                    }
+                                }
+                            }
+                            await musicDb.SaveChangesAsync();
+                            tran.Commit();
+                        }
+                    }
+                    catch (Exception xe)
+                    {
+                        log.Error($"Error {xe.GetType().Name} thrown within execution strategy");
+                        throw;
+                    }
+                });
+            }
+            return new EmptyResult();
+        }
         [HttpGet("start/musicfilescanner")]
         public async Task<IActionResult> StartMusicFileScanner()
         {
@@ -477,7 +539,6 @@ namespace Fastnet.Apollo.Web.Controllers
             musicDb.Validate();
             return new EmptyResult();
         }
-
         [HttpGet("reset/database/{startscan?}")]
         public async Task<IActionResult> ResetDatabase(bool startscan = true)
         {

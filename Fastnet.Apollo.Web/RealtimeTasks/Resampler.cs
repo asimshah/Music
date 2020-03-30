@@ -56,7 +56,7 @@ namespace Fastnet.Apollo.Web
             var counter = 0;
             while (!cancellationToken.IsCancellationRequested)
             {
-                await Task.Delay(2000);
+                await Task.Delay(TimeSpan.FromMinutes(1));
                 ++ counter;
                 try
                 {

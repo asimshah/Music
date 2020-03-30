@@ -13,6 +13,7 @@ using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using System;
+using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
@@ -35,6 +36,12 @@ namespace Fastnet.Apollo.Web
             var version = typeof(Startup).Assembly.GetCustomAttribute<AssemblyInformationalVersionAttribute>().InformationalVersion;
             var name = Process.GetCurrentProcess().ProcessName;
             log.Information($"Music {packageVersion} [{assemblyVersion}] site started ({name})");
+            var versions = GetVersions();
+            log.Information($"using versions:");
+            foreach (var item in versions.OrderBy(x => x))
+            {
+                log.Information($"   {item}");
+            }
         }
 
         public IConfiguration Configuration { get; }
@@ -204,13 +211,27 @@ namespace Fastnet.Apollo.Web
         // move this to Fastnet.Core
         private string GetPackageVersion()
         {
-            var assemblyLocation = System.Reflection.Assembly.GetExecutingAssembly().Location;
-            return System.Diagnostics.FileVersionInfo.GetVersionInfo(assemblyLocation).ProductVersion;
+            //var assemblyLocation = System.Reflection.Assembly.GetExecutingAssembly().Location;
+            //return System.Diagnostics.FileVersionInfo.GetVersionInfo(assemblyLocation).ProductVersion;
+            return System.Reflection.Assembly.GetExecutingAssembly().GetPackageVersion();
         }
         // move this to Fastnet.Core
         private string GetAssemblyVersion()
         {
-            return System.Reflection.Assembly.GetExecutingAssembly().GetName().Version.ToString();
+            //return System.Reflection.Assembly.GetExecutingAssembly().GetName().Version.ToString();
+            return System.Reflection.Assembly.GetExecutingAssembly().GetAssemblyVersion();
+        }
+        private IEnumerable<string> GetVersions()
+        {
+            var list = new List<string>();
+            foreach(var assemblyName in System.Reflection.Assembly.GetExecutingAssembly().GetReferencedAssemblies())
+            {
+                if (assemblyName.Name.StartsWith("fastnet", System.Globalization.CompareOptions.IgnoreCase))
+                {
+                    list.Add($"{assemblyName.Name}, {assemblyName.Version}");
+                }
+            }
+            return list;
         }
 
     }
