@@ -84,6 +84,10 @@ namespace Fastnet.Music.Metatools
                     ;
                 _names.AddRange(list);
             }
+            //if(_names.Any(n => n.Contains("&")))
+            //{
+            //    Debugger.Break();
+            //}
             _names = _names.Distinct(comparer).ToList();
             var g1 = _names.GroupBy(x => x.GetLastName());
             var names = new List<string>();
@@ -208,6 +212,7 @@ namespace Fastnet.Music.Metatools
             var list = new List<Performer>();
             foreach(var name in names)
             {
+
                 var performer = MusicDb.Performers
                     .Where(p => p.Type == type)
                     .ToArray()

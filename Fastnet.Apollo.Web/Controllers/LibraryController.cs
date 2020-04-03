@@ -524,7 +524,25 @@ namespace Fastnet.Apollo.Web.Controllers
         public async Task<IActionResult> StartMusicFileScanner()
         {
             log.Information("Music scanner started");
-            //musicDb.Database.SetCommandTimeout(10 * 60);
+
+            //foreach (var si in new MusicStyleCollection(musicOptions))
+            //{
+            //    var works = musicDb.Works.Where(x => x.StyleId == si.Style);
+            //    foreach (var work in works)
+            //    {
+            //        var workFiles = work.Tracks.SelectMany(x => x.MusicFiles)
+            //            .Where(mf => mf.IsGenerated == false)
+            //            .ToArray();
+            //        if (workFiles.All(mf => System.IO.File.Exists(mf.File) == false))
+            //        {
+            //            var roots = workFiles.Select(x => x.GetRootPath()).Distinct(StringComparer.CurrentCultureIgnoreCase);
+            //            foreach (var root in roots)
+            //            {
+            //                //var task = CreateTask(db, style, TaskType.DeletedPath, root);
+            //            }
+            //        }
+            //    } 
+            //}
             foreach (var si in new MusicStyleCollection(musicOptions))
             {
                 await taskPublisher.AddTask(si.Style);

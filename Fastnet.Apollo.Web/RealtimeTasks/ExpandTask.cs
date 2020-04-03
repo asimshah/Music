@@ -105,6 +105,28 @@ namespace Fastnet.Apollo.Web
                     taskList.Add(l);
                 }
             }
+            var works = db.Works.Where(x => x.StyleId == style);
+            foreach(var work in works)
+            {
+                taskList.AddRange(DeleteWorkIfRequired(work));
+            }
+            return taskList;
+        }
+        private List<TaskItem> DeleteWorkIfRequired(Work work)
+        {
+            var taskList = new List<TaskItem>();
+            var workFiles = work.Tracks.SelectMany(x => x.MusicFiles)
+                .Where(mf => mf.IsGenerated == false)
+                .ToArray();
+            if (workFiles.All(mf => System.IO.File.Exists(mf.File) == false))
+            {
+                var roots = workFiles.Select(x => x.GetRootPath()).Distinct(StringComparer.CurrentCultureIgnoreCase);
+                foreach (var root in roots)
+                {
+                    var task = CreateTask(db, work.StyleId, TaskType.DeletedPath, root);
+                    taskList.Add(task);
+                }
+            }
             return taskList;
         }
         private TaskItem ExpandOpusFolder(string folder, bool singlesFolder)

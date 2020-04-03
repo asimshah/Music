@@ -34,7 +34,7 @@ namespace Fastnet.Apollo.Web
         private List<FolderChange> changeList;
         private MusicOptions musicOptions;
         private CancellationToken cancellationToken;
-        private DateTimeOffset lastChangeTime = DateTimeOffset.Now;
+        //private DateTimeOffset lastChangeTime = DateTimeOffset.Now;
         private IDictionary<string, FileSystemMonitor> sources;
         private readonly FileSystemMonitorFactory mf;
         private readonly TaskPublisher publisher;
@@ -68,9 +68,19 @@ namespace Fastnet.Apollo.Web
                 Initialise();
                 Task.Run(async () =>
                 {
-                    //await Task.Delay(0);
-                    await ProcessChanges();
-                    log.Error("ProcessChanges() ended!!!!!!!!!!!!!!!");
+                    while (true)
+                    {
+                        try
+                        {
+                            await ProcessChanges();
+                            log.Error("ProcessChanges() ended!!!!!!!!!!!!!!!");
+                        }
+                        catch (Exception xe)
+                        {
+                            log.Error(xe, "ProcessChanges() failed");
+                            //throw;
+                        } 
+                    }
                 }, cancellationToken);
             }
             catch (Exception xe)
@@ -114,28 +124,16 @@ namespace Fastnet.Apollo.Web
         private void Initialise()
         {
             sources = new Dictionary<string, FileSystemMonitor>();
-            //Dictionary<string, MusicStyles> pathToStyleMap = new Dictionary<string, MusicStyles>();
             foreach (var style in musicOptions.Styles)
             {
                 var stylePaths = style.Style.GetPaths(musicOptions, false, false);
                 foreach (var sp in stylePaths)
                 {
-                    //pathToStyleMap.Add(sp, style.Style);
                     var fsm = AddMonitor(sp);
                     sources.Add(sp, fsm);
                     log.Information($"Monitor added for {sp}");
                 }
             }
-           
-            //foreach (var folderName in pathToStyleMap.Keys)
-            //{
-            //    if (!this.cancellationToken.IsCancellationRequested)
-            //    {
-            //        var fsm = AddMonitor(folderName);
-            //        sources.Add(folderName, fsm);
-            //        log.Information($"Monitor added for {folderName}");
-            //    }
-            //}
             foreach (var kvp in sources)
             {
                 kvp.Value.Start();
@@ -143,17 +141,17 @@ namespace Fastnet.Apollo.Web
 
             changeList = new List<FolderChange>();
         }
-        private void OnChangeOccurred(string folderName, IEnumerable<FileSystemMonitorEvent> actions)
-        {
-            foreach (FileSystemMonitorEvent item in actions)
-            {
-                if (!item.Path.EndsWith(".txt") && !item.Path.EndsWith(".json"))
-                {
-                    log.Debug($"{item.Type}, path {item.Path}, old path {item.OldPath ?? "none"}");
-                    ShouldProcess(item.Path, item.Type == WatcherChangeTypes.Deleted);
-                }
-            }
-        }
+        //private void OnChangeOccurred(string folderName, IEnumerable<FileSystemMonitorEvent> actions)
+        //{
+        //    foreach (FileSystemMonitorEvent item in actions)
+        //    {
+        //        if (!item.Path.EndsWith(".txt") && !item.Path.EndsWith(".json"))
+        //        {
+        //            log.Debug($"{item.Type}, path {item.Path}, old path {item.OldPath ?? "none"}");
+        //            ShouldProcess(item.Path, item.Type == WatcherChangeTypes.Deleted);
+        //        }
+        //    }
+        //}
         private void ProcessChangeList(List<(string Path, bool Deleted)> list)
         {
             log.Information($"processing list of {list.Count()} items");
@@ -297,65 +295,63 @@ namespace Fastnet.Apollo.Web
         }
         private async Task ProcessChanges()
         {
-            log.Debug($"{nameof(ProcessChanges)} started");
+            log.Information($"{nameof(ProcessChanges)} started");
             while (!cancellationToken.IsCancellationRequested)
             {
                 await Task.Delay(musicOptions.FolderChangePollingInterval, cancellationToken); //default 3 sec
-                var target = lastChangeTime.Add(musicOptions.FolderChangeAfterChangesInterval); // default 10secs
-                var now = DateTimeOffset.Now;
-                log.Trace($"{changeList.Count()} changes, lastchange = {lastChangeTime.ToDefaultWithTime()}, target {target.ToDefaultWithTime()} waiting for {(target - now).TotalMilliseconds} ms");
-                if (now > target)
+                //var target = lastChangeTime.Add(musicOptions.FolderChangeAfterChangesInterval); // default 10secs
+                //var now = DateTimeOffset.Now;
+                //log.Debug($"{changeList.Count()} changes, lastchange = {lastChangeTime.ToDefaultWithTime()}, target {target.ToDefaultWithTime()} waiting for {(target - now).TotalMilliseconds} ms");
+                //if (now > target)
+                //{
+
+                //}
+                if (changeListList.Count() > 0)
                 {
-                    if (changeListList.Count() > 0)
+                    List<(string Path, bool Deleted)> list = null;
+                    lock (changeListList)
                     {
-                        List<(string Path, bool Deleted)> list = null;
-                        lock (changeListList)
+                        list = changeListList.Dequeue();
+                    }
+                    ProcessChangeList(list);
+                    try
+                    {
+                        while (changeList.Count() > 0)
                         {
-                            list = changeListList.Dequeue();
-                        }
-                        ProcessChangeList(list);
-                        try
-                        {
-                            while (changeList.Count() > 0)
+                            foreach (var item in changeList.ToArray())
                             {
-                                foreach (var item in changeList.ToArray())
+                                var pd = item.PathData;// MusicMetaDataMethods.GetPathData(musicOptions, item.Path, true);
+                                if (pd.IsPortraits)
                                 {
-                                    var pd = item.PathData;// MusicMetaDataMethods.GetPathData(musicOptions, item.Path, true);
-                                    if (pd.IsPortraits)
+                                    await publisher.AddPortraitsTask(pd.MusicStyle);
+                                }
+                                else
+                                {
+                                    if (item.Deleted)
                                     {
-                                        await publisher.AddPortraitsTask(pd.MusicStyle);
+                                        await publisher.AddTask(pd.MusicStyle, Music.Data.TaskType.DeletedPath, pd.GetFullOpusPath() ?? pd.GetFullArtistPath());
                                     }
                                     else
                                     {
-                                        if (item.Deleted)
+                                        if (pd.GetFullOpusPath() != null)
                                         {
-                                            await publisher.AddTask(pd.MusicStyle, Music.Data.TaskType.DeletedPath, pd.GetFullOpusPath() ?? pd.GetFullArtistPath());
+                                            await publisher.AddTask(pd.MusicStyle, Music.Data.TaskType.DiskPath, pd.GetFullOpusPath());
                                         }
                                         else
                                         {
-                                            if (pd.GetFullOpusPath() != null)
-                                            {
-                                                await publisher.AddTask(pd.MusicStyle, Music.Data.TaskType.DiskPath, pd.GetFullOpusPath());
-                                            }
-                                            else
-                                            {
-                                                await publisher.AddTask(pd.MusicStyle, Music.Data.TaskType.ArtistFolder, pd.GetFullArtistPath());
-                                            }
-
+                                            await publisher.AddTask(pd.MusicStyle, Music.Data.TaskType.ArtistFolder, pd.GetFullArtistPath());
                                         }
+
                                     }
-                                    changeList.Remove(item);
                                 }
+                                changeList.Remove(item);
                             }
                         }
-                        catch (Exception xe)
-                        {
-                            log.Error(xe);
-                            throw;
-                        }
-                        //var target = lastChangeTime.Add(musicOptions.FolderChangeAfterChangesInterval); // default 10secs
-                        //var now = DateTimeOffset.Now;
-                        //log.Trace($"{changeList.Count()} changes, lastchange = {lastChangeTime.ToDefaultWithTime()}, target {target.ToDefaultWithTime()} waiting for {(target - now).TotalMilliseconds} ms");
+                    }
+                    catch (Exception xe)
+                    {
+                        log.Error(xe);
+                        throw;
                     }
                 }
             }

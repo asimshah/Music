@@ -92,6 +92,7 @@ namespace Fastnet.Music.Core
         /// <summary>
         /// Interval to wait for change notifications to stop (after they start!), default is 10 secs
         /// </summary>
+        [Obsolete]
         public TimeSpan FolderChangeAfterChangesInterval { get; set; } = TimeSpan.FromSeconds(10);
         /// <summary>
         /// Interval at which to check that source folders are accessible, default is 15 secs

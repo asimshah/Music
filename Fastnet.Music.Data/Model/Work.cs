@@ -5,13 +5,18 @@ using System.ComponentModel.DataAnnotations;
 
 namespace Fastnet.Music.Data
 {
-    public class Work : INameParsing, IPlayable
+    public interface ILengthConstants
     {
+        const int MaxWorkNameLength = 256;
+    }
+    public class Work : ILengthConstants, INameParsing, IPlayable
+    {
+        
         public long Id { get; set; }
         public Guid UID { get; set; }
-        [Required, MaxLength(128)]
+        [Required, MaxLength(ILengthConstants.MaxWorkNameLength)]
         public string Name { get; set; }
-        [MaxLength(128)]
+        [MaxLength(ILengthConstants.MaxWorkNameLength)]
         public string AlphamericName { get; set; }
         [MaxLength(16)]
         public string CompressedName { get; set; }
@@ -20,7 +25,7 @@ namespace Fastnet.Music.Data
         [MaxLength(64)]
         public string PartName { get; set; }
         public OpusType Type { get; set; }
-        [Required, MaxLength(128)]
+        [Required, MaxLength(ILengthConstants.MaxWorkNameLength)]
         public string OriginalName { get; set; }
         [Obsolete]
         [MaxLength(128)]
@@ -29,22 +34,15 @@ namespace Fastnet.Music.Data
         public string IdTagName { get; set; }
         [MaxLength(128)]
         public string UserProvidedName { get; set; }
-        [MaxLength(128)]
+        [MaxLength(ILengthConstants.MaxWorkNameLength)]
         public string DisambiguationName { get; set; } // used when copies are made for external systems, e.g for alexa, for phones
         public LibraryParsingStage ParsingStage { get; set; }
         public MusicStyles StyleId { get; set; }
-        //[Obsolete("get rid of Style table")]
-        //public virtual Style Style { get; set; }
         public long ArtistId { get; set; }
         public virtual Artist Artist { get; set; }
-        //public bool HasDefaultCover { get; set; }
+
         public string Mood { get; set; }
         public int Year { get; set; }
-        //public long CoverChecksum { get; set; }
-        //public byte[] CoverData { get; set; }
-        //[MaxLength(64)]
-        //public string CoverMimeType { get; set; }
-        //public DateTimeOffset CoverDateTime { get; set; }
         public DateTimeOffset LastModified { get; set; }
         public virtual Image Cover { get; set; }
         public virtual ICollection<Track> Tracks { get; } = new HashSet<Track>();

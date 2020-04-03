@@ -1,18 +1,18 @@
 import { Component } from '@angular/core';
-import { Performance, PerformanceTEO, WesternClassicalMusicFileTEO, TagValue, WesternClassicalAlbumTEO, TagValueStatus } from "../../../shared/catalog.types";
+import { Performance,  WesternClassicalMusicFileTEO, TagValue, WesternClassicalAlbumTEO } from "../../../shared/catalog.types";
 import { LibraryService } from '../../../shared/library.service';
 import { LoggingService } from '../../../shared/logging.service';
 
 import { DialogResult } from '../../../../fastnet/core/core.types';
-import { TagEditorComponent, teoModel, teValidationMessage } from '../../tag-editor.component';
+import { TagEditorComponent, teValidationMessage } from '../../tag-editor.component';
 
 
-export class performanceModel {// extends teoModel {
+export class performanceModel {
    public id: number;
    public composer: string;
    public composition: string;
-   public orchestras: TagValue[] = [];// string;
-   public conductors: TagValue[] = [];// string;
+   public orchestras: TagValue[] = [];
+   public conductors: TagValue[] = [];
    public performers: TagValue[] = [];
    public movementList: WesternClassicalMusicFileTEO[] = [];
 }
@@ -36,7 +36,6 @@ export class WesternClassicalTagEditorComponent extends TagEditorComponent {
       console.log("WesternClassicalTagEditorComponent: initialise()");
       await this.loadPerformances(performance);
       let i = this.pmList.findIndex(x => x.id === performance.id);
-      //console.log(`${JSON.stringify(this.pmList, null, 2)}`);
       this.currentModel = i;//0;
    }
    onCancel() {
@@ -61,8 +60,6 @@ export class WesternClassicalTagEditorComponent extends TagEditorComponent {
       return `performance ${this.currentModel + 1} of ${this.getPerformanceCount()}`;
    }
    getFileCount() {
-      //let fc = 0;
-      //this.pmList.forEach((m) => fc += m.fileCount);
       let text = `${this.teo.trackList.length} files`;
       if (this.pmList.length > 1) {
          text = `${text} in ${this.pmList.length} performances`;
@@ -151,21 +148,16 @@ export class WesternClassicalTagEditorComponent extends TagEditorComponent {
          pm.id = pteo.performanceId;
          pm.composer = this.getSingleSelected(pteo.composerTag.values);
          pm.composition = this.getSingleSelected(pteo.compositionTag.values);
-         pm.orchestras = pteo.orchestraTag.values;//this.getSingleSelected(pteo.orchestraTag.values);
-         pm.conductors = pteo.conductorTag.values;// this.getSingleSelected(pteo.conductorTag.values);
+         pm.orchestras = pteo.orchestraTag.values;
+         pm.conductors = pteo.conductorTag.values;
          pm.performers = pteo.performerTag.values;
          pm.movementList = pteo.movementList;
          this.pmList.push(pm);
       }
       this.performanceModelJson = JSON.stringify(this.pmList);
    }
-   getPerformersCSV() {
-      let pm = this.getCurrentPerformance();
-      return this.getCSV(pm.performers.filter((f) => f.selected).map((x) => x.value));
-   }
-   getCSV2(values: TagValue[]) {
-      let r = values.map((v) => `${v.value}${v.selected ? " [s]" : ""}`);
-      return r.join(', ');
+   getMultipleValuesCSV(values: TagValue[]) {
+      return this.getCSV(values.filter((f) => f.selected).map((x) => x.value));
    }
    private async updatePerformance() {
       for (let i = 0; i < this.teo.performanceList.length; ++i) {
@@ -173,23 +165,17 @@ export class WesternClassicalTagEditorComponent extends TagEditorComponent {
          let pm = this.pmList[i];
          this.setSingleValue(pteo.composerTag.values, pm.composer);
          this.setSingleValue(pteo.compositionTag.values, pm.composition);
-         //this.setSingleValue(pteo.orchestraTag.values, pm.orchestra);
-         //this.setSingleValue(pteo.conductorTag.values, pm.conductor);
          this.setMultipleValues(pteo.orchestraTag.values, pm.orchestras.filter(x => x.selected).map(m => m.value));
          this.setMultipleValues(pteo.conductorTag.values, pm.conductors.filter(x => x.selected).map(m => m.value));
          this.setMultipleValues(pteo.performerTag.values, pm.performers.filter(x => x.selected).map(m => m.value));
-         console.log(`${i}: ${this.getCSV2(pteo.conductorTag.values)}`);
-         console.log(`${i}: ${this.getCSV2(pteo.orchestraTag.values)}`);
          // remaining properties (performers and filelist) are byref and so are already up to date ...
       }
-      //console.log(`${JSON.stringify(this.teo.performanceList, null, 3)}`);
-      //await this.library.updatePerformance(this.teo.performanceList);
       await this.library.updateWesternClassicalAlbum(this.teo);
       this.performanceModelJson = JSON.stringify(this.pmList);
    }
-   private capitalise(text: string) {
-      return text.charAt(0).toUpperCase() + text.slice(1).toLowerCase();
-   }
+   //private capitalise(text: string) {
+   //   return text.charAt(0).toUpperCase() + text.slice(1).toLowerCase();
+   //}
    private getCSV(values: string[]) {
       let r = values.join(', ');
       return r;
