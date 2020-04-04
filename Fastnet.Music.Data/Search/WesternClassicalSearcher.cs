@@ -7,27 +7,6 @@ using System.Linq;
 
 namespace Fastnet.Music.Data
 {
-    //public static class wcs_extensions
-    //{
-    //    //public static string ToCSV(this ICollection<Artist> performers)
-    //    //{
-    //    //    return string.Join(", ", performers.Select(x => x.Name).ToArray());
-    //    //}
-    //    //public static string ToSortable(this string text)
-    //    //{
-    //    //    var words = text.Split(' ');
-    //    //    for(int i = 0;i < words.Length;++i)
-    //    //    //foreach(var word in words)
-    //    //    {
-    //    //        var isNumeric = int.TryParse(words[i], out int n);
-    //    //        if(isNumeric)
-    //    //        {
-    //    //            words[i] = $"00000{words[i]}";
-    //    //        }
-    //    //    }
-    //    //    return string.Join("", words);
-    //    //}
-    //}
     public class WesternClassicalSearcher : CatalogueSearcher
     {
         private static NaturalStringComparer naturalComparer = new NaturalStringComparer();
@@ -42,7 +21,7 @@ namespace Fastnet.Music.Data
             {
                 // get compositions that match the searchText
                 compositionQueryResults = GetMatchingCompositions(loweredSearch).ToArray();
-                performanceQueryResults = GetMatchingPerformaces(loweredSearch).ToArray();
+                performanceQueryResults = GetMatchingPerformances(loweredSearch).ToArray();
                 movementQueryResults = GetMatchingMovements(loweredSearch).ToArray();
             }
             var finalList = new List<WesternClassicalResult>();
@@ -217,7 +196,7 @@ namespace Fastnet.Music.Data
                 }
             });
         }
-        private IEnumerable<PerformanceQueryResult> GetMatchingPerformaces(string loweredSearch)
+        private IEnumerable<PerformanceQueryResult> GetMatchingPerformances(string loweredSearch)
         {
             var performances = MusicDb.Performances.Where(p => p.AlphamericPerformers.Contains(loweredSearch.ToAlphaNumerics()));
             return performances.Select(x => new PerformanceQueryResult

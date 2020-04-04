@@ -144,7 +144,7 @@ namespace Fastnet.Music.Data
             var tracks = MusicDb.Tracks
                 .Where(x1 => x1.Work.StyleId == MusicStyle).ToArray();
             //tracks = tracks.Where(x => x.Title.ToAlphaNumerics().ToLower().Contains(loweredSearch.ToAlphaNumerics())).ToArray();
-            tracks = tracks.Where(x => x.AlphamericTitle.Contains(loweredSearch.ToAlphaNumerics())).ToArray();
+            tracks = tracks.Where(x => x.AlphamericTitle.ToLower().Contains(loweredSearch.ToAlphaNumerics())).ToArray();
             return tracks.Select(x => new TrackQueryResult
             {
                 Artist = new SearchKey
