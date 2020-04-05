@@ -17,11 +17,11 @@ namespace Fastnet.Music.Core
         /// </summary>
         [Description("Western Classical")]
         WesternClassical,
-        /// <summary>
-        /// 
-        /// </summary>
-        [Description("Opera")]
-        Opera,
+        ///// <summary>
+        ///// 
+        ///// </summary>
+        //[Description("Opera")]
+        //Opera,
         /// <summary>
         /// 
         /// </summary>
