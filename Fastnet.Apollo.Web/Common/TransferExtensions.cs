@@ -194,12 +194,15 @@ namespace Fastnet.Apollo.Web
         }
         public static WorkDTO ToDTO(this Work w, bool full = false)
         {
+            // **URGENT ** there can now be multiple artists for a work
+            // so using artistId like this is WRONG!!
+            var artistId = w.Artists.Select(x => x.Id).First();
             if (!full)
             {
                 return new WorkDTO
                 {
                     Id = w.Id,
-                    ArtistId = w.ArtistId,
+                    ArtistId = artistId,// w.ArtistId,
                     OpusType = w.Type,
                     Name = w.Name,
                     Year = w.Year,
@@ -215,7 +218,7 @@ namespace Fastnet.Apollo.Web
                 return new WorkDTO
                 {
                     Id = w.Id,
-                    ArtistId = w.ArtistId,
+                    ArtistId = artistId,// w.ArtistId,
                     OpusType = w.Type,
                     Name = w.Name,
                     Year = w.Year,
@@ -259,7 +262,7 @@ namespace Fastnet.Apollo.Web
             {
                 Id = t.Id,
                 WorkId = t.WorkId,
-                ArtistId = t.Work.ArtistId,
+                //ArtistId = t.Work.ArtistId,
                 Number = t.Number,
                 Title = t.Title,
                 DisplayName = t.Title,
@@ -377,9 +380,9 @@ namespace Fastnet.Apollo.Web
             {
                 Id = work.Id,
                 OpusName = work.Name,
-                ArtistName = work.Artist.Name,
+                //ArtistName = work.Artist.Name,
                 TrackDetails = work.Tracks.ToDetails(),
-                CompressedArtistName = work.Artist.CompressedName,
+                //CompressedArtistName = work.Artist.CompressedName,
                 CompressedOpusName = work.CompressedName
             };
         }

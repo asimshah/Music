@@ -98,7 +98,15 @@ namespace Fastnet.Music.Metatools
                     artist.Type = ArtistType.Various;
                 }
                 await MusicDb.Artists.AddAsync(artist);
-                await MusicDb.SaveChangesAsync();
+                try
+                {
+                    await MusicDb.SaveChangesAsync();
+                }
+                catch (Exception xe)
+                {
+                    log.Error(xe);
+                    throw;
+                }
             }
             if (artist.Type != ArtistType.Various)
             {
@@ -123,7 +131,7 @@ namespace Fastnet.Music.Metatools
                     work = new Work
                     {
                         StyleId = this.MusicStyle,
-                        Artist = artist,
+                        //Artist = artist,
                         Name = name,
                         AlphamericName = name.ToAlphaNumerics(),
                         Type = OpusType,
@@ -135,14 +143,10 @@ namespace Fastnet.Music.Metatools
                         LastModified = DateTimeOffset.Now,
                         Year = year
                     };
-                    artist.Works.Add(work);
+                    //artist.Works.Add(work);
+                    MusicDb.AddWork(artist, work);
                 }
-                
-                //var cover = work.GetMostRecentOpusCoverFile(MusicOptions);
-                //if (cover != null)
-                //{
-                //    work.Cover = await cover.GetImage();
-                //}
+
                 return work;
             }
             catch (Exception xe)
@@ -187,7 +191,8 @@ namespace Fastnet.Music.Metatools
                 result = CatalogueStatus.GeneratedFilesOutOfDate;
                 if (album.Tracks.Count() == 0)
                 {
-                    artist.Works.Remove(album);
+                    //artist.Works.Remove(album);
+                    MusicDb.RemoveWork(artist, album);
                     if (artist.Works.Count() == 0)
                     {
                         MusicDb.Artists.Remove(artist);
@@ -265,7 +270,7 @@ namespace Fastnet.Music.Metatools
                 }
                 else
                 {
-                    Debug.Assert(tmpMf == mf);
+                    //Debug.Assert(tmpMf == mf);
                 }
                 mf.ParsingStage = MusicFileParsingStage.Catalogued;
                 mf.LastCataloguedAt = DateTimeOffset.Now;

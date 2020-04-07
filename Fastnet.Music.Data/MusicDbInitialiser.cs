@@ -18,7 +18,7 @@ namespace Fastnet.Music.Data
             var dbExists = creator.Exists();
             if (dbExists)
             {
-                log.Information("MusicDb exists");
+                log.Information($"MusicDb exists: {db.Database.GetDbConnection().ConnectionString}");
             }
             else
             {

@@ -112,23 +112,16 @@ namespace Fastnet.Music.Metatools
             
             return names;
         }
-        //private string BuildPerformerCSV()
-        //{
-        //    var comparer = new AccentAndCaseInsensitiveComparer();
-        //    try
-        //    {
-        //        var names = new List<string>();
-        //        names.AddRange(otherPerformers);
-        //        return string.Join(", ", names);
-        //    }
-        //    catch (Exception)
-        //    {
-        //        Debugger.Break();
-        //        throw;
-        //    }
-        //}
         public override async Task<CatalogueResult> CatalogueAsync()
         {
+            //void makeSafeForReporting(Performance performance)
+            //{
+            //    MusicDb.Entry(performance).Collection(x => x.PerformancePerformers).Load();
+            //    foreach(var item in performance.PerformancePerformers)
+            //    {
+            //        MusicDb.Entry(item).Reference(x => x.Performer).Load();
+            //    }
+            //};
             //await LoadMusicTags();
             Debug.Assert(!string.IsNullOrWhiteSpace(ComposerName));
             Debug.Assert(!string.IsNullOrWhiteSpace(CompositionName));
@@ -142,12 +135,14 @@ namespace Fastnet.Music.Metatools
                 var composition = GetComposition(composer, CompositionName);
                 RemoveCurrentPerformance();
                 var performance = GetPerformance(composition, orchestras, conductors, otherPerformers);
-                return new CatalogueResult { MusicSet = this, Status = CatalogueStatus.Success, Artist = composer, Composition = composition, Performance = performance };
+                //makeSafeForReporting(performance);
+                return CatalogueResult.Create(this, CatalogueStatus.Success, performance);// { MusicSet = this, Status = CatalogueStatus.Success, Artist = composer, Composition = composition, Performance = performance };
             }
             else
             {
                 var performance = FirstFile.Track.Performance;
-                return new CatalogueResult { MusicSet = this, Status = CatalogueStatus.Success, Artist = performance.Composition.Artist, Composition = performance.Composition, Performance = performance };
+                //makeSafeForReporting(performance);
+                return CatalogueResult.Create(this, CatalogueStatus.Success, performance);// { MusicSet = this, Status = CatalogueStatus.Success, Artist = performance.Composition.Artist, Composition = performance.Composition, Performance = performance };
             }
         }
 

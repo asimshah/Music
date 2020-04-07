@@ -130,7 +130,7 @@ export class Work extends BaseEntity {
 export class Track extends BaseEntity {
    public type = 'track';
    public workId: number;
-   public artistId: number;
+   //public artistId: number;
    public number: number | null;
    public title: string;
    public musicFileCount: number;
@@ -140,7 +140,7 @@ export class Track extends BaseEntity {
    public work: Work;
    public copyProperties(t: Track) {
       this.workId = t.workId;
-      this.artistId = t.artistId;
+      //this.artistId = t.artistId;
       this.id = t.id;
       this.number = t.number;
       this.title = t.title;
@@ -242,9 +242,9 @@ export class Movement extends Track {
 }
 export class OpusDetails {
    public id: number;
-   public artistName: string;
+   //public artistName: string;
    public opusName: string;
-   public compressedArtistName: string;
+   //public compressedArtistName: string;
    public compressedOpusName: string;
    public compressedPerformanceName: string;
    public trackDetails: TrackDetail[];

@@ -37,36 +37,45 @@ namespace Fastnet.Apollo.Web
                 {
                     foreach (var item in results)
                     {
-                        var cr = item;//.result;
-                        if (cr.Status == CatalogueStatus.Success && item.MusicSet != null)
+                        try
                         {
-                            if (cr.TaskItem != null && cr.TaskItem.Id > 0)
+                            var cr = item;//.result;
+                            if (cr.Status == CatalogueStatus.Success && item.MusicSet != null)
                             {
-                                // possibly do not queue resampling tasks
-                                if (cr.TaskItem.Type != TaskType.ResampleWork)
+                                if (cr.TaskItem != null && cr.TaskItem.Id > 0)
                                 {
-                                    QueueTask(cr.TaskItem);
+                                    // possibly do not queue resampling tasks
+                                    if (cr.TaskItem.Type != TaskType.ResampleWork)
+                                    {
+                                        QueueTask(cr.TaskItem);
+                                    }
+                                }
+                                switch (cr.MusicSetType)
+                                {
+                                    case Type T when T == typeof(PopularMusicAlbumSet) || T == typeof(WesternClassicalAlbumSet):
+                                        log.Information($"{taskItem} {T.Name} {cr.ArtistName} {cr.ArtistDescr}, {cr.WorkName} {cr.WorkDescr}, {cr.WorkTrackCount} tracks {cr.TrackContent}");
+                                        break;
+                                    case Type T when T == typeof(WesternClassicalCompositionSet):
+                                        //if (cr.Performance.Movements.Count() == 0)
+                                        if (cr.PerformanceMovementCount == 0)
+                                        {
+                                            log.Warning($"{cr.CompositionName} {cr.CompositionDescr}, \"{cr.PerformersCSV}\" {cr.PerformanceDescr} has no movements");
+                                        }
+                                        //var work = cr.Performance.Movements.Select(m => m.Work).First();
+                                        log.Information($"{taskItem} {T.Name} {cr.ArtistName} {cr.ArtistDescr}, {cr.CompositionName} {cr.CompositionDescr}, {cr.PerformanceMovementCount} movements, \"{cr.PerformersCSV}\" {cr.PerformanceDescr} (from {cr.WorkName} {cr.WorkDescr})");
+                                        break;
+                                }
+                                // send hub message that artist is new/modified
+                                if (cr.ArtistType != ArtistType.Various)
+                                {
+                                    await this.playManager.SendArtistNewOrModified(cr.ArtistId);
                                 }
                             }
-                            switch (cr.MusicSetType)
-                            {
-                                case Type T when T == typeof(PopularMusicAlbumSet) || T == typeof(WesternClassicalAlbumSet):
-                                    log.Information($"{taskItem} {T.Name} {cr.Artist.Name} [A-{cr.Artist.Id}], {cr.Work.Name} [W-{cr.Work.Id}], {cr.Work.Tracks.Count()} tracks {GetTrackContentString(cr.Work)}");
-                                    break;
-                                case Type T when T == typeof(WesternClassicalCompositionSet):
-                                    if (cr.Performance.Movements.Count() == 0)
-                                    {
-                                        log.Warning($"{cr.Composition.Name} [C-{cr.Composition.Id}], \"{cr.Performance.GetAllPerformersCSV()}\" [P-{cr.Performance.Id}] has no movements");
-                                    }
-                                    var work = cr.Performance.Movements.Select(m => m.Work).First();
-                                    log.Information($"{taskItem} {T.Name} {cr.Artist.Name} [A-{cr.Artist.Id}], {cr.Composition.Name} [C-{cr.Composition.Id}], {cr.Performance.Movements.Count()} movements, \"{cr.Performance.GetAllPerformersCSV()}\" [P-{cr.Performance.Id}] (from {work.Name} [W-{work.Id}])");
-                                    break;
-                            }
-                            // send hub message that artist is new/modified
-                            if (cr.Artist.Type != ArtistType.Various)
-                            {
-                                await this.playManager.SendArtistNewOrModified(cr.Artist.Id);
-                            }
+                        }
+                        catch (Exception xe)
+                        {
+                            log.Error(xe, $"[TI-{taskItem}]");
+                            throw;
                         }
                     }
                 }
@@ -157,44 +166,44 @@ namespace Fastnet.Apollo.Web
                         results.Add(cr);
                         if (cr.Status == CatalogueStatus.Success)
                         {
-                            if (cr.Artist == null)
-                            {
-                                log.Trace($"Artist missing");
-                            }
+                            //if (cr.Artist == null)
+                            //{
+                            //    log.Trace($"Artist missing");
+                            //}
                             switch (cr.MusicSetType)
                             {
                                 case Type T when T == typeof(PopularMusicAlbumSet) || T == typeof(WesternClassicalAlbumSet):
-                                    if (cr.Work == null)
+                                    if (cr.WorkName == string.Empty)
                                     {
                                         log.Trace($"Album missing");
                                     }
-                                    else if (cr.Work.Tracks == null || cr.Work.Tracks.Count() == 0)
+                                    else if (cr.WorkTrackCount == 0)
                                     {
                                         log.Trace($"Work has no tracks");
                                     }
-                                    if (cr.Tracks == null)
-                                    {
-                                        log.Trace($"Tracks missing");
-                                    }
-                                    else if (cr.Tracks.Count() == 0)
-                                    {
-                                        log.Trace($"Track count is 0");
-                                    }
+                                    //if (cr.Tracks == null)
+                                    //{
+                                    //    log.Trace($"Tracks missing");
+                                    //}
+                                    //else if (cr.Tracks.Count() == 0)
+                                    //{
+                                    //    log.Trace($"Track count is 0");
+                                    //}
                                     //if(cr.TaskItem != null)
                                     //{
                                     //    QueueTask(cr.TaskItem);
                                     //}
                                     break;
                                 case Type T when T == typeof(WesternClassicalCompositionSet):
-                                    if (cr.Composition == null)
+                                    if (cr.CompositionName == string.Empty)
                                     {
                                         log.Trace($"Composition missing");
                                     }
-                                    if (cr.Performance == null)
+                                    if (cr.PerformersCSV == string.Empty)
                                     {
                                         log.Trace($"Performance missing");
                                     }
-                                    else if (cr.Performance.Movements == null || cr.Performance.Movements.Count() == 0)
+                                    else if (cr.PerformanceMovementCount == 0)
                                     {
                                         log.Trace($"Performance has no movements");
                                     }

@@ -269,8 +269,9 @@ namespace Fastnet.Apollo.Web.Controllers
             //{
             await Task.Delay(0);
             musicDb.ChangeTracker.AutoDetectChangesEnabled = false;
-            var works = musicDb.Works
-                .Where(w => w.ArtistId == id)
+            var works = musicDb.Works.AsEnumerable()
+                //.Where(w => w.ArtistId == id)
+                .Where(w => w.Artists.Select(x => x.Id).Contains(id))
                 .ToArray()
                 .OrderBy(x => x.Name, new NaturalStringComparer());
             var list = works.Select(x => x.ToDTO(full));
@@ -438,7 +439,7 @@ namespace Fastnet.Apollo.Web.Controllers
                 foreach (var path in paths)
                 {
                     await taskPublisher.AddTask(work.StyleId, TaskType.DiskPath, path, true);
-                    log.Information($"[A-{work.Artist.Id}] {work.Artist.Name} [W-{work.Id}] {work.Name} {path} forcibly recatalogued");
+                    log.Information($"[A-{work.GetArtistIds()}] {work.GetArtistNames()} [W-{work.Id}] {work.Name} {path} forcibly recatalogued");
                 }
             }
             return SuccessResult();
@@ -861,7 +862,7 @@ namespace Fastnet.Apollo.Web.Controllers
                 result = false;
                 foreach (var work in worksWithoutTracks)
                 {
-                    log.Error($"Artist {work.Artist.Name}, work {work.Name} has no tracks");
+                    log.Error($"Artist(s) {work.GetArtistNames()}, work {work.Name} has no tracks");
                 }
             }
             var tracksWithoutMusic = db.Tracks.Where(a => a.MusicFiles.Count() == 0);
@@ -870,7 +871,7 @@ namespace Fastnet.Apollo.Web.Controllers
                 result = false;
                 foreach (var track in tracksWithoutMusic)
                 {
-                    log.Error($"Artist {track.Work.Artist.Name}, work {track.Work.Name}, track {track.Title}  has no tracks");
+                    log.Error($"Artist(s) {track.Work.GetArtistNames()}, work {track.Work.Name}, track {track.Title}  has no tracks");
                 }
             }
             var tracksWithOnlyGeneratedMusic = db.Tracks.Where(a => a.MusicFiles.All(x => x.IsGenerated));
@@ -879,7 +880,7 @@ namespace Fastnet.Apollo.Web.Controllers
                 result = false;
                 foreach (var track in tracksWithOnlyGeneratedMusic)
                 {
-                    log.Error($"Artist {track.Work.Artist.Name}, work {track.Work.Name}, track {track.Title} only has generated music");
+                    log.Error($"Artist(s) {track.Work.GetArtistNames()}, work {track.Work.Name}, track {track.Title} only has generated music");
                 }
             }
             var compositionsWithoutPerformances = db.Compositions.Where(a => a.Performances.Count() == 0);

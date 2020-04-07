@@ -121,16 +121,18 @@ namespace Fastnet.Music.Data
         {
             var works = MusicDb.Works
                 .Where(x1 => x1.StyleId == MusicStyle).ToArray();
-            //works = works.Where(x => x.Name.ToAlphaNumerics().ToLower().Contains(loweredSearch.ToAlphaNumerics()))
-            //    .ToArray();
             works = works.Where(x => x.AlphamericName.Contains(loweredSearch.ToAlphaNumerics()))
                 .ToArray();
             return works.Select(x => new WorkQueryResult
             {
                 Artist = new SearchKey
                 {
-                    Key = x.Artist.Id,
-                    Name = x.Artist.Name
+                    //Key = x.Artist.Id,
+                    //Name = x.Artist.Name
+
+                    // **URGENT** this is not right as only the first artist is set as matching - but what is the alternative?
+                    Key = x.Artists.First().Id,
+                    Name = x.Artists.First().Name
                 },
                 Work = new SearchKey
                 {
@@ -142,15 +144,18 @@ namespace Fastnet.Music.Data
         private IEnumerable<TrackQueryResult> GetMatchingTracks(string loweredSearch)
         {
             var tracks = MusicDb.Tracks
-                .Where(x1 => x1.Work.StyleId == MusicStyle).ToArray();
-            //tracks = tracks.Where(x => x.Title.ToAlphaNumerics().ToLower().Contains(loweredSearch.ToAlphaNumerics())).ToArray();
+                .Where(x1 => x1.Work.StyleId == MusicStyle).ToArray();;
             tracks = tracks.Where(x => x.AlphamericTitle.ToLower().Contains(loweredSearch.ToAlphaNumerics())).ToArray();
             return tracks.Select(x => new TrackQueryResult
             {
                 Artist = new SearchKey
                 {
-                    Key = x.Work.Artist.Id,
-                    Name = x.Work.Artist.Name
+                    //Key = x.Work.Artist.Id,
+                    //Name = x.Work.Artist.Name
+
+                    // **URGENT** this is not right as only the first artist is set as matching - but what is the alternative?
+                    Key = x.Work.Artists.First().Id,
+                    Name = x.Work.Artists.First().Name
                 },
                 Work = new SearchKey
                 {

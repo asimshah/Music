@@ -111,20 +111,19 @@ namespace Fastnet.Music.Metatools
         }
         public virtual void SaveChanges(MusicDb db,Work work)
         {
-            //if (ArtistTag.GetValue<string>() != work.Artist.Name)
-            if (work.Artist.Type != ArtistType.Various && !ArtistTag.GetValue<string>().IsEqualIgnoreAccentsAndCase(work.Artist.Name))
-            {
-                log.Information($"{work.Artist.Name}, \"{work.Name}\": Artist changed from {work.Artist.Name} to {ArtistTag.GetValue<string>()}");
-                log.Warning("Artist name changes are not supported");
-            }
+            //if (work.Artist.Type != ArtistType.Various && !ArtistTag.GetValue<string>().IsEqualIgnoreAccentsAndCase(work.Artist.Name))
+            //{
+            //    log.Information($"{work.Artist.Name}, \"{work.Name}\": Artist changed from {work.Artist.Name} to {ArtistTag.GetValue<string>()}");
+            //    log.Warning("Artist name changes are not supported");
+            //}
             if (AlbumTag.GetValue<string>() != work.Name)
             {
-                log.Information($"{work.Artist.Name}, \"{work.Name}\": Album changed from {work.Name} to {AlbumTag.GetValue<string>()}");
+                log.Information($"{work.GetArtistNames()}, \"{work.Name}\": Album changed from {work.Name} to {AlbumTag.GetValue<string>()}");
                 work.Name = AlbumTag.GetValue<string>();
             }
             if (YearTag.GetValue<int>() != work.Year)
             {
-                log.Information($"{work.Artist.Name}, \"{work.Name}\": Year changed from {work.Name} to {AlbumTag.GetValue<string>()}");
+                log.Information($"{work.GetArtistNames()}, \"{work.Name}\": Year changed from {work.Name} to {AlbumTag.GetValue<string>()}");
                 work.Year = YearTag.GetValue<int>();
             }
             foreach(var mfteo in TrackList)
@@ -132,12 +131,12 @@ namespace Fastnet.Music.Metatools
                 var track = mfteo.MusicFile.Track;
                 if(mfteo.TrackNumberTag.GetValue<int>() != track.Number)
                 {
-                    log.Information($"{work.Artist.Name}, \"{work.Name}\": track number {track.Number} changed to {mfteo.TrackNumberTag.GetValue<int>()}");
+                    log.Information($"{work.GetArtistNames()}, \"{work.Name}\": track number {track.Number} changed to {mfteo.TrackNumberTag.GetValue<int>()}");
                     track.Number = mfteo.TrackNumberTag.GetValue<int>();
                 }
                 if (mfteo.TitleTag.GetValue<string>() != track.Title)
                 {
-                    log.Information($"{work.Artist.Name}, \"{work.Name}\": track number {track.Number} title changed from {track.Title} to {mfteo.TitleTag.GetValue<string>()}");
+                    log.Information($"{work.GetArtistNames()}, \"{work.Name}\": track number {track.Number} title changed from {track.Title} to {mfteo.TitleTag.GetValue<string>()}");
                     track.Title = mfteo.TitleTag.GetValue<string>();
                 }
             }

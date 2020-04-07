@@ -135,17 +135,18 @@ namespace Fastnet.Music.Metatools
             var result = true;
             foreach (var work in db.Works)
             {
-                var styles = work.Artist.ArtistStyles.Select(x => x.StyleId);
-                var r = styles.Any(x => x == work.StyleId);
-                if (!r)
-                {
-                    log.Warning($"Work {work.Name} [{work.Id}] is in style {work.StyleId} but artist {work.Artist} [W-{work.Artist.Id}] is not");
-                    if (result == true)
-                    {
-                        result = false;
-                    }
-                }
-                r = work.Tracks.Count() > 0;
+                //var styles = work.Artist.ArtistStyles.Select(x => x.StyleId);
+
+                //var r = styles.Any(x => x == work.StyleId);
+                //if (!r)
+                //{
+                //    log.Warning($"Work {work.Name} [{work.Id}] is in style {work.StyleId} but artist {work.Artist} [W-{work.Artist.Id}] is not");
+                //    if (result == true)
+                //    {
+                //        result = false;
+                //    }
+                //}
+                var r = work.Tracks.Count() > 0;
                 if (!r)
                 {
                     log.Warning($"Work {work.Name} [W-{work.Id}] has no tracks");
@@ -753,9 +754,10 @@ namespace Fastnet.Music.Metatools
         {
             folderName ??= work.Name;
             string coverFile = null;
-            //var allworkFolders = work.StyleId.FindAllDirectories(musicOptions, work.Artist.Name, work.Name);
-            var allworkFolders = work.StyleId.GetOpusFolders(musicOptions, work.Artist.Type, work.Artist.Name, work.Name);
 
+            //var allworkFolders = work.StyleId.GetOpusFolders(musicOptions, work.Artist.Type, work.Artist.Name, work.Name);
+            var musicFiles = work.Tracks.SelectMany(x => x.MusicFiles);
+            var allworkFolders = musicFiles.Select(mf => mf.GetRootPath());
             foreach (var pattern in musicOptions.CoverFilePatterns)
             {
                 coverFile = allworkFolders.SelectMany(p => IO.Directory.EnumerateFiles(p, pattern, IO.SearchOption.AllDirectories)).FirstOrDefault(cf => IO.File.Exists(cf));

@@ -1,8 +1,8 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
     <TargetFramework>netstandard2.1</TargetFramework>
-    <Version>2.4.3</Version>
-    <AssemblyVersion>2.$([System.DateTime]::Now.ToString('yyyy')).$([System.DateTime]::Now.ToString('Md')).$([System.DateTime]::Now.ToString('HHmm'))</AssemblyVersion>
+    <Version>2.4.4</Version>
+    <AssemblyVersion>2.$([System.DateTime]::Now.ToString('yyyy')).$([System.DateTime]::Now.ToString('Mdd')).$([System.DateTime]::Now.ToString('HHmm'))</AssemblyVersion>
   </PropertyGroup>
 
   <Target Name="PreBuild" BeforeTargets="PreBuildEvent">
@@ -10,6 +10,6 @@
   </Target>
 
   <ItemGroup>
-    <PackageReference Include="Fastnet.Music.Core" Version="2.4.1" />
+    <PackageReference Include="Fastnet.Music.Core" Version="2.4.7" />
   </ItemGroup>
 </Project>

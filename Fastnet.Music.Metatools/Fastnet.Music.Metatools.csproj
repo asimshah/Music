@@ -2,13 +2,13 @@
   <PropertyGroup>
     <TargetFramework>netstandard2.1</TargetFramework>
     <Version>2.4.86</Version>
-    <AssemblyVersion>2.$([System.DateTime]::Now.ToString('yyyy')).$([System.DateTime]::Now.ToString('Md')).$([System.DateTime]::Now.ToString('HHmm'))</AssemblyVersion>
+    <AssemblyVersion>2.$([System.DateTime]::Now.ToString('yyyy')).$([System.DateTime]::Now.ToString('Mdd')).$([System.DateTime]::Now.ToString('HHmm'))</AssemblyVersion>
   </PropertyGroup>
   <Target Name="PreBuild" BeforeTargets="PreBuildEvent">
     <Exec Command="rem powershell .\BumpProjectVersion.ps1 $(ProjectPath) $(DeployOnBuild)" />
   </Target>
   <ItemGroup>
-    <PackageReference Include="Fastnet.Music.Taglib" Version="2.0.161" />
+    <PackageReference Include="Fastnet.Music.Taglib" Version="2.4.19" />
     <PackageReference Include="FlacLibSharp" Version="3.2.0" />
   </ItemGroup>
   <ItemGroup>

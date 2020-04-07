@@ -46,8 +46,9 @@ namespace Fastnet.Apollo.Web
                 }
                 catch (CatalogueFailed cfe)
                 {
-                    log.Information($"[TI-{cfe.TaskId}] CatalogueFailed, attempting requeue");
-                    TryAddTaskAgain(cfe.TaskId);
+                    log.Information($"[TI-{cfe.TaskId}] CatalogueFailed, requeue suspended");
+                    //log.Information($"[TI-{cfe.TaskId}] CatalogueFailed, attempting requeue");
+                    //TryAddTaskAgain(cfe.TaskId);
                 }
                 catch (Exception xe)
                 {

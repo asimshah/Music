@@ -139,7 +139,7 @@ namespace Fastnet.Apollo.Web
                             }
                             await db.SaveChangesAsync();
                         }
-                        log.Information($"{taskItem} resampling completed {work.Artist.Name}, {work.Name}, {resampledCount}/{work.Tracks.Count()} files");
+                        log.Information($"{taskItem} resampling completed {work.GetArtistNames()}, {work.Name}, {resampledCount}/{work.Tracks.Count()} files");
                     }
                     else
                     {

@@ -79,45 +79,28 @@ namespace Fastnet.Apollo.Web
             taskItem.Status = Music.Core.TaskStatus.Finished;
             taskItem.FinishedAt = DateTimeOffset.Now;
             await db.SaveChangesAsync();
-            if (dc.DeletedArtistId.HasValue)
+            //if (dc.DeletedArtistId.HasValue)
+            //{
+            //    await this.playManager.SendArtistDeleted(dc.DeletedArtistId.Value);
+            //}
+            foreach(var id in dc.DeletedArtistList)
             {
-                await this.playManager.SendArtistDeleted(dc.DeletedArtistId.Value);
+                await this.playManager.SendArtistDeleted(id);
             }
-            else if (dc.ModifiedArtistId.HasValue)
+            //else if (dc.ModifiedArtistId.HasValue)
+            foreach (var id in dc.ModifiedArtistList)
             {
                 var shouldSend = true;
-                var artist = await db.Artists.FindAsync(dc.ModifiedArtistId.Value);
-                if(artist != null)
+                var artist = await db.Artists.FindAsync(id);
+                if (artist != null)
                 {
                     shouldSend = artist.Type != ArtistType.Various;
                 }
                 if (shouldSend)
                 {
-                    await this.playManager.SendArtistNewOrModified(dc.ModifiedArtistId.Value);
+                    await this.playManager.SendArtistNewOrModified(id);
                 }
             }
-            //if (dc.DeletedArtistId.HasValue || dc.ModifiedArtistId.HasValue)
-            //{
-            //    var shouldSend = true;
-            //    var id = dc.ModifiedArtistId ?? 0;
-            //    if (id > 0)
-            //    {
-            //        var artist = await db.Artists.FindAsync(id);
-            //        shouldSend = artist.Type != ArtistType.Various;
-            //    }
-            //    if (shouldSend)
-            //    {
-            //        if (dc.DeletedArtistId.HasValue)
-            //        {
-            //            await this.playManager.SendArtistDeleted(dc.DeletedArtistId.Value);
-            //        }
-            //        else if (dc.ModifiedArtistId.HasValue)
-            //        {
-            //            await this.playManager.SendArtistNewOrModified(dc.ModifiedArtistId.Value);
-            //        }
-            //    }
-            //}
-            // send artist modified/deleted - info is in dc
         }
     }
 }

@@ -191,9 +191,8 @@ namespace Fastnet.Music.Metatools
             {
                 bool r = false;
                 var works = currentMusicFiles.Select(mf => mf.Track).Select(x => x.Work).Distinct();
-                //currentMusicFiles.Select(mf => mf.Track).Where(x => x.Performance != null)
-                //    .Select(x => x.Performance.Composition.Artist).Distinct();
-                var artists = works.Select(x => x.Artist)
+                var artists = works.SelectMany(x => x.Artists)
+                    //.Select(x => x.Artist)
                     .Union(currentMusicFiles.Select(mf => mf.Track).Where(x => x.Performance != null)
                     .Select(x => x.Performance.Composition.Artist))
                     .Distinct();
@@ -211,12 +210,10 @@ namespace Fastnet.Music.Metatools
                 {
                     foreach (var work in works)
                     {
-                        //var coverFile = MusicStyle.GetMostRecentOpusCoverFile(MusicOptions, IsCollection ? "Collections" : work.Artist.Name, currentPathData.OpusPath);
-                        //var coverFile = MusicStyle.GetMostRecentOpusCoverFile(MusicOptions, work, currentPathData.OpusPath);
                         var coverFile = work.GetMostRecentOpusCoverFile(MusicOptions);
                         if (work.Cover.HasChanged(coverFile))
                         {
-                            log.Debug($"artist {work.Artist.Name}, work {work.Name}, cover art file {coverFile}");
+                            log.Debug($"artist(s) {work.GetArtistNames()}, work {work.Name}, cover art file {coverFile}");
                             r = true;
                             break;
                         }

@@ -13,10 +13,13 @@ using System.Text;
 using System.Threading.Tasks;
 
 namespace Fastnet.Music.Data
-{    public class DeleteContext
+{
+    public class DeleteContext
     {
-        public long? ModifiedArtistId { get; private set; }
-        public long? DeletedArtistId { get; private set; }
+        //public long? ModifiedArtistId { get; private set; }
+        //public long? DeletedArtistId { get; private set; }
+        public List<long> ModifiedArtistList { get; set; } = new List<long>();
+        public List<long> DeletedArtistList { get; set; } = new List<long>();
         private readonly object source;
         //public DeleteContext(OpusFolder folder)
         //{
@@ -41,14 +44,20 @@ namespace Fastnet.Music.Data
             }
             return "context unknown!";
         }
-        public void SetModifiedArtistId(long id)
+        public void SetModifiedArtistId(params long[] idList)
         {
-            this.ModifiedArtistId = id;
+            //this.ModifiedArtistId = id;
+            this.ModifiedArtistList.AddRange(idList);
         }
-        public void SetDeletedArtistId(long id)
+        public void SetDeletedArtistId(params long[] idList)
         {
-            this.DeletedArtistId = id;
-            this.ModifiedArtistId = null;
+            //this.DeletedArtistId = id;
+            //this.ModifiedArtistId = null;
+            this.DeletedArtistList.AddRange(idList);
+            foreach (var id in idList)
+            {
+                this.ModifiedArtistList.Remove(id);
+            }
         }
     }
     public static partial class Extensions
@@ -102,17 +111,17 @@ namespace Fastnet.Music.Data
             }
             var performersCSV = performance.GetAllPerformersCSV();
             var ppList = performance.PerformancePerformers.ToArray();
-            foreach(var pp in ppList)
+            foreach (var pp in ppList)
             {
                 pp.Performance.PerformancePerformers.Remove(pp);
                 pp.Performer.PerformancePerformers.Remove(pp);
             }
             musicDb.PerformancePerformers.RemoveRange(ppList);
             var performers = ppList.Select(x => x.Performer);
-            foreach(var performer in performers.ToArray())
+            foreach (var performer in performers.ToArray())
             {
                 var count = performer.PerformancePerformers.Count();
-                if(count == 0)
+                if (count == 0)
                 {
                     musicDb.Performers.Remove(performer);
                     log.Information($"{context}: [Pf-{performer.Id}] performer {performer.Name}, {performer.Type} deleted");
@@ -180,10 +189,6 @@ namespace Fastnet.Music.Data
         /// <returns></returns>
         public static Performer GetPerformer(this MusicDb db, string name, PerformerType type)
         {
-            //var performer = db.Performers
-            //    .Where(p => p.Type == type)
-            //    .ToArray()
-            //    .SingleOrDefault(p => p.Name.IsEqualIgnoreAccentsAndCase(name));
             db.Performers.Load();
             var performer = db.Performers.Local
                 .Where(p => p.Type == type)
@@ -196,7 +201,7 @@ namespace Fastnet.Music.Data
                     Type = type
                 };
                 db.Performers.Add(performer);
-                log.Information($"new performer {name}");
+                //log.Information($"new performer {name}");
             }
             return performer;
         }
@@ -274,7 +279,7 @@ namespace Fastnet.Music.Data
 
                 log.Information($"[Pf-{performer.Id}] {performer} removed, replaced with [Pf-{validPerformer.Id}] {validPerformer} ");
             }
-            catch(DbUpdateConcurrencyException xe)
+            catch (DbUpdateConcurrencyException xe)
             {
                 xe.Report();
                 throw;
@@ -287,7 +292,8 @@ namespace Fastnet.Music.Data
         }
         private static void Delete(this MusicDb musicDb, Track track, DeleteContext context)
         {
-            long artistId = track.Work.ArtistId;
+            //long artistId = track.Work.ArtistId;
+            var artistIds = track.Work.Artists.Select(x => x.Id);
             foreach (var musicFile in track.MusicFiles.ToArray())
             {
                 musicFile.Track = null;
@@ -306,7 +312,7 @@ namespace Fastnet.Music.Data
                 musicDb.Delete(work, context);
             }
             musicDb.Tracks.Remove(track);
-            context.SetModifiedArtistId(artistId);
+            context.SetModifiedArtistId(artistIds.ToArray());
             log.Information($"{context}: Track [T-{track.Id}] deleted: {track.Title}");
         }
         private static void Delete(this MusicDb musicDb, Artist artist, DeleteContext context)
@@ -319,7 +325,7 @@ namespace Fastnet.Music.Data
             }
             foreach (var work in artist.Works)
             {
-                work.Artist = null;
+                //work.Artist = null;
                 musicDb.Delete(work, context);
             }
             var styles = artist.ArtistStyles.ToArray();
@@ -352,15 +358,21 @@ namespace Fastnet.Music.Data
         }
         private static void Delete(this MusicDb musicDb, Work work, DeleteContext context)
         {
-            long artistId = work.ArtistId;
+            //long artistId = work.ArtistId;
+            var artistIds = work.Artists.Select(x => x.Id);
             foreach (var track in work.Tracks)
             {
                 track.Work = null;
                 musicDb.Delete(track, context);
             }
-            var artist = work.Artist;
-            artist?.Works.Remove(work);
-            if (artist != null)
+            //var artist = work.Artist;
+            var artists = work.Artists.ToArray();
+            var list = work.ArtistWorkList.ToArray();
+            musicDb.ArtistWorkList.RemoveRange(list);
+            work.ArtistWorkList.Clear();
+            //artist?.Works.Remove(work);
+            //if (artist != null)
+            foreach(var artist in artists)
             {
                 if (artist.Works.Count() == 0 && artist.Compositions.Count() == 0)
                 {
@@ -368,7 +380,8 @@ namespace Fastnet.Music.Data
                 }
             }
             musicDb.Works.Remove(work);
-            context.SetModifiedArtistId(artistId);
+
+            context.SetModifiedArtistId(artistIds.ToArray());
             log.Information($"{context}: Work [W-{work.Id}] deleted: {work.Name}");
         }
     }
@@ -582,6 +595,33 @@ namespace Fastnet.Music.Data
                     log.Information($"property {property.Name}: database value {databaseValue.ToString()}, proposed value {proposedValue.ToString()}");
                 }
             }
+        }
+    }
+    public static partial class Extensions
+    {
+        public static ArtistWork AddWork(this MusicDb musicDb, Artist artist, Work work)
+        {
+            var aw = new ArtistWork { Artist = artist, Work = work };
+
+            artist.ArtistWorkList.Add(aw);
+            musicDb.ArtistWorkList.Add(aw);
+            //log.Information($"{aw} added");
+            return aw;
+        }
+        public static void RemoveWork(this MusicDb musicDb, Artist artist, Work work)
+        {
+            //var aw = new ArtistWork { Artist = this, Work = work };
+            var aw = artist.ArtistWorkList.FirstOrDefault(x => x.Work == work);
+            if(aw == null)
+            {
+                log.Error($"[W-{work.Id}] {work} not found in ArtistWorkList for [A-{artist.Id}] {artist}");
+            }
+            else
+            {
+                artist.ArtistWorkList.Remove(aw);
+                musicDb.ArtistWorkList.Remove(aw);
+                //log.Information($"{aw} removed");
+            }            
         }
     }
 }

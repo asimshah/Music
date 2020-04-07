@@ -63,7 +63,7 @@ namespace Fastnet.Music.Metatools
                 album.Cover = await cover.GetImage();
                 album.LastModified = DateTimeOffset.Now;
             }
-            var cr = new CatalogueResult { MusicSet = this, Status = result, Artist = artist, Work = album, Tracks = tracks };
+            var cr = CatalogueResult.Create(this, result, album);// { MusicSet = this, Status = result, Artist = artist, Work = album, Tracks = tracks };
             if (!MusicOptions.DisableResampling)
             {
                 if (this.MusicFiles.All(f => f.Encoding == EncodingType.flac))

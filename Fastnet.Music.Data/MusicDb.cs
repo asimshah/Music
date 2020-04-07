@@ -3,10 +3,12 @@ using Fastnet.Core.Logging;
 using Fastnet.Music.Core;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Proxies;
+using Microsoft.EntityFrameworkCore.Storage;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
@@ -15,6 +17,44 @@ namespace Fastnet.Music.Data
 {
 #pragma warning disable CS1591 // Missing XML comment for publicly visible type or member
 
+    public class RetryStrategy : SqlServerRetryingExecutionStrategy
+    {
+        private int retryNumber = 0;
+        private string identifier = string.Empty;
+        private ILogger log;
+        public RetryStrategy( ExecutionStrategyDependencies dependencies) : base(dependencies, 10)
+        {
+            log = ApplicationLoggerFactory.CreateLogger<RetryStrategy>();
+        }
+
+        public int RetryNumber { get => retryNumber; set => retryNumber = value; }
+
+        public void SetIdentifier(string ident)
+        {
+            identifier = ident;
+        }
+        protected override void OnFirstExecution()
+        {
+            //Debug.WriteLine($"OnFirstExecution");
+            base.OnFirstExecution();
+        }
+        protected override void OnRetry()
+        {
+            RetryNumber++;
+            //if(!string.IsNullOrWhiteSpace(identifier))
+            //{
+            //    log.Information($"OnRetry(): {identifier}, retry {RetryNumber} of {MaxRetryCount}");
+            //}
+            
+            base.OnRetry();
+        }
+        protected override bool ShouldRetryOn(Exception exception)
+        {
+            //log.Information($"{identifier}: ShouldRetryOn(): exception {exception.GetType().Name}, {exception.Message}");
+            return true;
+            //return base.ShouldRetryOn(exception);
+        }
+    }
     public class MusicDb : DbContext
     {
 #pragma warning disable CS0169 // The field 'MusicDb.config' is never used
@@ -27,6 +67,7 @@ namespace Fastnet.Music.Data
         //public DbSet<Style> Styles { get; set; }
         public DbSet<Artist> Artists { get; set; }
         public DbSet<Work> Works { get; set; }
+        public DbSet<ArtistWork> ArtistWorkList { get; set; }
         public DbSet<Composition> Compositions { get; set; }
         public DbSet<Performance> Performances { get; set; }
         public DbSet<Performer> Performers { get; set; }
@@ -68,7 +109,11 @@ namespace Fastnet.Music.Data
         {
             if(!optionsBuilder.IsConfigured)
             {
-                optionsBuilder.UseSqlServer(connectionString, options => { options.EnableRetryOnFailure(); })
+                optionsBuilder.UseSqlServer(connectionString, options =>
+                {
+                    options.EnableRetryOnFailure();
+                    options.ExecutionStrategy(x => new RetryStrategy(x));
+                })
                     .EnableDetailedErrors()
                     .EnableSensitiveDataLogging()
                     .UseLazyLoadingProxies();
@@ -111,6 +156,19 @@ namespace Fastnet.Music.Data
 
             modelBuilder.Entity<Work>()
                 .HasIndex(e => e.AlphamericName);
+
+            modelBuilder.Entity<ArtistWork>()
+                .HasKey(k => new { k.ArtistId, k.WorkId });
+
+            modelBuilder.Entity<ArtistWork>()
+                .HasOne(aw => aw.Artist)
+                .WithMany(x => x.ArtistWorkList)
+                .HasForeignKey(x => x.ArtistId);
+
+            modelBuilder.Entity<ArtistWork>()
+                .HasOne(aw => aw.Work)
+                .WithMany(x => x.ArtistWorkList)
+                .HasForeignKey(x => x.WorkId);
 
             modelBuilder.Entity<Composition>()
                 .HasIndex(e => new { e.ArtistId, e.AlphamericName })
@@ -155,8 +213,6 @@ namespace Fastnet.Music.Data
                 .WithMany(x => x.Items)
                 .HasForeignKey(k => k.PlaylistId);
 
-            //modelBuilder.Entity<TaskItem>()
-            //    .HasIndex(x => x.TargetPath);
             modelBuilder.Entity<TaskItem>()
                 .HasIndex(x => x.ScheduledAt);
             modelBuilder.Entity<TaskItem>()
@@ -200,9 +256,22 @@ namespace Fastnet.Music.Data
             TaskItems.ToList().ForEach(x => x.Status = Core.TaskStatus.Pending);
 
             EnsurePerformersRefactored(options);
-
+            EnsureArtistWorkRefactored();
             SaveChanges();
         }
+
+        private void EnsureArtistWorkRefactored()
+        {
+            var works = Works.AsEnumerable()
+                .Where(w => w.ArtistId > 0); 
+            foreach(var work in works)
+            {
+                var artist = Artists.Find(work.ArtistId);
+                this.AddWork(artist, work);
+                work.ArtistId = 0;
+            }
+        }
+
         private void EnsurePerformersRefactored(MusicOptions musicOptions)
         {
             void AddPerformer(string performerName, PerformerType type, Performance performance)

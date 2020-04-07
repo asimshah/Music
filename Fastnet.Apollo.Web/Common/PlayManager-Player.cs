@@ -51,8 +51,7 @@ namespace Fastnet.Apollo.Web
                 Id = 0,// pli.Id,
                 Type = PlaylistRuntimeItemType.SingleItem,
                 Position = new PlaylistPosition(majorSequence, track.Number),
-                //Title = track.Title,
-                Titles = new string[] { track.Work.Artist.Name, track.Performance?.Composition.Name ?? track.Work.Name, track.Title },
+                Titles = new string[] { track.Work.Artists.First().Name, track.Performance?.Composition.Name ?? track.Work.Name, track.Title },
                 Sequence = track.Number,
                 NotPlayableOnCurrentDevice = mf == null,
                 ItemId = track.Id,
@@ -78,7 +77,7 @@ namespace Fastnet.Apollo.Web
                         Position = new PlaylistPosition(pli.Sequence, 0),
                         //Title = pli.Title,
                         Titles = new string[] {
-                                pli.MusicFile.Track.Performance?.Composition.Artist.Name ?? pli.MusicFile.Track.Work.Artist.Name,
+                                pli.MusicFile.Track.Performance?.Composition.Artist.Name ?? pli.MusicFile.Track.Work.Artists.First().Name,
                                 pli.MusicFile.Track.Performance?.Composition.Name ?? pli.MusicFile.Track.Work.Name,
                                 pli.MusicFile.Track.Title
                             },
@@ -102,7 +101,7 @@ namespace Fastnet.Apollo.Web
                         Position = new PlaylistPosition(pli.Sequence, 0),
                         //Title = pli.Title,
                         Titles = new string[] {
-                                pli.Track.Performance?.Composition.Artist.Name ?? pli.Track.Work.Artist.Name,
+                                pli.Track.Performance?.Composition.Artist.Name ?? pli.Track.Work.Artists.First().Name,
                                 pli.Track.Performance?.Composition.Name ?? pli.Track.Work.Name,
                                 pli.Track.Title
                             },

@@ -1,8 +1,8 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
     <TargetFramework>netstandard2.1</TargetFramework>
-    <Version>2.4.5</Version>
-    <AssemblyVersion>2.$([System.DateTime]::Now.ToString('yyyy')).$([System.DateTime]::Now.ToString('Md')).$([System.DateTime]::Now.ToString('HHmm'))</AssemblyVersion>
+    <Version>2.5.2</Version>
+    <AssemblyVersion>2.$([System.DateTime]::Now.ToString('yyyy')).$([System.DateTime]::Now.ToString('Mdd')).$([System.DateTime]::Now.ToString('HHmm'))</AssemblyVersion>
   </PropertyGroup>
   <Target Name="PreBuild" BeforeTargets="PreBuildEvent">
     <Exec Command="rem powershell .\BumpProjectVersion.ps1 $(ProjectPath)" />
@@ -10,9 +10,13 @@
   <ItemGroup>
     <Compile Remove="Migrations\20191115151925_AddAlphamericColumns.cs" />
     <Compile Remove="Migrations\20191115151925_AddAlphamericColumns.Designer.cs" />
+    <Compile Remove="Migrations\20200405152556_ConvertArtistWorkToManyToMany.cs" />
+    <Compile Remove="Migrations\20200405152556_ConvertArtistWorkToManyToMany.Designer.cs" />
+    <Compile Remove="Migrations\20200405160620_ConvertArtistWorkToManyToMany.cs" />
+    <Compile Remove="Migrations\20200405160620_ConvertArtistWorkToManyToMany.Designer.cs" />
   </ItemGroup>
   <ItemGroup>
-    <PackageReference Include="Fastnet.Music.Core" Version="2.4.1" />
+    <PackageReference Include="Fastnet.Music.Core" Version="2.4.7" />
     <PackageReference Include="Microsoft.EntityFrameworkCore.Proxies" Version="3.1.2" />
     <PackageReference Include="Microsoft.EntityFrameworkCore.SqlServer" Version="3.1.2" />
     <PackageReference Include="Microsoft.EntityFrameworkCore.Tools" Version="3.1.2">

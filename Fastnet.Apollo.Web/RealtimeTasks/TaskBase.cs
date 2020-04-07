@@ -11,6 +11,7 @@ using System.Threading.Tasks;
 namespace Fastnet.Apollo.Web
 {
 #nullable enable
+
     public abstract class TaskBase
     {
         protected MusicStyles musicStyle;
@@ -94,21 +95,30 @@ namespace Fastnet.Apollo.Web
             {
                 RT? r = default;
 
-                SqlServerRetryingExecutionStrategy? strategy = db.Database.CreateExecutionStrategy() as SqlServerRetryingExecutionStrategy;
-
+                //SqlServerRetryingExecutionStrategy? strategy = db.Database.CreateExecutionStrategy() as SqlServerRetryingExecutionStrategy;
+                var strategy = db.Database.CreateExecutionStrategy() as RetryStrategy;
                 if (strategy != null)
                 {
+                    strategy.SetIdentifier($"[TI-{taskId}]");
                     await strategy.ExecuteAsync(async () =>
                     {
-                        log.Debug($"[TI-{taskId}] execution strategy started");
+                        
+                        if(strategy.RetryNumber > 0)
+                        {
+                            await Task.Delay(TimeSpan.FromSeconds(10));
+                        }
+                        log.Information($"[TI-{taskId}] execution started, retry {strategy.RetryNumber + 1}");
                         try
                         {
-
-                            using (var tran = db.Database.BeginTransaction())
+                            //using (var tran = db.Database.BeginTransaction(System.Data.IsolationLevel.Snapshot)) // default is read committed
+                            using (var db2 = new MusicDb(connectionString))
                             {
-                                r = await methodAsync(db);
-                                tran.Commit();
-                                log.Debug($"[TI-{taskId}] execution strategy: transaction committed");
+                                using (var tran = db2.Database.BeginTransaction())
+                                {
+                                    r = await methodAsync(db2);
+                                    tran.Commit();
+                                    log.Debug($"[TI-{taskId}] execution strategy: transaction committed");
+                                } 
                             }
                         }
                         catch (Exception xe)
