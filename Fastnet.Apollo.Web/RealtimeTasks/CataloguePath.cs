@@ -166,10 +166,6 @@ namespace Fastnet.Apollo.Web
                         results.Add(cr);
                         if (cr.Status == CatalogueStatus.Success)
                         {
-                            //if (cr.Artist == null)
-                            //{
-                            //    log.Trace($"Artist missing");
-                            //}
                             switch (cr.MusicSetType)
                             {
                                 case Type T when T == typeof(PopularMusicAlbumSet) || T == typeof(WesternClassicalAlbumSet):
@@ -181,18 +177,6 @@ namespace Fastnet.Apollo.Web
                                     {
                                         log.Trace($"Work has no tracks");
                                     }
-                                    //if (cr.Tracks == null)
-                                    //{
-                                    //    log.Trace($"Tracks missing");
-                                    //}
-                                    //else if (cr.Tracks.Count() == 0)
-                                    //{
-                                    //    log.Trace($"Track count is 0");
-                                    //}
-                                    //if(cr.TaskItem != null)
-                                    //{
-                                    //    QueueTask(cr.TaskItem);
-                                    //}
                                     break;
                                 case Type T when T == typeof(WesternClassicalCompositionSet):
                                     if (cr.CompositionName == string.Empty)

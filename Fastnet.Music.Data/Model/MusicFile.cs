@@ -6,7 +6,7 @@ using System.IO;
 
 namespace Fastnet.Music.Data
 {
-    public class MusicFile
+    public class MusicFile : IIdentifier
     {
         public long Id { get; set; }
         public MusicStyles Style { get; set; }

@@ -4,7 +4,7 @@ using System.ComponentModel.DataAnnotations;
 
 namespace Fastnet.Music.Data
 {
-    public class Track : INameParsing
+    public class Track : IIdentifier, INameParsing
     {
         public long Id { get; set; }
         public int Number { get; set; }
@@ -16,7 +16,7 @@ namespace Fastnet.Music.Data
         public string Title { get; set; }
         [MaxLength(256)]
         public string AlphamericTitle { get; set; }
-        [MaxLength(16)]
+        [MaxLength(ILengthConstants.MaxCompressedNameLength)]
         public string CompressedName { get; set; }
         [Required, MaxLength(256)]
         public string CompositionName { get; set; } // only if WesternClassical

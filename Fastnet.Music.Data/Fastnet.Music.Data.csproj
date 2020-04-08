@@ -14,6 +14,8 @@
     <Compile Remove="Migrations\20200405152556_ConvertArtistWorkToManyToMany.Designer.cs" />
     <Compile Remove="Migrations\20200405160620_ConvertArtistWorkToManyToMany.cs" />
     <Compile Remove="Migrations\20200405160620_ConvertArtistWorkToManyToMany.Designer.cs" />
+    <Compile Remove="Migrations\20200408112544_ConvertCompositionPerformanceToManyToMany.cs" />
+    <Compile Remove="Migrations\20200408112544_ConvertCompositionPerformanceToManyToMany.Designer.cs" />
   </ItemGroup>
   <ItemGroup>
     <PackageReference Include="Fastnet.Music.Core" Version="2.4.7" />

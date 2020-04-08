@@ -16,7 +16,7 @@ namespace Fastnet.Music.Data
         DeletedPath,
         ResampleWork
     }
-    public class TaskItem
+    public class TaskItem : IIdentifier
     {
         public long Id { get; set; }
         public TaskStatus Status { get; set; }

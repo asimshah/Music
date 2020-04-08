@@ -2,7 +2,7 @@
 
 namespace Fastnet.Music.Data
 {
-    public class Playlist
+    public class Playlist : IIdentifier
     {
         public long Id { get; set; }
         public PlaylistType Type { get; set; }

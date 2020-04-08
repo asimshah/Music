@@ -104,7 +104,9 @@ namespace Fastnet.Music.Data
             }
             performance.Movements.Clear();
             var composition = performance.Composition;
-            composition?.Performances.Remove(performance);
+
+            //composition?.Performances.Remove(performance);
+            musicDb.RemovePerformance(composition, performance);
             if (composition?.Performances.Count() == 0)
             {
                 musicDb.Delete(composition, context);
@@ -337,12 +339,13 @@ namespace Fastnet.Music.Data
         private static void Delete(this MusicDb musicDb, Composition composition, DeleteContext context)
         {
             long artistId = composition.ArtistId;
-            foreach (var performance in composition.Performances)
+            foreach (var performance in composition.Performances.ToArray())
             {
-                performance.Composition = null;
+                //performance.Composition = null;
+                musicDb.RemovePerformance(composition, performance);
                 musicDb.Delete(performance, context);
             }
-            composition.Performances.Clear();
+            //composition.Performances.Clear();
             musicDb.Compositions.Remove(composition);
             var artist = composition.Artist;
             artist?.Compositions.Remove(composition);
@@ -599,18 +602,39 @@ namespace Fastnet.Music.Data
     }
     public static partial class Extensions
     {
+        public static CompositionPerformance AddPerformance(this MusicDb musicDb, Composition composition, Performance performance)
+        {
+            var cp = new CompositionPerformance { Performance = performance, Composition = composition };
+            composition.CompositionPerformances.Add(cp);
+            musicDb.CompositionPerformances.Add(cp);
+            return cp;
+        }
+        public static void RemovePerformance(this MusicDb musicDb, Composition composition, Performance performance)
+        {
+            if (composition != null)
+            {
+                var cp = composition.CompositionPerformances.FirstOrDefault(x => x.Performance == performance);
+                if (cp == null)
+                {
+                    log.Error($"{performance.ToIdent()}  not found in CompositionPerformances for {composition.ToIdent()} {composition}");
+                }
+                else
+                {
+                    composition.CompositionPerformances.Remove(cp);
+                    musicDb.CompositionPerformances.Remove(cp);
+                } 
+            }
+        }
         public static ArtistWork AddWork(this MusicDb musicDb, Artist artist, Work work)
         {
             var aw = new ArtistWork { Artist = artist, Work = work };
 
             artist.ArtistWorkList.Add(aw);
             musicDb.ArtistWorkList.Add(aw);
-            //log.Information($"{aw} added");
             return aw;
         }
         public static void RemoveWork(this MusicDb musicDb, Artist artist, Work work)
         {
-            //var aw = new ArtistWork { Artist = this, Work = work };
             var aw = artist.ArtistWorkList.FirstOrDefault(x => x.Work == work);
             if(aw == null)
             {

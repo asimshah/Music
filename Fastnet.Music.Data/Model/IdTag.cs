@@ -2,7 +2,7 @@
 
 namespace Fastnet.Music.Data
 {
-    public class IdTag
+    public class IdTag : IIdentifier
     {
         public long Id { get; set; }
         [MaxLength(64)]

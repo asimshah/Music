@@ -228,28 +228,42 @@ namespace Fastnet.Apollo.Web.Controllers
         public async Task<IActionResult> GetAllPerformances(long id, bool full = false)
         {
             musicDb.ChangeTracker.AutoDetectChangesEnabled = false;
-            var performances = await musicDb.Performances
-                .Where(x => x.CompositionId == id).ToArrayAsync();
-            if (performances.Count() > 0)
+            
+            //var performances = await musicDb.Performances
+            //    .Where(x => x.CompositionId == id).ToArrayAsync();
+
+            //if (performances.Count() > 0)
+            //{
+            //    var result = performances.Select(x => x.ToDTO(full))
+            //        .OrderByDescending(x => x.MovementCount)
+            //        .ThenBy(x => x.Performers);
+            //    return SuccessResult(result);
+            //}
+            //else
+            //{
+
+            //}
+            var composition = await musicDb.Compositions.FindAsync(id);
+            if (composition != null)
             {
-                var result = performances.Select(x => x.ToDTO(full))
-                    .OrderByDescending(x => x.MovementCount)
-                    .ThenBy(x => x.Performers);
-                return SuccessResult(result);
-            }
-            else
-            {
-                var composition = await musicDb.Compositions.FindAsync(id);
-                if(composition != null)
+                var performances = composition.Performances;
+                if (performances.Count() > 0)
                 {
-                    log.Error($"No performances found for {composition.Artist.Name} composition {composition.Name}");
+                    var result = performances.Select(x => x.ToDTO(full))
+                        .OrderByDescending(x => x.MovementCount)
+                        .ThenBy(x => x.Performers);
+                    return SuccessResult(result);
                 }
                 else
                 {
-                    log.Error($"Composition {id} not found");
+                    log.Error($"No performances found for {composition.Artist.Name} composition {composition.Name}");
                 }
-                return ErrorResult("Composition and/or performances not found");
             }
+            else
+            {
+                log.Error($"Composition {id} not found");
+            }
+            return ErrorResult("Composition and/or performances not found");
         }
         [HttpGet("get/artist/allcompositions/{id}/{full?}")]
         public IActionResult GetAllCompositions(long id, bool full = false)

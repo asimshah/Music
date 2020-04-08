@@ -10,7 +10,5 @@ namespace Fastnet.Music.Data
         public long ArtistId { get; set; }
         public virtual Artist Artist { get; set; }
         public MusicStyles StyleId { get; set; }
-        //[Obsolete("remove Style")]
-        //public virtual Style Style { get; set; }
     }
 }

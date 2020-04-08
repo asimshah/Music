@@ -8,40 +8,28 @@ namespace Fastnet.Music.Data
 {
     // * Important *
     // cannot use a private constructor because of lazy loading
-    public class ArtistWork
+    public class ArtistWork : IManyToManyIdentifier
     {
-        //private ArtistWork()
-        //{
-
-        //}
-        ////internal ArtistWork(Artist artist, Work work)
-        ////{
-        ////    this.Artist = artist;
-        ////    this.Work = work;
-        ////}
         public long ArtistId { get; set; }
         public virtual Artist Artist { get; set; }
         public long WorkId { get; set; }
         public virtual Work Work { get; set; }
+        public string ToIdent()
+        {
+            return IManyToManyIdentifier.ToIdent(Artist, Work);
+        }
         public override string ToString()
         {
             return $"[A-{ArtistId}+W-{WorkId}]";
         }
-        //internal static ArtistWork Create(Artist artist, Work work)
-        //{
-        //    var aw = new ArtistWork();
-        //    aw.Artist = artist;
-        //    aw.Work = work;
-        //    return aw;
-        //}
     }
-    public class Artist : ILengthConstants, INameParsing
+    public class Artist : IIdentifier, ILengthConstants, INameParsing
     {
         public long Id { get; set; }
         public Guid UID { get; set; }
         [MaxLength(ILengthConstants.MaxArtistNameLength)]
         public string Name { get; set; }
-        [MaxLength(16)]
+        [MaxLength(ILengthConstants.MaxCompressedNameLength)]
         public string CompressedName { get; set; }
         public ArtistType Type { get; set; }
         [MaxLength(ILengthConstants.MaxArtistNameLength)]
@@ -65,19 +53,6 @@ namespace Fastnet.Music.Data
         public virtual ICollection<Composition> Compositions { get; } = new HashSet<Composition>();
         [Timestamp]
         public byte[] Timestamp { get; set; }
-        //public ArtistWork AddWork(Work work)
-        //{
-        //    var aw = new ArtistWork { Artist = this, Work = work };
-        //    ArtistWorkList.Add(aw);
-        //    return aw;
-        //}
-        //public ArtistWork RemoveWork(Work work)
-        //{
-        //    //var aw = new ArtistWork { Artist = this, Work = work };
-        //    var aw = ArtistWorkList.FirstOrDefault(x => x.Work == work);
-        //    ArtistWorkList.Remove(aw);
-        //    return aw;
-        //}
         public override string ToString()
         {
             return $"{Name}: {Works.Count()} works, {Compositions.Count} compositions";

@@ -8,7 +8,7 @@ using System.Linq;
 
 namespace Fastnet.Music.Data
 {
-    public class Work : ILengthConstants, INameParsing, IPlayable
+    public class Work : IIdentifier, INameParsing, IPlayable
     {        
         public long Id { get; set; }
         public Guid UID { get; set; }
@@ -16,7 +16,7 @@ namespace Fastnet.Music.Data
         public string Name { get; set; }
         [MaxLength(ILengthConstants.MaxWorkNameLength)]
         public string AlphamericName { get; set; }
-        [MaxLength(16)]
+        [MaxLength(ILengthConstants.MaxCompressedNameLength)]
         public string CompressedName { get; set; }
         public bool IsMultiPart { get; set; }
         public int PartNumber { get; set; }
@@ -36,10 +36,7 @@ namespace Fastnet.Music.Data
         public string DisambiguationName { get; set; } // used when copies are made for external systems, e.g for alexa, for phones
         public LibraryParsingStage ParsingStage { get; set; }
         public MusicStyles StyleId { get; set; }
-
         public long ArtistId { get; set; }
-        //public virtual Artist Artist { get; set; }
-        //public Artist Artist => GetArtist();
         public virtual IEnumerable<Artist> Artists => ArtistWorkList.Select(aw => aw.Artist);
         public virtual ICollection<ArtistWork> ArtistWorkList { get; } = new HashSet<ArtistWork>();
         public string Mood { get; set; }

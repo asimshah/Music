@@ -13,11 +13,27 @@ namespace Fastnet.Music.Data
         string Name { get; }
         IEnumerable<Track> Tracks { get; }
     }
-    public class Performance : IPlayable
+    public class CompositionPerformance : IManyToManyIdentifier
     {
-        public long Id { get; set; }
+        public long PerformanceId { get; set; } // we'll make this a unique key so that a performance can only appear once in this table
+        public virtual Performance Performance { get; set; }
         public long CompositionId { get; set; }
-        public virtual Composition Composition { get; set; } // the composition performed
+        public virtual Composition Composition { get; set; }
+        public string ToIdent()
+        {
+            return IManyToManyIdentifier.ToIdent(Composition, Performance);
+        }
+        public override string ToString()
+        {
+            return $"[C-{CompositionId}+P-{PerformanceId}]";
+        }
+    }
+    public class Performance : EntityBase, IPlayable
+    {
+        public override long Id { get; set; }
+        public long CompositionId { get; set; }
+        //public virtual Composition Composition { get; set; } // the composition performed
+        public Composition Composition => CompositionPerformances.Select(x => x.Composition).Single();
         public int Year { get; set; }
         public virtual ICollection<Track> Movements { get; } = new HashSet<Track>(); // the 'album' containing this performance is the Work that these tracks belong to
         [Obsolete("remove after all dbs have updated")]
@@ -29,13 +45,16 @@ namespace Fastnet.Music.Data
         public string Conductors { get; set; } // CSV of conductors
         [MaxLength(2048)]
         public string AlphamericPerformers { get; set; }
-        [MaxLength(16)]
+        [MaxLength(ILengthConstants.MaxCompressedNameLength)]
         public string CompressedName { get; set; }
         [NotMapped]
         IEnumerable<Track> IPlayable.Tracks => Movements;
         [NotMapped]
         string IPlayable.Name => GetAllPerformersCSV();
         public virtual List<PerformancePerformer> PerformancePerformers { get; /*set;*/ } = new List<PerformancePerformer>();
+        public virtual ICollection<CompositionPerformance> CompositionPerformances { get; } = new HashSet<CompositionPerformance>();
+
+        //public virtual CompositionPerformance CompositionPerformance { get; set;}
         public override string ToString()
         {
             return $"{Composition.Name}, {Movements.Count} movements: \"{GetAllPerformersCSV()}\"";
@@ -70,5 +89,9 @@ namespace Fastnet.Music.Data
                 .Select(pp => pp.Performer.Name);
             return string.Join(", ", r);
         }
+        //public string ToIdent()
+        //{
+        //    return ((IIdentifier)this).ToIdent();
+        //}
     }
 }

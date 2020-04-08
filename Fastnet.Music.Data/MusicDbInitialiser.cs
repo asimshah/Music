@@ -34,33 +34,6 @@ namespace Fastnet.Music.Data
             }
             db.UpgradeContent(options);
         }
-        //[Obsolete]
-        //public static void InitialiseOld(MusicDb db)
-        //{
-        //    var log = db.Database.GetService<ILogger<MusicDbInitialiser>>() as ILogger;
-        //    var creator = db.Database.GetService<IDatabaseCreator>() as RelationalDatabaseCreator;
-        //    var dbExists = creator.Exists();
-
-        //    if (dbExists)
-        //    {
-        //        log.Information("MusicDb exists");
-        //        db.Database.Migrate();
-        //        log.Trace("The following migrations have been applied:");
-        //        var migrations = db.Database.GetAppliedMigrations();
-        //        foreach (var migration in migrations)
-        //        {
-        //            log.Trace($"\t{migration}");
-        //        }
-        //    }
-        //    else
-        //    {
-        //        log.Warning("No MusicDb found");
-        //        creator.EnsureCreated();
-        //        log.Information("new MusicDb created");
-        //    }
-
-        //    db.UpgradeContent();
-        //}
     }
 #pragma warning restore CS1591 // Missing XML comment for publicly visible type or member
 }

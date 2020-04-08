@@ -4,7 +4,7 @@ using System.ComponentModel.DataAnnotations.Schema;
 
 namespace Fastnet.Music.Data
 {
-    public class Device
+    public class Device : IIdentifier
     {
         public long Id { get; set; }
         public string KeyName { get; set; }

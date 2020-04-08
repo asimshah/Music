@@ -3,7 +3,7 @@ using System.ComponentModel.DataAnnotations;
 
 namespace Fastnet.Music.Data
 {
-    public class Performer
+    public class Performer : IIdentifier
     {
         public long Id { get; set; }
         public PerformerType Type { get; set; }

@@ -210,9 +210,11 @@ namespace Fastnet.Music.Metatools
                     // *NB* it is possible, though unlikely that a performance of exactly the same performers already exists!
                     // for the present I am not checking for this!!
                     var oldComposition = performance.Composition;
-                    performance.Composition = existingComposition;
-                    oldComposition.Performances.Remove(performance); 
-                    //existingComposition.Performances.Add(performance);
+                    db.RemovePerformance(oldComposition, performance);
+                    db.AddPerformance(existingComposition, performance);
+                    //performance.Composition = existingComposition;
+                    //oldComposition.Performances.Remove(performance); 
+
                     if(oldComposition.Performances.Count() == 0)
                     {
                         db.Compositions.Remove(oldComposition);

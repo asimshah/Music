@@ -35,17 +35,11 @@ namespace Fastnet.Music.Data
         }
         protected override void OnFirstExecution()
         {
-            //Debug.WriteLine($"OnFirstExecution");
             base.OnFirstExecution();
         }
         protected override void OnRetry()
         {
             RetryNumber++;
-            //if(!string.IsNullOrWhiteSpace(identifier))
-            //{
-            //    log.Information($"OnRetry(): {identifier}, retry {RetryNumber} of {MaxRetryCount}");
-            //}
-            
             base.OnRetry();
         }
         protected override bool ShouldRetryOn(Exception exception)
@@ -64,11 +58,11 @@ namespace Fastnet.Music.Data
         private readonly ILogger log;
         public DbSet<MusicFile> MusicFiles { get; set; }
         public DbSet<IdTag> IdTags { get; set; }
-        //public DbSet<Style> Styles { get; set; }
         public DbSet<Artist> Artists { get; set; }
         public DbSet<Work> Works { get; set; }
         public DbSet<ArtistWork> ArtistWorkList { get; set; }
         public DbSet<Composition> Compositions { get; set; }
+        public DbSet<CompositionPerformance> CompositionPerformances { get; set; }
         public DbSet<Performance> Performances { get; set; }
         public DbSet<Performer> Performers { get; set; }
         public DbSet<PerformancePerformer> PerformancePerformers { get; set; }
@@ -118,8 +112,6 @@ namespace Fastnet.Music.Data
                     .EnableSensitiveDataLogging()
                     .UseLazyLoadingProxies();
             }
-            //var cs = config.GetConnectionString("TestMusicDb");
-            //base.OnConfiguring(optionsBuilder);
         }
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
@@ -174,12 +166,35 @@ namespace Fastnet.Music.Data
                 .HasIndex(e => new { e.ArtistId, e.AlphamericName })
                 .IsUnique();
 
-            modelBuilder.Entity<Performer>()
-                .HasIndex(e => new {e.Type, e.Name })
+            modelBuilder.Entity<CompositionPerformance>()
+                .HasKey(k => new { k.CompositionId, k.PerformanceId })
+                ;
+
+            modelBuilder.Entity<CompositionPerformance>()
+                .HasOne(aw => aw.Composition)
+                .WithMany(x => x.CompositionPerformances)
+                .HasForeignKey(x => x.CompositionId)
+                .OnDelete(DeleteBehavior.NoAction)
+                ;
+
+
+            modelBuilder.Entity<CompositionPerformance>()
+                .HasOne(aw => aw.Performance)
+                .WithMany(x => x.CompositionPerformances)
+                .HasForeignKey(x => x.PerformanceId)
+                .OnDelete(DeleteBehavior.NoAction)
+                ;
+
+            modelBuilder.Entity<CompositionPerformance>()
+                .HasIndex(e => e.PerformanceId)
                 .IsUnique();
 
             modelBuilder.Entity<Performance>()
                 .HasIndex(e => e.AlphamericPerformers);
+
+            modelBuilder.Entity<Performer>()
+                .HasIndex(e => new { e.Type, e.Name })
+                .IsUnique();
 
             modelBuilder.Entity<PerformancePerformer>()
                 .HasKey(k => new { k.PerformanceId, k.PerformerId });
@@ -237,11 +252,7 @@ namespace Fastnet.Music.Data
                 log.Warning($"work {work.Name} [W-{work.Id}] has no alphameric text");
                 work.AlphamericName = work.Name.ToAlphaNumerics().ToLower();
             }
-            //foreach (var performance in Performances.Where(w => w.AlphamericPerformers == null))
-            //{
-            //    log.Warning($"performance {performance.Performers} [P-{performance.Id}] has no alphameric text");
-            //    performance.AlphamericPerformers = performance.Performers.ToAlphaNumerics().ToLower();
-            //}
+
             foreach (var composition in Compositions.Where(w => w.AlphamericName == null))
             {
                 log.Warning($"composition {composition.Name} [C-{composition.Id}] has no alphameric text");
@@ -257,7 +268,20 @@ namespace Fastnet.Music.Data
 
             EnsurePerformersRefactored(options);
             EnsureArtistWorkRefactored();
+            EnsureCompositionPerformanceRefactored();
             SaveChanges();
+        }
+
+        private void EnsureCompositionPerformanceRefactored()
+        {
+            var performances = Performances.Where(p => p.CompositionId > 0);
+            foreach (var performance in performances)
+            {
+                var composition = Compositions.Find(performance.CompositionId);
+                var cp = this.AddPerformance(composition, performance);
+                performance.CompositionId = 0;
+                log.Information($"{cp.ToIdent()} added");
+            }
         }
 
         private void EnsureArtistWorkRefactored()
@@ -267,8 +291,9 @@ namespace Fastnet.Music.Data
             foreach(var work in works)
             {
                 var artist = Artists.Find(work.ArtistId);
-                this.AddWork(artist, work);
+                var aw = this.AddWork(artist, work);
                 work.ArtistId = 0;
+                log.Information($"{aw.ToIdent()} added");
             }
         }
 

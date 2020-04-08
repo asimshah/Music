@@ -4,5 +4,6 @@
     {
         const int MaxArtistNameLength = 128;
         const int MaxWorkNameLength = 256;
+        const int MaxCompressedNameLength = 16;
     }
 }

@@ -252,7 +252,7 @@ namespace Fastnet.Music.Metatools
             }
             var performance = new Performance
             {
-                Composition = composition,
+                //Composition = composition,
                 AlphamericPerformers = performers.ToAlphaNumerics(),
                 Year = year
             };
@@ -278,7 +278,8 @@ namespace Fastnet.Music.Metatools
                 performance.Movements.Add(track);
             }
             Debug.Assert(performance.Movements.Count > 0);
-            composition.Performances.Add(performance);
+            MusicDb.AddPerformance(composition, performance);
+            //composition.Performances.Add(performance);
             return performance;
         }
         private IEnumerable<string> RemoveDuplicateNames(IEnumerable<string> names)

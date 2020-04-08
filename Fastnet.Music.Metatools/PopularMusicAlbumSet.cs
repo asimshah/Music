@@ -10,7 +10,7 @@ using System.Threading.Tasks;
 
 namespace Fastnet.Music.Metatools
 {
-    public class PopularMusicAlbumSet : MusicSet //<PopularMusicTags>
+    public class PopularMusicAlbumSet : MusicSet 
     {
         public string ArtistName { get; protected internal set; }
         public string AlbumName { get; protected internal set; }
