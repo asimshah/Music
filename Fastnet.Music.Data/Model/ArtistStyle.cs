@@ -10,5 +10,9 @@ namespace Fastnet.Music.Data
         public long ArtistId { get; set; }
         public virtual Artist Artist { get; set; }
         public MusicStyles StyleId { get; set; }
+        public string ToIdent()
+        {
+            return $"{Artist.ToIdent()}[-{StyleId}]".Replace("][", string.Empty);
+        }
     }
 }

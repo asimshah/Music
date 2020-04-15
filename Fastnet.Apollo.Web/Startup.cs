@@ -57,6 +57,7 @@ namespace Fastnet.Apollo.Web
             services.Configure<SchedulerOptions>(Configuration.GetSection("SchedulerOptions"));
             services.Configure<MusicOptions>(Configuration.GetSection("MusicOptions"));
             services.Configure<FileSystemMonitorOptions>(Configuration.GetSection("FileSystemMonitorOptions"));
+            services.Configure<IndianClassicalInformation>(Configuration.GetSection("IndianClassicalInformation"));
             services.AddSingleton<BrowserMonitor>();
             var cs = environment.LocaliseConnectionString(Configuration.GetConnectionString("MusicDb"));
             services.AddDbContext<MusicDb>(options =>

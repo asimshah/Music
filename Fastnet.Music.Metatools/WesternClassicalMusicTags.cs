@@ -2,6 +2,7 @@
 
 namespace Fastnet.Music.Metatools
 {
+#pragma warning disable CS1591 // Missing XML comment for publicly visible type or member
     public class WesternClassicalMusicTags : MusicTags
     {
         public string Composer { get; set; }
@@ -11,4 +12,5 @@ namespace Fastnet.Music.Metatools
         public int MovementNumber { get; set; }
         public IEnumerable<string> Performers { get; set; }
     }
+#pragma warning restore CS1591 // Missing XML comment for publicly visible type or member
 }

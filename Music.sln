@@ -26,6 +26,8 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution 
 		.editorconfig = .editorconfig
 	EndProjectSection
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "RagaGenerator", "RagaGenerator\RagaGenerator.csproj", "{24F18F04-64E3-450D-91A0-228061686C34}"
+EndProject
 Global
 	GlobalSection(SharedMSBuildProjectFiles) = preSolution
 		..\SharedWeb\SharedWeb.projitems*{080852f5-8880-42cd-8a4c-03c8f0b69e2b}*SharedItemsImports = 13
@@ -67,6 +69,10 @@ Global
 		{B9C2AFD7-6FC8-4941-92F6-877D8D903744}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{B9C2AFD7-6FC8-4941-92F6-877D8D903744}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{B9C2AFD7-6FC8-4941-92F6-877D8D903744}.Release|Any CPU.Build.0 = Release|Any CPU
+		{24F18F04-64E3-450D-91A0-228061686C34}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{24F18F04-64E3-450D-91A0-228061686C34}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{24F18F04-64E3-450D-91A0-228061686C34}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{24F18F04-64E3-450D-91A0-228061686C34}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

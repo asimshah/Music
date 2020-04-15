@@ -63,6 +63,8 @@ namespace Fastnet.Music.Data
         public DbSet<ArtistWork> ArtistWorkList { get; set; }
         public DbSet<Composition> Compositions { get; set; }
         public DbSet<CompositionPerformance> CompositionPerformances { get; set; }
+        public DbSet<Raga> Ragas { get; set; }
+        public DbSet<RagaPerformance> RagaPerformances { get; set; }
         public DbSet<Performance> Performances { get; set; }
         public DbSet<Performer> Performers { get; set; }
         public DbSet<PerformancePerformer> PerformancePerformers { get; set; }
@@ -189,11 +191,20 @@ namespace Fastnet.Music.Data
                 .HasIndex(e => e.PerformanceId)
                 .IsUnique();
 
+            modelBuilder.Entity<RagaPerformance>()
+                .HasKey(k => new { k.ArtistId, k.RagaId, k.PerformanceId });
+
+            modelBuilder.Entity<RagaPerformance>()
+                .HasOne(rp => rp.Artist)
+                .WithMany(x => x.RagaPerformances)
+                .HasForeignKey(x => x.ArtistId);
+
             modelBuilder.Entity<Performance>()
                 .HasIndex(e => e.AlphamericPerformers);
 
             modelBuilder.Entity<Performer>()
-                .HasIndex(e => new { e.Type, e.Name })
+                //.HasIndex(e => new { e.Type, e.Name })
+                .HasIndex(e => new {e.AlphamericName, e.Type})
                 .IsUnique();
 
             modelBuilder.Entity<PerformancePerformer>()
@@ -266,10 +277,38 @@ namespace Fastnet.Music.Data
             log.Information($"{toBeRemoved.Count()} task items removed");
             TaskItems.ToList().ForEach(x => x.Status = Core.TaskStatus.Pending);
 
+            EnsurePerformanceMusicStyle();
             EnsurePerformersRefactored(options);
             EnsureArtistWorkRefactored();
             EnsureCompositionPerformanceRefactored();
+            EnsurePerformerAlphamericNames();
             SaveChanges();
+        }
+
+        private void EnsurePerformerAlphamericNames()
+        {
+            var performers = Performers.Where(x => string.IsNullOrWhiteSpace(x.AlphamericName));
+            foreach(var performer in performers)
+            {
+                performer.AlphamericName = performer.Name.ToAlphaNumerics();
+            }
+        }
+
+        private void EnsurePerformanceMusicStyle()
+        {
+            var wplist = Works.Where(x => x.Tracks.All(t => t.Performance != null))
+                .SelectMany(x => x.Tracks)
+                .Where(t => t.Performance.StyleId != t.Work.StyleId)
+                .Select(x => new { Work = x.Work, Performance = x.Performance})
+                .Distinct()
+                ;
+
+            foreach(var item in wplist)
+            {
+                item.Performance.StyleId = item.Work.StyleId;
+                log.Information($"{item.Performance.ToIdent()} set to {item.Performance.StyleId}");
+            }
+
         }
 
         private void EnsureCompositionPerformanceRefactored()

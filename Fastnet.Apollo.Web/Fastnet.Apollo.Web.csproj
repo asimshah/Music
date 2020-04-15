@@ -19,7 +19,7 @@
 
 
   <ItemGroup>
-    <PackageReference Include="Fastnet.Core.Web" Version="2.2.10" />
+    <PackageReference Include="Fastnet.Core.Web" Version="2.2004.13125729" />
     <PackageReference Include="Microsoft.AspNetCore.Mvc.NewtonsoftJson" Version="3.1.2" />
     <PackageReference Include="Microsoft.AspNetCore.SpaServices.Extensions" Version="3.1.2" />
     <PackageReference Include="Microsoft.EntityFrameworkCore.Tools" Version="3.1.2">

@@ -8,9 +8,9 @@ using System.Linq;
 
 namespace Fastnet.Music.Data
 {
-    public class Work : IIdentifier, INameParsing, IPlayable
+    public class Work : EntityBase, INameParsing, IPlayable
     {        
-        public long Id { get; set; }
+        public override long Id { get; set; }
         public Guid UID { get; set; }
         [Required, MaxLength(ILengthConstants.MaxWorkNameLength)]
         public string Name { get; set; }

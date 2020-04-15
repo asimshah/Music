@@ -28,12 +28,14 @@ namespace Fastnet.Apollo.Web
         private readonly MusicOptions options;
         private readonly IServiceProvider serviceProvider;
         private readonly string connectionString;
-        public TaskRunner(IServiceProvider sp, IOptions<MusicOptions> options,
+        private readonly IndianClassicalInformation indianClassicalInformation;
+        public TaskRunner(IServiceProvider sp, IOptions<MusicOptions> options, IOptions<IndianClassicalInformation> iciOptions,
             IConfiguration cfg, IWebHostEnvironment environment,
             ILogger<TaskRunner> logger) : base(logger)
         {
             this.serviceProvider = sp;
             this.options = options.Value;
+            this.indianClassicalInformation = iciOptions.Value;
             maxConsumerThreads = Math.Max(1, this.options.MaxTaskThreads);
             connectionString = environment.LocaliseConnectionString(cfg.GetConnectionString("MusicDb"));
         }
@@ -56,7 +58,7 @@ namespace Fastnet.Apollo.Web
         {
             for(int i = 0; i < maxConsumerThreads;++i)
             {
-                var th = new TaskHost(this.serviceProvider, options, TaskQueue, connectionString, cancellationToken);
+                var th = new TaskHost(this.serviceProvider, options, TaskQueue, indianClassicalInformation, connectionString, cancellationToken);
                 var t = Task.Run(async () =>
                 {
                     while (!cancellationToken.IsCancellationRequested)

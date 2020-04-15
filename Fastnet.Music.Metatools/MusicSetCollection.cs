@@ -21,7 +21,11 @@ namespace Fastnet.Music.Metatools
         /// <summary>
         /// files is a set of music files fom the same opus (ie. originalyl from the same disk folder)
         /// </summary>
+        /// <param name="musicOptions"></param>
+        /// <param name="musicDb"></param>
+        /// <param name="musicFolder"></param>
         /// <param name="files"></param>
+        /// <param name="taskItem"></param>
         internal MusicSetCollection(MusicOptions musicOptions, MusicDb musicDb, OpusFolder musicFolder, List<MusicFile> files, TaskItem taskItem)
         {
             this.musicOptions = musicOptions;

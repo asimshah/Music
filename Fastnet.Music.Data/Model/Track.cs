@@ -4,9 +4,9 @@ using System.ComponentModel.DataAnnotations;
 
 namespace Fastnet.Music.Data
 {
-    public class Track : IIdentifier, INameParsing
+    public class Track : EntityBase, INameParsing
     {
-        public long Id { get; set; }
+        public override long Id { get; set; }
         public int Number { get; set; }
         /// <summary>
         /// Valid if this track is a movement in some performance

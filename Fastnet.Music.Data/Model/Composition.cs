@@ -8,9 +8,9 @@ namespace Fastnet.Music.Data
     public class Composition : EntityBase
     {
         public override long Id { get; set; }
-        [Required, MaxLength(512)]
+        [Required, MaxLength(ILengthConstants.MaxCompositionNameLength)]
         public string Name { get; set; }
-        [MaxLength(512)]
+        [MaxLength(ILengthConstants.MaxCompositionNameLength)]
         public string AlphamericName { get; set; }
         [MaxLength(ILengthConstants.MaxCompressedNameLength)]
         public string CompressedName { get; set; }

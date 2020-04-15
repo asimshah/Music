@@ -37,7 +37,7 @@ namespace Fastnet.Music.Metatools
                     .GroupBy(gb => new { gb.artist, alphaMericWorkname = gb.work.ToAlphaNumerics() });
                 foreach (var group in artistAndWorkGroups.OrderBy(k => k.Key.artist))
                 {
-                    var musicStyle = group.First().file.Style;
+                    //var musicStyle = group.First().file.Style;
                     var musicFilesForSet = group.Select(g => g.file).OrderBy(f => f.GetTagIntValue("TrackNumber"));
                     Debug.Assert(musicFilesForSet.Count() > 0);
                     var setWC = new WesternClassicalCompositionSet(musicDb, musicOptions, group.Key.artist, group.First().work, musicFilesForSet, this.taskItem);

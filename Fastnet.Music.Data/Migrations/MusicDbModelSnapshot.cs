@@ -406,6 +406,9 @@ namespace Fastnet.Music.Data.Migrations
                         .HasColumnType("nvarchar(2048)")
                         .HasMaxLength(2048);
 
+                    b.Property<int>("StyleId")
+                        .HasColumnType("int");
+
                     b.Property<int>("Year")
                         .HasColumnType("int");
 
@@ -441,6 +444,10 @@ namespace Fastnet.Music.Data.Migrations
                         .HasColumnType("bigint")
                         .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
 
+                    b.Property<string>("AlphamericName")
+                        .HasColumnType("nvarchar(128)")
+                        .HasMaxLength(128);
+
                     b.Property<string>("Name")
                         .HasColumnType("nvarchar(128)")
                         .HasMaxLength(128);
@@ -450,9 +457,9 @@ namespace Fastnet.Music.Data.Migrations
 
                     b.HasKey("Id");
 
-                    b.HasIndex("Type", "Name")
+                    b.HasIndex("AlphamericName", "Type")
                         .IsUnique()
-                        .HasFilter("[Name] IS NOT NULL");
+                        .HasFilter("[AlphamericName] IS NOT NULL");
 
                     b.ToTable("Performers");
                 });
@@ -508,6 +515,51 @@ namespace Fastnet.Music.Data.Migrations
                     b.HasIndex("PlaylistId");
 
                     b.ToTable("PlaylistItems");
+                });
+
+            modelBuilder.Entity("Fastnet.Music.Data.Raga", b =>
+                {
+                    b.Property<long>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bigint")
+                        .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
+
+                    b.Property<string>("AlphamericName")
+                        .HasColumnType("nvarchar(512)")
+                        .HasMaxLength(512);
+
+                    b.Property<string>("CompressedName")
+                        .HasColumnType("nvarchar(16)")
+                        .HasMaxLength(16);
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(512)")
+                        .HasMaxLength(512);
+
+                    b.HasKey("Id");
+
+                    b.ToTable("Ragas");
+                });
+
+            modelBuilder.Entity("Fastnet.Music.Data.RagaPerformance", b =>
+                {
+                    b.Property<long>("ArtistId")
+                        .HasColumnType("bigint");
+
+                    b.Property<long>("RagaId")
+                        .HasColumnType("bigint");
+
+                    b.Property<long>("PerformanceId")
+                        .HasColumnType("bigint");
+
+                    b.HasKey("ArtistId", "RagaId", "PerformanceId");
+
+                    b.HasIndex("PerformanceId");
+
+                    b.HasIndex("RagaId");
+
+                    b.ToTable("RagaPerformances");
                 });
 
             modelBuilder.Entity("Fastnet.Music.Data.TaskItem", b =>
@@ -854,6 +906,27 @@ namespace Fastnet.Music.Data.Migrations
                     b.HasOne("Fastnet.Music.Data.Playlist", "Playlist")
                         .WithMany("Items")
                         .HasForeignKey("PlaylistId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+                });
+
+            modelBuilder.Entity("Fastnet.Music.Data.RagaPerformance", b =>
+                {
+                    b.HasOne("Fastnet.Music.Data.Artist", "Artist")
+                        .WithMany("RagaPerformances")
+                        .HasForeignKey("ArtistId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("Fastnet.Music.Data.Performance", "Performance")
+                        .WithMany()
+                        .HasForeignKey("PerformanceId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("Fastnet.Music.Data.Raga", "Raga")
+                        .WithMany()
+                        .HasForeignKey("RagaId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
                 });

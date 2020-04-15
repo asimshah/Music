@@ -33,18 +33,17 @@ namespace Fastnet.Apollo.Web.Controllers
         private static readonly Regex ipadRegex = new Regex(@"(android|ipad|playbook|silk|bb\d+|meego).+mobile|avantgo|bada\/|blackberry|blazer|compal|elaine|fennec|hiptop|iemobile|ip(hone|od)|iris|kindle|lge |maemo|midp|mmp|mobile.+firefox|netfront|opera m(ob|in)i|palm( os)?|phone|p(ixi|re)\/|plucker|pocket|psp|series(4|6)0|symbian|treo|up\.(browser|link)|vodafone|wap|windows ce|xda|xiino", RegexOptions.IgnoreCase | RegexOptions.Multiline | RegexOptions.Compiled);
         private MusicOptions musicOptions;
         private readonly string contentRootPath;
-        //private readonly SchedulerService ss;
         private readonly MusicServerOptions musicServerOptions;
         private readonly MusicDb musicDb;
         private readonly TaskRunner taskRunner;
         private readonly TaskPublisher taskPublisher;
-        public LibraryController(/*SchedulerService schedulerService ,*/ IWebHostEnvironment env,
+        public LibraryController( IWebHostEnvironment env,
             IOptions<MusicServerOptions> mso, /*IServiceProvider sp,*/
             TaskPublisher tp,  TaskRunner tr,
+            //IOptions<IndianClassicalInformation> indianClassical,
             IOptionsMonitor<MusicOptions> mo, ILogger<LibraryController> logger, MusicDb mdb) : base(logger, env)
         {
             this.musicOptions = mo.CurrentValue;
-            //this.ss = schedulerService;// hs as SchedulerService;
             mo.OnChangeWithDelay((opt) =>
             {
                 this.musicOptions = opt;
@@ -476,7 +475,7 @@ namespace Fastnet.Apollo.Web.Controllers
         [HttpGet("repair/performers")]
         public async Task<IActionResult> RepairPerformers()
         {
-            SqlServerRetryingExecutionStrategy? strategy = musicDb.Database.CreateExecutionStrategy() as SqlServerRetryingExecutionStrategy;
+            SqlServerRetryingExecutionStrategy strategy = musicDb.Database.CreateExecutionStrategy() as SqlServerRetryingExecutionStrategy;
             if (strategy != null)
             {
                 await strategy.ExecuteAsync(async () =>
@@ -540,24 +539,6 @@ namespace Fastnet.Apollo.Web.Controllers
         {
             log.Information("Music scanner started");
 
-            //foreach (var si in new MusicStyleCollection(musicOptions))
-            //{
-            //    var works = musicDb.Works.Where(x => x.StyleId == si.Style);
-            //    foreach (var work in works)
-            //    {
-            //        var workFiles = work.Tracks.SelectMany(x => x.MusicFiles)
-            //            .Where(mf => mf.IsGenerated == false)
-            //            .ToArray();
-            //        if (workFiles.All(mf => System.IO.File.Exists(mf.File) == false))
-            //        {
-            //            var roots = workFiles.Select(x => x.GetRootPath()).Distinct(StringComparer.CurrentCultureIgnoreCase);
-            //            foreach (var root in roots)
-            //            {
-            //                //var task = CreateTask(db, style, TaskType.DeletedPath, root);
-            //            }
-            //        }
-            //    } 
-            //}
             foreach (var si in new MusicStyleCollection(musicOptions))
             {
                 await taskPublisher.AddTask(si.Style);

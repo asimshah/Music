@@ -79,15 +79,10 @@ namespace Fastnet.Apollo.Web
             taskItem.Status = Music.Core.TaskStatus.Finished;
             taskItem.FinishedAt = DateTimeOffset.Now;
             await db.SaveChangesAsync();
-            //if (dc.DeletedArtistId.HasValue)
-            //{
-            //    await this.playManager.SendArtistDeleted(dc.DeletedArtistId.Value);
-            //}
             foreach(var id in dc.DeletedArtistList)
             {
                 await this.playManager.SendArtistDeleted(id);
             }
-            //else if (dc.ModifiedArtistId.HasValue)
             foreach (var id in dc.ModifiedArtistList)
             {
                 var shouldSend = true;

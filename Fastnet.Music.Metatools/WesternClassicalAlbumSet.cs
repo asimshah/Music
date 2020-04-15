@@ -20,7 +20,7 @@ namespace Fastnet.Music.Metatools
                 "Various Composers"
                 : MusicOptions.ReplaceAlias(FirstFile.GetArtistName() ?? FirstFile.Musician);
             this.AlbumName = FirstFile.GetAlbumName() ?? FirstFile.OpusName;
-            this.YearNumber = FirstFile.GetYear() ?? 0;
+            //this.YearNumber = FirstFile.GetYear() ?? 0;
         }
     }
 }

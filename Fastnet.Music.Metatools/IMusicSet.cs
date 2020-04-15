@@ -6,9 +6,7 @@ namespace Fastnet.Music.Metatools
 {
     public interface IMusicSet
     {
-        //IEnumerable<MusicTags> CustomTagFileTagList { get; }
         string Name { get; }
-        Task<CatalogueResult> CatalogueAsync();
-        //void SetMusicDb(MusicDb musicDb);
+        Task<CatalogueResultBase> CatalogueAsync();
     }
 }

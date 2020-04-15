@@ -7,7 +7,7 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="Fastnet.Core" Version="2.2.8" />
+    <PackageReference Include="Fastnet.Core" Version="2.2004.13125653" />
     <PackageReference Include="Microsoft.Extensions.Logging.Abstractions" Version="3.1.2" />
     <PackageReference Include="NAudio" Version="1.10.0" />
     <PackageReference Include="NAudio.Lame" Version="1.1.0" />

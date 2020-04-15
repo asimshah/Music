@@ -22,8 +22,12 @@ namespace Fastnet.Apollo.Web
     {
         private TaskItem taskItem;
         private readonly PlayManager playManager;
-        public CataloguePath(MusicOptions options, long taskId, string connectionString, BlockingCollection<TaskQueueItem> taskQueue, PlayManager pm) : base(options, taskId, connectionString, taskQueue)
+        private readonly IndianClassicalInformation indianClassicalInformation;
+        public CataloguePath(MusicOptions options, long taskId, string connectionString,
+            IndianClassicalInformation ici,
+            BlockingCollection<TaskQueueItem> taskQueue, PlayManager pm) : base(options, taskId, connectionString, taskQueue)
         {
+            this.indianClassicalInformation = ici;
             this.playManager = pm;
         }
         protected override async Task RunTask()
@@ -42,33 +46,34 @@ namespace Fastnet.Apollo.Web
                             var cr = item;//.result;
                             if (cr.Status == CatalogueStatus.Success && item.MusicSet != null)
                             {
-                                if (cr.TaskItem != null && cr.TaskItem.Id > 0)
-                                {
-                                    // possibly do not queue resampling tasks
-                                    if (cr.TaskItem.Type != TaskType.ResampleWork)
-                                    {
-                                        QueueTask(cr.TaskItem);
-                                    }
-                                }
-                                switch (cr.MusicSetType)
-                                {
-                                    case Type T when T == typeof(PopularMusicAlbumSet) || T == typeof(WesternClassicalAlbumSet):
-                                        log.Information($"{taskItem} {T.Name} {cr.ArtistName} {cr.ArtistDescr}, {cr.WorkName} {cr.WorkDescr}, {cr.WorkTrackCount} tracks {cr.TrackContent}");
-                                        break;
-                                    case Type T when T == typeof(WesternClassicalCompositionSet):
-                                        //if (cr.Performance.Movements.Count() == 0)
-                                        if (cr.PerformanceMovementCount == 0)
-                                        {
-                                            log.Warning($"{cr.CompositionName} {cr.CompositionDescr}, \"{cr.PerformersCSV}\" {cr.PerformanceDescr} has no movements");
-                                        }
-                                        //var work = cr.Performance.Movements.Select(m => m.Work).First();
-                                        log.Information($"{taskItem} {T.Name} {cr.ArtistName} {cr.ArtistDescr}, {cr.CompositionName} {cr.CompositionDescr}, {cr.PerformanceMovementCount} movements, \"{cr.PerformersCSV}\" {cr.PerformanceDescr} (from {cr.WorkName} {cr.WorkDescr})");
-                                        break;
-                                }
+                                //if (cr.TaskItem != null && cr.TaskItem.Id > 0)
+                                //{
+                                //    // possibly do not queue resampling tasks
+                                //    if (cr.TaskItem.Type != TaskType.ResampleWork)
+                                //    {
+                                //        QueueTask(cr.TaskItem);
+                                //    }
+                                //}
+                                //switch (cr.MusicSetType)
+                                //{
+                                //    case Type T when T == typeof(PopularMusicAlbumSet) || T == typeof(WesternClassicalAlbumSet):
+                                //        log.Information($"{taskItem} {T.Name} {cr.ArtistName} {cr.ArtistDescr}, {cr.WorkName} {cr.WorkDescr}, {cr.WorkTrackCount} tracks {cr.TrackContent}");
+                                //        break;
+                                //    case Type T when T == typeof(WesternClassicalCompositionSet):
+                                //        //if (cr.Performance.Movements.Count() == 0)
+                                //        if (cr.PerformanceMovementCount == 0)
+                                //        {
+                                //            log.Warning($"{cr.CompositionName} {cr.CompositionDescr}, \"{cr.PerformersCSV}\" {cr.PerformanceDescr} has no movements");
+                                //        }
+                                //        //var work = cr.Performance.Movements.Select(m => m.Work).First();
+                                //        log.Information($"{taskItem} {T.Name} {cr.ArtistName} {cr.ArtistDescr}, {cr.CompositionName} {cr.CompositionDescr}, {cr.PerformanceMovementCount} movements, \"{cr.PerformersCSV}\" {cr.PerformanceDescr} (from {cr.WorkName} {cr.WorkDescr})");
+                                //        break;
+                                //}
+                                log.Information($"{taskItem} {cr.MusicSetType.Name} {cr}");
                                 // send hub message that artist is new/modified
-                                if (cr.ArtistType != ArtistType.Various)
+                                foreach (var id in cr.ArtistIdListForNotification)
                                 {
-                                    await this.playManager.SendArtistNewOrModified(cr.ArtistId);
+                                    await this.playManager.SendArtistNewOrModified(id);
                                 }
                             }
                         }
@@ -81,7 +86,7 @@ namespace Fastnet.Apollo.Web
                 }
             }
         }
-        private async Task<List<CatalogueResult>> CatalogueAsync(MusicDb db, PathData pd)
+        private async Task<List<CatalogueResultBase>> CatalogueAsync(MusicDb db, PathData pd)
         {
             db.ChangeTracker.AutoDetectChangesEnabled = false;
             taskItem = await db.TaskItems.FindAsync(taskId);
@@ -98,9 +103,8 @@ namespace Fastnet.Apollo.Web
                     }
                     return result;
                 };
-                var results = new List<CatalogueResult>();
+                var results = new List<CatalogueResultBase>();
                 var folder = new OpusFolder(musicOptions, pd);
-                //if (forceChanges == true || folder.CheckForChanges(db))
                 if (forceChanges == true || changesPresent(folder))
                 {
                     var delay = GetRandomDelay();
@@ -113,7 +117,7 @@ namespace Fastnet.Apollo.Web
                 else
                 {
                     taskItem.Status = Music.Core.TaskStatus.Finished;
-                    results.Add(new CatalogueResult { Status = CatalogueStatus.Success });
+                    //results.Add(new CatalogueResult { Status = CatalogueStatus.Success });
                     log.Information($"{taskItem} starting {folder.ToString()} no update required");
                 }
                 taskItem.FinishedAt = DateTimeOffset.Now;
@@ -126,9 +130,9 @@ namespace Fastnet.Apollo.Web
                 throw new CatalogueFailed { TaskId = taskId };
             }
         }
-        private async Task<List<CatalogueResult>> ProcessFolderAsync(MusicDb db, OpusFolder folder, ChangesDetected changes)
+        private async Task<List<CatalogueResultBase>> ProcessFolderAsync(MusicDb db, OpusFolder folder, ChangesDetected changes)
         {
-            var results = new List<CatalogueResult>();
+            var results = new List<CatalogueResultBase>();
             db.Database.SetCommandTimeout(TimeSpan.FromMinutes(10));
             StepTimer st = null;
             if (musicOptions.TimeCatalogueSteps)
@@ -144,7 +148,7 @@ namespace Fastnet.Apollo.Web
                     shouldDeleteMusicFiles = true;
                     break;
             }
-            if (/*true ||*/ taskItem.Force || shouldDeleteMusicFiles)
+            if (taskItem.Force || shouldDeleteMusicFiles)
             {
                 var deletedFilesCount = folder.RemoveCurrentMusicFiles(db); st?.Time("Removal");
                 if (deletedFilesCount > 0)
@@ -155,7 +159,7 @@ namespace Fastnet.Apollo.Web
             var musicFiles = await WriteAudioFilesAsync(db, folder); st?.Time("MusicFiles to DB");
             if (musicFiles.Count() > 0) // count is 0 most often when trying to find singles for an artist
             {
-                await UpdateTagsAsync(db, musicFiles); st?.Time("Extract tags");
+                await UpdateTagsAsync(db, musicFiles, indianClassicalInformation); st?.Time("Extract tags");
                 var musicSets = GetMusicSets(db, folder, musicFiles); st?.Time("Split into sets");
                 if (musicSets != null)
                 {
@@ -164,49 +168,49 @@ namespace Fastnet.Apollo.Web
                     {
                         var cr = await set.CatalogueAsync(); st?.Time($"Set {i++ + 1}");
                         results.Add(cr);
-                        if (cr.Status == CatalogueStatus.Success)
-                        {
-                            switch (cr.MusicSetType)
-                            {
-                                case Type T when T == typeof(PopularMusicAlbumSet) || T == typeof(WesternClassicalAlbumSet):
-                                    if (cr.WorkName == string.Empty)
-                                    {
-                                        log.Trace($"Album missing");
-                                    }
-                                    else if (cr.WorkTrackCount == 0)
-                                    {
-                                        log.Trace($"Work has no tracks");
-                                    }
-                                    break;
-                                case Type T when T == typeof(WesternClassicalCompositionSet):
-                                    if (cr.CompositionName == string.Empty)
-                                    {
-                                        log.Trace($"Composition missing");
-                                    }
-                                    if (cr.PerformersCSV == string.Empty)
-                                    {
-                                        log.Trace($"Performance missing");
-                                    }
-                                    else if (cr.PerformanceMovementCount == 0)
-                                    {
-                                        log.Trace($"Performance has no movements");
-                                    }
+                        //if (cr.Status == CatalogueStatus.Success)
+                        //{
+                        //    switch (cr.MusicSetType)
+                        //    {
+                        //        case Type T when T == typeof(PopularMusicAlbumSet) || T == typeof(WesternClassicalAlbumSet):
+                        //            if (cr.WorkName == string.Empty)
+                        //            {
+                        //                log.Trace($"Album missing");
+                        //            }
+                        //            else if (cr.WorkTrackCount == 0)
+                        //            {
+                        //                log.Trace($"Work has no tracks");
+                        //            }
+                        //            break;
+                        //        case Type T when T == typeof(WesternClassicalCompositionSet):
+                        //            if (cr.CompositionName == string.Empty)
+                        //            {
+                        //                log.Trace($"Composition missing");
+                        //            }
+                        //            if (cr.PerformersCSV == string.Empty)
+                        //            {
+                        //                log.Trace($"Performance missing");
+                        //            }
+                        //            else if (cr.PerformanceMovementCount == 0)
+                        //            {
+                        //                log.Trace($"Performance has no movements");
+                        //            }
 
-                                    break;
-                            }
-                        }
+                        //            break;
+                        //    }
+                        //}
                     } 
                 }                
             }
             else
             {
-                results.Add(new CatalogueResult { Status = CatalogueStatus.Success });
+                //results.Add(new CatalogueResult { Status = CatalogueStatus.Success });
             }
             return results;
         }
         private IEnumerable<IMusicSet> GetMusicSets(MusicDb db, OpusFolder musicFolder, List<MusicFile> files)
         {
-            //Debug.Assert(ValidateMusicFileSet(db, files) == true);
+
             if (ValidateMusicFileSet(db, files))
             {
                 var style = files.First().Style;
@@ -217,6 +221,8 @@ namespace Fastnet.Apollo.Web
                         return new PopularMusicSetCollection(musicOptions, db, musicFolder, files, taskItem);
                     case MusicStyles.WesternClassical:
                         return new WesternClassicalMusicSetCollection(musicOptions, db, musicFolder, files, taskItem);
+                    case MusicStyles.IndianClassical:
+                        return new IndianClassicalMusicSetCollection(musicOptions, db, musicFolder, files, taskItem);
                 }
             }
             else
@@ -254,11 +260,11 @@ namespace Fastnet.Apollo.Web
             }
             return true;
         }
-        private async Task UpdateTagsAsync(MusicDb db, List<MusicFile> files/*, bool force*/)
+        private async Task UpdateTagsAsync(MusicDb db, List<MusicFile> files, IndianClassicalInformation ici)
         {
             foreach (var musicFile in files)
             {
-                await db.UpdateTagsAsync(musicFile/*, force*/);
+                await db.UpdateTagsAsync(musicFile, ici);
             }
         }
         private async Task<List<MusicFile>> WriteAudioFilesAsync(MusicDb db, OpusFolder folder)

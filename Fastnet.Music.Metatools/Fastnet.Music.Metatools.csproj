@@ -3,10 +3,11 @@
     <TargetFramework>netstandard2.1</TargetFramework>
     <Version>2.4.86</Version>
     <AssemblyVersion>2.$([System.DateTime]::Now.ToString('yyyy')).$([System.DateTime]::Now.ToString('Mdd')).$([System.DateTime]::Now.ToString('HHmm'))</AssemblyVersion>
+    <GenerateDocumentationFile>true</GenerateDocumentationFile>
   </PropertyGroup>
-  <Target Name="PreBuild" BeforeTargets="PreBuildEvent">
-    <Exec Command="rem powershell .\BumpProjectVersion.ps1 $(ProjectPath) $(DeployOnBuild)" />
-  </Target>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
+    <NoWarn>1701;1702;CS1591</NoWarn>
+  </PropertyGroup>
   <ItemGroup>
     <PackageReference Include="Fastnet.Music.Taglib" Version="2.4.19" />
     <PackageReference Include="FlacLibSharp" Version="3.2.0" />

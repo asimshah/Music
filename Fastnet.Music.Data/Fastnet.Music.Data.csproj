@@ -1,11 +1,18 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
     <TargetFramework>netstandard2.1</TargetFramework>
-    <Version>2.5.2</Version>
+    <Version>2.5.3</Version>
     <AssemblyVersion>2.$([System.DateTime]::Now.ToString('yyyy')).$([System.DateTime]::Now.ToString('Mdd')).$([System.DateTime]::Now.ToString('HHmm'))</AssemblyVersion>
   </PropertyGroup>
-  <Target Name="PreBuild" BeforeTargets="PreBuildEvent">
-    <Exec Command="rem powershell .\BumpProjectVersion.ps1 $(ProjectPath)" />
+  <PropertyGroup>
+    <GenerateNuspecDependsOn>$(GenerateNuspecDependsOn);SetPackageVersion</GenerateNuspecDependsOn>
+  </PropertyGroup>
+  <Target Name="SetPackageVersion" DependsOnTargets="Build">
+    <PropertyGroup>
+      <!--<PackageVersion>$([System.DateTime]::Now.ToString(&quot;yyyy.MM.dd.HHmmss&quot;))</PackageVersion>-->
+      <!--You can customize the format and the rule about how version increases here.-->
+      <PackageVersion>$([System.DateTime]::Now.ToString("2.yyMM.dHHmmss"))</PackageVersion>
+    </PropertyGroup>
   </Target>
   <ItemGroup>
     <Compile Remove="Migrations\20191115151925_AddAlphamericColumns.cs" />
@@ -18,7 +25,7 @@
     <Compile Remove="Migrations\20200408112544_ConvertCompositionPerformanceToManyToMany.Designer.cs" />
   </ItemGroup>
   <ItemGroup>
-    <PackageReference Include="Fastnet.Music.Core" Version="2.4.7" />
+    <PackageReference Include="Fastnet.Music.Core" Version="2.2004.13125853" />
     <PackageReference Include="Microsoft.EntityFrameworkCore.Proxies" Version="3.1.2" />
     <PackageReference Include="Microsoft.EntityFrameworkCore.SqlServer" Version="3.1.2" />
     <PackageReference Include="Microsoft.EntityFrameworkCore.Tools" Version="3.1.2">

@@ -4,7 +4,14 @@
     <Version>2.4.19</Version>
     <AssemblyVersion>2.$([System.DateTime]::Now.ToString('yyyy')).$([System.DateTime]::Now.ToString('Mdd')).$([System.DateTime]::Now.ToString('HHmm'))</AssemblyVersion>
   </PropertyGroup>
-  <Target Name="PreBuild" BeforeTargets="PreBuildEvent">
-    <Exec Command="rem powershell .\BumpProjectVersion.ps1 $(ProjectPath)" />
+  <PropertyGroup>
+    <GenerateNuspecDependsOn>$(GenerateNuspecDependsOn);SetPackageVersion</GenerateNuspecDependsOn>
+  </PropertyGroup>
+  <Target Name="SetPackageVersion" DependsOnTargets="Build">
+    <PropertyGroup>
+      <!--<PackageVersion>$([System.DateTime]::Now.ToString(&quot;yyyy.MM.dd.HHmmss&quot;))</PackageVersion>-->
+      <!--You can customize the format and the rule about how version increases here.-->
+      <PackageVersion>$([System.DateTime]::Now.ToString("2.yyMM.dHHmmss"))</PackageVersion>
+    </PropertyGroup>
   </Target>
 </Project>

@@ -31,13 +31,16 @@ namespace Fastnet.Music.Metatools
         protected IEnumerable<MusicFile> MusicFiles { get; private set; }
         protected OpusType OpusType { get; private set; }
         protected readonly TaskItem taskItem;
+        protected readonly int year;
         private readonly bool generated;
         /// <summary>
         /// create a a music set for the given music files in the given music style
         /// </summary>
+        /// <param name="db"></param>
         /// <param name="musicOptions"></param>
         /// <param name="musicStyle"></param>
         /// <param name="musicFiles"></param>
+        /// <param name="taskItem"></param>
         public MusicSet(MusicDb db, MusicOptions musicOptions, MusicStyles musicStyle, IEnumerable<MusicFile> musicFiles, TaskItem taskItem)
         {
             Debug.Assert(musicFiles.Count() > 0);
@@ -46,26 +49,22 @@ namespace Fastnet.Music.Metatools
             this.MusicOptions = musicOptions;
             this.MusicStyle = musicStyle;
             this.MusicFiles = musicFiles;
+            this.year = musicFiles.Select(f => f.GetYear() ?? 0).Max();
             this.taskItem = taskItem;
             this.FirstFile = musicFiles.First();
             this.OpusType = FirstFile.OpusType;
             this.generated = FirstFile.IsGenerated;
         }
         protected abstract string GetName();
-        public abstract Task<CatalogueResult> CatalogueAsync();
-        //protected async Task<string> ReadMusicTagJson()
-        //{
-        //    //var diskPath = Path.Combine(FirstFile.DiskRoot, FirstFile.StylePath, FirstFile.OpusPath);  //**NB** should this be FirstFile.GetRootPath()
-        //    var diskPath = FirstFile.GetRootPath();
-        //    var filename = Path.Combine(diskPath, ITEOBase.TagFile);
-        //    if (File.Exists(filename))
-        //    {
-        //        return await File.ReadAllTextAsync(filename);
-        //    }
-        //    return null;
-        //}
-        private Artist FindArtist(string name)
+        public abstract Task<CatalogueResultBase> CatalogueAsync();
+        /// <summary>
+        /// looks for an artist in the database but does not create one
+        /// </summary>
+        /// <param name="name"></param>
+        /// <returns></returns>
+        public Artist FindArtist(string name)
         {
+            // **Outstanding ** should this be looking for an artist with matching music style?
             MusicDb.Artists.Load();
             try
             {
@@ -77,6 +76,8 @@ namespace Fastnet.Music.Metatools
                 throw;
             }
         }
+
+
         protected async Task<Artist> GetArtistAsync(string name)
         {
             Debug.Assert(MusicDb != null);
@@ -84,29 +85,7 @@ namespace Fastnet.Music.Metatools
             Artist artist = FindArtist(name);
             if (artist == null)
             {
-                artist = new Artist
-                {
-                    UID = Guid.NewGuid(),
-                    Name = name,
-                    Type = ArtistType.Artist,
-                    OriginalName = name,
-                };
-                artist.ArtistStyles.Add(new ArtistStyle { Artist = artist, StyleId = MusicStyle });
-                log.Debug($"{taskItem} new artist instance for {name}, {artist.Id}");
-                if (this is PopularMusicAlbumSet && OpusType == OpusType.Collection)
-                {
-                    artist.Type = ArtistType.Various;
-                }
-                await MusicDb.Artists.AddAsync(artist);
-                try
-                {
-                    await MusicDb.SaveChangesAsync();
-                }
-                catch (Exception xe)
-                {
-                    log.Error(xe);
-                    throw;
-                }
+                artist = await CreateNewArtist(name);
             }
             if (artist.Type != ArtistType.Various)
             {
@@ -120,6 +99,36 @@ namespace Fastnet.Music.Metatools
             artist.LastModified = DateTimeOffset.Now;
             return artist;
         }
+
+        protected async Task<Artist> CreateNewArtist(string name)
+        {
+            Artist artist = new Artist
+            {
+                UID = Guid.NewGuid(),
+                Name = name,
+                Type = ArtistType.Artist,
+                OriginalName = name,
+            };
+            artist.ArtistStyles.Add(new ArtistStyle { Artist = artist, StyleId = MusicStyle });
+            log.Debug($"{taskItem} new artist instance for {name}, {artist.Id}");
+            if (this is PopularMusicAlbumSet && OpusType == OpusType.Collection)
+            {
+                artist.Type = ArtistType.Various;
+            }
+            await MusicDb.Artists.AddAsync(artist);
+            try
+            {
+                await MusicDb.SaveChangesAsync();
+            }
+            catch (Exception xe)
+            {
+                log.Error(xe);
+                throw;
+            }
+
+            return artist;
+        }
+
         protected Work GetWork(Artist artist, string name, int year)
         {
             Debug.Assert(MusicDb != null);

@@ -14,52 +14,6 @@ using System.Threading.Tasks;
 
 namespace Fastnet.Music.Data
 {
-    public class DeleteContext
-    {
-        //public long? ModifiedArtistId { get; private set; }
-        //public long? DeletedArtistId { get; private set; }
-        public List<long> ModifiedArtistList { get; set; } = new List<long>();
-        public List<long> DeletedArtistList { get; set; } = new List<long>();
-        private readonly object source;
-        //public DeleteContext(OpusFolder folder)
-        //{
-        //    source = folder;
-        //}
-        protected DeleteContext()
-        {
-
-        }
-        public DeleteContext(TaskItem item)
-        {
-            source = item;
-        }
-        public override string ToString()
-        {
-            switch (source)
-            {
-                //case OpusFolder f:
-                //    return f.ToContextDescription();
-                case TaskItem ti:
-                    return ti.ToContextDescription();
-            }
-            return "context unknown!";
-        }
-        public void SetModifiedArtistId(params long[] idList)
-        {
-            //this.ModifiedArtistId = id;
-            this.ModifiedArtistList.AddRange(idList);
-        }
-        public void SetDeletedArtistId(params long[] idList)
-        {
-            //this.DeletedArtistId = id;
-            //this.ModifiedArtistId = null;
-            this.DeletedArtistList.AddRange(idList);
-            foreach (var id in idList)
-            {
-                this.ModifiedArtistList.Remove(id);
-            }
-        }
-    }
     public static partial class Extensions
     {
         private static readonly ILogger log = ApplicationLoggerFactory.CreateLogger("Fastnet.Music.Data.Extensions");
@@ -93,83 +47,15 @@ namespace Fastnet.Music.Data
             musicDb.MusicFiles.Remove(mf);
             log.Information($"{context}: Musicfile [MF-{mf.Id}] deleted: {mf.File}");
         }
-        public static void Delete(this MusicDb musicDb, Performance performance, DeleteContext context)
+        /// <summary>
+        /// Gets a collection of Performer entries, creating any that are new
+        /// </summary>
+        /// <param name="db"></param>
+        /// <param name="list"></param>
+        /// <returns></returns>
+        public static IEnumerable<Performer> GetPerformers(this MusicDb db, IEnumerable<MetaPerformer> list)
         {
-            long artistId = performance.Composition.ArtistId;
-            foreach (var movement in performance.Movements)
-            {
-                movement.Performance = null;
-                // we do not delete movements here because
-                // a movement is a track and tracks are also in an album
-            }
-            performance.Movements.Clear();
-            var composition = performance.Composition;
-
-            //composition?.Performances.Remove(performance);
-            musicDb.RemovePerformance(composition, performance);
-            if (composition?.Performances.Count() == 0)
-            {
-                musicDb.Delete(composition, context);
-            }
-            var performersCSV = performance.GetAllPerformersCSV();
-            var ppList = performance.PerformancePerformers.ToArray();
-            foreach (var pp in ppList)
-            {
-                pp.Performance.PerformancePerformers.Remove(pp);
-                pp.Performer.PerformancePerformers.Remove(pp);
-            }
-            musicDb.PerformancePerformers.RemoveRange(ppList);
-            var performers = ppList.Select(x => x.Performer);
-            foreach (var performer in performers.ToArray())
-            {
-                var count = performer.PerformancePerformers.Count();
-                if (count == 0)
-                {
-                    musicDb.Performers.Remove(performer);
-                    log.Information($"{context}: [Pf-{performer.Id}] performer {performer.Name}, {performer.Type} deleted");
-                }
-            }
-            musicDb.Performances.Remove(performance);
-            context.SetModifiedArtistId(artistId);
-            log.Information($"{context}: Performance [P-{performance.Id}] deleted: {performersCSV}");
-        }
-        public static void RemovePlaylistItems<T>(this MusicDb musicDb, T entity)
-        {
-            PlaylistItemType itemType = PlaylistItemType.MusicFile;
-            long itemId = 0;
-            switch (entity)
-            {
-                case Performance p:
-                    itemType = PlaylistItemType.Performance;
-                    itemId = p.Id;
-                    break;
-                case Work w:
-                    itemType = PlaylistItemType.Work;
-                    itemId = w.Id;
-                    break;
-                case Track t:
-                    itemType = PlaylistItemType.Track;
-                    itemId = t.Id;
-                    break;
-                case MusicFile mf:
-                    itemType = PlaylistItemType.MusicFile;
-                    itemId = mf.Id;
-                    break;
-            }
-            var items = musicDb.PlaylistItems.Where(x => x.Type == itemType && x.ItemId == itemId).ToArray();
-            foreach (var item in items)
-            {
-                var playlist = item.Playlist;
-                item.Playlist = null;
-                playlist.Items.Remove(item);
-                musicDb.PlaylistItems.Remove(item);
-                //log.Information($"playlist item {item.Title} removed from {playlist.Name}");
-                if (playlist.Items.Count() == 0)
-                {
-                    musicDb.Playlists.Remove(playlist);
-                    //log.Information($"playlist {playlist.Name} removed");
-                }
-            }
+            return list.Select(n => db.GetPerformer(n));
         }
         /// <summary>
         /// Gets a collection of Performer entries, creating any that are new
@@ -180,10 +66,36 @@ namespace Fastnet.Music.Data
         /// <returns></returns>
         public static IEnumerable<Performer> GetPerformers(this MusicDb db, IEnumerable<string> names, PerformerType type)
         {
-            return names.Select(n => db.GetPerformer(n, type));
+            var list = names.Select(n => new MetaPerformer(type, n));
+            return db.GetPerformers(list);
+            //return names.Select(n => db.GetPerformer(n, type));
         }
         /// <summary>
         /// Gets the correspnding Performer nentry, creating one if required
+        /// </summary>
+        /// <param name="db"></param>
+        /// <param name="mp"></param>
+        /// <returns></returns>
+        public static Performer GetPerformer(this MusicDb db, MetaPerformer mp)
+        {
+            var alphamericName = mp.Name.ToAlphaNumerics();
+            db.Performers.Load();
+            var performer = db.Performers.Local
+                .SingleOrDefault(p => p.AlphamericName == alphamericName && p.Type == mp.Type);
+            if (performer == null)
+            {
+                performer = new Performer
+                {
+                    AlphamericName = alphamericName,
+                    Name = mp.Name,
+                    Type = mp.Type
+                };
+                db.Performers.Add(performer);
+            }
+            return performer;
+        }
+        /// <summary>
+        /// Gets the corresponding Performer nentry, creating one if required
         /// </summary>
         /// <param name="db"></param>
         /// <param name="name"></param>
@@ -191,21 +103,23 @@ namespace Fastnet.Music.Data
         /// <returns></returns>
         public static Performer GetPerformer(this MusicDb db, string name, PerformerType type)
         {
-            db.Performers.Load();
-            var performer = db.Performers.Local
-                .Where(p => p.Type == type)
-                .SingleOrDefault(p => p.Name.IsEqualIgnoreAccentsAndCase(name));
-            if (performer == null)
-            {
-                performer = new Performer
-                {
-                    Name = name,
-                    Type = type
-                };
-                db.Performers.Add(performer);
-                //log.Information($"new performer {name}");
-            }
-            return performer;
+            var mp = new MetaPerformer(type, name);
+            return db.GetPerformer(mp);
+            //var alphamericName = name.ToAlphaNumerics();
+            //db.Performers.Load();
+            //var performer = db.Performers.Local
+            //    .SingleOrDefault(p => p.AlphamericName == alphamericName && p.Type == type);
+            //if (performer == null)
+            //{
+            //    performer = new Performer
+            //    {
+            //        AlphamericName = alphamericName,
+            //        Name = name, 
+            //        Type = type
+            //    };
+            //    db.Performers.Add(performer);
+            //}
+            //return performer;
         }
         /// <summary>
         /// returns a collection of performers that exist in the database
@@ -221,9 +135,9 @@ namespace Fastnet.Music.Data
             foreach (var name in names)
             {
                 var performer = db.Performers
-                    .Where(p => p.Type == type)
-                    .ToArray()
-                    .SingleOrDefault(p => p.Name.IsEqualIgnoreAccentsAndCase(name));
+                    .SingleOrDefault(p => p.AlphamericName.ToLower() == name.ToAlphaNumerics().ToLower() && p.Type == type);
+                    //.ToArray()
+                    //.SingleOrDefault(p => p.Name.IsEqualIgnoreAccentsAndCase(name));
                 if (performer != null)
                 {
                     list.Add(performer);
@@ -231,32 +145,6 @@ namespace Fastnet.Music.Data
             }
             return list;
         }
-        //public static void RepairPerformer(this MusicDb db, string requiredName, string name)
-        //{
-        //    log.Debug($"repairing {requiredName}");
-        //    var validPerformers = db.Performers
-        //        .ToArray()
-        //        .Where(p => p.Name.IsEqualIgnoreAccentsAndCase(requiredName));
-        //    if (validPerformers.Count() > 1)
-        //    {
-        //        log.Information($"{requiredName} occurs {validPerformers.Count()} times");
-        //    }
-        //    var performers = db.Performers.ToArray()
-        //        .Where(p => p.Name.IsEqualIgnoreAccentsAndCase(name));
-        //    foreach (var performer in performers)
-        //    {
-        //        var validPerformer = validPerformers.SingleOrDefault(x => x.Type == performer.Type);
-        //        if (validPerformer == null)
-        //        {
-        //            // performer has to be replaced there is no target performer of the same type
-        //            log.Information($"{performer.Name} [{performer.Type}] has to be replaced there is no target performer of the same type");
-        //        }
-        //        else
-        //        {
-        //            db.ReplacePerformer(performer, validPerformer);
-        //        }
-        //    }
-        //}
         public static async Task ReplacePerformer(this MusicDb db, Performer performer, Performer validPerformer)
         {
             try
@@ -341,11 +229,9 @@ namespace Fastnet.Music.Data
             long artistId = composition.ArtistId;
             foreach (var performance in composition.Performances.ToArray())
             {
-                //performance.Composition = null;
                 musicDb.RemovePerformance(composition, performance);
                 musicDb.Delete(performance, context);
             }
-            //composition.Performances.Clear();
             musicDb.Compositions.Remove(composition);
             var artist = composition.Artist;
             artist?.Compositions.Remove(composition);
@@ -361,20 +247,16 @@ namespace Fastnet.Music.Data
         }
         private static void Delete(this MusicDb musicDb, Work work, DeleteContext context)
         {
-            //long artistId = work.ArtistId;
             var artistIds = work.Artists.Select(x => x.Id);
             foreach (var track in work.Tracks)
             {
                 track.Work = null;
                 musicDb.Delete(track, context);
             }
-            //var artist = work.Artist;
             var artists = work.Artists.ToArray();
             var list = work.ArtistWorkList.ToArray();
             musicDb.ArtistWorkList.RemoveRange(list);
             work.ArtistWorkList.Clear();
-            //artist?.Works.Remove(work);
-            //if (artist != null)
             foreach(var artist in artists)
             {
                 if (artist.Works.Count() == 0 && artist.Compositions.Count() == 0)
@@ -383,9 +265,125 @@ namespace Fastnet.Music.Data
                 }
             }
             musicDb.Works.Remove(work);
-
             context.SetModifiedArtistId(artistIds.ToArray());
             log.Information($"{context}: Work [W-{work.Id}] deleted: {work.Name}");
+        }
+        private static void Delete(this MusicDb musicDb, Performance performance, DeleteContext context)
+        {
+            long artistId = performance.Composition.ArtistId;
+            foreach (var movement in performance.Movements)
+            {
+                movement.Performance = null;
+                // we do not delete movements here because
+                // a movement is a track and tracks are also in an album
+            }
+            performance.Movements.Clear();
+            var compositions = Enumerable.Empty<Composition>();
+            var ragas = Enumerable.Empty<Raga>();
+            switch (performance.StyleId)
+            {
+                case MusicStyles.WesternClassical:
+                    compositions = performance.CompositionPerformances.Select(x => x.Composition);
+                    if (compositions.Count() > 1)
+                    {
+                        log.Error($"{performance.ToIdent()} is associated with more than one {performance.CompositionPerformances.Select(x => x.ToIdent()).ToCSV()}");
+                    }
+                    break;
+                case MusicStyles.IndianClassical:
+                    ragas = musicDb.RagaPerformances.Where(x => x.Performance == performance)
+                        .Select(x => x.Raga);
+                    break;
+            }
+            foreach (var composition in compositions)
+            {
+                musicDb.RemovePerformance(composition, performance);
+                if (composition.Performances.Count() == 0)
+                {
+                    musicDb.Delete(composition, context);
+                }
+            }
+            //foreach (var raga in ragas)
+            //{
+            //    var rpList = musicDb.RagaPerformances.Where(rp => rp.Performance == performance).ToArray();
+            //    var artists = rpList.Select(x => x.Artist);
+            //    musicDb.RagaPerformances.RemoveRange(rpList);
+            //    if (musicDb.RagaPerformances.Where(rp => rp.Performance == performance).Count() == 0)
+            //    {
+            //        musicDb.Delete(raga, context);
+            //    }
+            //    foreach(var artist in artists)
+            //    {
+            //        if(musicDb.RagaPerformances.Where(rp => rp.Artist == artist).Count() == 0)
+            //        {
+
+            //        }
+            //    }
+            //}
+            //var composition = performance.Composition;
+            //musicDb.RemovePerformance(composition, performance);
+            //if (composition?.Performances.Count() == 0)
+            //{
+            //    musicDb.Delete(composition, context);
+            //}
+            var performersCSV = performance.GetAllPerformersCSV();
+            var ppList = performance.PerformancePerformers.ToArray();
+            foreach (var pp in ppList)
+            {
+                pp.Performance.PerformancePerformers.Remove(pp);
+                pp.Performer.PerformancePerformers.Remove(pp);
+            }
+            musicDb.PerformancePerformers.RemoveRange(ppList);
+            var performers = ppList.Select(x => x.Performer);
+            foreach (var performer in performers.ToArray())
+            {
+                var count = performer.PerformancePerformers.Count();
+                if (count == 0)
+                {
+                    musicDb.Performers.Remove(performer);
+                    log.Information($"{context}: [Pf-{performer.Id}] performer {performer.Name}, {performer.Type} deleted");
+                }
+            }
+            musicDb.Performances.Remove(performance);
+            context.SetModifiedArtistId(artistId);
+            log.Information($"{context}: Performance [P-{performance.Id}] deleted: {performersCSV}");
+        }
+        private static void RemovePlaylistItems<T>(this MusicDb musicDb, T entity)
+        {
+            PlaylistItemType itemType = PlaylistItemType.MusicFile;
+            long itemId = 0;
+            switch (entity)
+            {
+                case Performance p:
+                    itemType = PlaylistItemType.Performance;
+                    itemId = p.Id;
+                    break;
+                case Work w:
+                    itemType = PlaylistItemType.Work;
+                    itemId = w.Id;
+                    break;
+                case Track t:
+                    itemType = PlaylistItemType.Track;
+                    itemId = t.Id;
+                    break;
+                case MusicFile mf:
+                    itemType = PlaylistItemType.MusicFile;
+                    itemId = mf.Id;
+                    break;
+            }
+            var items = musicDb.PlaylistItems.Where(x => x.Type == itemType && x.ItemId == itemId).ToArray();
+            foreach (var item in items)
+            {
+                var playlist = item.Playlist;
+                item.Playlist = null;
+                playlist.Items.Remove(item);
+                musicDb.PlaylistItems.Remove(item);
+                //log.Information($"playlist item {item.Title} removed from {playlist.Name}");
+                if (playlist.Items.Count() == 0)
+                {
+                    musicDb.Playlists.Remove(playlist);
+                    //log.Information($"playlist {playlist.Name} removed");
+                }
+            }
         }
     }
     public static partial class Extensions
@@ -616,7 +614,7 @@ namespace Fastnet.Music.Data
                 var cp = composition.CompositionPerformances.FirstOrDefault(x => x.Performance == performance);
                 if (cp == null)
                 {
-                    log.Error($"{performance.ToIdent()}  not found in CompositionPerformances for {composition.ToIdent()} {composition}");
+                    log.Error($"{performance.ToIdent()} not found in CompositionPerformances for {composition.ToIdent()} {composition}");
                 }
                 else
                 {
@@ -625,6 +623,21 @@ namespace Fastnet.Music.Data
                 } 
             }
         }
+        //public static void RemovePerformance(this MusicDb musicDb, Raga raga, Performance performance)
+        //{
+        //    if(raga != null)
+        //    {
+        //        var rpList = musicDb.RagaPerformances.Where(rp => rp.Performance == performance).ToArray();
+        //        if(rpList.Count() == 0)
+        //        {
+        //            log.Error($"{performance.ToIdent()} not found in RagaPerformances for {raga.ToIdent()}");
+        //        }
+        //        else
+        //        {
+        //            musicDb.RagaPerformances.RemoveRange(rpList);
+        //        }
+        //    }
+        //}
         public static ArtistWork AddWork(this MusicDb musicDb, Artist artist, Work work)
         {
             var aw = new ArtistWork { Artist = artist, Work = work };
@@ -647,5 +660,6 @@ namespace Fastnet.Music.Data
                 //log.Information($"{aw} removed");
             }            
         }
+
     }
 }

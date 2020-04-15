@@ -55,13 +55,15 @@ namespace Fastnet.Music.Metatools
         }
         public int RemoveCurrentMusicFiles(MusicDb db)
         {
+            var dc = new OpusDeleteContext(this);
+            var entityHelper = new EntityHelper(db, dc);
             int count = 0;
             var filesInDb = GetMusicFilesFromDb(db);
             foreach (var mf in filesInDb.ToArray())
             {
                 ++count;
-                var dc = new OpusDeleteContext(this);
-                db.Delete(mf, dc);
+                entityHelper.Delete(mf);
+                //db.Delete(mf, dc);
             }
             return count;
         }
@@ -158,23 +160,7 @@ namespace Fastnet.Music.Metatools
                 }
                 return r;
             }
-            //bool musicTagsAreNew()
-            //{
-            //    bool r = false;
-            //    if (HasMusicTags())
-            //    {
-            //        var tagFile = Path.Combine(Folderpath, ITEOBase.TagFile);
-            //        var tagTime = new DateTimeOffset(new FileInfo(tagFile).LastWriteTimeUtc, TimeSpan.Zero);
-            //        r = currentMusicFiles.Any(mf => mf.LastCataloguedAt < tagTime);
-            //    }
-            //    st.Time();
-            //    if (r)
-            //    {
-            //        changesDetected = ChangesDetected.MusicTagsAreNewer;
-            //        //log.Trace($"customTagsAreNew() returns true");
-            //    }
-            //    return r;
-            //}
+
             bool additionsOrDeletionsExist()
             {
                 var differences = filesOnDisk.Select(f => f.fi.FullName).Except(currentMusicFiles.Select(mf => mf.File), StringComparer.CurrentCultureIgnoreCase);
@@ -192,10 +178,17 @@ namespace Fastnet.Music.Metatools
                 bool r = false;
                 var works = currentMusicFiles.Select(mf => mf.Track).Select(x => x.Work).Distinct();
                 var artists = works.SelectMany(x => x.Artists)
-                    //.Select(x => x.Artist)
-                    .Union(currentMusicFiles.Select(mf => mf.Track).Where(x => x.Performance != null)
-                    .Select(x => x.Performance.Composition.Artist))
+                    .Union(currentMusicFiles.Where(mf => mf.Track.Performance != null)
+                    .Select(x => x.Track.Performance)
+                    .Where(x => x.Composition != null).Select(x => x.Composition.Artist))
                     .Distinct();
+                //var artistFromCompositions = performances.Where(x => x.Composition != null).Select(x => x.Composition.Artist);
+
+                //.Select(mf => mf.Track).Where(x => x.Performance != null)
+
+                //.Union(currentMusicFiles.Select(mf => mf.Track).Where(x => x.Performance != null)
+                //.Select(x => x.Performance.Composition.Artist))
+                //.Distinct();
                 foreach (var artist in artists.Where(a => a.Type != ArtistType.Various))
                 {
                     var f = artist.GetPortraitFile(MusicOptions);

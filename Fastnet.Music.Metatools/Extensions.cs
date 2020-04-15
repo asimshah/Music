@@ -3,6 +3,7 @@ using Fastnet.Core.Logging;
 using Fastnet.Music.Core;
 using Fastnet.Music.Data;
 using Fastnet.Music.TagLib;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using System;
 using System.Collections.Generic;
@@ -18,21 +19,26 @@ using IO = System.IO;
 
 namespace Fastnet.Music.Metatools
 {
+#pragma warning disable CS1591 // Missing XML comment for publicly visible type or member
     public static partial class Extensions
     {
         private static readonly ILogger log = ApplicationLoggerFactory.CreateLogger("Fastnet.Music.Metatools.Extensions");
     }
     public static partial class Extensions
     {
-        // musicdb extensions
+        //musicdb extensions
+
+
+
         /// <summary>
         /// Reads all the tags in the audio file and adds them to the database
         /// (Not all the tags are used)
         /// </summary>
         /// <param name="mf"></param>
+        /// <param name="ici"></param>
         /// <param name="db"></param>
         /// <returns></returns>
-        public static async Task UpdateTagsAsync(this MusicDb db, MusicFile mf/*, bool force = false*/)
+        public static async Task UpdateTagsAsync(this MusicDb db, MusicFile mf, IndianClassicalInformation ici)
         {
             if (/*force == true*/
                 /*||*/ mf.ParsingStage == MusicFileParsingStage.Unknown
@@ -48,7 +54,7 @@ namespace Fastnet.Music.Metatools
                 switch (mf.Encoding)
                 {
                     case EncodingType.flac:
-                        db.UpdateFlacTagsAsync(mf);
+                        db.UpdateFlacTagsAsync(mf, ici);
                         break;
                     default:
                         await db.UpdateMp3TagsAsync(mf);
@@ -58,6 +64,7 @@ namespace Fastnet.Music.Metatools
             }
         }
         public static bool ValidateTags(this MusicDb db, MusicFile mf)
+
         {
             bool result = true;
             bool isTagPresent(string tagName, bool logIfMissing = false)
@@ -84,6 +91,21 @@ namespace Fastnet.Music.Metatools
                 {
                     switch (mf.Style)
                     {
+                        case MusicStyles.IndianClassical:
+                            var requiredTags = new string[] { "Raga" };
+                            if (requiredTags.Any(t => !isTagPresent(t)))
+                            {
+                                result = false;
+                                if (requiredTags.Count() > 1)
+                                {
+                                    log.Error($"{mf.File} none of {(string.Join(", ", requiredTags))} found");
+                                }
+                                else
+                                {
+                                    log.Error($"{mf.File} tag {requiredTags.First()} not found");
+                                }
+                            }
+                            break;
                         case MusicStyles.WesternClassical:
                             // optional tags: these do  not need to be preent but we report if they are not
                             var optionalTags = new string[] { "Composer", "Composition", "Conductor", "Orchestra" };
@@ -135,17 +157,6 @@ namespace Fastnet.Music.Metatools
             var result = true;
             foreach (var work in db.Works)
             {
-                //var styles = work.Artist.ArtistStyles.Select(x => x.StyleId);
-
-                //var r = styles.Any(x => x == work.StyleId);
-                //if (!r)
-                //{
-                //    log.Warning($"Work {work.Name} [{work.Id}] is in style {work.StyleId} but artist {work.Artist} [W-{work.Artist.Id}] is not");
-                //    if (result == true)
-                //    {
-                //        result = false;
-                //    }
-                //}
                 var r = work.Tracks.Count() > 0;
                 if (!r)
                 {
@@ -241,7 +252,7 @@ namespace Fastnet.Music.Metatools
             log.Information("ValidatePerformances() completed");
             return result;
         }
-        private static void UpdateFlacTagsAsync(this MusicDb musicDb, MusicFile mf)
+        private static void UpdateFlacTagsAsync(this MusicDb musicDb, MusicFile mf, IndianClassicalInformation ici)
         {
             const string vorbisSeparators = ";\r\n\t";
             using (var file = new fsl.FlacFile(mf.File))
@@ -264,7 +275,6 @@ namespace Fastnet.Music.Metatools
                                 }
                                 values = subValues;
                             }
-                            //var value = string.Join("|", tag.Value.Select(x => x.Trim()).ToArray());
                             var value = string.Join("|", values);
                             var idTag = new IdTag
                             {
@@ -273,7 +283,6 @@ namespace Fastnet.Music.Metatools
                                 Value = value
                             };
                             mf.IdTags.Add(idTag);
-                            //await musicDb.IdTags.AddAsync(idTag);
                         }
                         catch (Exception xe)
                         {
@@ -294,102 +303,157 @@ namespace Fastnet.Music.Metatools
                         PictureData = picture.Data
                     };
                     mf.IdTags.Add(idTag);
-                    //await musicDb.IdTags.AddAsync(idTag);
                 }
                 else
                 {
                     log.Debug($"{mf.File} {pictures.Count()} pictures found - but no FlacLibSharp.PictureType.CoverFront");
                 }
-                if (mf.IdTags.SingleOrDefault(x => string.Compare(x.Name, "COMPOSITION", true) == 0) == null)
+                switch (mf.Style)
                 {
-                    var w = mf.IdTags.SingleOrDefault(x => string.Compare(x.Name, "Work", true) == 0);
-                    if (w == null)
+                    case MusicStyles.WesternClassical:
+                        CreateWesternClassicalTags(mf);
+                        break;
+                    case MusicStyles.IndianClassical:
+                        CreateIndianClassicalTags(mf, ici);
+                        break;
+                }
+
+            }
+        }
+        private static void CreateIndianClassicalTags(MusicFile mf, IndianClassicalInformation ici)
+        {
+            static bool CheckTagsForRaga(MusicFile mf, IndianClassicalInformation ici)
+            {
+                var ragaTag = mf.IdTags.SingleOrDefault(x => string.Compare(x.Name, "Raga", true) == 0);
+                if(ragaTag != null)
+                {
+                    var parts = ragaTag.Value.Split(" ").AsEnumerable();
+                    if (parts.First().IsEqualIgnoreAccentsAndCase("raga"))
                     {
-                        var title = mf.IdTags.SingleOrDefault(x => string.Compare(x.Name, "Title", true) == 0);
-                        if (title != null)
-                        {
-                            var parts = title.Value.Split(':');
-                            var idTag = new IdTag
-                            {
-                                MusicFile = mf,
-                                Name = "COMPOSITION",
-                                Value = parts.First().Trim()
-                            };
-                            mf.IdTags.Add(idTag);
-                            if (parts.Length > 1)
-                            {
-                                title.Value = string.Join(":", parts.Skip(1)).Trim();
-                            }
-                            //else
-                            //{
-                            //    log.Information("pause");
-                            //}
-                        }
-                        //if (title != null && title.Value.Contains(":"))
-                        //{
-                        //    var parts = title.Value.Split(':');
-                        //    var idTag = new IdTag
-                        //    {
-                        //        MusicFile = mf,
-                        //        Name = "COMPOSITION",
-                        //        Value = parts.First().Trim()
-                        //    };
-                        //    mf.IdTags.Add(idTag);
-                        //    //await musicDb.IdTags.AddAsync(idTag);
-                        //}
+                        parts = parts.Skip(1);
+                    }
+                    var rName = string.Join(" ", parts);
+                    if (ici.Lookup.TryGetValue(rName.ToAlphaNumerics(), out RagaName rn))
+                    {
+                        ragaTag.Value = rn.Name;
+                        return true;
                     }
                     else
                     {
-                        var work = w.Value.Split(':');
+                        log.Error($"Raga {rName} not found in IndianClassicalInformation");
+                    }
+                }
+                return false;
+            }
+            static void ExtractRagaFromTitle(MusicFile mf, IndianClassicalInformation ici)
+            {
+                var title = mf.IdTags.SingleOrDefault(x => string.Compare(x.Name, "Title", true) == 0);
+                IEnumerable<string> parts = title.Value.Split(" ");
+                if (parts.First().IsEqualIgnoreAccentsAndCase("raga"))
+                {
+                    parts = parts.Skip(1);
+                }
+                bool found = false;
+                for (int index = parts.Count() - 1; index >= 0; --index)
+                {
+                    var rName = string.Join(" ", parts.Take(index + 1));
+                    if (ici.Lookup.TryGetValue(rName.ToAlphaNumerics(), out RagaName rn))
+                    {
+                        log.Information($"{title.Value} is raga {rn.Name}");
+                        var idTag = new IdTag
+                        {
+                            MusicFile = mf,
+                            Name = "RAGA",
+                            Value = rn.Name
+                        };
+                        mf.IdTags.Add(idTag);
+                        found = true;
+                        break;
+                    }
+                }
+                if (!found)
+                {
+                    log.Information($"no raga entry found for {title.Value}");
+                }
+            }
+            ici.PrepareNames();
+            if (!CheckTagsForRaga(mf, ici))
+            {
+                ExtractRagaFromTitle(mf, ici);
+            }
+        }
+        private static void CreateWesternClassicalTags(MusicFile mf)
+        {
+            if (mf.IdTags.SingleOrDefault(x => string.Compare(x.Name, "COMPOSITION", true) == 0) == null)
+            {
+                var w = mf.IdTags.SingleOrDefault(x => string.Compare(x.Name, "Work", true) == 0);
+                if (w == null)
+                {
+                    var title = mf.IdTags.SingleOrDefault(x => string.Compare(x.Name, "Title", true) == 0);
+                    if (title != null)
+                    {
+                        var parts = title.Value.Split(':');
                         var idTag = new IdTag
                         {
                             MusicFile = mf,
                             Name = "COMPOSITION",
-                            Value = work.First().Trim()
+                            Value = parts.First().Trim()
                         };
                         mf.IdTags.Add(idTag);
-                        //await musicDb.IdTags.AddAsync(idTag);
-                    }
-                }
-                if (mf.IdTags.SingleOrDefault(x => string.Compare(x.Name, "Orchestra", true) == 0) == null)
-                {
-                    //var performers = mf.GetTagValue("Performer") ?? mf.GetTagValue("Performers");
-                    var performers = mf.GetTag("Performer") ?? mf.GetTag("Performers");
-                    if (performers != null)
-                    {
-                        var orchestra = Extract("orchestra", performers.Value);
-                        if (orchestra != null)
+                        if (parts.Length > 1)
                         {
-                            performers.Value = Remove("orchestra", performers.Value);
-                            var idTag = new IdTag
-                            {
-                                MusicFile = mf,
-                                Name = "ORCHESTRA",
-                                Value = orchestra
-                            };
-                            mf.IdTags.Add(idTag);
-                            //await musicDb.IdTags.AddAsync(idTag);
+                            title.Value = string.Join(":", parts.Skip(1)).Trim();
                         }
                     }
                 }
-                if (mf.IdTags.SingleOrDefault(x => string.Compare(x.Name, "Conductor", true) == 0) == null)
+                else
                 {
-                    var performers = mf.GetTag("Performer") ?? mf.GetTag("Performers");
-                    if (performers != null)
+                    var work = w.Value.Split(':');
+                    var idTag = new IdTag
                     {
-                        var orchestra = Extract("conductor", performers.Value);
-                        if (orchestra != null)
+                        MusicFile = mf,
+                        Name = "COMPOSITION",
+                        Value = work.First().Trim()
+                    };
+                    mf.IdTags.Add(idTag);
+
+                }
+            }
+            if (mf.IdTags.SingleOrDefault(x => string.Compare(x.Name, "Orchestra", true) == 0) == null)
+            {
+                var performers = mf.GetTag("Performer") ?? mf.GetTag("Performers");
+                if (performers != null)
+                {
+                    var orchestra = Extract("orchestra", performers.Value);
+                    if (orchestra != null)
+                    {
+                        performers.Value = Remove("orchestra", performers.Value);
+                        var idTag = new IdTag
                         {
-                            performers.Value = Remove("conductor", performers.Value);
-                            var idTag = new IdTag
-                            {
-                                MusicFile = mf,
-                                Name = "CONDUCTOR",
-                                Value = orchestra
-                            };
-                            mf.IdTags.Add(idTag);
-                            //await musicDb.IdTags.AddAsync(idTag);
-                        }
+                            MusicFile = mf,
+                            Name = "ORCHESTRA",
+                            Value = orchestra
+                        };
+                        mf.IdTags.Add(idTag);
+                    }
+                }
+            }
+            if (mf.IdTags.SingleOrDefault(x => string.Compare(x.Name, "Conductor", true) == 0) == null)
+            {
+                var performers = mf.GetTag("Performer") ?? mf.GetTag("Performers");
+                if (performers != null)
+                {
+                    var orchestra = Extract("conductor", performers.Value);
+                    if (orchestra != null)
+                    {
+                        performers.Value = Remove("conductor", performers.Value);
+                        var idTag = new IdTag
+                        {
+                            MusicFile = mf,
+                            Name = "CONDUCTOR",
+                            Value = orchestra
+                        };
+                        mf.IdTags.Add(idTag);
                     }
                 }
             }
@@ -398,7 +462,6 @@ namespace Fastnet.Music.Metatools
         {
             var tags = new Dictionary<string, object>();
             var file = TagLib.File.Create(mf.File);
-            //bool allowStyleTags = true;
             var performers = new List<string>();
             void addPerformers(string[] strings)
             {
@@ -411,7 +474,7 @@ namespace Fastnet.Music.Metatools
             }
             var t = file.GetTag(Music.TagLib.TagTypes.AllTags);
             var tag = file.Tag;
-            object tt;// = null;
+            object tt;
             // first get commontags (ie from all files regardless)
             tt = tag?.Track; if (tt != null) { tags.Add("TrackNumber", tag.Track.ToString()); }
             tt = tag?.Title; if (tt != null) { tags.Add(nameof(tag.Title), tag.Title); }
@@ -545,7 +608,6 @@ namespace Fastnet.Music.Metatools
                         await musicDb.IdTags.AddAsync(idTag);
 
                     }
-
                 }
                 catch (Exception xe)
                 {
@@ -553,18 +615,127 @@ namespace Fastnet.Music.Metatools
                     throw;
                 }
             }
-            //return allowStyleTags;
         }
     }
     public static partial class Extensions
     {
+        //private static LambdaEqualityComparer<(PerformerType type, string name)> performerComparer =  new LambdaEqualityComparer<(PerformerType type, string name)>((l, r) => l.type == r.type && l.name.IsEqualIgnoreAccentsAndCase(r.name));
+        /// <summary>
+        /// returns performers available in this set of files - can be any name found in IDtags table including Artist and Composer
+        /// names are not duplicated but types are promoted upwards if necessary
+        /// </summary>
+        /// <param name="musicFiles"></param>
+        /// <param name="musicOptions"></param>
+        /// <returns></returns>
+        internal static IEnumerable<MetaPerformer> GetAllPerformers(this IEnumerable<MusicFile> musicFiles, MusicOptions musicOptions)
+        {
+            var performers = new List<MetaPerformer>();
+            foreach (var musicFile in musicFiles)
+            {
+                foreach (var item in musicFile.GetAllPerformers(musicOptions))
+                {
+                    var existingItem = performers.SingleOrDefault(x => x == item);
+                    if(existingItem != null)
+                    {
+                        if (existingItem.Type < item.Type)
+                        {
+                            // promote type upwards
+                            existingItem.Reset(item.Type);
+                        }
+                    }
+                    else if (!performers.Contains(item))
+                    {
+                        performers.Add(item);
+                    }
+                }             
+            }
+            return performers;
+        }
+        /// <summary>
+        /// returns performers available in this file - can be any name found in IDtags table including Artist and Composer
+        /// names are not duplicated but types are promoted upwards if necessary
+        /// </summary>
+        /// <param name="mf"></param>
+        /// <param name="musicOptions"></param>
+        /// <returns></returns>
+        internal static IEnumerable<MetaPerformer> GetAllPerformers(this MusicFile mf, MusicOptions musicOptions)
+        {
+            var performers = new List<MetaPerformer>();
+            void AddPerfomer(PerformerType type, string text)
+            {
+                void add(string part)
+                {
+                    part = musicOptions.ReplaceAlias(part);
+                    var existingItem = performers.FirstOrDefault(x => x.Name.IsEqualIgnoreAccentsAndCase(part));
+                    if (existingItem != null)
+                    {
+                        if (existingItem.Type < type)
+                        {
+                            // promote type upwards
+                            existingItem.Reset(type);
+                        }
+                    }
+                    else
+                    {
+                        var nmp = new MetaPerformer(type, part);
+                        if (!performers.Contains(nmp))
+                        {
+                            performers.Add(nmp);
+                        }
+                    }
+                }
+                if (!string.IsNullOrWhiteSpace(text))
+                {
+                    var parts = text.Split('|', ';', ',', ':');
+                    foreach (var part in parts)
+                    {
+                        var t = Regex.Replace(part, @"\(.*?\)", "").Trim();
+                        add(t);
+                    }
+                }
+            }
+            AddPerfomer(PerformerType.Other, mf.Musician);
+            AddPerfomer(PerformerType.Artist, mf.GetTagValue<string>("Artist"));
+            AddPerfomer(PerformerType.Other, mf.GetTagValue<string>("Performer"));
+            AddPerfomer(PerformerType.Other, mf.GetTagValue<string>("Performers"));
+            if (mf.MusicianType != ArtistType.Various)
+            {
+                AddPerfomer(PerformerType.Other, mf.GetTagValue<string>("AlbumArtists"));
+                AddPerfomer(PerformerType.Other, mf.GetTagValue<string>("Album Artists"));
+            }
+            switch (mf.Style)
+            {
+                case MusicStyles.IndianClassical:
+                    if (mf.MusicianType != ArtistType.Various)
+                    {
+                        AddPerfomer(PerformerType.Artist, mf.GetTagValue<string>("AlbumArtists"));
+                        AddPerfomer(PerformerType.Artist, mf.GetTagValue<string>("Album Artists"));
+                    }
+                    break;
+                case MusicStyles.WesternClassical:
+                    AddPerfomer(PerformerType.Other, mf.GetTagValue<string>("Composer"));
+                    AddPerfomer(PerformerType.Conductor, mf.GetTagValue<string>("Conductor"));
+                    AddPerfomer(PerformerType.Orchestra, mf.GetTagValue<string>("Orchestra"));
+                    goto case MusicStyles.Popular;                    
+                case MusicStyles.Popular:
+                    if (mf.MusicianType != ArtistType.Various)
+                    {
+                        AddPerfomer(PerformerType.Other, mf.GetTagValue<string>("AlbumArtists"));
+                        AddPerfomer(PerformerType.Other, mf.GetTagValue<string>("Album Artists"));
+                    }
+                    break;
+            }
+            return performers.OrderBy(x => x.Type)
+                .ThenBy(x =>  x.Type == PerformerType.Orchestra ? x.Name : x.Name.GetLastName());
+        }
         public static string GetArtistName(this MusicFile mf/*, MusicDb db*/)
         {
+            Debug.Assert(mf.IsGenerated == false);
             var name = mf.Musician;
             switch (mf.Encoding)
             {
                 case EncodingType.flac:
-                    Debug.Assert(mf.IsGenerated == false);
+
                     switch (mf.Style)
                     {
                         case MusicStyles.WesternClassical:
@@ -622,6 +793,15 @@ namespace Fastnet.Music.Metatools
             }
             return name;
         }
+        public static string GetRagaName(this MusicFile mf)
+        {
+            var name = mf.OpusName;
+            if (!(mf.OpusType == OpusType.Singles))
+            {
+                name = mf.GetTagValue<string>("Raga") ?? name;
+            }
+            return name;
+        }
         public static int? GetYear(this MusicFile mf)
         {
             int? year;
@@ -657,7 +837,6 @@ namespace Fastnet.Music.Metatools
         public static IEnumerable<string> GetOrchestras(this MusicFile mf)
         {
             return GetSplittableTag(mf, "Orchestra");
-            //return mf.GetTagValue<string>("Orchestra");
         }
         public static IEnumerable<string> GetConductors(this MusicFile mf)
         {
@@ -747,7 +926,6 @@ namespace Fastnet.Music.Metatools
         /// </summary>
         /// <param name="work"></param>
         /// <param name="musicOptions"></param>
-        /// <param name="musicStyle"></param>
         /// <param name="folderName"></param>
         /// <returns></returns>
         public static string GetCoverFile(this Work work, MusicOptions musicOptions, string folderName = null)
@@ -929,4 +1107,5 @@ namespace Fastnet.Music.Metatools
             return null;
         }
     }
+#pragma warning restore CS1591 // Missing XML comment for publicly visible type or member
 }

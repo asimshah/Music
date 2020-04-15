@@ -2,6 +2,7 @@
 using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 using System.Linq;
 
 namespace Fastnet.Music.Data
@@ -23,9 +24,9 @@ namespace Fastnet.Music.Data
             return $"[A-{ArtistId}+W-{WorkId}]";
         }
     }
-    public class Artist : IIdentifier, ILengthConstants, INameParsing
+    public class Artist : EntityBase, ILengthConstants, INameParsing
     {
-        public long Id { get; set; }
+        public override long Id { get; set; }
         public Guid UID { get; set; }
         [MaxLength(ILengthConstants.MaxArtistNameLength)]
         public string Name { get; set; }
@@ -51,6 +52,9 @@ namespace Fastnet.Music.Data
         //public virtual ICollection<Work> Works { get; } = new HashSet<Work>();
         public virtual IEnumerable<Work> Works => ArtistWorkList.Select(aw => aw.Work);
         public virtual ICollection<Composition> Compositions { get; } = new HashSet<Composition>();
+        public virtual ICollection<RagaPerformance> RagaPerformances { get; } = new HashSet<RagaPerformance>();
+        [NotMapped]
+        public IEnumerable<Raga> Ragas => RagaPerformances.Select(x => x.Raga);
         [Timestamp]
         public byte[] Timestamp { get; set; }
         public override string ToString()

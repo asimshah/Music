@@ -10,12 +10,13 @@ using System.Threading.Tasks;
 
 namespace Fastnet.Music.Metatools
 {
+#pragma warning disable CS1591 // Missing XML comment for publicly visible type or member
     /// <summary>
     /// Each western classical music set is catalogued by artist, composition and performance where the performers string distinguishes
     /// individual performances. Each performance has movements (which are a subset of the tracks whic have been previously
     /// catalogued as a western classical album)
     /// </summary>
-    public class WesternClassicalCompositionSet : MusicSet //<WesternClassicalMusicTags>
+    public class WesternClassicalCompositionSet : MusicSetWithPerformances //MusicSet 
     {
         private AccentAndCaseInsensitiveComparer comparer = new AccentAndCaseInsensitiveComparer();
         //private PerformanceTEO performanceTEO;
@@ -35,22 +36,6 @@ namespace Fastnet.Music.Metatools
             orchestras = GetOrchestras();
             otherPerformers = GetOtherPerformers();
         }
-        //protected override async Task LoadMusicTags()
-        //{
-        //    var json = await ReadMusicTagJson();
-        //    if (json != null)
-        //    {
-        //        var teo = json.ToInstance<WesternClassicalAlbumTEO>();
-        //        performanceTEO = teo.PerformanceList.Single(x =>
-        //            x.MovementFilenames.All(f => MusicFiles.Select(mf => mf.File).SingleOrDefault(x => x.EndsWith(f, System.Globalization.CompareOptions.IgnoreCase)) != null)
-        //        );
-        //        ComposerName = performanceTEO.ComposerTag.GetValue<string>();
-        //        CompositionName = performanceTEO.CompositionTag.GetValue<string>();
-        //        orchestras = performanceTEO.OrchestraTag.GetValues<string>();
-        //        conductors = performanceTEO.ConductorTag.GetValues<string>();
-        //        otherPerformers = performanceTEO.PerformerTag.GetValues<string>();
-        //    }
-        //}
         protected override string GetName()
         {
             return $"{ComposerName}:{CompositionName}";
@@ -58,7 +43,6 @@ namespace Fastnet.Music.Metatools
         private IEnumerable<string> GetConductors()
         {
             return MusicFiles
-                //.Where(x => x.GetConductor() != null)
                 .SelectMany(x => x.GetConductors())
                 .Select(x => MusicOptions.ReplaceAlias(x))
                 .Distinct(comparer)
@@ -67,7 +51,6 @@ namespace Fastnet.Music.Metatools
         private IEnumerable<string> GetOrchestras()
         {
             return MusicFiles
-                //.Where(x => x.GetOrchestra() != null)
                 .SelectMany(x => x.GetOrchestras())
                 .Select(x => MusicOptions.ReplaceAlias(x))
                 .Distinct(comparer)
@@ -84,10 +67,6 @@ namespace Fastnet.Music.Metatools
                     ;
                 _names.AddRange(list);
             }
-            //if(_names.Any(n => n.Contains("&")))
-            //{
-            //    Debugger.Break();
-            //}
             _names = _names.Distinct(comparer).ToList();
             var g1 = _names.GroupBy(x => x.GetLastName());
             var names = new List<string>();
@@ -112,17 +91,8 @@ namespace Fastnet.Music.Metatools
             
             return names;
         }
-        public override async Task<CatalogueResult> CatalogueAsync()
+        public override async Task<CatalogueResultBase> CatalogueAsync()
         {
-            //void makeSafeForReporting(Performance performance)
-            //{
-            //    MusicDb.Entry(performance).Collection(x => x.PerformancePerformers).Load();
-            //    foreach(var item in performance.PerformancePerformers)
-            //    {
-            //        MusicDb.Entry(item).Reference(x => x.Performer).Load();
-            //    }
-            //};
-            //await LoadMusicTags();
             Debug.Assert(!string.IsNullOrWhiteSpace(ComposerName));
             Debug.Assert(!string.IsNullOrWhiteSpace(CompositionName));
             Debug.Assert(FirstFile != null);
@@ -135,37 +105,12 @@ namespace Fastnet.Music.Metatools
                 var composition = GetComposition(composer, CompositionName);
                 RemoveCurrentPerformance();
                 var performance = GetPerformance(composition, orchestras, conductors, otherPerformers);
-                //makeSafeForReporting(performance);
-                return CatalogueResult.Create(this, CatalogueStatus.Success, performance);// { MusicSet = this, Status = CatalogueStatus.Success, Artist = composer, Composition = composition, Performance = performance };
+                return new WesternClassicalCompositionCatalogueResult(this, CatalogueStatus.Success, performance);// { MusicSet = this, Status = CatalogueStatus.Success, Artist = composer, Composition = composition, Performance = performance };
             }
             else
             {
                 var performance = FirstFile.Track.Performance;
-                //makeSafeForReporting(performance);
-                return CatalogueResult.Create(this, CatalogueStatus.Success, performance);// { MusicSet = this, Status = CatalogueStatus.Success, Artist = performance.Composition.Artist, Composition = performance.Composition, Performance = performance };
-            }
-        }
-
-        private void RemoveCurrentPerformance()
-        {
-            // find the performance containing the current music files, if any
-            var tracks = this.MusicFiles.Where(x => x.Track != null).Select(x => x.Track);
-            var performances = tracks.Where(t => t.Performance != null).Select(t => t.Performance);
-            if(performances.Count() > 1)
-            {
-                var idlist = string.Join(", ", this.MusicFiles.Select(x => x.Id));
-                log.Warning($"Music files {idlist} have more than one performance - this is unexpected!");
-                foreach(var performance in performances)
-                {
-                    log.Warning($"  {performance.Composition.Artist.Name}, {performance.Composition.Name}, {performance.GetAllPerformersCSV()}");
-                }
-            }
-            foreach(var performance in performances.ToArray())
-            {
-                var performers = performance.GetAllPerformersCSV();
-                MusicDb.PerformancePerformers.RemoveRange(performance.PerformancePerformers);
-                MusicDb.Performances.Remove(performance);
-                log.Information($"{performance.Composition.Artist.Name}, {performance.Composition.Name}, {performance.GetAllPerformersCSV()} removed");
+                return new WesternClassicalCompositionCatalogueResult(this, CatalogueStatus.Success, performance);// { MusicSet = this, Status = CatalogueStatus.Success, Artist = performance.Composition.Artist, Composition = performance.Composition, Performance = performance };
             }
         }
 
@@ -185,10 +130,6 @@ namespace Fastnet.Music.Metatools
         private Composition GetComposition(Artist artist, string name)
         {
             Debug.Assert(MusicDb != null);
-            //if(name.ToAlphaNumerics() == "SevenSongsOp95")
-            //{
-            //    Debugger.Break();
-            //}
             var composition = FindComposition(artist, name);// artist.Compositions.SingleOrDefault(w => w.Name.IsEqualIgnoreAccentsAndCase(name));
             if (composition == null)
             {
@@ -232,7 +173,7 @@ namespace Fastnet.Music.Metatools
             var conductors = MusicDb.FindPerformers(conductorNames, PerformerType.Conductor);
             var orchestras = MusicDb.FindPerformers(orchestraNames, PerformerType.Orchestra);
             var others = MusicDb.FindPerformers(otherNames, PerformerType.Other);
-            int year = FirstFile.GetYear() ?? 0;
+            //int year = FirstFile.GetYear() ?? 0;
             if(conductors.Count() == conductorNames.Count() && orchestras.Count() == orchestraNames.Count() && others.Count() == otherNames.Count())
             {
                 var performances = composition.Performances
@@ -252,7 +193,6 @@ namespace Fastnet.Music.Metatools
             }
             var performance = new Performance
             {
-                //Composition = composition,
                 AlphamericPerformers = performers.ToAlphaNumerics(),
                 Year = year
             };
@@ -278,8 +218,9 @@ namespace Fastnet.Music.Metatools
                 performance.Movements.Add(track);
             }
             Debug.Assert(performance.Movements.Count > 0);
+
+
             MusicDb.AddPerformance(composition, performance);
-            //composition.Performances.Add(performance);
             return performance;
         }
         private IEnumerable<string> RemoveDuplicateNames(IEnumerable<string> names)
@@ -314,4 +255,5 @@ namespace Fastnet.Music.Metatools
             return $"{this.GetType().Name}::{ComposerName}::{CompositionName}::{MusicFiles.Count()} files";
         }
     }
+#pragma warning restore CS1591 // Missing XML comment for publicly visible type or member
 }

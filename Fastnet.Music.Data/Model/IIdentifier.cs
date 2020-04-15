@@ -12,9 +12,8 @@
                 IdTag _ => $"[IdT-{identifier.Id}]",
                 Artist _ => $"[A-{identifier.Id}]",
                 Work _ => $"[W-{identifier.Id}]",
-                //ArtistWork _ => $"[AW-{identifier.Id}]",
                 Composition _ => $"[C-{identifier.Id}]",
-                //CompositionPerformance _ => $"[CP-{identifier.Id}]",
+                Raga _ => $"[R-{identifier.Id}]",
                 Performance _ => $"[P-{identifier.Id}]",
                 Performer _ => $"[Pf-{identifier.Id}]",
                 Track _ => $"[T-{identifier.Id}]",
@@ -32,7 +31,6 @@
         public string ToIdent()
         {
             return IIdentifier.DefaultToIdent(this);
-            //return ((IIdentifier)this).ToIdent();
         }
     }
     public interface IManyToManyIdentifier

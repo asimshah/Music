@@ -14,6 +14,7 @@ namespace Fastnet.Music.Metatools
         /// <summary>
         /// 
         /// </summary>
+        /// <param name="options"></param>
         /// <param name="style"></param>
         /// <param name="artistName">This name will be matched to disk folders ignoring accents and case</param>
         public ArtistFolder(MusicOptions options, MusicStyles style, string artistName) //: base(options, style)

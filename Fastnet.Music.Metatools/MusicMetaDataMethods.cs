@@ -46,6 +46,7 @@ namespace Fastnet.Music.Metatools
         /// </summary>
         /// <param name="musicOptions"></param>
         /// <param name="diskPath"></param>
+        /// <param name="allowDeleted"></param>
         /// <returns></returns>
         public static PathData GetPathData(MusicOptions musicOptions, string diskPath, bool allowDeleted = false)
         {

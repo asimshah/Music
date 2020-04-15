@@ -16,13 +16,11 @@ namespace Fastnet.Music.Core
         /// return a list of valid style paths that exists, i.e. where the style is enabled and for each source that is enabled
         /// (compare with MusicSet version which does test for enabled in either case - should this replace that?)
         /// </summary>
-        /// <param name="musicOptions"></param>
         /// <param name="musicStyle"></param>
+        /// <param name="musicOptions"></param>
         /// <param name="includeGenerated">default is false</param>
         /// <param name="includeDisabledStyles">default is false</param>
         /// <returns></returns>
-        //public static IEnumerable<string> GetPaths(this MusicStyles musicStyle, MusicOptions musicOptions,
-        //    bool excludeGenerated = true)
         public static IEnumerable<string> GetPaths(this MusicStyles musicStyle, MusicOptions musicOptions,
             bool includeGenerated, bool includeDisabledStyles)
         {

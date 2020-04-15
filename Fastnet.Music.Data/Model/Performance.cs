@@ -1,4 +1,5 @@
 ﻿using Fastnet.Core;
+using Fastnet.Music.Core;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
@@ -7,33 +8,14 @@ using System.Linq;
 
 namespace Fastnet.Music.Data
 {
-    public interface IPlayable
-    {
-        long Id { get; }
-        string Name { get; }
-        IEnumerable<Track> Tracks { get; }
-    }
-    public class CompositionPerformance : IManyToManyIdentifier
-    {
-        public long PerformanceId { get; set; } // we'll make this a unique key so that a performance can only appear once in this table
-        public virtual Performance Performance { get; set; }
-        public long CompositionId { get; set; }
-        public virtual Composition Composition { get; set; }
-        public string ToIdent()
-        {
-            return IManyToManyIdentifier.ToIdent(Composition, Performance);
-        }
-        public override string ToString()
-        {
-            return $"[C-{CompositionId}+P-{PerformanceId}]";
-        }
-    }
     public class Performance : EntityBase, IPlayable
     {
         public override long Id { get; set; }
+        public MusicStyles StyleId { get; set; } // helps distinguish performance between music styles - e.g WesternClassical uses Composition ->> Performances, Indian Classical uses Raga ->> Performances
+        [Obsolete("retain till all databases have been upgraded")]
         public long CompositionId { get; set; }
         //public virtual Composition Composition { get; set; } // the composition performed
-        public Composition Composition => CompositionPerformances.Select(x => x.Composition).Single();
+        public Composition Composition => GetComposition();// CompositionPerformances.Select(x => x.Composition).Single();
         public int Year { get; set; }
         public virtual ICollection<Track> Movements { get; } = new HashSet<Track>(); // the 'album' containing this performance is the Work that these tracks belong to
         [Obsolete("remove after all dbs have updated")]
@@ -51,10 +33,8 @@ namespace Fastnet.Music.Data
         IEnumerable<Track> IPlayable.Tracks => Movements;
         [NotMapped]
         string IPlayable.Name => GetAllPerformersCSV();
-        public virtual List<PerformancePerformer> PerformancePerformers { get; /*set;*/ } = new List<PerformancePerformer>();
+        public virtual List<PerformancePerformer> PerformancePerformers { get; } = new List<PerformancePerformer>();
         public virtual ICollection<CompositionPerformance> CompositionPerformances { get; } = new HashSet<CompositionPerformance>();
-
-        //public virtual CompositionPerformance CompositionPerformance { get; set;}
         public override string ToString()
         {
             return $"{Composition.Name}, {Movements.Count} movements: \"{GetAllPerformersCSV()}\"";
@@ -89,9 +69,17 @@ namespace Fastnet.Music.Data
                 .Select(pp => pp.Performer.Name);
             return string.Join(", ", r);
         }
-        //public string ToIdent()
-        //{
-        //    return ((IIdentifier)this).ToIdent();
-        //}
+        private Composition GetComposition()
+        {
+            if(StyleId == MusicStyles.WesternClassical)
+            {
+                return CompositionPerformances.Select(x => x.Composition).Single();
+            }
+            //else
+            //{
+            //    throw new Exception($"performance {ToIdent()} in {StyleId} does not have a composition");
+            //}
+            return null;
+        }
     }
 }

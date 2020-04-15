@@ -6,9 +6,9 @@ using System.IO;
 
 namespace Fastnet.Music.Data
 {
-    public class MusicFile : IIdentifier
+    public class MusicFile : EntityBase
     {
-        public long Id { get; set; }
+        public override long Id { get; set; }
         public MusicStyles Style { get; set; }
         [MaxLength(256)]
         public string DiskRoot { get; set; }

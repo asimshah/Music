@@ -21,7 +21,9 @@ namespace Fastnet.Apollo.Web
         private readonly BlockingCollection<TaskQueueItem> taskQueue;
         private readonly MusicOptions options;
         private readonly IServiceProvider serviceProvider;
+        private readonly IndianClassicalInformation indianClassicalInformation;
         public TaskHost(IServiceProvider sp, MusicOptions options, BlockingCollection<TaskQueueItem> taskQueue,
+            IndianClassicalInformation ici,
             string connectionString, CancellationToken cancellationToken)
         {
             this.serviceProvider = sp;
@@ -31,6 +33,7 @@ namespace Fastnet.Apollo.Web
             this.log = ApplicationLoggerFactory.CreateLogger($"Fastnet.Apollo.Web.TaskHost{hostIdentity}");
             this.connectionString = connectionString;
             this.taskQueue = taskQueue;
+            indianClassicalInformation = ici;
         }
         public async Task Execute()
         {
@@ -74,7 +77,7 @@ namespace Fastnet.Apollo.Web
                     switch (item.Type)
                     {
                         case TaskType.DiskPath:
-                            tb = new CataloguePath(options, item.TaskItemId, connectionString, taskQueue, this.serviceProvider.GetService<PlayManager>());
+                            tb = new CataloguePath(options, item.TaskItemId, connectionString, indianClassicalInformation, taskQueue, this.serviceProvider.GetService<PlayManager>());
                             break;
                         case TaskType.Portraits:
                             tb = new UpdatePortraits(options, item.TaskItemId, connectionString);

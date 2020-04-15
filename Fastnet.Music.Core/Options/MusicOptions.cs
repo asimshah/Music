@@ -179,8 +179,8 @@ namespace Fastnet.Music.Core
         /// 
         /// </summary>
         /// <param name="musicOptions"></param>
-        /// <param name="includeDisabled"></param>
-        public MusicSources(MusicOptions musicOptions, bool includeGenerated = false/*, bool includeDisabled = false*/)
+        /// <param name="includeGenerated"></param>
+        public MusicSources(MusicOptions musicOptions, bool includeGenerated = false)
         {
             this.musicOptions = musicOptions;
             this.includeGenerated = includeGenerated;
