@@ -1,4 +1,5 @@
 ﻿using Fastnet.Core;
+using Fastnet.Music.Core;
 using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
@@ -9,14 +10,14 @@ namespace Fastnet.Music.Data
 {
     public class WesternClassicalSearcher : CatalogueSearcher
     {
-        private static NaturalStringComparer naturalComparer = new NaturalStringComparer();
+        
         protected override (bool prefixMode, IEnumerable<ISearchResult> searchResults) SearchCatalogue(string loweredSearch)
         {
             // get artists that match the searchText
             var artists = GetMatchingArtists(loweredSearch).ToArray();
             var compositionQueryResults = new CompositionQueryResult[0];
-            var performanceQueryResults = new PerformanceQueryResult[0];
-            var movementQueryResults = new MovementQueryResult[0];
+            var performanceQueryResults = new CompositionPerformanceQueryResult[0];
+            var movementQueryResults = new CompositionPerformanceMovementQueryResult[0];
             if (!prefixMatch)
             {
                 // get compositions that match the searchText
@@ -25,7 +26,7 @@ namespace Fastnet.Music.Data
                 movementQueryResults = GetMatchingMovements(loweredSearch).ToArray();
             }
             var finalList = new List<WesternClassicalResult>();
-            finalList.AddRange(artists.Select(a => new WesternClassicalResult { Composer = a.Artist, ComposerIsMatched = true }));
+            finalList.AddRange(artists.Select(a => new WesternClassicalResult { Composer = a.Artists.First(), ComposerIsMatched = true }));
             // eliminate compositions whose artists are already in the artists list (as all their compositions are matched by implication)
             var artistKeys = finalList.Select(l => l.Composer.Key);
             var t1 = compositionQueryResults.Where(w => artistKeys.Contains(w.Composer.Key));
@@ -51,7 +52,7 @@ namespace Fastnet.Music.Data
                     CompositionIsMatched = true
                 });
             }
-            // eliminate performanes where the composition or the artist is already in the list is already in the list
+            // eliminate performances where the composition or the artist is already in the list is already in the list
             var t2 = performanceQueryResults.Where(p => artistKeys.Contains(p.Composer.Key));
             performanceQueryResults = performanceQueryResults.Except(t2).ToArray();
             var compositionKeys = finalList.Where(l => l.Compositions != null).SelectMany(l => l.Compositions.Select(c => c.Composition.Key));
@@ -133,7 +134,7 @@ namespace Fastnet.Music.Data
                         };
                         cr.Performances.Add(pr);
                     }
-                    pr.Movements.Add(new TrackResult { Track = mr.Movement });
+                    pr.Movements = pr.Movements.Append(new TrackResult { Track = mr.Movement });
                 }
             }
 
@@ -196,10 +197,12 @@ namespace Fastnet.Music.Data
                 }
             });
         }
-        private IEnumerable<PerformanceQueryResult> GetMatchingPerformances(string loweredSearch)
+        private IEnumerable<CompositionPerformanceQueryResult> GetMatchingPerformances(string loweredSearch)
         {
-            var performances = MusicDb.Performances.Where(p => p.AlphamericPerformers.Contains(loweredSearch.ToAlphaNumerics()));
-            return performances.Select(x => new PerformanceQueryResult
+            //var performances = MusicDb.Performances.Where(p => p.AlphamericPerformers.Contains(loweredSearch.ToAlphaNumerics()));
+            var alphamericSearch = loweredSearch.ToAlphaNumerics();
+            var performances = MusicDb.Performances.Where(p => p.StyleId == MusicStyle && p.AlphamericPerformers.Contains(alphamericSearch));
+            return performances.Select(x => new CompositionPerformanceQueryResult
             {
                 Composer = new SearchKey
                 {
@@ -236,13 +239,11 @@ namespace Fastnet.Music.Data
                 }
             });
         }
-        private IEnumerable<MovementQueryResult> GetMatchingMovements(string loweredSearch)
+        private IEnumerable<CompositionPerformanceMovementQueryResult> GetMatchingMovements(string loweredSearch)
         {
             var tracks = MusicDb.Tracks.Where(x1 => x1.Work.StyleId == MusicStyle);//.ToArray();
-
-            //tracks = tracks.Where(x => x.Title.ToAlphaNumerics().ToLower().Contains(loweredSearch.ToAlphaNumerics())).ToArray();
             tracks = tracks.Where(x => x.AlphamericTitle.Contains(loweredSearch.ToAlphaNumerics()));//.ToArray();
-            return tracks.Select(x => new MovementQueryResult
+            return tracks.Select(x => new CompositionPerformanceMovementQueryResult
             {
                 //Composer = new SearchKey
                 //{

@@ -39,10 +39,6 @@ namespace Fastnet.Music.Data
         {
             return $"[TI-{Id}] type {Type} for {TaskString}";
         }
-        public string ToContextDescription()
-        {
-            //{(this.ArtistPath ?? "null")}::{(this.OpusPath ?? "null")}
-            return this.ToString();
-        }
+
     }
 }

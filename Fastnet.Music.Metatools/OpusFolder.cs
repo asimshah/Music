@@ -53,10 +53,10 @@ namespace Fastnet.Music.Metatools
                 this.forSinglesOnly = pathData.MusicStyle == MusicStyles.Popular;
             }
         }
-        public int RemoveCurrentMusicFiles(MusicDb db)
+        public int RemoveCurrentMusicFiles(MusicDb db, TaskItem taskItem)
         {
-            var dc = new OpusDeleteContext(this);
-            var entityHelper = new EntityHelper(db, dc);
+            //var dc = new OpusDeleteContext(this);
+            var entityHelper = new EntityHelper(db, taskItem);
             int count = 0;
             var filesInDb = GetMusicFilesFromDb(db);
             foreach (var mf in filesInDb.ToArray())

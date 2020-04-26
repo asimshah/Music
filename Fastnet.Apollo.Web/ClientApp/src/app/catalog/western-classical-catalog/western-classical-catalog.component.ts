@@ -1,6 +1,6 @@
 import { Component, ViewChild, ElementRef } from '@angular/core';
 import { BaseCatalogComponent } from '../base-catalog.component';
-import { SearchKey } from '../../shared/common.types';
+import { SearchKey, PerformanceResult } from '../../shared/common.types';
 import { LibraryService } from '../../shared/library.service';
 import { Artist, Composition, Performance, Movement, MusicFile, Track, Work } from "../../shared/catalog.types";
 import { PlayerService } from '../../shared/player.service';
@@ -14,9 +14,7 @@ import { sortedInsert } from '../../../fastnet/core/common.functions';
 import { MessageService } from '../../shared/message.service';
 
 
-class PerformanceResult {
-   performance: SearchKey;
-}
+
 class CompositionResult {
    composition: SearchKey;
    compositionIsMatched: boolean;
@@ -142,14 +140,11 @@ export class WesternClassicalCatalogComponent extends BaseCatalogComponent {
       });
    }
    protected async onSearch() {
-
       this.searchFoundNothing = false;
       let r = await this.library.search<WesternClassicalResults>(this.parameterService.getCurrentStyle(), this.searchText);
       this.prefixMode = r.prefixMode;
-
       this.composers = [];
       if (r.results.length > 0) {
-         //this.processSearchResults1(r, prefixMode);
          this.processSearchResults(r, this.prefixMode);
       } else {
          console.log('nothing found');

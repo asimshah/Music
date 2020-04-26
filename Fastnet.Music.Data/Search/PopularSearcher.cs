@@ -10,7 +10,7 @@ namespace Fastnet.Music.Data
     {
         protected override (bool prefixMode, IEnumerable<ISearchResult> searchResults) SearchCatalogue(string loweredSearch)
         {
-            loweredSearch = loweredSearch.Trim();
+            //loweredSearch = loweredSearch.Trim();
             var artists = GetMatchingArtists(loweredSearch).ToArray();
             var works = new WorkQueryResult[0];
             var tracks = new TrackQueryResult[0];
@@ -20,7 +20,7 @@ namespace Fastnet.Music.Data
                 tracks = GetMatchingTracks(loweredSearch).ToArray();
             }
             var finalList = new List<PopularResult>();
-            finalList.AddRange(artists.Select(a => new PopularResult { Artist = a.Artist, ArtistIsMatched = true }));
+            finalList.AddRange(artists.Select(a => new PopularResult { Artist = a.Artists.First(), ArtistIsMatched = true }));
             // eliminate works whose artists are already in the artists list (as all their works are already present)
             var artistKeys = finalList.Select(l => l.Artist.Key);// artists.Select(a => a.Artist.Key);
             var t1 = works.Where(w => artistKeys.Contains(w.Artist.Key));

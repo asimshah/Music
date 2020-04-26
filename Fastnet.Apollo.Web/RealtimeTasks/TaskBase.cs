@@ -3,6 +3,7 @@ using Fastnet.Core.Logging;
 using Fastnet.Music.Core;
 using Fastnet.Music.Data;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Storage;
 using Microsoft.Extensions.Logging;
 using System;
 using System.Collections.Concurrent;
@@ -99,36 +100,22 @@ namespace Fastnet.Apollo.Web
                 var strategy = db.Database.CreateExecutionStrategy() as RetryStrategy;
                 if (strategy != null)
                 {
-                    strategy.SetIdentifier($"[TI-{taskId}]");
                     await strategy.ExecuteAsync(async () =>
-                    {
-                        
+                    {                        
                         if(strategy.RetryNumber > 0)
                         {
                             await Task.Delay(TimeSpan.FromSeconds(10));
+                            log.Information($"[TI-{taskId}] execution restarted, retry {strategy.RetryNumber}");
                         }
-                        log.Information($"[TI-{taskId}] execution started, retry {strategy.RetryNumber + 1}");
-                        try
+
+                        using (var db2 = new MusicDb(connectionString))
                         {
-                            //using (var tran = db.Database.BeginTransaction(System.Data.IsolationLevel.Snapshot)) // default is read committed
-                            using (var db2 = new MusicDb(connectionString))
+                            using (var tran = db2.Database.BeginTransaction())
                             {
-                                using (var tran = db2.Database.BeginTransaction())
-                                {
-                                    r = await methodAsync(db2);
-                                    tran.Commit();
-                                    log.Debug($"[TI-{taskId}] execution strategy: transaction committed");
-                                } 
+                                r = await methodAsync(db2);
+                                tran.Commit();
+                                log.Debug($"[TI-{taskId}] execution strategy: transaction committed");
                             }
-                        }
-                        catch (Exception xe)
-                        {
-                            log.Error($"[TI-{taskId}] Error {xe.GetType().Name} thrown within execution strategy");
-                            throw;
-                        }
-                        finally
-                        {
-                            log.Debug($"[TI-{taskId}] execution strategy finished");
                         }
                     });
                 }

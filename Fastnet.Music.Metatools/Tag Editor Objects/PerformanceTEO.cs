@@ -144,7 +144,7 @@ namespace Fastnet.Music.Metatools
             //{
             //    return text.Split(",", StringSplitOptions.RemoveEmptyEntries).Select(x => x.Trim());
             //}
-            bool CompareTwoArrays(IEnumerable<string> left, IEnumerable<string> right)
+            static bool CompareTwoArrays(IEnumerable<string> left, IEnumerable<string> right)
             {
                 if(left.Count() == right.Count())
                 {

@@ -11,40 +11,40 @@ namespace Fastnet.Music.Metatools
     /// <summary>
     /// Western classsical music files are grouped by composition within artist
     /// </summary>
-    public class WesternClassicalMusicSetCollection : MusicSetCollection<WesternClassicalMusicTags>
+    public class WesternClassicalMusicSetCollection : BaseMusicSetCollection<WesternClassicalAlbumSet, WesternClassicalCompositionSet>
     {
         public WesternClassicalMusicSetCollection(MusicOptions musicOptions, MusicDb musicDb,
             OpusFolder musicFolder, List<MusicFile> files, TaskItem taskItem) : base(musicOptions, musicDb, musicFolder, files, taskItem)
         {
-            this.log = ApplicationLoggerFactory.CreateLogger<WesternClassicalMusicSetCollection>();
+
         }
-        protected override List<IMusicSet> CreateSets()
+        protected override (string firstLevel, string secondLevel) GetPartitioningKeys(MusicFile mf)
         {
-            var result = new List<IMusicSet>();
-            // first create a western classical album set
-            var wcalbumSet = new WesternClassicalAlbumSet(musicDb, musicOptions, files, taskItem);
-            result.Add(wcalbumSet);
-            if (!(files.First().IsGenerated))
+            var allPerformers = mf.GetAllPerformers(musicOptions);
+            var composerPerformers = allPerformers.Where(x => x.Type == PerformerType.Composer);
+            Debug.Assert(composerPerformers.Count() <= 1, $"{taskItem} more than 1 composer name: {composerPerformers.Select(x => x.Name).ToCSV()}");
+             var composer = composerPerformers.FirstOrDefault();
+            if(composer == null)
             {
-                string getArtistName(MusicFile mf) {
-                    return musicOptions.ReplaceAlias(mf.GetArtistName());
-                }
-                string getWorkName(MusicFile mf)
+                var artistPerformers = allPerformers.Where(x => x.Type == PerformerType.Artist);
+                if (artistPerformers.Count() == 0)
                 {
-                    return musicOptions.ReplaceAlias(mf.GetWorkName());
+                    log.Error($"{taskItem} neither composer nor artist found");
                 }
-                var artistAndWorkGroups = files.Select(f => new { file = f, artist = getArtistName(f), /*alphaMericWorkname = getWorkName(f).ToAlphaNumerics(),*/  work = getWorkName(f) })
-                    .GroupBy(gb => new { gb.artist, alphaMericWorkname = gb.work.ToAlphaNumerics() });
-                foreach (var group in artistAndWorkGroups.OrderBy(k => k.Key.artist))
+                else
                 {
-                    //var musicStyle = group.First().file.Style;
-                    var musicFilesForSet = group.Select(g => g.file).OrderBy(f => f.GetTagIntValue("TrackNumber"));
-                    Debug.Assert(musicFilesForSet.Count() > 0);
-                    var setWC = new WesternClassicalCompositionSet(musicDb, musicOptions, group.Key.artist, group.First().work, musicFilesForSet, this.taskItem);
-                    result.Add(setWC);
+                    composer = artistPerformers.First();
+                    log.Warning($"{taskItem} no composer found, using {composer.Name}");
                 }
             }
-            return result;
+            var composition = mf.GetWorkName().ToAlphaNumerics();
+            return (composer.Name, composition);
+        }
+        protected override (string firstLevel, string secondLevel) GetKeysForCollectionPartitioning(MusicFile mf)
+        {
+            // western classical music collections are kept as a single "album" by "Various Composers"
+            // becuase they have further breakdown into compositions by composer
+            return ("Various Composers", mf.OpusName);
         }
     }
 }

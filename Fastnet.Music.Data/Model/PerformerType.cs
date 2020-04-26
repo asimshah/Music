@@ -8,6 +8,7 @@
         Other,
         Orchestra,
         Conductor,
-        Artist // used to designate the primary artist(s) for a work, composition, or raga performance
+        Artist,
+        Composer// used to designate the primary artist(s) for a work, composition, or raga performance
     }
 }

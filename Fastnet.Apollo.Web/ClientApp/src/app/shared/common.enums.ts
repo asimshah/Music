@@ -9,7 +9,6 @@ export enum LocalStorageKeys {
 export enum MusicStyles {
     Popular = 1,
     WesternClassical,
-    Opera,
     IndianClassical,
     HindiFilms
 }

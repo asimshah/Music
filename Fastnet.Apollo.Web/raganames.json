@@ -438,8 +438,8 @@
                 "Aliases": []
             },
             {
-                "Name": "Bhoop/ Bhoopali",
-                "Aliases": []
+                "Name": "Bhoopali",
+                "Aliases": [ "Bhoop", "Bhopali", "Bhupali" ]
             },
             {
                 "Name": "Bhup Bilawal",
@@ -2087,7 +2087,7 @@
             },
             {
                 "Name": "Miyan ki Malhar",
-                "Aliases": []
+                "Aliases": [ "Mian ki Malhar" ]
             },
             {
                 "Name": "Miyan ki Sarang",

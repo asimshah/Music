@@ -2,6 +2,7 @@ import { Highlighter } from "./common.types";
 import { MusicStyles } from "./common.enums";
 
 
+
 export enum EditorResult {
    saveChanges,
    cancel
@@ -57,6 +58,7 @@ export class Artist extends BaseEntity {
    public workCount: number;
    public singlesCount: number;
    public compositionCount: number;
+   public ragaCount: number;
    public performanceCount: number;
    public quality: MetadataQuality;
    public imageUrl: string;
@@ -72,6 +74,7 @@ export class Artist extends BaseEntity {
       this.workCount = a.workCount;
       this.singlesCount = a.singlesCount;
       this.compositionCount = a.compositionCount;
+      this.ragaCount = a.ragaCount;
       this.performanceCount = a.performanceCount;
       this.quality = a.quality;
       this.imageUrl = a.imageUrl;
@@ -130,7 +133,6 @@ export class Work extends BaseEntity {
 export class Track extends BaseEntity {
    public type = 'track';
    public workId: number;
-   //public artistId: number;
    public number: number | null;
    public title: string;
    public musicFileCount: number;
@@ -201,6 +203,26 @@ export class Composition extends BaseEntity {
       this.showPerformances = false;
    }
 }
+export class Raga extends BaseEntity {
+   public type = 'raga';
+   public name: string;
+   public performances: Performance[] | null = null;
+   public showPerformances: boolean;
+   public copyProperties(c: Composition) {
+      this.id = c.id;
+      this.name = c.name;
+      this.highlightedName = c.name;
+      if (c.performances) {
+         this.performances = [];
+         for (let p1 of c.performances) {
+            let p2 = new Performance();
+            p2.copyProperties(p1);
+            this.performances.push(p2);
+         }
+      }
+      this.showPerformances = false;
+   }
+}
 export class Performance extends BaseEntity {
    public type = 'performance';
    public performers: string;
@@ -242,9 +264,7 @@ export class Movement extends Track {
 }
 export class OpusDetails {
    public id: number;
-   //public artistName: string;
    public opusName: string;
-   //public compressedArtistName: string;
    public compressedOpusName: string;
    public compressedPerformanceName: string;
    public trackDetails: TrackDetail[];

@@ -29,8 +29,7 @@ import { WesternClassicalTagEditorComponent } from './catalog/western-classical-
 import { MultipleValueEditorComponent } from './catalog/multiple-values-editor/multiple-values-editor.component';
 import { MusicfileEditorComponent } from './catalog/musicfile-editor/musicfile-editor.component';
 import { PopularTagEditorComponent } from './catalog/popular-catalog/popular-tag-editor/popular-tag-editor.component';
-
-
+import { IndianClassicalCatalogComponent } from './catalog/indian-classical-catalog/indian-classical-catalog.component';
 
 export class CustomHammerConfig extends HammerGestureConfig {
     overrides = <any>{
@@ -59,7 +58,8 @@ export class CustomHammerConfig extends HammerGestureConfig {
         WesternClassicalCatalogComponent,
         WesternClassicalTagEditorComponent,
         PopularCatalogComponent,
-        PopularTagEditorComponent
+        PopularTagEditorComponent,
+        IndianClassicalCatalogComponent
     ],
     imports: [
         BrowserModule.withServerTransition({ appId: 'ng-cli-universal' }),
@@ -87,7 +87,7 @@ export class CustomHammerConfig extends HammerGestureConfig {
         PlayerService,
         LoggingService
     ],
-    entryComponents: [DefaultCatalogComponent, WesternClassicalCatalogComponent, PopularCatalogComponent],
+    entryComponents: [DefaultCatalogComponent, WesternClassicalCatalogComponent, PopularCatalogComponent, IndianClassicalCatalogComponent],
     bootstrap: [AppComponent]
 })
 export class AppModule { }

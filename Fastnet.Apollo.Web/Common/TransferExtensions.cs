@@ -16,80 +16,10 @@ using System.Threading.Tasks;
 
 namespace Fastnet.Apollo.Web
 {
-    //public class MyComparer : IEqualityComparer<string>
-    //{
-    //    ///// <summary>
-    //    ///// 
-    //    ///// </summary>
-    //    ///// <param name="x"></param>
-    //    ///// <param name="y"></param>
-    //    ///// <returns></returns>
-    //    //public override int Compare(string x, string y)
-    //    //{
-    //    //    var r = string.Compare(x, y, CultureInfo.CurrentCulture, CompareOptions.IgnoreNonSpace | CompareOptions.IgnoreCase);
-    //    //    Debug.WriteLine($"{x} against {y}, result {r}");
-    //    //    return r;
-    //    //}
-    //    ///// <summary>
-    //    ///// 
-    //    ///// </summary>
-    //    ///// <param name="x"></param>
-    //    ///// <param name="y"></param>
-    //    ///// <returns></returns>
-    //    //public override bool Equals(string x, string y)
-    //    //{
-    //    //    return Compare(x, y) == 0;
-    //    //}
-    //    ///// <summary>
-    //    ///// 
-    //    ///// </summary>
-    //    ///// <param name="obj"></param>
-    //    ///// <returns></returns>
-    //    //public override int GetHashCode(string obj)
-    //    //{
-    //    //    return obj.GetHashCode();
-    //    //}
-    //    public bool Equals(string x, string y)
-    //    {
-    //        if(object.ReferenceEquals(x, y)) {
-    //            return true;
-    //        }
-    //        if (object.ReferenceEquals(x, null) || object.ReferenceEquals(y, null))
-    //        {
-    //            return false;
-    //        }
-    //        var r = string.Compare(x, y, CultureInfo.CurrentCulture, CompareOptions.IgnoreNonSpace | CompareOptions.IgnoreCase);
-    //        //var r = string.Compare(x.RemoveDiacritics(), y.RemoveDiacritics(), CultureInfo.CurrentCulture, CompareOptions.IgnoreCase);
-    //        Debug.WriteLine($"{x} against {y}, result {r}");
-    //        return r == 0;
-    //    }
-
-    //    public int GetHashCode(string obj)
-    //    {
-    //        return obj.RemoveDiacritics().GetHashCode();
-    //    }
-    //}
-    //public static class core_extensions // move the to fastnet.core
-    //{
-    //    //public static string GetLastName(this string text)
-    //    //{
-    //    //    var parts = text.Split(' ', StringSplitOptions.RemoveEmptyEntries);
-    //    //    return parts.Length > 1 ? parts.Last() : parts.First();
-    //    //}
-    //}
     public static partial class TransferExtensions
     {
-        private static ILogger log = ApplicationLoggerFactory.CreateLogger("Fastnet.Apollo.Web.TransferExtensions");
-        //public static StyleDTO ToDTO(this Style style, MusicOptions musicOptions)
-        //{
-        //    StyleInformation si = musicOptions.Styles.Single(x => x.Style == style.Id);
-        //    return new StyleDTO
-        //    {
-        //        Id = si.Style,
-        //        Enabled = si.Enabled,
-        //        DisplayName = si.Style.ToDescription()
-        //    };
-        //}
+        //private static readonly ILogger log = ApplicationLoggerFactory.CreateLogger("Fastnet.Apollo.Web.TransferExtensions");
+
         public static ArtistDTO ToDTO(this Artist a)
         {
             return new ArtistDTO
@@ -108,15 +38,6 @@ namespace Fastnet.Apollo.Web
                 ImageUrl = $"lib/get/artist/imageart/{a.Id}"
             };
         }
-        //public static CompositionDTO ToDTO(this Composition c)
-        //{
-        //    return new CompositionDTO
-        //    {
-        //        Id = c.Id,
-        //        Name = c.Name,
-        //        DisplayName = c.Name
-        //    };
-        //}
         public static CompositionDTO ToDTO(this Composition c, bool fullContent = false)
         {
             if (!fullContent)
@@ -144,29 +65,12 @@ namespace Fastnet.Apollo.Web
         /// <returns></returns>
         public static PerformanceDTO ToDTO(this Performance p, bool full = false)
         {
-            //string getFullPerformersText()
-            //{
-            //    var list = new List<string>();
-            //    if(p.Performers != null && p.Performers.Length > 0)
-            //    {
-            //        list.Add(p.Performers);
-            //    }
-            //    if (p.Orchestras != null && p.Orchestras.Length > 0)
-            //    {
-            //        list.Add(p.Orchestras);
-            //    }
-            //    if (p.Conductors != null && p.Conductors.Length > 0)
-            //    {
-            //        list.Add(p.Conductors);
-            //    }
-            //    return string.Join(", ", list.Where(x => x.Trim().Length > 0));
-            //}
             if (!full)
             {
                 return new PerformanceDTO
                 {
                     Id = p.Id,
-                    Performers = p.GetAllPerformersCSV(),// getFullPerformersText(),// p.Performers,
+                    Performers = p.GetAllPerformersCSV(),
                     Year = p.Year,
                     AlbumName = p.Movements.First().Work.Name,
                     DisplayName = p.Movements.First().Work.Name,
@@ -180,11 +84,11 @@ namespace Fastnet.Apollo.Web
             return new PerformanceDTO
             {
                 Id = p.Id,
-                Performers = p.GetAllPerformersCSV(),// getFullPerformersText(), //p.Performers,
+                Performers = p.GetAllPerformersCSV(),
                 Year = p.Year,
                 AlbumName = p.Movements.First().Work.Name,
                 DisplayName = p.Movements.First().Work.Name,
-                AlbumCoverArt = $"lib/get/work/coverart/{p.Movements.First().Work.Id}",// p.Movements.First().Work
+                AlbumCoverArt = $"lib/get/work/coverart/{p.Movements.First().Work.Id}",
                 MovementCount = p.Movements.Count,
                 Movements = p.Movements.ToDTO(),
                 FormattedDuration = p.Movements
@@ -194,15 +98,13 @@ namespace Fastnet.Apollo.Web
         }
         public static WorkDTO ToDTO(this Work w, bool full = false)
         {
-            // **URGENT ** there can now be multiple artists for a work
-            // so using artistId like this is WRONG!!
             var artistId = w.Artists.Select(x => x.Id).First();
             if (!full)
             {
                 return new WorkDTO
                 {
                     Id = w.Id,
-                    ArtistId = artistId,// w.ArtistId,
+                    ArtistIdList =  w.Artists.Select(x => x.Id),
                     OpusType = w.Type,
                     Name = w.Name,
                     Year = w.Year,
@@ -218,7 +120,7 @@ namespace Fastnet.Apollo.Web
                 return new WorkDTO
                 {
                     Id = w.Id,
-                    ArtistId = artistId,// w.ArtistId,
+                    ArtistIdList = w.Artists.Select(x => x.Id),
                     OpusType = w.Type,
                     Name = w.Name,
                     Year = w.Year,
@@ -262,7 +164,6 @@ namespace Fastnet.Apollo.Web
             {
                 Id = t.Id,
                 WorkId = t.WorkId,
-                //ArtistId = t.Work.ArtistId,
                 Number = t.Number,
                 Title = t.Title,
                 DisplayName = t.Title,
@@ -280,16 +181,16 @@ namespace Fastnet.Apollo.Web
                 Encoding = mf.Encoding,
                 Duration = mf.Duration,
                 IsFaulty = mf.IsFaulty,
-                FormattedDuration = mf.Duration.FormatDuration(),// mf.Duration.HasValue ? FormatDuration(mf.Duration.Value) : "",
-                BitRate = mf.GetBitRate().rate,// getBitRate(mf).rate,
+                FormattedDuration = mf.Duration.FormatDuration(),
+                BitRate = mf.GetBitRate().rate,
                 BitsPerSample = mf.BitsPerSample,
                 SampleRate = mf.SampleRate.HasValue ? mf.SampleRate / 1000.0 : null,
-                AudioProperties = mf.GetAudioProperties() // getAudioProperties(mf),
+                AudioProperties = mf.GetAudioProperties()
             };
-            t_m.Rank = mf.Rank();// getRanking(t_m);
+            t_m.Rank = mf.Rank();
             return t_m;
         }
-        public static AudioDevice /*DeviceDTO*/ ToDTO(this Device d)
+        public static AudioDevice ToDTO(this Device d)
         {
             return new AudioDevice
             {
@@ -307,17 +208,6 @@ namespace Fastnet.Apollo.Web
         }
         public static DeviceStatusDTO ToDTO(this DeviceStatus ds, DeviceRuntime dr)
         {
-            //(PlaylistItemRuntime major, PlaylistItemRuntime minor) findItem(PlaylistPosition pos)
-            //{
-            //    PlaylistItemRuntime maj = dr.Playlist.Items[pos.Major - 1];
-            //    PlaylistItemRuntime min = null;
-            //    if (maj.Type == PlaylistRuntimeItemType.MultipleItems && pos.Minor > 0)
-            //    {
-            //        min = maj.SubItems.ToArray()[pos.Minor - 1];
-            //    }
-            //    return (maj, min);
-            //}
-            //(PlaylistItemRuntime majorPli, PlaylistItemRuntime minorPli) = dr.CurrentPosition.IsUnset() ? (null, null) : findItem(dr.CurrentPosition);
             var ct = ds.CurrentTime.TotalMilliseconds;
             var tt = ds.TotalTime.TotalMilliseconds;
             var rt = tt - ct;
@@ -325,15 +215,12 @@ namespace Fastnet.Apollo.Web
             {
                 Key = ds.Key,
                 PlaylistPosition = dr.CurrentPosition,
-                //Title = majorPli?.Type == PlaylistRuntimeItemType.SingleItem ? majorPli.Title : minorPli?.Title,
-                //CoverArtUrl = majorPli?.CoverArtUrl,
                 CurrentTime = ct,
                 TotalTime = tt,
                 RemainingTime = rt,
                 FormattedCurrentTime = ct.FormatDuration(),
                 FormattedTotalTime = tt.FormatDuration(),
                 FormattedRemainingTime = rt.FormatDuration(),
-                //AudioProperties = majorPli?.Type == PlaylistRuntimeItemType.SingleItem ? majorPli?.AudioProperties : minorPli?.AudioProperties,
                 State = ds.State,
                 Volume = ds.Volume,
                 CommandSequence = dr.CommandSequenceNumber
@@ -346,7 +233,6 @@ namespace Fastnet.Apollo.Web
                 Id = pli.Id,
                 Position = pli.Position,
                 Type = pli.Type,
-                //Title = pli.Title,
                 NotPlayableOnCurrentDevice = pli.NotPlayableOnCurrentDevice,
                 Titles = pli.Titles,
                 CoverArtUrl = pli.CoverArtUrl,
@@ -358,7 +244,6 @@ namespace Fastnet.Apollo.Web
                 IsSubitem = isSubitem,
                 SubItems = pli.SubItems?.Select(x => x.ToDTO(true))
             };
-            //if(pli.)
             return dto;
         }
         public static IOpusDetails ToDetails(this Performance performance)
@@ -380,9 +265,7 @@ namespace Fastnet.Apollo.Web
             {
                 Id = work.Id,
                 OpusName = work.Name,
-                //ArtistName = work.Artist.Name,
                 TrackDetails = work.Tracks.ToDetails(),
-                //CompressedArtistName = work.Artist.CompressedName,
                 CompressedOpusName = work.CompressedName
             };
         }
@@ -408,7 +291,7 @@ namespace Fastnet.Apollo.Web
                     var md = new MusicFileDetail
                     {
                         Id = mf.Id,
-                        File = System.IO.Path.Combine(rpath, name),// mf.File,
+                        File = System.IO.Path.Combine(rpath, name),
                         FileLength = mf.FileLength,
                         FileLastWriteTimeString = mf.FileLastWriteTimeUtc.ToDefaultWithTime()
                     };
@@ -419,8 +302,6 @@ namespace Fastnet.Apollo.Web
             }
             return list.ToArray();
         }
-
     }
-
 }
 

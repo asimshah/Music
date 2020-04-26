@@ -5,7 +5,9 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Proxies;
 using Microsoft.EntityFrameworkCore.Storage;
 using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Logging.Console;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -16,27 +18,25 @@ using System.Threading.Tasks;
 namespace Fastnet.Music.Data
 {
 #pragma warning disable CS1591 // Missing XML comment for publicly visible type or member
-
+    
     public class RetryStrategy : SqlServerRetryingExecutionStrategy
     {
-        private int retryNumber = 0;
-        private string identifier = string.Empty;
-        private ILogger log;
-        public RetryStrategy( ExecutionStrategyDependencies dependencies) : base(dependencies, 10)
+        //private ILogger log;
+        public RetryStrategy( ExecutionStrategyDependencies dependencies, int maxRetryCount) : base(dependencies, maxRetryCount)
         {
-            log = ApplicationLoggerFactory.CreateLogger<RetryStrategy>();
+            //log = ApplicationLoggerFactory.CreateLogger<RetryStrategy>();
         }
 
-        public int RetryNumber { get => retryNumber; set => retryNumber = value; }
+        public int RetryNumber { get; set; } = 0;
 
-        public void SetIdentifier(string ident)
-        {
-            identifier = ident;
-        }
-        protected override void OnFirstExecution()
-        {
-            base.OnFirstExecution();
-        }
+        //public void SetIdentifier(string ident)
+        //{
+        //    identifier = ident;
+        //}
+        //protected override void OnFirstExecution()
+        //{
+        //    base.OnFirstExecution();
+        //}
         protected override void OnRetry()
         {
             RetryNumber++;
@@ -44,13 +44,13 @@ namespace Fastnet.Music.Data
         }
         protected override bool ShouldRetryOn(Exception exception)
         {
-            //log.Information($"{identifier}: ShouldRetryOn(): exception {exception.GetType().Name}, {exception.Message}");
             return true;
-            //return base.ShouldRetryOn(exception);
         }
     }
     public class MusicDb : DbContext
     {
+        //public static readonly ILoggerFactory loggerFactory = new LoggerFactory(new[] {
+        //    new ConsoleLoggerProvider((_, __) => true, true)});
 #pragma warning disable CS0169 // The field 'MusicDb.config' is never used
         //private IConfiguration config;
 #pragma warning restore CS0169 // The field 'MusicDb.config' is never used
@@ -105,13 +105,25 @@ namespace Fastnet.Music.Data
         {
             if(!optionsBuilder.IsConfigured)
             {
+                //var lf = LoggerFactory.Create(builder =>
+                //{
+                //    builder.AddFilter("Microsoft.EntityFrameworkCore", LogLevel.Information)
+                //    .AddDebug()
+                //    .Services.AddSingleton<ILoggerProvider>((sp) =>
+                //    {
+                //        return new RollingFileLoggerProvider((c, l) => l > LogLevel.Debug, false);
+                //    });
+
+                //});
+                
                 optionsBuilder.UseSqlServer(connectionString, options =>
                 {
                     options.EnableRetryOnFailure();
-                    options.ExecutionStrategy(x => new RetryStrategy(x));
+                    options.ExecutionStrategy(x => new RetryStrategy(x, 4));
                 })
                     .EnableDetailedErrors()
                     .EnableSensitiveDataLogging()
+                    //.UseLoggerFactory(lf)
                     .UseLazyLoadingProxies();
             }
         }
@@ -145,7 +157,7 @@ namespace Fastnet.Music.Data
                 .HasIndex(e => e.Name);
 
             modelBuilder.Entity<Artist>()
-                .HasIndex(e => e.Name)
+                .HasIndex(e => e.AlphamericName)
                 .IsUnique();
 
             modelBuilder.Entity<Work>()
@@ -277,6 +289,7 @@ namespace Fastnet.Music.Data
             log.Information($"{toBeRemoved.Count()} task items removed");
             TaskItems.ToList().ForEach(x => x.Status = Core.TaskStatus.Pending);
 
+            EnsureArtistAlphamericNames();
             EnsurePerformanceMusicStyle();
             EnsurePerformersRefactored(options);
             EnsureArtistWorkRefactored();
@@ -284,13 +297,20 @@ namespace Fastnet.Music.Data
             EnsurePerformerAlphamericNames();
             SaveChanges();
         }
-
+        private void EnsureArtistAlphamericNames()
+        {
+            var artists = Artists.Where(x => string.IsNullOrWhiteSpace(x.AlphamericName));
+            foreach (var artist in artists)
+            {
+                artist.AlphamericName = artist.Name.ToAlphaNumerics();
+            }
+        }
         private void EnsurePerformerAlphamericNames()
         {
             var performers = Performers.Where(x => string.IsNullOrWhiteSpace(x.AlphamericName));
             foreach(var performer in performers)
             {
-                performer.AlphamericName = performer.Name.ToAlphaNumerics();
+                performer.AlphamericName = performer.Name.ToAlphaNumerics().ToLower();
             }
         }
 
@@ -350,6 +370,7 @@ namespace Fastnet.Music.Data
                     performer = new Performer
                     {
                         Name = name,
+                        AlphamericName = name.ToAlphaNumerics().ToLower(),
                         Type = type
                     };
                     Performers.Add(performer);

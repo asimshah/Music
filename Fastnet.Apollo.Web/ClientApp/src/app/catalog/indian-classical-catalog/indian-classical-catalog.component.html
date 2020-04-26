@@ -1,0 +1,16 @@
+<div class="component-container" (swipeleft)="onSwipeLeft()" (swiperight)="onSwipeRight()">
+   <div *ngIf="catalogView === CatalogView.DefaultView">
+      <div class="artists-panel">
+         <ng-container *ngFor="let artist of allArtists">
+            <div class="artist-descr" (click)="onArtistClick(artist)">
+               <div class="artist-image">
+                  <img *ngIf="artist.imageUrl" [src]="artist.imageUrl" />
+               </div>
+               <div class="artist-name">{{artist.name}}</div>
+               <div class="artist-stats">{{getArtistStats(artist)}}</div>
+            </div>
+         </ng-container>
+      </div>
+   </div>
+   <popup-message></popup-message>
+</div>

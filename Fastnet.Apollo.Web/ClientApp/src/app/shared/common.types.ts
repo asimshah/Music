@@ -23,6 +23,11 @@ export class SearchKey {
    key: number;
    name: string;
 }
+
+export class PerformanceResult {
+   performance: SearchKey;
+}
+
 export class AudioCapability {
    constructor(public maxSampleRate: number) {
 

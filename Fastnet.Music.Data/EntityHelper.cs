@@ -3,6 +3,7 @@ using Fastnet.Core.Logging;
 using Fastnet.Music.Core;
 using Microsoft.Extensions.Logging;
 using System;
+using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
 
@@ -24,9 +25,29 @@ namespace Fastnet.Music.Data
             this.db = db;
             this.context = ctx;
         }
+        public EntityHelper(MusicDb db, TaskItem taskItem) : this(db, new DeleteContext(taskItem))
+        {
+
+        }
         public void Delete(MusicFile musicFile)
         {
             BubbleDelete(musicFile);
+        }
+        public void Delete(Performance performance)
+        {
+            BubbleDelete(performance);
+        }
+        public IEnumerable<long> GetModifiedArtistIds()
+        {
+            return this.context?.ModifiedArtistList ?? Enumerable.Empty<long>();
+        }
+        public IEnumerable<long> GetDeletedArtistIds()
+        {
+            return this.context?.DeletedArtistList ?? Enumerable.Empty<long>();
+        }
+        private string ToIdent()
+        {
+            return context.ToString();
         }
         /// <summary>
         /// Delete entity and any related parent entities that should also be deleted 
@@ -38,34 +59,34 @@ namespace Fastnet.Music.Data
             switch (entity)
             {
                 case MusicFile mf:
-                    RemoveEntity(mf);
                     RemoveReferencingEntitiesIfRequired(mf);
+                    RemoveEntity(mf);
                     break;
                 case Track track:
-                    RemoveEntity(track);
                     RemoveReferencingEntitiesIfRequired(track);
+                    RemoveEntity(track);
                     break;
                 case Work work:
-                    RemoveEntity(work);
                     RemoveReferencingEntitiesIfRequired(work);
+                    RemoveEntity(work);
                     break;
                 case Artist artist:
                     RemoveEntity(artist);
                     //RemoveReferencingEntitiesIfRequired(work);
                     break;
                 case Performance performance:
-                    RemoveEntity(performance);
                     RemoveReferencingEntitiesIfRequired(performance);
+                    RemoveEntity(performance);
                     break;
                 case Composition composition:
-                    RemoveEntity(composition);
                     RemoveReferencingEntitiesIfRequired(composition);
+                    RemoveEntity(composition);
                     break;
                 case Raga raga:
                     RemoveEntity(raga);
                     break;
                 default:
-                    log.Error($"Delete<T> does not support type {typeof(T).Name}");
+                    log.Error($"{ToIdent()} Delete<T> does not support type {typeof(T).Name}");
                     break;
             };
 
@@ -75,14 +96,14 @@ namespace Fastnet.Music.Data
             DeleteRelatedPlaylistItems(musicFile);
             DeleteRelatedIdTags(musicFile);
             db.MusicFiles.Remove(musicFile);
-            log.Information($"{musicFile.ToIdent()} {musicFile.File} deleted");
+            log.Information($"{ToIdent()} {musicFile.ToIdent()} {musicFile.File} deleted");
         }
         private void RemoveEntity(Composition composition)
         {
             Debug.Assert(composition.Performances.Count() == 0);
             context.SetModifiedArtistId(composition.ArtistId);
             db.Compositions.Remove(composition);
-            log.Information($"{composition.ToIdent()} removed");
+            log.Information($"{ToIdent()} {composition.ToIdent()} removed");
         }
         private void RemoveEntity(Performance performance)
         {
@@ -90,7 +111,7 @@ namespace Fastnet.Music.Data
             switch (performance.StyleId)
             {
                 case MusicStyles.WesternClassical:
-                    context.SetModifiedArtistId(performance.Composition.ArtistId);
+                    //context.SetModifiedArtistId(performance.Composition.ArtistId);
                     break;
                 case MusicStyles.IndianClassical:
                     var idlist = db.RagaPerformances.Where(x => x.Performance == performance).Select(x => x.ArtistId);
@@ -99,37 +120,37 @@ namespace Fastnet.Music.Data
             }
 
             db.Performances.Remove(performance);
-            log.Information($"{performance.ToIdent()} removed");
+            log.Information($"{ToIdent()} {performance.ToIdent()} removed");
         }
         private void RemoveEntity(Track track)
         {
             Debug.Assert(track.MusicFiles.Count() == 0);
             context.SetModifiedArtistId(track.Work.ArtistWorkList.Select(x => x.ArtistId).ToArray());
             db.Tracks.Remove(track);
-            log.Information($"{track.ToIdent()} {track.Title} removed");
+            log.Information($"{ToIdent()} {track.ToIdent()} {track.Title} removed");
         }
         private void RemoveEntity(Work work)
         {
             Debug.Assert(work.Tracks.Count() == 0);
             context.SetModifiedArtistId(work.ArtistWorkList.Select(x => x.ArtistId).ToArray());
             db.Works.Remove(work);
-            log.Information($"{work.ToIdent()} {work.Name} removed");
+            log.Information($"{ToIdent()} {work.ToIdent()} {work.Name} removed");
         }
         private void RemoveEntity(Raga raga)
         {
             Debug.Assert(db.RagaPerformances.Where(x => x.Raga == raga).Count() == 0);
             db.Ragas.Remove(raga); // i don't bubble delete becuase ragas have no parents
-            log.Information($"{raga.ToIdent()} {raga.Name} deleted");
+            log.Information($"{ToIdent()} {raga.ToIdent()} {raga.Name} deleted");
         }
         private void RemoveEntity(Artist artist)
         {
             Debug.Assert(artist.Works.Count() == 0);
             var aslist = db.ArtistStyles.Where(x => x.Artist == artist);
             db.ArtistStyles.RemoveRange(aslist);
-            log.Information($"{aslist.Select(x => x.ToIdent()).ToCSV()} removed");
+            log.Information($"{ToIdent()} {aslist.Select(x => x.ToIdent()).ToCSV()} removed");
             context.SetDeletedArtistId(artist.Id);
             db.Artists.Remove(artist);
-            log.Information($"{artist.ToIdent()} {artist.Name} removed");
+            log.Information($"{ToIdent()} {artist.ToIdent()} {artist.Name} removed");
         }
         /// <summary>
         /// removes any entity that refers to music file if that entity is now 'empty'
@@ -141,7 +162,7 @@ namespace Fastnet.Music.Data
             var track = musicFile.Track;
             Debug.Assert(track != null);
             track.MusicFiles.Remove(musicFile);
-            if (track.MusicFiles.All(x => x.IsGenerated))
+            if (track.MusicFiles.Count() > 0 && track.MusicFiles.All(x => x.IsGenerated))
             {
                 // remaining music files are system generated
                 foreach (var mf in track.MusicFiles.ToArray())
@@ -165,6 +186,7 @@ namespace Fastnet.Music.Data
             var performance = track.Performance;
             if (performance != null)
             {
+                track.Performance = null;
                 performance.Movements.Remove(track);
                 if (performance.Movements.Count() == 0)
                 {
@@ -184,7 +206,7 @@ namespace Fastnet.Music.Data
             var awlist = work.ArtistWorkList.ToArray();
             var artists = awlist.Select(x => x.Artist).ToArray();
             db.ArtistWorkList.RemoveRange(awlist);
-            log.Information($"{awlist.Select(x => x.ToIdent()).ToCSV()} deleted");
+            log.Information($"{ToIdent()} {awlist.Select(x => x.ToIdent()).ToCSV()} deleted");
             foreach (var artist in artists)
             {
                 var aw = artist.ArtistWorkList.Single(x => x.Work == work);
@@ -205,9 +227,11 @@ namespace Fastnet.Music.Data
                     Debug.Assert(cpList.Count() == 1);
                     var cp = cpList.Single();
                     var composition = cp.Composition;
+                    context.SetModifiedArtistId(composition.ArtistId);
                     composition.CompositionPerformances.Remove(cp);
+                    performance.CompositionPerformances.Remove(cp);
                     db.CompositionPerformances.Remove(cp);
-                    log.Information($"{cp.ToIdent()} deleted");
+                    log.Information($"{ToIdent()} {cp.ToIdent()} deleted");
                     if (composition.CompositionPerformances.Count() == 0)
                     {
                         BubbleDelete(composition);
@@ -225,7 +249,7 @@ namespace Fastnet.Music.Data
                     Debug.Assert(rplist.Select(x => x.Raga).Count() == 1);
                     var raga = rplist.Select(x => x.Raga).Single();
                     db.RagaPerformances.RemoveRange(rplist);
-                    log.Information($"{rplist.Select(x => x.ToIdent()).ToCSV()} deleted");
+                    log.Information($"{ToIdent()} {rplist.Select(x => x.ToIdent()).ToCSV()} deleted");
                     if (db.RagaPerformances.Where(x => x.Raga == raga).Count() == 0)
                     {
                         BubbleDelete(raga);
@@ -249,7 +273,7 @@ namespace Fastnet.Music.Data
         {
             var tags = musicFile.IdTags.ToArray();
             db.IdTags.RemoveRange(tags);
-            log.Information($"{musicFile.ToIdent()} {tags.Count()} idtags deleted");
+            log.Information($"{ToIdent()} {musicFile.ToIdent()} {tags.Count()} idtags deleted");
         }
         private void DeleteRelatedPlaylistItems<T>(T entity)
         {
@@ -259,7 +283,7 @@ namespace Fastnet.Music.Data
                 Work w => (PlaylistItemType.Work, w.Id),
                 Track t => (PlaylistItemType.Track, t.Id),
                 MusicFile mf => (PlaylistItemType.MusicFile, mf.Id),
-                _ => throw new Exception($"Parameter {nameof(entity)} type {entity.GetType().Name} not supported")
+                _ => throw new Exception($"{ToIdent()} Parameter {nameof(entity)} type {entity.GetType().Name} not supported")
             };
             var items = db.PlaylistItems.Where(x => x.Type == itemType && x.ItemId == itemId).ToArray();
             foreach (var item in items)
@@ -268,11 +292,11 @@ namespace Fastnet.Music.Data
                 item.Playlist = null;
                 playlist.Items.Remove(item);
                 db.PlaylistItems.Remove(item);
-                log.Information($"playlist item {item.Title} removed from {playlist.Name} and deleted");
+                log.Information($"{ToIdent()} playlist item {item.Title} removed from {playlist.Name} and deleted");
                 if (playlist.Items.Count() == 0)
                 {
                     db.Playlists.Remove(playlist);
-                    log.Information($"playlist {playlist.Name} deleted");
+                    log.Information($"{ToIdent()} playlist {playlist.Name} deleted");
                 }
             }
         }
@@ -282,13 +306,13 @@ namespace Fastnet.Music.Data
             var performers = pplist.Select(x => x.Performer);
             db.PerformancePerformers.RemoveRange(pplist);
             performance.PerformancePerformers.Clear();
-            log.Information($"{pplist.Select(x => x.ToIdent()).ToCSV()} deleted");
+            log.Information($"{ToIdent()} {pplist.Select(x => x.ToIdent()).ToCSV()} deleted");
             foreach (var performer in performers)
             {
                 if (db.PerformancePerformers.Where(x => x.Performer == performer).Count() == 0)
                 {
                     db.Performers.Remove(performer);
-                    log.Information($"{performer.ToIdent()} {performer} deleted");
+                    log.Information($"{ToIdent()} {performer.ToIdent()} {performer} deleted");
                 }
             }
         }

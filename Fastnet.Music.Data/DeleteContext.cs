@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using System.Linq;
 
 namespace Fastnet.Music.Data
 {
@@ -22,13 +23,14 @@ namespace Fastnet.Music.Data
                 //case OpusFolder f:
                 //    return f.ToContextDescription();
                 case TaskItem ti:
-                    return ti.ToContextDescription();
+                    return ti.ToString();
             }
             return "context unknown!";
         }
         public void SetModifiedArtistId(params long[] idList)
         {
-            this.ModifiedArtistList.AddRange(idList);
+            var list = idList.Except(this.DeletedArtistList).ToArray();
+            this.ModifiedArtistList.AddRange(list);
         }
         public void SetDeletedArtistId(params long[] idList)
         {

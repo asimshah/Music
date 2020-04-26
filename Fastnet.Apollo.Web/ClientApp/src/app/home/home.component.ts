@@ -10,6 +10,7 @@ import { Style } from '../shared/common.types';
 import { PopularCatalogComponent } from '../catalog/popular-catalog/popular-catalog.component';
 import { WesternClassicalCatalogComponent } from '../catalog/western-classical-catalog/western-classical-catalog.component';
 import { ParameterService } from '../shared/parameter.service';
+import { IndianClassicalCatalogComponent } from '../catalog/indian-classical-catalog/indian-classical-catalog.component';
 
 @Component({
     selector: 'app-home',
@@ -70,7 +71,10 @@ export class HomeComponent implements AfterViewInit, OnDestroy {
                     break;
                 case MusicStyles.WesternClassical:
                     this.loadCatalog(WesternClassicalCatalogComponent);
-                    break;
+                  break;
+               case MusicStyles.IndianClassical:
+                  this.loadCatalog(IndianClassicalCatalogComponent);
+                  break;
                 default:
                     this.loadCatalog(DefaultCatalogComponent);
                     break;

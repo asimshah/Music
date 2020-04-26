@@ -1,8 +1,10 @@
 ﻿using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
+using System.Diagnostics;
 
 namespace Fastnet.Music.Data
 {
+    [DebuggerDisplay("{Name}({Type})")]
     public class Performer : EntityBase
     {
         public override long Id { get; set; }

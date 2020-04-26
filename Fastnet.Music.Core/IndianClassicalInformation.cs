@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Diagnostics;
 using Fastnet.Core;
 
@@ -12,7 +13,7 @@ namespace Fastnet.Music.Core
         {
             if (Lookup == null)
             {
-                var dict = new Dictionary<string, RagaName>();
+                var dict = new Dictionary<string, RagaName>(StringComparer.CurrentCultureIgnoreCase);
                 foreach (var rn in RagaNames)
                 {
                     try

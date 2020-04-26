@@ -6,6 +6,8 @@
   </PropertyGroup>
   <PropertyGroup>
     <GenerateNuspecDependsOn>$(GenerateNuspecDependsOn);SetPackageVersion</GenerateNuspecDependsOn>
+    <RunAnalyzersDuringBuild>false</RunAnalyzersDuringBuild>
+    <RunAnalyzersDuringLiveAnalysis>false</RunAnalyzersDuringLiveAnalysis>
   </PropertyGroup>
   <Target Name="SetPackageVersion" DependsOnTargets="Build">
     <PropertyGroup>
@@ -25,12 +27,15 @@
     <Compile Remove="Migrations\20200408112544_ConvertCompositionPerformanceToManyToMany.Designer.cs" />
   </ItemGroup>
   <ItemGroup>
-    <PackageReference Include="Fastnet.Music.Core" Version="2.2004.13125853" />
-    <PackageReference Include="Microsoft.EntityFrameworkCore.Proxies" Version="3.1.2" />
-    <PackageReference Include="Microsoft.EntityFrameworkCore.SqlServer" Version="3.1.2" />
-    <PackageReference Include="Microsoft.EntityFrameworkCore.Tools" Version="3.1.2">
+    <PackageReference Include="Microsoft.EntityFrameworkCore.Proxies" Version="3.1.3" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore.SqlServer" Version="3.1.3" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore.Tools" Version="3.1.3">
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
     </PackageReference>
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\..\Core\Fastnet.Core\Fastnet.Core.csproj" />
+    <ProjectReference Include="..\Fastnet.Music.Core\Fastnet.Music.Core.csproj" />
   </ItemGroup>
 </Project>

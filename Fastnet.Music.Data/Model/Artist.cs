@@ -30,6 +30,8 @@ namespace Fastnet.Music.Data
         public Guid UID { get; set; }
         [MaxLength(ILengthConstants.MaxArtistNameLength)]
         public string Name { get; set; }
+        [MaxLength(ILengthConstants.MaxArtistNameLength)]
+        public string AlphamericName { get; set; }
         [MaxLength(ILengthConstants.MaxCompressedNameLength)]
         public string CompressedName { get; set; }
         public ArtistType Type { get; set; }

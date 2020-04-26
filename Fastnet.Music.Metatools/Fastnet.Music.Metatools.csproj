@@ -4,6 +4,8 @@
     <Version>2.4.86</Version>
     <AssemblyVersion>2.$([System.DateTime]::Now.ToString('yyyy')).$([System.DateTime]::Now.ToString('Mdd')).$([System.DateTime]::Now.ToString('HHmm'))</AssemblyVersion>
     <GenerateDocumentationFile>true</GenerateDocumentationFile>
+    <RunAnalyzersDuringBuild>false</RunAnalyzersDuringBuild>
+    <RunAnalyzersDuringLiveAnalysis>false</RunAnalyzersDuringLiveAnalysis>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
     <NoWarn>1701;1702;CS1591</NoWarn>
@@ -13,6 +15,8 @@
     <PackageReference Include="FlacLibSharp" Version="3.2.0" />
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\..\Core\Fastnet.Core\Fastnet.Core.csproj" />
+    <ProjectReference Include="..\Fastnet.Music.Core\Fastnet.Music.Core.csproj" />
     <ProjectReference Include="..\Fastnet.Music.Data\Fastnet.Music.Data.csproj" />
     <ProjectReference Include="..\Fastnet.Music.MediaTools\Fastnet.Music.MediaTools.csproj" />
   </ItemGroup>

@@ -1,6 +1,7 @@
 ﻿using Fastnet.Core;
 using Fastnet.Music.Core;
 using System.Collections.Generic;
+using System.Linq;
 
 namespace Fastnet.Apollo.Web
 {
@@ -33,6 +34,7 @@ namespace Fastnet.Apollo.Web
         public int WorkCount { get; set; }
         public int SinglesCount { get; set; }
         public int CompositionCount { get; set; }
+        public int RagaCount { get; set; }
         public int PerformanceCount { get; set; }
         public MetadataQuality Quality { get; set; }
         public string ImageUrl { get; set; }
@@ -59,7 +61,8 @@ namespace Fastnet.Apollo.Web
     public class WorkDTO
     {
         public long Id { get; set; }
-        public long ArtistId { get; set; }
+        public long ArtistId => ArtistIdList.First(); // temporary til Ui can cope with multiple artists for a work
+        public IEnumerable<long> ArtistIdList { get; set; }
         public OpusType OpusType { get; set; }
         public string Name { get; set; }
         public int Year { get; set; }

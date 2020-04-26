@@ -1,0 +1,89 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<ClassDiagram MajorVersion="1" MinorVersion="1">
+  <Class Name="Fastnet.Music.Metatools.BaseMusicSet" Collapsed="true">
+    <Position X="7.75" Y="0.75" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>QAAEAAAEACAAGAAAFAAAqAQCAQAAAAAQQAgAAAQABAg=</HashCode>
+      <FileName>BaseMusicSet.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="Fastnet.Music.Metatools.BaseAlbumSet" Collapsed="true">
+    <Position X="4.75" Y="2" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAgAAgAAQIAIQAAAAAAAAAAiAAAAAAAAAAAAAAAABAQ=</HashCode>
+      <FileName>BaseAlbumSet.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="Fastnet.Music.Metatools.MusicSetWithPerformances" Collapsed="true">
+    <Position X="11.75" Y="2" Width="2" />
+    <TypeIdentifier>
+      <HashCode>QAAgAAAAAAAAAgAAAAAAAAAAAAAACAAAAQAAEAAAAAA=</HashCode>
+      <FileName>MusicSetWithPerformances.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="Fastnet.Music.Metatools.IndianClassicalAlbumSet" Collapsed="true">
+    <Position X="1.75" Y="3.5" Width="2" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAAAAAAAAAAEAgAQAAAAAAAAAAAAAABAA=</HashCode>
+      <FileName>IndianClassicalAlbumSet.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="Fastnet.Music.Metatools.PopularMusicAlbumSet" Collapsed="true">
+    <Position X="4.5" Y="3.5" Width="2" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAAAAEAAAAAAAgAQAAAAAAAAAAAAAAAAA=</HashCode>
+      <FileName>PopularMusicAlbumSet.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="Fastnet.Music.Metatools.WesternClassicalAlbumSet" Collapsed="true">
+    <Position X="7.25" Y="3.5" Width="2" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAAAAAAAAAAAAgAQAAAAAAAAAAAAAAAAA=</HashCode>
+      <FileName>WesternClassicalAlbumSet.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="Fastnet.Music.Metatools.IndianClassicalRagaSet" Collapsed="true">
+    <Position X="10" Y="3.5" Width="2" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAAAAAAAQAAEAAAQAAAAAAAAAAAAAABAA=</HashCode>
+      <FileName>IndianClassicalRagaSet.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="Fastnet.Music.Metatools.WesternClassicalCompositionSet" Collapsed="true">
+    <Position X="12.75" Y="3.5" Width="2.5" />
+    <TypeIdentifier>
+      <HashCode>AAAgAAAAAAIAAAAEAAAAAAAgAQAAAAAAQAABAAAABAA=</HashCode>
+      <FileName>WesternClassicalCompositionSet.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="Fastnet.Music.Metatools.BaseMusicSetCollection&lt;ASET, PSET&gt;" Collapsed="true">
+    <Position X="5.25" Y="5" Width="2.5" />
+    <TypeIdentifier>
+      <HashCode>QAAAAAAAAAAAAAAAAAAgIAAEAAAgAAAAAAAAAAAAAAA=</HashCode>
+      <FileName>BaseMusicSetCollection.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="Fastnet.Music.Metatools.BaseMusicSetCollection&lt;T&gt;" Collapsed="true">
+    <Position X="2" Y="5" Width="2" />
+    <TypeIdentifier>
+      <HashCode>RAAAAAAAEAAEABAAEAAAqAAAAAAgAAAEAAAAgAAIAAA=</HashCode>
+      <FileName>BaseMusicSetCollection.cs</FileName>
+    </TypeIdentifier>
+    <Lollipop Position="0.2" />
+  </Class>
+  <Class Name="Fastnet.Music.Metatools.IndianClassicalMusicSetCollection" Collapsed="true">
+    <Position X="1.75" Y="6.5" Width="4.25" />
+    <TypeIdentifier>
+      <HashCode>QAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=</HashCode>
+      <FileName>IndianClassicalMusicSetCollection.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="Fastnet.Music.Metatools.WesternClassicalMusicSetCollection" Collapsed="true">
+    <Position X="7.25" Y="6.5" Width="4.75" />
+    <TypeIdentifier>
+      <HashCode>QAAAAAAAAAAAAAEAAAAAAAAAAAAAAAAAAAAAAAAAAAA=</HashCode>
+      <FileName>WesternClassicalMusicSetCollection.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Font Name="Segoe UI" Size="9" />
+</ClassDiagram>

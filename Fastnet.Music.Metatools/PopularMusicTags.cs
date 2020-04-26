@@ -1,7 +1,7 @@
 ﻿namespace Fastnet.Music.Metatools
 {
-    public class PopularMusicTags : MusicTags
-    {
-        public string Artist { get; set; }
-    }
+    //public class PopularMusicTags : MusicTags
+    //{
+    //    public string Artist { get; set; }
+    //}
 }

@@ -11,24 +11,26 @@ using System.Threading.Tasks;
 namespace Fastnet.Music.Metatools
 {
 #pragma warning disable CS1591 // Missing XML comment for publicly visible type or member
-    public class IndianClassicalRagaSet : MusicSetWithPerformances
+    public class IndianClassicalRagaSet : BasePerformanceSet
     {
         //private Raga Raga { get; set; }
-        private readonly List<MetaPerformer> otherPerformers = new List<MetaPerformer>();
-        private readonly List<MetaPerformer> artistPerformers = new List<MetaPerformer>();
+        //private readonly List<MetaPerformer> otherPerformers = new List<MetaPerformer>();
+        //private readonly List<MetaPerformer> artistPerformers = new List<MetaPerformer>();
         private readonly string ragaName;
 
         internal IndianClassicalRagaSet(MusicDb db, MusicOptions musicOptions,
-            string ragaName, IEnumerable<MetaPerformer> artists, IEnumerable<MetaPerformer> otherPerformers,
+            //string ragaName, IEnumerable<MetaPerformer> artists, IEnumerable<MetaPerformer> otherPerformers,
             IEnumerable<MusicFile> musicFiles, TaskItem taskItem)
             : base(db, musicOptions, MusicStyles.IndianClassical, musicFiles, taskItem)
         {
-            this.artistPerformers.AddRange(artists);
-            this.otherPerformers.AddRange(otherPerformers);// allPerformers.Where(x => x.type != PerformerType.Artist).ToList();
-            this.ragaName = ragaName;
+            //this.artistPerformers.AddRange(artists);
+            //this.otherPerformers.AddRange(otherPerformers);
+            var ragaNames = musicFiles.Select(x => x.GetRagaName()).Distinct();
+            Debug.Assert(ragaNames.Count() == 1, $"{taskItem} music files have more than one raga name");
+            this.ragaName = ragaNames.First();
             //this.year = musicFiles.Select(f => f.GetYear() ?? 0).Max();
         }
-        public async override Task<CatalogueResultBase> CatalogueAsync()
+        public async override Task<BaseCatalogueResult> CatalogueAsync()
         {
             RemoveCurrentPerformance();
             var Raga = GetRaga(ragaName);

@@ -28,8 +28,6 @@ namespace Fastnet.Music.Metatools
     {
         //musicdb extensions
 
-
-
         /// <summary>
         /// Reads all the tags in the audio file and adds them to the database
         /// (Not all the tags are used)
@@ -619,9 +617,9 @@ namespace Fastnet.Music.Metatools
     }
     public static partial class Extensions
     {
-        //private static LambdaEqualityComparer<(PerformerType type, string name)> performerComparer =  new LambdaEqualityComparer<(PerformerType type, string name)>((l, r) => l.type == r.type && l.name.IsEqualIgnoreAccentsAndCase(r.name));
+        static string[] honourifics = new string[] { "Pt.", "Pt", "Pandit", "Ustad", "Ustaad", "Shri", "Shrimati", "Mr.", "Mr", "Sir", "Mrs", "Mrs.", "Dame", "Lord", "Lady" };
         /// <summary>
-        /// returns performers available in this set of files - can be any name found in IDtags table including Artist and Composer
+        /// returns performers available in this set of files
         /// names are not duplicated but types are promoted upwards if necessary
         /// </summary>
         /// <param name="musicFiles"></param>
@@ -661,11 +659,29 @@ namespace Fastnet.Music.Metatools
         internal static IEnumerable<MetaPerformer> GetAllPerformers(this MusicFile mf, MusicOptions musicOptions)
         {
             var performers = new List<MetaPerformer>();
+            string[] getParts(string text)
+            {
+                return text.Split('&', '|', ';', ',', ':');
+            }
             void AddPerfomer(PerformerType type, string text)
             {
+                string filter(string name)
+                {
+                    IEnumerable<string> nameParts = name.Split(" ", System.StringSplitOptions.RemoveEmptyEntries);
+                    if (honourifics.Any(x => string.Compare(x, nameParts.First(), true) == 0))
+                    {
+                        nameParts = nameParts.Skip(1);
+                    }
+                    return string.Join(" ", nameParts);
+                }
                 void add(string part)
                 {
+                    part = filter(part);
                     part = musicOptions.ReplaceAlias(part);
+                    if(part == "collections")
+                    {
+                        Debugger.Break();
+                    }
                     var existingItem = performers.FirstOrDefault(x => x.Name.IsEqualIgnoreAccentsAndCase(part));
                     if (existingItem != null)
                     {
@@ -686,7 +702,7 @@ namespace Fastnet.Music.Metatools
                 }
                 if (!string.IsNullOrWhiteSpace(text))
                 {
-                    var parts = text.Split('|', ';', ',', ':');
+                    var parts = getParts(text);// text.Split('&', '|', ';', ',', ':');
                     foreach (var part in parts)
                     {
                         var t = Regex.Replace(part, @"\(.*?\)", "").Trim();
@@ -694,18 +710,18 @@ namespace Fastnet.Music.Metatools
                     }
                 }
             }
-            AddPerfomer(PerformerType.Other, mf.Musician);
-            AddPerfomer(PerformerType.Artist, mf.GetTagValue<string>("Artist"));
+            if (mf.OpusType != OpusType.Collection)
+            {
+                AddPerfomer(PerformerType.Other, mf.Musician);
+            }
+
             AddPerfomer(PerformerType.Other, mf.GetTagValue<string>("Performer"));
             AddPerfomer(PerformerType.Other, mf.GetTagValue<string>("Performers"));
-            if (mf.MusicianType != ArtistType.Various)
-            {
-                AddPerfomer(PerformerType.Other, mf.GetTagValue<string>("AlbumArtists"));
-                AddPerfomer(PerformerType.Other, mf.GetTagValue<string>("Album Artists"));
-            }
+
             switch (mf.Style)
             {
                 case MusicStyles.IndianClassical:
+                    AddPerfomer(PerformerType.Artist, mf.GetTagValue<string>("Artist"));
                     if (mf.MusicianType != ArtistType.Various)
                     {
                         AddPerfomer(PerformerType.Artist, mf.GetTagValue<string>("AlbumArtists"));
@@ -713,11 +729,38 @@ namespace Fastnet.Music.Metatools
                     }
                     break;
                 case MusicStyles.WesternClassical:
-                    AddPerfomer(PerformerType.Other, mf.GetTagValue<string>("Composer"));
+                    //var composer = mf.GetTagValue<string>("Composer");
+                    //if (composer == null)
+                    //{
+                    //    AddPerfomer(PerformerType.Artist, mf.GetTagValue<string>("Artist"));
+                    //    var firstArtist = performers.Where(x => x.Type == PerformerType.Artist).FirstOrDefault();
+                    //    if (firstArtist != null)
+                    //    {
+                    //        firstArtist.Reset(PerformerType.Composer);
+                    //        log.Debug($"{mf.File} has no composer tag, using {firstArtist.Name} as composer");
+                    //        performers = performers.Where(x => x.Type != PerformerType.Artist).ToList();                            
+                    //    }
+                    //    else
+                    //    {
+                    //        log.Error($"{mf.File} has no composer tag and no artist tag");
+                    //    }
+                    //}
+                    //else
+                    //{
+                    //    AddPerfomer(PerformerType.Composer, composer);
+                    //}
+                    AddPerfomer(PerformerType.Composer, mf.GetTagValue<string>("Composer"));
+                    AddPerfomer(PerformerType.Artist, mf.GetTagValue<string>("Artist"));
                     AddPerfomer(PerformerType.Conductor, mf.GetTagValue<string>("Conductor"));
                     AddPerfomer(PerformerType.Orchestra, mf.GetTagValue<string>("Orchestra"));
-                    goto case MusicStyles.Popular;                    
+                    if (mf.MusicianType != ArtistType.Various)
+                    {
+                        AddPerfomer(PerformerType.Other, mf.GetTagValue<string>("AlbumArtists"));
+                        AddPerfomer(PerformerType.Other, mf.GetTagValue<string>("Album Artists"));
+                    }
+                    break;
                 case MusicStyles.Popular:
+                    AddPerfomer(PerformerType.Artist, mf.GetTagValue<string>("Artist"));
                     if (mf.MusicianType != ArtistType.Various)
                     {
                         AddPerfomer(PerformerType.Other, mf.GetTagValue<string>("AlbumArtists"));
@@ -728,6 +771,11 @@ namespace Fastnet.Music.Metatools
             return performers.OrderBy(x => x.Type)
                 .ThenBy(x =>  x.Type == PerformerType.Orchestra ? x.Name : x.Name.GetLastName());
         }
+        internal static IEnumerable<MetaPerformer> GetArtists(this MusicFile mf, MusicOptions musicOptions)
+        {
+            return mf.GetAllPerformers(musicOptions).Where(x => x.Type == PerformerType.Artist);
+        }
+        [Obsolete("use GetArtists() instead")]
         public static string GetArtistName(this MusicFile mf/*, MusicDb db*/)
         {
             Debug.Assert(mf.IsGenerated == false);

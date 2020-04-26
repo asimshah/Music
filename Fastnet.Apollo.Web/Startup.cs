@@ -121,7 +121,6 @@ namespace Fastnet.Apollo.Web
             }
 
             app.UseRouting();
-
             app.UseEndpoints(endpoints =>
             {
                 endpoints.MapControllerRoute(

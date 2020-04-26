@@ -15,8 +15,7 @@
       <PackageVersion>$([System.DateTime]::Now.ToString("2.yyMM.dHHmmss"))</PackageVersion>
     </PropertyGroup>
   </Target>
-
   <ItemGroup>
-    <PackageReference Include="Fastnet.Music.Core" Version="2.2004.13125853" />
+    <ProjectReference Include="..\Fastnet.Music.Core\Fastnet.Music.Core.csproj" />
   </ItemGroup>
 </Project>

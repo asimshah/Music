@@ -70,20 +70,22 @@ namespace Fastnet.Apollo.Web
                 }
             }
 
-            log.Information($"Deleting {musicFileList.Count()} music files");
-            var dc = new DeleteContext(taskItem);
+            log.Information($"{taskItem} deleting {musicFileList.Count()} music files");
+            //var dc = new DeleteContext(taskItem);
+            var eh = new EntityHelper(db, taskItem);
             foreach (var mf in musicFileList)
             {
-                db.Delete(mf, dc);
+                //db.Delete(mf, dc);
+                eh.Delete(mf);
             }
             taskItem.Status = Music.Core.TaskStatus.Finished;
             taskItem.FinishedAt = DateTimeOffset.Now;
             await db.SaveChangesAsync();
-            foreach(var id in dc.DeletedArtistList)
+            foreach(var id in eh.GetDeletedArtistIds())
             {
                 await this.playManager.SendArtistDeleted(id);
             }
-            foreach (var id in dc.ModifiedArtistList)
+            foreach (var id in eh.GetModifiedArtistIds())
             {
                 var shouldSend = true;
                 var artist = await db.Artists.FindAsync(id);

@@ -4,9 +4,9 @@ using System.Threading.Tasks;
 
 namespace Fastnet.Music.Metatools
 {
-    public interface IMusicSet
-    {
-        string Name { get; }
-        Task<CatalogueResultBase> CatalogueAsync();
-    }
+    //public interface IMusicSet
+    //{
+    //    string Name { get; }
+    //    Task<CatalogueResultBase> CatalogueAsync();
+    //}
 }
