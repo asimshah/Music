@@ -44,6 +44,7 @@ namespace Fastnet.Music.Data
         }
         protected override bool ShouldRetryOn(Exception exception)
         {
+            Debug.WriteLine($"ShouldRetryOn() called with {exception.GetType().Name}, retry number is {RetryNumber}");
             return true;
         }
     }
@@ -87,19 +88,35 @@ namespace Fastnet.Music.Data
         }
         public override int SaveChanges()
         {
-            if (this.ChangeTracker.AutoDetectChangesEnabled == false)
+            try
             {
-                this.ChangeTracker.DetectChanges();
+                if (this.ChangeTracker.AutoDetectChangesEnabled == false)
+                {
+                    this.ChangeTracker.DetectChanges();
+                }
+                return base.SaveChanges();
             }
-            return base.SaveChanges();
+            catch (Exception xe)
+            {
+                log.Error(xe);
+                throw;
+            }
         }
         public override Task<int> SaveChangesAsync(CancellationToken cancellationToken = default)
         {
-            if (this.ChangeTracker.AutoDetectChangesEnabled == false)
+            try
             {
-                this.ChangeTracker.DetectChanges();
+                if (this.ChangeTracker.AutoDetectChangesEnabled == false)
+                {
+                    this.ChangeTracker.DetectChanges();
+                }
+                return base.SaveChangesAsync(cancellationToken);
             }
-            return base.SaveChangesAsync(cancellationToken);
+            catch (Exception xe)
+            {
+                log.Error(xe);
+                throw;
+            }
         }
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
@@ -119,7 +136,7 @@ namespace Fastnet.Music.Data
                 optionsBuilder.UseSqlServer(connectionString, options =>
                 {
                     options.EnableRetryOnFailure();
-                    options.ExecutionStrategy(x => new RetryStrategy(x, 4));
+                    options.ExecutionStrategy(x => new RetryStrategy(x, 2));
                 })
                     .EnableDetailedErrors()
                     .EnableSensitiveDataLogging()

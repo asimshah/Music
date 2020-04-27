@@ -36,7 +36,16 @@ namespace Fastnet.Apollo.Web
         public async Task RunAsync()
         {
             (musicStyle, taskData, forSingles, forceChanges) = await GetTaskAsync();
-            await RunTask();
+            try
+            {
+                await RunTask();
+            }
+            catch (Exception xe)
+            {
+                log.Error(xe);
+                SetTaskFailed();
+                //throw;
+            }
         }
         protected abstract Task RunTask();
 
@@ -90,34 +99,98 @@ namespace Fastnet.Apollo.Web
             }
 
         }
+        protected async Task ExecuteTaskItemWithRetryAsync(Func<MusicDb, Task> methodAsync)
+        {
+            using (var db = new MusicDb(connectionString))
+            {
+                //RT? r = default;
+                var strategy = db.Database.CreateExecutionStrategy() as RetryStrategy;
+                if (strategy != null)
+                {
+                    await strategy.ExecuteAsync(async () =>
+                    {
+                        try
+                        {
+                            if (strategy.RetryNumber > 0)
+                            {
+                                await Task.Delay(TimeSpan.FromSeconds(10));
+                                log.Information($"[TI-{taskId}] execution restarted, retry {strategy.RetryNumber}");
+                            }
+
+                            using (var db2 = new MusicDb(connectionString))
+                            {
+                                using (var tran = db2.Database.BeginTransaction())
+                                {
+                                    await methodAsync(db2);
+                                    tran.Commit();
+                                    log.Debug($"[TI-{taskId}] execution strategy: transaction committed");
+                                }
+                            }
+                        }
+                        catch (DbUpdateException de)
+                        {
+                            if (de.InnerException != null)
+                            {
+                                log.Error(de.InnerException);
+                            }
+                            else
+                            {
+                                log.Error(de);
+                            }
+                            throw;
+                        }
+                        catch (Exception xe)
+                        {
+                            log.Error(xe);
+                            throw;
+                        }
+                    });
+                }
+                return;
+            }
+        }
         protected async Task<RT?> ExecuteTaskItemWithRetryAsync<RT>(Func<MusicDb, Task<RT>> methodAsync) where RT : class
         {
             using (var db = new MusicDb(connectionString))
             {
                 RT? r = default;
-
-                //SqlServerRetryingExecutionStrategy? strategy = db.Database.CreateExecutionStrategy() as SqlServerRetryingExecutionStrategy;
                 var strategy = db.Database.CreateExecutionStrategy() as RetryStrategy;
                 if (strategy != null)
                 {
-                    await strategy.ExecuteAsync(async () =>
-                    {                        
-                        if(strategy.RetryNumber > 0)
-                        {
-                            await Task.Delay(TimeSpan.FromSeconds(10));
-                            log.Information($"[TI-{taskId}] execution restarted, retry {strategy.RetryNumber}");
-                        }
-
-                        using (var db2 = new MusicDb(connectionString))
-                        {
-                            using (var tran = db2.Database.BeginTransaction())
+                    try
+                    {
+                        await strategy.ExecuteAsync(async () =>
                             {
-                                r = await methodAsync(db2);
-                                tran.Commit();
-                                log.Debug($"[TI-{taskId}] execution strategy: transaction committed");
-                            }
-                        }
-                    });
+                                try
+                                {
+                                    if (strategy.RetryNumber > 0)
+                                    {
+                                        await Task.Delay(TimeSpan.FromSeconds(10));
+                                        log.Information($"[TI-{taskId}] execution restarted, retry {strategy.RetryNumber}");
+                                    }
+
+                                    using (var db2 = new MusicDb(connectionString))
+                                    {
+                                        using (var tran = db2.Database.BeginTransaction())
+                                        {
+                                            r = await methodAsync(db2);
+                                            tran.Commit();
+                                            log.Debug($"[TI-{taskId}] execution strategy: transaction committed");
+                                        }
+                                    }
+                                }
+                                catch (Exception xe)
+                                {
+                                    log.Error(xe);
+                                    throw;
+                                }
+                            });
+                    }
+                    catch (Exception xe)
+                    {
+                        log.Error(xe);
+                        throw;
+                    }
                 }
                 return r;
             }
@@ -133,6 +206,17 @@ namespace Fastnet.Apollo.Web
             else
             {
                 log.Information($"{item.ToDescription()} - not task queue available");
+            }
+        }
+        private void SetTaskFailed()
+        {
+            using (var db = new MusicDb(connectionString))
+            {
+                var t = db.TaskItems.Find(taskId);
+                t.Status = Music.Core.TaskStatus.Failed;
+                t.FinishedAt = DateTimeOffset.Now;
+                db.SaveChanges();
+                log.Warning($"{t} {t.TaskString} abandoned");
             }
         }
     }

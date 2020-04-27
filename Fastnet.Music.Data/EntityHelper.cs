@@ -103,7 +103,7 @@ namespace Fastnet.Music.Data
             Debug.Assert(composition.Performances.Count() == 0);
             context.SetModifiedArtistId(composition.ArtistId);
             db.Compositions.Remove(composition);
-            log.Information($"{ToIdent()} {composition.ToIdent()} removed");
+            log.Information($"{ToIdent()} {composition.ToIdent()} {composition.Name} removed");
         }
         private void RemoveEntity(Performance performance)
         {
@@ -211,7 +211,8 @@ namespace Fastnet.Music.Data
             {
                 var aw = artist.ArtistWorkList.Single(x => x.Work == work);
                 artist.ArtistWorkList.Remove(aw);
-                if (artist.ArtistWorkList.Count() == 0)
+                
+                if (artist.ArtistWorkList.Count() == 0 && artist.Compositions.Count() == 0)
                 {
                     BubbleDelete(artist);
                 }
@@ -259,14 +260,11 @@ namespace Fastnet.Music.Data
         }
         private void RemoveReferencingEntitiesIfRequired(Composition composition)
         {
-            var composer = composition.Artist;
+            var composer = composition.Artist;            
             composer.Compositions.Remove(composition);
-            if (composer.Compositions.Count() == 0)
+            if (composer.Compositions.Count() == 0 && composer.Works.Count() == 0)
             {
-                if (composer.Works.Count() == 0)
-                {
-                    BubbleDelete(composer);
-                }
+                BubbleDelete(composer);
             }
         }
         private void DeleteRelatedIdTags(MusicFile musicFile)

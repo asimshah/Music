@@ -3,6 +3,7 @@ using Fastnet.Music.Core;
 using Fastnet.Music.Data;
 using Fastnet.Music.Metatools;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Storage;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -20,7 +21,7 @@ namespace Fastnet.Apollo.Web
             this.playManager = pm;
         }
 
-        protected override async Task RunTask()
+        protected /*override*/ async Task RunTaskOld()
         {
             var pd = MusicMetaDataMethods.GetPathData(musicOptions, taskData, true);
             if (pd != null)
@@ -31,7 +32,30 @@ namespace Fastnet.Apollo.Web
                 });
             }
         }
-
+        protected override async Task RunTask()
+        {
+            var pd = MusicMetaDataMethods.GetPathData(musicOptions, taskData, true);
+            if (pd != null)
+            {
+                await this.ExecuteTaskItemWithRetryAsync(async (db) =>
+                {
+                    //try
+                    //{
+                        await DeleteAsync(db, pd);
+                    //}
+                    //catch (RetryLimitExceededException)
+                    //{
+                    //    await SetTaskFailed();
+                    //}
+                    //catch (Exception xe)
+                    //{
+                    //    log.Error(xe, $"{taskItem}");
+                    //    await SetTaskFailed();
+                    //    throw;
+                    //}
+                });
+            }
+        }
         private async Task DeleteAsync(MusicDb db, PathData pd)
         {
             db.ChangeTracker.AutoDetectChangesEnabled = false;

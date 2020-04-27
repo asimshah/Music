@@ -36,8 +36,8 @@ namespace Fastnet.Apollo.Web
             if (pd != null)
             {
                 Debug.Assert(pd.MusicStyle == musicStyle);
-                try
-                {
+                //try
+                //{
                     var results = await this.ExecuteTaskItemWithRetryAsync(async (db) => await CatalogueAsync(db, pd));
                     if (results != null)
                     {
@@ -86,31 +86,21 @@ namespace Fastnet.Apollo.Web
                             }
                         }
                     }
-                }
-                catch(RetryLimitExceededException)
-                {
-                    await SetTaskFailed();
-                }
-                catch (Exception xe)
-                {
-                    log.Error(xe, $"{taskItem}");
-                    await SetTaskFailed();
-                    //throw;
-                }
+                //}
+                //catch(RetryLimitExceededException)
+                //{
+                //    await SetTaskFailed();
+                //}
+                //catch (Exception xe)
+                //{
+                //    log.Error(xe, $"{taskItem}");
+                //    await SetTaskFailed();
+                //    throw;
+                //}
             }
         }
 
-        private async Task SetTaskFailed()
-        {
-            using (var db = new MusicDb(connectionString))
-            {
-                var t = await db.TaskItems.FindAsync(taskId);
-                t.Status = Music.Core.TaskStatus.Failed;
-                t.FinishedAt = DateTimeOffset.Now;
-                db.SaveChanges();
-                log.Warning($"{t} {t.TaskString} abandoned");
-            }
-        }
+
 
         private async Task<List<BaseCatalogueResult>> CatalogueAsync(MusicDb db, PathData pd)
         {
@@ -201,11 +191,19 @@ namespace Fastnet.Apollo.Web
             }
             if (taskItem.Force || shouldDeleteMusicFiles)
             {
-                var deletedFilesCount = folder.RemoveCurrentMusicFiles(db, taskItem); st?.Time("Removal");
-                if (deletedFilesCount > 0)
+                try
                 {
-                    await db.SaveChangesAsync();
-                    log.Information($"{taskItem} {deletedFilesCount} music files removed from db");
+                    var deletedFilesCount = folder.RemoveCurrentMusicFiles(db, taskItem); st?.Time("Removal");
+                    if (deletedFilesCount > 0)
+                    {
+                        await db.SaveChangesAsync();
+                        log.Information($"{taskItem} {deletedFilesCount} music files removed from db");
+                    }
+                }
+                catch (Exception xe)
+                {
+                    log.Error(xe);
+                    throw;
                 }
             }
             var musicFiles = await WriteAudioFilesAsync(db, folder); st?.Time("MusicFiles to DB");
