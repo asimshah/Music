@@ -34,7 +34,7 @@ namespace Fastnet.Music.Metatools
                 else
                 {
                     composer = artistPerformers.First();
-                    log.Warning($"{taskItem} no composer found, using {composer.Name}");
+                    log.Debug($"{taskItem} no composer found, using {composer.Name}");
                 }
             }
             var composition = mf.GetWorkName().ToAlphaNumerics();

@@ -15,14 +15,6 @@ namespace Fastnet.Music.Metatools
         internal BaseMusicSetCollection(MusicOptions musicOptions, MusicDb musicDb, OpusFolder musicFolder, List<MusicFile> files, TaskItem taskItem) : base(musicOptions, musicDb, musicFolder, files, taskItem)
         {
         }
-        //private (string artist, string work) GetPartitioningKeys(MusicFile mf)
-        //{
-        //    var artist = mf.GetAllPerformers(musicOptions)
-        //        .Where(x => x.Type == PerformerType.Artist)
-        //        .Select(x => x.Name.ToAlphaNumerics()).ToCSV();
-        //    var work = mf.GetWorkName().ToAlphaNumerics();
-        //    return (artist, work);
-        //}
         protected abstract (string firstLevel, string secondLevel) GetPartitioningKeys(MusicFile mf);
         protected override IEnumerable<BaseMusicSet> CreateSets()
         {
@@ -92,7 +84,6 @@ namespace Fastnet.Music.Metatools
         /// <summary>
         /// return one or more album sets - normally one but multiple sets if dealing with a collection
         /// </summary>
-        /// <typeparam name="T"></typeparam>
         /// <returns></returns>
         protected virtual IEnumerable<BaseMusicSet> CreateSets()
         {
@@ -102,13 +93,6 @@ namespace Fastnet.Music.Metatools
             return fileset.Select(fs => CreateAlbumSet(fs));
         }
         protected abstract (string firstLevel, string secondLevel) GetKeysForCollectionPartitioning(MusicFile mf);
-        //protected virtual (string firstLevel, string secondLevel) GetKeysForCollectionPartitioning(MusicFile mf)
-        //{
-        //    //this only works for popular singles
-        //    var artist = mf.GetAllPerformers(musicOptions).Select(x => x.Name.ToAlphaNumerics()).ToCSV();
-        //    var work = $"{artist} Singles"; // worry about this??? could this be string.empty???
-        //    return (artist, work);
-        //}
         private IEnumerable<IEnumerable<MusicFile>> PartitionCollection()
         {
             var fileSets = new List<IEnumerable<MusicFile>>();

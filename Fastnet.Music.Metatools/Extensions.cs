@@ -678,10 +678,10 @@ namespace Fastnet.Music.Metatools
                 {
                     part = filter(part);
                     part = musicOptions.ReplaceAlias(part);
-                    if(part == "collections")
-                    {
-                        Debugger.Break();
-                    }
+                    //if(part == "collections")
+                    //{
+                    //    Debugger.Break();
+                    //}
                     var existingItem = performers.FirstOrDefault(x => x.Name.IsEqualIgnoreAccentsAndCase(part));
                     if (existingItem != null)
                     {
@@ -729,26 +729,6 @@ namespace Fastnet.Music.Metatools
                     }
                     break;
                 case MusicStyles.WesternClassical:
-                    //var composer = mf.GetTagValue<string>("Composer");
-                    //if (composer == null)
-                    //{
-                    //    AddPerfomer(PerformerType.Artist, mf.GetTagValue<string>("Artist"));
-                    //    var firstArtist = performers.Where(x => x.Type == PerformerType.Artist).FirstOrDefault();
-                    //    if (firstArtist != null)
-                    //    {
-                    //        firstArtist.Reset(PerformerType.Composer);
-                    //        log.Debug($"{mf.File} has no composer tag, using {firstArtist.Name} as composer");
-                    //        performers = performers.Where(x => x.Type != PerformerType.Artist).ToList();                            
-                    //    }
-                    //    else
-                    //    {
-                    //        log.Error($"{mf.File} has no composer tag and no artist tag");
-                    //    }
-                    //}
-                    //else
-                    //{
-                    //    AddPerfomer(PerformerType.Composer, composer);
-                    //}
                     AddPerfomer(PerformerType.Composer, mf.GetTagValue<string>("Composer"));
                     AddPerfomer(PerformerType.Artist, mf.GetTagValue<string>("Artist"));
                     AddPerfomer(PerformerType.Conductor, mf.GetTagValue<string>("Conductor"));
@@ -817,14 +797,13 @@ namespace Fastnet.Music.Metatools
                 {
                     case EncodingType.flac:
                     default:
-                        //Debug.Assert(mf.IsGenerated == false);
                         switch (mf.Style)
                         {
                             case MusicStyles.WesternClassical:
                                 name = mf.GetTagValue<string>("Composition") ?? mf.GetTagValue<string>("Album") ?? name;
                                 break;
                             default:
-                                name = mf.GetAlbumName();// mf.GetTagValue<string>("Album") ?? name;
+                                name = mf.GetAlbumName();
                                 break;
                         }
                         break;

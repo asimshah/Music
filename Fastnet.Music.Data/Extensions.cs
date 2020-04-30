@@ -56,9 +56,9 @@ namespace Fastnet.Music.Data
         /// <param name="db"></param>
         /// <param name="list"></param>
         /// <returns></returns>
-        public static IEnumerable<Performer> GetPerformers(this MusicDb db, IEnumerable<MetaPerformer> list)
+        public static IEnumerable<Performer> GetPerformers(this MusicDb db, IEnumerable<MetaPerformer> list, TaskItem taskItem = null)
         {
-            return list.Select(n => db.GetPerformer(n));
+            return list.Select(n => db.GetPerformer(n, taskItem));
         }
         /// <summary>
         /// Gets a collection of Performer entries, creating any that are new
@@ -71,7 +71,6 @@ namespace Fastnet.Music.Data
         {
             var list = names.Select(n => new MetaPerformer(type, n));
             return db.GetPerformers(list);
-            //return names.Select(n => db.GetPerformer(n, type));
         }
         /// <summary>
         /// Gets the correspnding Performer nentry, creating one if required
@@ -79,7 +78,7 @@ namespace Fastnet.Music.Data
         /// <param name="db"></param>
         /// <param name="mp"></param>
         /// <returns></returns>
-        public static Performer GetPerformer(this MusicDb db, MetaPerformer mp)
+        public static Performer GetPerformer(this MusicDb db, MetaPerformer mp, TaskItem taskItem = null)
         {
             if(mp.Name == "collections")
             {
@@ -99,6 +98,7 @@ namespace Fastnet.Music.Data
                     Type = mp.Type
                 };
                 db.Performers.Add(performer);
+                log.Information($"{taskItem?.ToString() ?? "[No-TI]"} Performer {performer} added");
             }
             return performer;
         }
@@ -495,19 +495,10 @@ namespace Fastnet.Music.Data
     {
         public static string GetMostRecentOpusCoverFile(this Work work, MusicOptions musicOptions)
         {
-            //var musicFiles = work.Tracks.SelectMany(t => t.MusicFiles)
-            //    .Where(mf => !mf.IsGenerated).AsEnumerable();
             var folders = new List<string>();
             foreach (var mf in work.Tracks.SelectMany(t => t.MusicFiles)
                 .Where(mf => !mf.IsGenerated))
             {
-                //var pathFragments = new List<string>(new string[] { mf.DiskRoot, mf.StylePath });
-                //if(work.Type == OpusType.Collection)
-                //{
-                //    pathFragments.Add("Collections");
-                //}
-                //pathFragments.AddRange(mf.OpusPath.Split("\\"));
-                //folders.Add(Path.Combine(pathFragments.ToArray()));
                 folders.Add(mf.GetRootPath());
             }
             IEnumerable<string> imageFiles = null;
@@ -593,21 +584,6 @@ namespace Fastnet.Music.Data
                 } 
             }
         }
-        //public static void RemovePerformance(this MusicDb musicDb, Raga raga, Performance performance)
-        //{
-        //    if(raga != null)
-        //    {
-        //        var rpList = musicDb.RagaPerformances.Where(rp => rp.Performance == performance).ToArray();
-        //        if(rpList.Count() == 0)
-        //        {
-        //            log.Error($"{performance.ToIdent()} not found in RagaPerformances for {raga.ToIdent()}");
-        //        }
-        //        else
-        //        {
-        //            musicDb.RagaPerformances.RemoveRange(rpList);
-        //        }
-        //    }
-        //}
         public static ArtistWork AddWork(this MusicDb musicDb, Artist artist, Work work)
         {
             var aw = new ArtistWork { Artist = artist, Work = work };

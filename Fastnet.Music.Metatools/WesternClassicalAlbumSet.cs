@@ -4,6 +4,7 @@ using Fastnet.Music.Data;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 
@@ -30,10 +31,16 @@ namespace Fastnet.Music.Metatools
                     otherPerformers.Remove(first);
                     first.Reset(PerformerType.Artist);
                     artistPerformers.Add(first);
-                    log.Warning($"{taskItem} no artist found, using {first.Name}");
+                    log.Debug($"{taskItem} no artist found, using {first.Name}");
                 }
             }
-
+            var compositionNames = MusicFiles.Select(x => x.GetWorkName()).Distinct(StringComparer.CurrentCultureIgnoreCase);
+            if(compositionNames.Any(cn => cn.IsEqualIgnoreAccentsAndCase(AlbumName)))
+            {
+                var temp = AlbumName;
+                SetAlbumNameToOpusName();
+                log.Warning($"{taskItem} album name {temp} matches a composition name [{compositionNames.ToCSV()}], changed to {AlbumName}");
+            }
         }
         public override Task<BaseCatalogueResult> CatalogueAsync()
         {
@@ -42,23 +49,26 @@ namespace Fastnet.Music.Metatools
         protected override Track CreateTrackIfRequired(Work album, MusicFile mf, string title)
         {
             var alphamericTitle = title.ToAlphaNumerics();
-            var track = album.Tracks.SingleOrDefault(x => x.Title == alphamericTitle && x.CompositionName.IsEqualIgnoreAccentsAndCase(mf.GetWorkName()));
-            if (track == null)
+            //var track = album.Tracks.SingleOrDefault(x => x.Title == alphamericTitle && x.CompositionName.IsEqualIgnoreAccentsAndCase(mf.GetWorkName()));
+            var tracks = album.Tracks.Where(x => x.AlphamericTitle == alphamericTitle /*&& x.CompositionName.IsEqualIgnoreAccentsAndCase(mf.GetWorkName())*/);
+            if(tracks.Count() > 0)
             {
-                track = new Track
-                {
-                    Work = album,
-                    CompositionName = mf.GetWorkName(),
-                    OriginalTitle = mf.Title,
-                    UID = Guid.NewGuid(),
-                };
-                album.Tracks.Add(track);
+                var existingMusicFile = tracks.First().MusicFiles.First();
+                if(mf.GetWorkName().IsEqualIgnoreAccentsAndCase(existingMusicFile.GetWorkName()))
+                {                    
+                    // there is an existing track with the same title and the same work name, i.e. composition
+                    // should the composer also be checked?
+                    return tracks.First();
+                }
             }
+            var track = new Track
+            {
+                Work = album,
+                OriginalTitle = mf.Title,
+                UID = Guid.NewGuid(),
+            };
+            album.Tracks.Add(track);
             return track;
         }
-
-
-
-
     }
 }

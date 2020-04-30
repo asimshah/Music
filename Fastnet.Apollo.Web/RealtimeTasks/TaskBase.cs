@@ -42,7 +42,7 @@ namespace Fastnet.Apollo.Web
             }
             catch (Exception xe)
             {
-                log.Error(xe);
+                log.Error(xe, $"[TI-{ taskId}]");
                 SetTaskFailed();
                 //throw;
             }
@@ -131,19 +131,19 @@ namespace Fastnet.Apollo.Web
                         {
                             if (de.InnerException != null)
                             {
-                                log.Error(de.InnerException);
+                                log.Error(de.InnerException, $"[TI-{taskId}]");
                             }
                             else
                             {
-                                log.Error(de);
+                                log.Error(de, $"[TI-{taskId}]");
                             }
                             throw;
                         }
-                        catch (Exception xe)
-                        {
-                            log.Error(xe);
-                            throw;
-                        }
+                        //catch (Exception xe)
+                        //{
+                        //    log.Error(xe);
+                        //    throw;
+                        //}
                     });
                 }
                 return;
@@ -161,34 +161,34 @@ namespace Fastnet.Apollo.Web
                     {
                         await strategy.ExecuteAsync(async () =>
                             {
-                                try
+                                //try
+                                //{
+                                if (strategy.RetryNumber > 0)
                                 {
-                                    if (strategy.RetryNumber > 0)
-                                    {
-                                        await Task.Delay(TimeSpan.FromSeconds(10));
-                                        log.Information($"[TI-{taskId}] execution restarted, retry {strategy.RetryNumber}");
-                                    }
+                                    await Task.Delay(TimeSpan.FromSeconds(10));
+                                    log.Information($"[TI-{taskId}] execution restarted, retry {strategy.RetryNumber}");
+                                }
 
-                                    using (var db2 = new MusicDb(connectionString))
+                                using (var db2 = new MusicDb(connectionString))
+                                {
+                                    using (var tran = db2.Database.BeginTransaction())
                                     {
-                                        using (var tran = db2.Database.BeginTransaction())
-                                        {
-                                            r = await methodAsync(db2);
-                                            tran.Commit();
-                                            log.Debug($"[TI-{taskId}] execution strategy: transaction committed");
-                                        }
+                                        r = await methodAsync(db2);
+                                        tran.Commit();
+                                        log.Debug($"[TI-{taskId}] execution strategy: transaction committed");
                                     }
                                 }
-                                catch (Exception xe)
-                                {
-                                    log.Error(xe);
-                                    throw;
-                                }
+                                //}
+                                //catch (Exception xe)
+                                //{
+                                //    log.Error(xe, $"[TI-{taskId}]");
+                                //    throw;
+                                //}
                             });
                     }
                     catch (Exception xe)
                     {
-                        log.Error(xe);
+                        log.Error(xe, $"[TI-{taskId}]");
                         throw;
                     }
                 }

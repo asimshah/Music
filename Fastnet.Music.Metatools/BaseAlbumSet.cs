@@ -29,16 +29,9 @@ namespace Fastnet.Music.Metatools
             var albumNames = MusicFiles.Select(x => x.GetAlbumName()).Distinct(StringComparer.CurrentCultureIgnoreCase);
             if (albumNames.Count() > 1)
             {
-                var opusPaths = MusicFiles.Select(x => x.OpusPath).Distinct();
-                Debug.Assert(opusPaths.Count() == 1, $"{taskItem} more than 1 opus path: {opusPaths.ToCSV()}");
-                var temp = opusPaths.First();
-                var parts = temp.Split("\\");
-                if (parts.Count() > 1)
-                {
-                    temp = parts[1];
-                }
-                AlbumName = temp;
-                log.Information($"{taskItem} multiple album names found ({albumNames.ToCSV()}, changed to folder name {temp}");
+                SetAlbumNameToOpusName();
+                log.Information($"{taskItem} multiple album names found ({albumNames.ToCSV()}, changed to folder name {AlbumName}");
+
             }
             else
             {
@@ -64,6 +57,14 @@ namespace Fastnet.Music.Metatools
                 }.ToList();
             }
         }
+
+        protected void SetAlbumNameToOpusName(/*TaskItem taskItem*/)
+        {
+            var opusNames = MusicFiles.Select(x => x.OpusName).Distinct();
+            Debug.Assert(opusNames.Count() == 1, $"{taskItem} more than 1 opus name: {opusNames.ToCSV()}");
+            AlbumName = opusNames.First();
+        }
+
         protected virtual async Task<BaseCatalogueResult> CatalogueAsync(Func<CatalogueStatus, Work, BaseCatalogueResult> catalogueResult)
         {
             var artists = await GetArtistsAsync(artistPerformers);

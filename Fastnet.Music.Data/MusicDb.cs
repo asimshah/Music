@@ -21,22 +21,11 @@ namespace Fastnet.Music.Data
     
     public class RetryStrategy : SqlServerRetryingExecutionStrategy
     {
-        //private ILogger log;
         public RetryStrategy( ExecutionStrategyDependencies dependencies, int maxRetryCount) : base(dependencies, maxRetryCount)
         {
-            //log = ApplicationLoggerFactory.CreateLogger<RetryStrategy>();
         }
 
         public int RetryNumber { get; set; } = 0;
-
-        //public void SetIdentifier(string ident)
-        //{
-        //    identifier = ident;
-        //}
-        //protected override void OnFirstExecution()
-        //{
-        //    base.OnFirstExecution();
-        //}
         protected override void OnRetry()
         {
             RetryNumber++;
@@ -44,17 +33,12 @@ namespace Fastnet.Music.Data
         }
         protected override bool ShouldRetryOn(Exception exception)
         {
-            Debug.WriteLine($"ShouldRetryOn() called with {exception.GetType().Name}, retry number is {RetryNumber}");
+            //Debug.WriteLine($"ShouldRetryOn() called with {exception.GetType().Name}, retry number is {RetryNumber}");
             return true;
         }
     }
     public class MusicDb : DbContext
     {
-        //public static readonly ILoggerFactory loggerFactory = new LoggerFactory(new[] {
-        //    new ConsoleLoggerProvider((_, __) => true, true)});
-#pragma warning disable CS0169 // The field 'MusicDb.config' is never used
-        //private IConfiguration config;
-#pragma warning restore CS0169 // The field 'MusicDb.config' is never used
         private string connectionString;
         private readonly ILogger log;
         public DbSet<MusicFile> MusicFiles { get; set; }
@@ -136,7 +120,7 @@ namespace Fastnet.Music.Data
                 optionsBuilder.UseSqlServer(connectionString, options =>
                 {
                     options.EnableRetryOnFailure();
-                    options.ExecutionStrategy(x => new RetryStrategy(x, 2));
+                    options.ExecutionStrategy(x => new RetryStrategy(x, 4));
                 })
                     .EnableDetailedErrors()
                     .EnableSensitiveDataLogging()

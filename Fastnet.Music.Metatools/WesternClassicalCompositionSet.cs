@@ -19,23 +19,11 @@ namespace Fastnet.Music.Metatools
     public class WesternClassicalCompositionSet : BasePerformanceSet //MusicSet 
     {
         private readonly AccentAndCaseInsensitiveComparer comparer = new AccentAndCaseInsensitiveComparer(true);
-
-        //private readonly IEnumerable<MetaPerformer> conductors;
-        //private readonly IEnumerable<MetaPerformer> orchestras;
-        //private readonly IEnumerable<MetaPerformer> remainingPerformers;
-        //private readonly string composerName;
         private MetaPerformer composer;
         public string compositionName;
         public WesternClassicalCompositionSet(MusicDb db, MusicOptions musicOptions, 
              IEnumerable<MusicFile> musicFiles, TaskItem taskItem) : base(db, musicOptions, MusicStyles.WesternClassical, musicFiles, taskItem)
         {
-            //var composerPerformers = otherPerformers.Where(x => x.Type == PerformerType.Composer).ToArray();
-            //Debug.Assert(composerPerformers.Count() == 1, $"{taskItem} more than 1 composer name: {composerPerformers.Select(x => x.Name).ToCSV()}");
-            //this.composer = composerPerformers.First();
-            //foreach(var cp in composerPerformers)
-            //{
-            //    otherPerformers.Remove(cp);
-            //}
             var workNames = musicFiles.Select(x => x.GetWorkName()).Distinct(comparer);
             if(workNames.Count() != 1)
             {
@@ -48,10 +36,6 @@ namespace Fastnet.Music.Metatools
         {
             base.PartitionPerformers(allPerformers);
             var composerPerformers = otherPerformers.Where(x => x.Type == PerformerType.Composer);
-            //if (composerPerformers.Count() != 1)
-            //{
-            //    Debugger.Break();
-            //}
             Debug.Assert(composerPerformers.Count() <= 1, $"{taskItem} more than 1 composer name: {composerPerformers.Select(x => x.Name).ToCSV()}");
             this.composer = composerPerformers.FirstOrDefault();
             if(composer == null)
@@ -140,7 +124,6 @@ namespace Fastnet.Music.Metatools
             MusicDb.AddPerformance(composition, performance);
             return new WesternClassicalCompositionCatalogueResult(this, CatalogueStatus.Success, performance);
         }
-
         private Composition FindComposition(Artist artist, string name)
         {
             try
@@ -157,7 +140,7 @@ namespace Fastnet.Music.Metatools
         private Composition GetComposition(Artist artist, string name)
         {
             Debug.Assert(MusicDb != null);
-            var composition = FindComposition(artist, name);// artist.Compositions.SingleOrDefault(w => w.Name.IsEqualIgnoreAccentsAndCase(name));
+            var composition = FindComposition(artist, name);
             if (composition == null)
             {
                 composition = new Composition

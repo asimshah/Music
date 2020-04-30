@@ -41,20 +41,10 @@ namespace Fastnet.Music.Metatools
         {
             return base.CatalogueAsync((cs, w) =>  new PopularCatalogueResult(this, cs, w));
         }
-        //public override async Task<BaseCatalogueResult> CatalogueAsync()
-        //{
-        //    var album = await GetWork();
-        //    var (result, tracks) = CatalogueTracks(album);// CatalogueTracks(artist, album);
-        //    await UpdateAlbumCover(album);
-        //    await InitiateResampling(album.UID.ToString());
-        //    var cr = new PopularCatalogueResult(this, result, album/*, resamplingTask*/);
-        //    return cr;
-        //}
         public override string ToString()
         {
             return $"{Name}::{MusicFiles.Count()} files";
         }
-
         protected override Track CreateTrackIfRequired(Work album, MusicFile mf, string title)
         {
             var alphamericTitle = title.ToAlphaNumerics();
@@ -64,7 +54,6 @@ namespace Fastnet.Music.Metatools
                 track = new Track
                 {
                     Work = album,
-                    CompositionName = string.Empty,
                     OriginalTitle = mf.Title,
                     UID = Guid.NewGuid(),
                 };

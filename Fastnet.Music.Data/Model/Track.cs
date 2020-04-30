@@ -17,9 +17,11 @@ namespace Fastnet.Music.Data
         [MaxLength(256)]
         public string AlphamericTitle { get; set; }
         [MaxLength(ILengthConstants.MaxCompressedNameLength)]
+
         public string CompressedName { get; set; }
         [Required, MaxLength(256)]
-        public string CompositionName { get; set; } // only if WesternClassical
+        [Obsolete()]
+        public string CompositionName { get; set; } = string.Empty; // only if WesternClassical
         [Required, MaxLength(256)]
         public string OriginalTitle { get; set; }
         [Obsolete]

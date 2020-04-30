@@ -148,7 +148,9 @@ namespace Fastnet.Apollo.Web
                 if (dto.Title.Contains(":"))
                 {
                     var parts = dto.Title.Split(":");
-                    if (parts[0].IsEqualIgnoreAccentsAndCase(movement.CompositionName))
+                    //if (parts[0].IsEqualIgnoreAccentsAndCase(movement.CompositionName))
+
+                    if (parts[0].IsEqualIgnoreAccentsAndCase(movement.Performance.Composition.Name))
                     {
                         dto.Title = string.Join(":", parts.Skip(1));
                     }

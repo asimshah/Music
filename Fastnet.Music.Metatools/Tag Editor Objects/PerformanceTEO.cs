@@ -232,11 +232,12 @@ namespace Fastnet.Music.Metatools
                     }
                     foreach(var m in performance.Movements)
                     {
-                        m.CompositionName = performance.Composition.Name;
+                        //m.CompositionName = performance.Composition.Name;
                         if (m.Title.Contains(":"))
                         {
                             var parts = m.Title.Split(":");
-                            if (parts[0].IsEqualIgnoreAccentsAndCase(m.CompositionName))
+                            //if (parts[0].IsEqualIgnoreAccentsAndCase(m.CompositionName))
+                            if (parts[0].IsEqualIgnoreAccentsAndCase(performance.Composition.Name))
                             {
                                 m.Title = string.Join(":", parts.Skip(1));
                             }
