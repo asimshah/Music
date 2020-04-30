@@ -19,10 +19,10 @@ namespace Fastnet.Music.Metatools
             public const string IndianClassicalArtistName = "Various Artists";
         }
         public string AlbumName { get; protected internal set; }
-        internal BaseAlbumSet() : base()
-        {
+        //internal BaseAlbumSet() : base()
+        //{
 
-        }
+        //}
         internal BaseAlbumSet(MusicDb db, MusicOptions musicOptions, MusicStyles musicStyle, IEnumerable<MusicFile> musicFiles, TaskItem taskItem)
             : base(db, musicOptions, musicStyle, musicFiles, taskItem)
         {
@@ -57,14 +57,13 @@ namespace Fastnet.Music.Metatools
                 }.ToList();
             }
         }
-
+        //protected abstract Track CreateTrackIfRequiredOld(Work album, MusicFile mf, string title);
         protected void SetAlbumNameToOpusName(/*TaskItem taskItem*/)
         {
             var opusNames = MusicFiles.Select(x => x.OpusName).Distinct();
             Debug.Assert(opusNames.Count() == 1, $"{taskItem} more than 1 opus name: {opusNames.ToCSV()}");
             AlbumName = opusNames.First();
         }
-
         protected virtual async Task<BaseCatalogueResult> CatalogueAsync(Func<CatalogueStatus, Work, BaseCatalogueResult> catalogueResult)
         {
             var artists = await GetArtistsAsync(artistPerformers);
@@ -133,7 +132,6 @@ namespace Fastnet.Music.Metatools
             }
             return (result, tracks);
         }
-        protected abstract Track CreateTrackIfRequired(Work album, MusicFile mf, string title);
         protected virtual string GetTitle(MusicFile mf)
         {
             string title = /*fileteo?.TitleTag.GetValue<string>() ??*/ mf.GetTagValue<string>("Title");
@@ -147,6 +145,28 @@ namespace Fastnet.Music.Metatools
                 }
             }
             return title;
+        }
+        private Track CreateTrackIfRequired(Work album, MusicFile mf, string title)
+        {
+            var alphamericTitle = title.ToAlphaNumerics();
+            var tracks = album.Tracks.Where(x => x.AlphamericTitle == alphamericTitle);
+            var track = tracks.Count() > 0 ?
+                SelectMatchingTrack(tracks, mf)
+                : null;
+            track ??= new Track {Work = album, OriginalTitle = mf.Title, UID = Guid.NewGuid() };
+            album.Tracks.Add(track);
+            return track;
+        }
+        /// <summary>
+        /// Called during track creation when existing tracks are found with the same alphameric title as the current music file - parameter mf.
+        /// return one of the tracks, or null to create a new track. Default is to use the first of the matching tracks
+        /// </summary>
+        /// <param name="tracks"></param>
+        /// <param name="mf"></param>
+        /// <returns></returns>
+        protected virtual Track SelectMatchingTrack(IEnumerable<Track> tracks, MusicFile mf)
+        {
+            return tracks.First();
         }
         protected async Task UpdateAlbumCover(Work album)
         {
@@ -177,7 +197,7 @@ namespace Fastnet.Music.Metatools
                 }
             }
         }
-        private Track GetTrack(/*Artist artist, */ Work album, MusicFile mf, int index, int totalInPreviousParts)
+        private Track GetTrack(Work album, MusicFile mf, int index, int totalInPreviousParts)
         {
             Debug.Assert(mf.IsGenerated == false);
             try

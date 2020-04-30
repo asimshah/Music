@@ -9,7 +9,7 @@ using System.Threading.Tasks;
 
 namespace Fastnet.Music.Metatools
 {
-    public class IndianClassicalAlbumSet : BaseAlbumSet // PopularMusicAlbumSet
+    public class IndianClassicalAlbumSet : BaseAlbumSet
     {
         static string[] honourifics = new string[] { "Pt.", "Pt", "Pandit", "Ustad", "Ustaad", "Shri", "Shrimati" };
         internal IndianClassicalAlbumSet(MusicDb db, MusicOptions musicOptions,  IEnumerable<MusicFile> musicFiles, TaskItem taskItem)
@@ -32,29 +32,29 @@ namespace Fastnet.Music.Metatools
         {
             throw new System.NotImplementedException();
         }
-        protected override Track CreateTrackIfRequired(Work album, MusicFile mf, string title)
-        {
-            var alphamericTitle = title.ToAlphaNumerics();
-            //var track = album.Tracks.SingleOrDefault(x => x.Title == alphamericTitle && x.CompositionName.IsEqualIgnoreAccentsAndCase(mf.GetWorkName()));
-            var tracks = album.Tracks.Where(x => x.Title == alphamericTitle /*&& x.CompositionName.IsEqualIgnoreAccentsAndCase(mf.GetWorkName())*/);
-            if (tracks.Count() > 1)
-            {
-                Debugger.Break();
-            }
-            var track = tracks.FirstOrDefault();
-            if (track == null)
-            {
-                track = new Track
-                {
-                    Work = album,
-                    //CompositionName = mf.GetRagaName(),
-                    OriginalTitle = mf.Title,
-                    UID = Guid.NewGuid(),
-                };
-                album.Tracks.Add(track);
-            }
-            return track;
-        }
+        //protected override Track CreateTrackIfRequiredOld(Work album, MusicFile mf, string title)
+        //{
+        //    var alphamericTitle = title.ToAlphaNumerics();
+        //    //var track = album.Tracks.SingleOrDefault(x => x.Title == alphamericTitle && x.CompositionName.IsEqualIgnoreAccentsAndCase(mf.GetWorkName()));
+        //    var tracks = album.Tracks.Where(x => x.Title == alphamericTitle /*&& x.CompositionName.IsEqualIgnoreAccentsAndCase(mf.GetWorkName())*/);
+        //    if (tracks.Count() > 1)
+        //    {
+        //        Debugger.Break();
+        //    }
+        //    var track = tracks.FirstOrDefault();
+        //    if (track == null)
+        //    {
+        //        track = new Track
+        //        {
+        //            Work = album,
+        //            //CompositionName = mf.GetRagaName(),
+        //            OriginalTitle = mf.Title,
+        //            UID = Guid.NewGuid(),
+        //        };
+        //        album.Tracks.Add(track);
+        //    }
+        //    return track;
+        //}
 
         //private IEnumerable<string> GetArtistNames()
         //{

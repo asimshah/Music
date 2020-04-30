@@ -15,10 +15,10 @@ namespace Fastnet.Music.Metatools
     /// </summary>
     public class WesternClassicalAlbumSet : BaseAlbumSet 
     {
-        internal WesternClassicalAlbumSet()
-        {
+        //internal WesternClassicalAlbumSet()
+        //{
 
-        }
+        //}
         public WesternClassicalAlbumSet(MusicDb db, MusicOptions musicOptions, IEnumerable<MusicFile> musicFiles, TaskItem taskItem)
             : base(db, musicOptions, MusicStyles.WesternClassical, musicFiles, taskItem)
         {
@@ -46,29 +46,11 @@ namespace Fastnet.Music.Metatools
         {
             return base.CatalogueAsync((cs, w) => new WesternClassicalAlbumCatalogueResult(this, cs, w));
         }
-        protected override Track CreateTrackIfRequired(Work album, MusicFile mf, string title)
+        protected override Track SelectMatchingTrack(IEnumerable<Track> tracks, MusicFile mf)
         {
-            var alphamericTitle = title.ToAlphaNumerics();
-            //var track = album.Tracks.SingleOrDefault(x => x.Title == alphamericTitle && x.CompositionName.IsEqualIgnoreAccentsAndCase(mf.GetWorkName()));
-            var tracks = album.Tracks.Where(x => x.AlphamericTitle == alphamericTitle /*&& x.CompositionName.IsEqualIgnoreAccentsAndCase(mf.GetWorkName())*/);
-            if(tracks.Count() > 0)
-            {
-                var existingMusicFile = tracks.First().MusicFiles.First();
-                if(mf.GetWorkName().IsEqualIgnoreAccentsAndCase(existingMusicFile.GetWorkName()))
-                {                    
-                    // there is an existing track with the same title and the same work name, i.e. composition
-                    // should the composer also be checked?
-                    return tracks.First();
-                }
-            }
-            var track = new Track
-            {
-                Work = album,
-                OriginalTitle = mf.Title,
-                UID = Guid.NewGuid(),
-            };
-            album.Tracks.Add(track);
-            return track;
+            //if there is an existing track with the same title and the same work name, i.e.composition
+            //select it. Should the composer also be checked?
+            return tracks.SingleOrDefault(t => t.MusicFiles.Any(x => x.GetWorkName().IsEqualIgnoreAccentsAndCase(mf.GetWorkName())));
         }
     }
 }

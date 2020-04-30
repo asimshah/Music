@@ -12,10 +12,10 @@ namespace Fastnet.Music.Metatools
 {
     public class PopularMusicAlbumSet : BaseAlbumSet
     {
-        internal PopularMusicAlbumSet()
-        {
+        //internal PopularMusicAlbumSet()
+        //{
 
-        }
+        //}
         /// <summary>
         /// internal use by WesternClassicalAlbumSet only
         /// </summary>
@@ -44,22 +44,6 @@ namespace Fastnet.Music.Metatools
         public override string ToString()
         {
             return $"{Name}::{MusicFiles.Count()} files";
-        }
-        protected override Track CreateTrackIfRequired(Work album, MusicFile mf, string title)
-        {
-            var alphamericTitle = title.ToAlphaNumerics();
-            var track = album.Tracks.SingleOrDefault(x => x.Title == alphamericTitle);
-            if (track == null)
-            {
-                track = new Track
-                {
-                    Work = album,
-                    OriginalTitle = mf.Title,
-                    UID = Guid.NewGuid(),
-                };
-                album.Tracks.Add(track);
-            }
-            return track;
         }
     }
 }
