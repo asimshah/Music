@@ -24,7 +24,7 @@ namespace Fastnet.Music.Metatools
         }
         protected override (string firstLevel, string secondLevel) GetKeysForCollectionPartitioning(MusicFile mf)
         {
-            throw new System.NotImplementedException();
+            return ("Various Artists", mf.OpusName);
         }
         //protected override List<BaseMusicSet> CreateSets()
         //{

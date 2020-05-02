@@ -20,17 +20,19 @@ namespace Fastnet.Music.Metatools
             //    "Various Artists"
             //    : MusicOptions.ReplaceAlias(FirstFile.GetArtistName() ?? FirstFile.Musician);
             //this.AlbumName = FirstFile.GetAlbumName() ?? FirstFile.OpusName;
-
+            SetAlbumNameToOpusName();
         }
 
         public override Task<BaseCatalogueResult> CatalogueAsync()
         {
-            throw new System.NotImplementedException();
+            return base.CatalogueAsync((cs, w) => new IndianClassicalAlbumCatalogueResult(this, cs, w));
         }
 
-        protected override string GetName()
+        protected override Track SelectMatchingTrack(IEnumerable<Track> tracks, MusicFile mf)
         {
-            throw new System.NotImplementedException();
+            return tracks.SingleOrDefault(t => t.MusicFiles.Any(x => x.GetRagaName().IsEqualIgnoreAccentsAndCase(mf.GetRagaName()))
+                && t.MusicFiles.Any(x => x.GetAllPerformers(MusicOptions).Where(mp => mp.Type == PerformerType.Artist).Select(mp => mp.Name).ToCSV().ToLower()
+                == mf.GetAllPerformers(MusicOptions).Where(mp => mp.Type == PerformerType.Artist).Select(mp => mp.Name).ToCSV().ToLower()));
         }
         //protected override Track CreateTrackIfRequiredOld(Work album, MusicFile mf, string title)
         //{
@@ -58,7 +60,7 @@ namespace Fastnet.Music.Metatools
 
         //private IEnumerable<string> GetArtistNames()
         //{
-            
+
         //    IEnumerable<string> extractArtistNames(MusicFile mf)
         //    {
         //        IEnumerable<string> parseValue(string text)

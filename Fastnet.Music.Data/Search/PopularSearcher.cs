@@ -81,7 +81,7 @@ namespace Fastnet.Music.Data
             SortResults(finalList);
             return (prefixMatch, finalList);
         }
-        protected void SortResults(List<PopularResult> results)
+        /*protected */internal void SortResults(List<PopularResult> results)
         {
             results.Sort((left, right) =>
             {

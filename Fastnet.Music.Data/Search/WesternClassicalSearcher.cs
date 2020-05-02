@@ -169,7 +169,7 @@ namespace Fastnet.Music.Data
         //        }
         //    });
         //}
-        protected void SortNaturalResults(List<WesternClassicalResult> results)
+        internal void SortNaturalResults(List<WesternClassicalResult> results)
         {
             //var results = list.Cast<WesternClassicalResult>() as List<WesternClassicalResult>;
             results.Sort((l, r) =>

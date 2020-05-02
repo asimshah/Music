@@ -44,8 +44,8 @@ namespace Fastnet.Music.Metatools
             var type = typeof(PSET);
             switch (type)
             {
-                //case Type t when (t == typeof(IndianClassicalAlbumSet)):
-                //    return new IndianClassicalRagaSet(musicDb, musicOptions, files, taskItem) as U;
+                case Type t when (t == typeof(IndianClassicalRagaSet)):
+                    return new IndianClassicalRagaSet(musicDb, musicOptions, files, taskItem) as PSET;
                 case Type t when (t == typeof(WesternClassicalCompositionSet)):
                     return new WesternClassicalCompositionSet(musicDb, musicOptions, files, taskItem) as PSET;
             };
