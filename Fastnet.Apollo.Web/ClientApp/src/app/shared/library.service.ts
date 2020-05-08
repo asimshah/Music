@@ -4,7 +4,7 @@ import { HttpClient } from "@angular/common/http";
 import { Injectable } from "@angular/core";
 import { Parameters, Style } from "./common.types";
 
-import { Artist, Performance, Composition, Track, Movement, Work, TrackDetail, OpusDetails, PerformanceTEO, MusicFileTEO, PopularAlbumTEO, WesternClassicalAlbumTEO, TagValue } from "../shared/catalog.types";
+import { Artist, Performance, Composition, Track, Movement, Work, TrackDetail, OpusDetails, PerformanceTEO, MusicFileTEO, PopularAlbumTEO, WesternClassicalAlbumTEO, TagValue, ArtistSet, Raga } from "../shared/catalog.types";
 import { MusicStyles } from "./common.enums";
 import { sortedInsert } from "../../fastnet/core/common.functions";
 
@@ -17,18 +17,49 @@ export class LibraryService extends BaseService {
    constructor(http: HttpClient) {
       super(http, "lib");
    }
-   public async getArtists(style: Style) {
-      return this.getAsync<number[]>(`get/${style.id}/allartists`);
-   }
    public async search<T>(style: Style, text: string): Promise<T> {
       return this.getAsync<T>(`search/${style.id}/${text}`);
    }
-   public async getArtist(id: number): Promise<Artist> {
-      let a = await this.getAsync<Artist>(`get/artist/${id}`);
+   public async getAllArtists(style: Style) {
+      return this.getAsync<number[]>(`get/${style.id}/allartists`);
+   }
+   public async getArtist(style: Style, id: number): Promise<Artist> {
+      let a = await this.getAsync<Artist>(`get/${style.id}/artist/${id}`);
       return new Promise<Artist>(resolve => {
          let artist = new Artist();
          artist.copyProperties(a); // so local properties and methods are present
          resolve(artist);
+      });
+   }
+   public async getArtists(style: Style, ids: number[]): Promise<ArtistSet> {
+      let args = ids.join("&id=");
+      let a = await this.getAsync<ArtistSet>(`get/${style.id}/artistSet?id=${args}`);
+      return new Promise<ArtistSet>(resolve => {
+         let set = new ArtistSet();
+         set.copyProperties(a); // so local properties and methods are present
+         resolve(set);
+      });
+   }
+   public async getAllRagas(set: ArtistSet): Promise<Raga[]> {
+      //[HttpGet("get/artist/allragas")]
+      let args = set.artistIds.join("&id=");
+      let result = await this.getAsync<Raga[]>(`get/artist/allragas?id=${args}`);
+      return new Promise<Raga[]>(resolve => {
+         let list: Raga[] = [];
+         for (let item of result) {
+            let r = new Raga();
+            r.copyProperties(item); // so local properties and methods are present
+            list.push(r);
+         }
+         resolve(list);
+      });
+   }
+   public async getRaga(ragaId: number): Promise<Raga> {
+      let r = await this.getAsync<Raga>(`get/raga/${ragaId}`);
+      return new Promise<Raga>((resolve) => {
+         let raga = new Raga();
+         raga.copyProperties(r); // so local properties and methods are present
+         resolve(raga);
       });
    }
    public async getComposition(id: number): Promise<Composition> {
@@ -65,16 +96,28 @@ export class LibraryService extends BaseService {
          resolve(performance);
       });
    }
-
    public async getCompositionInfo(id: number): Promise<Composition> {
       return this.getAsync<Composition>(`get/composition/${id}`);
    }
    public async getPerformanceInfo(id: number): Promise<Performance> {
       return this.getAsync<Performance>(`get/performance/${id}`);
    }
-   public async getAllPerformances(compositionId: number, full: boolean = false): Promise<Performance[]> {
-      //let list = await this.getAsync<Performance[]>(`get/composition/allperformances/${compositionId}`);
+   public async getAllCompositionPerformances(compositionId: number, full: boolean = false): Promise<Performance[]> {
       let query = full ? `get/composition/allperformances/${compositionId}/true` : `get/composition/allperformances/${compositionId}`;
+      let list = await this.getAsync<Performance[]>(query);
+      return new Promise<Performance[]>(resolve => {
+         let performances: Performance[] = [];
+         for (let item of list) {
+            let performance = new Performance();
+            performance.copyProperties(item);
+            performances.push(performance);
+         }
+         resolve(performances);
+      });
+   }
+   public async getAllRagaPerformances(style: Style, set: ArtistSet, raga: Raga): Promise<Performance[]> {
+      let args = set.artistIds.join("&id=");
+      let query = `get/${style.id}/${raga.id}/allperformances/artistSet?id=${args}`;
       let list = await this.getAsync<Performance[]>(query);
       return new Promise<Performance[]>(resolve => {
          let performances: Performance[] = [];
@@ -142,10 +185,6 @@ export class LibraryService extends BaseService {
          resolve(tracks);
       });
    }
-   //public async updatePerformance(plist: PerformanceTEO[]) {
-   //   return this.postAsync("update/performance", plist);
-   //}
-
    public async getPerformanceDetails(performance: Performance) {
       return await this.getAsync<OpusDetails>(`get/performance/details/${performance.id}`);
    }
@@ -212,9 +251,6 @@ export class LibraryService extends BaseService {
    public async resetDatabase() {
       return this.getAsync("reset/database/true");
    }
-   //public async resetArtist(id: number) {
-   //    return this.getAsync(`reset/artist/${id}`);
-   //}
    public async resetWork(id: number) {
       return this.getAsync(`reset/work/${id}`);
    }

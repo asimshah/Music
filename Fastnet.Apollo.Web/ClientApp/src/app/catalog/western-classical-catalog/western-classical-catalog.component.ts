@@ -65,18 +65,7 @@ export class WesternClassicalCatalogComponent extends BaseCatalogComponent {
       this.log.information("onTapTrack()");
       this.commandPanel.open(MusicStyles.WesternClassical, c, p, t, async (r) => await this.executeCommand(r));
    }
-   async onPlayPerformance(performance: Performance) {
-      await this.playMusic(performance);
-   }
-   async onQueuePerformance(performance: Performance) {
-      await this.queueMusic(performance);
-   }
-   async onPlayMovement(movement: Movement) {
-      await this.playMusic(movement);
-   }
-   async onQueueMovement(movement: Movement) {
-      await this.queueMusic(movement);
-   }
+
    async onRightClick(e: Event, c: Composition, p: Performance) {
       e.preventDefault();
       if (!this.isTouchDevice()) {
@@ -87,13 +76,8 @@ export class WesternClassicalCatalogComponent extends BaseCatalogComponent {
    toggleShowMovements(performance: Performance) {
       performance.showMovements = !performance.showMovements;
    }
-   onPerformanceMouse(p: Performance, val: boolean) {
-      p.isHighLit = val;
-   }
-   onMovementMouse(m: Movement, f: MusicFile, val: boolean) {
-      m.isHighLit = val;
-      f.isHighLit = val;
-   }
+
+
    getArtistStats(a: Artist) {
       let parts: string[] = [];
       if (a.compositionCount > 0) {
@@ -118,17 +102,7 @@ export class WesternClassicalCatalogComponent extends BaseCatalogComponent {
       let t = `${p_part} ${c_part}`;
       return t;
    }
-   getPerformanceSource(p: Performance): string {
-      let text: string[] = [];
-      text.push(`"${p.albumName}"`);
-      if (p.performers.trim().length > 0) {
-         text.push(p.performers);
-      }
-      if (p.year > 1900) {
-         text.push(p.year.toString());
-      }
-      return text.join(", ");
-   }
+
    //public async editorCallback(item: Performance) {
    //    this.log.information(`editorCallback()!!`);
    //    await this.westernClassicalTagEditor.open(item);
@@ -153,7 +127,7 @@ export class WesternClassicalCatalogComponent extends BaseCatalogComponent {
    }
    private async processSearchResults(r: WesternClassicalResults, prefixMode: boolean) {
       r.results.forEach(async (wcr) => { //NB; foreach does not wait for all async stuff to finish
-         let artist = await this.library.getArtist(wcr.composer.key);
+         let artist = await this.library.getArtist(this.currentStyle, wcr.composer.key);
          artist.highlightSearch(this.searchText, artist.name, prefixMode);
          this.addComposer(artist);
          if (wcr.composerIsMatched) {
@@ -166,7 +140,7 @@ export class WesternClassicalCatalogComponent extends BaseCatalogComponent {
                let composition = artist.compositions.find(x => x.id === cr.composition.key)!;
                composition.highlightSearch(this.searchText, composition.name, prefixMode);
                if (cr.compositionIsMatched) {
-                  composition.performances = await this.library.getAllPerformances(composition.id, true);
+                  composition.performances = await this.library.getAllCompositionPerformances(composition.id, true);
                   for (let p of composition.performances) {
                      p.highlightSearch(this.searchText, p.performers, prefixMode);
                   }
@@ -184,7 +158,7 @@ export class WesternClassicalCatalogComponent extends BaseCatalogComponent {
       });
    }
    private async loadPerformances(c: Composition) {
-      c.performances = await this.library.getAllPerformances(c.id, true);
+      c.performances = await this.library.getAllCompositionPerformances(c.id, true);
       for (let p of c.performances) {
          p.highlightSearch(this.searchText, p.performers, false);
       }

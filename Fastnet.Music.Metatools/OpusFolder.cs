@@ -179,8 +179,11 @@ namespace Fastnet.Music.Metatools
                 var works = currentMusicFiles.Select(mf => mf.Track).Select(x => x.Work).Distinct();
                 var artists = works.SelectMany(x => x.Artists)
                     .Union(currentMusicFiles.Where(mf => mf.Track.Performance != null)
-                    .Select(x => x.Track.Performance)
-                    .Where(x => x.Composition != null).Select(x => x.Composition.Artist))
+                        .Select(x => x.Track.Performance)
+                        .Where(x => x.GetComposition() != null).Select(x => x.GetComposition().Artist))
+                    .Union(currentMusicFiles.Where(mf => mf.Track.Performance != null)
+                        .Select(x => x.Track.Performance)
+                        .Where(x => x.GetRaga() != null).SelectMany(x => x.RagaPerformances.Select(rp => rp.Artist)))
                     .Distinct();
                 //var artistFromCompositions = performances.Where(x => x.Composition != null).Select(x => x.Composition.Artist);
 

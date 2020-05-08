@@ -290,6 +290,7 @@ namespace Fastnet.Music.Data
             log.Information($"{toBeRemoved.Count()} task items removed");
             TaskItems.ToList().ForEach(x => x.Status = Core.TaskStatus.Pending);
 
+            EnsureArtistReputation();
             EnsureArtistAlphamericNames();
             EnsurePerformanceMusicStyle();
             EnsurePerformersRefactored(options);
@@ -304,6 +305,14 @@ namespace Fastnet.Music.Data
             foreach (var artist in artists)
             {
                 artist.AlphamericName = artist.Name.ToAlphaNumerics();
+            }
+        }
+        private void EnsureArtistReputation()
+        {
+            var artists = Artists.Where(x => x.Reputation == Reputation.NotDefined);
+            foreach (var artist in artists)
+            {
+                artist.Reputation = Reputation.Average;
             }
         }
         private void EnsurePerformerAlphamericNames()
@@ -382,7 +391,8 @@ namespace Fastnet.Music.Data
                     Performance = performance,
                 };
                 PerformancePerformers.Add(pp);
-                log.Information($"[A-{performance.Composition.Artist.Id}] {performance.Composition.Artist.Name}, [C-{performance.Composition.Id}] {performance.Composition.Name} [P-{performance.Id}] [N-{performer.Id}] {performer.Name} added");
+                //log.Information($"[A-{performance.Composition.Artist.Id}] {performance.Composition.Artist.Name}, [C-{performance.Composition.Id}] {performance.Composition.Name} [P-{performance.Id}] [Pf-{performer.Id}] {performer.Name} added");
+                log.Information($"{performance.ToLogIdentity()} [Pf-{performer.Id}] {performer.Name} added");
             }
             IEnumerable<string> split(string text)
             {

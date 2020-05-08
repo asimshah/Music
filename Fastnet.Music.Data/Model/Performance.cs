@@ -35,9 +35,61 @@ namespace Fastnet.Music.Data
         string IPlayable.Name => GetAllPerformersCSV();
         public virtual List<PerformancePerformer> PerformancePerformers { get; } = new List<PerformancePerformer>();
         public virtual ICollection<CompositionPerformance> CompositionPerformances { get; } = new HashSet<CompositionPerformance>();
+        public virtual ICollection<RagaPerformance> RagaPerformances { get; } = new HashSet<RagaPerformance>();
+        /// <summary>
+        /// returns either the composition or the raga name as appropriate
+        /// </summary>
+        /// <returns></returns>
+        public string GetParentEntityName(bool compressed = false)
+        {
+            if (compressed)
+            {
+                return GetComposition()?.CompressedName ?? GetRaga().CompressedName;
+            }
+            else
+            {
+                return GetComposition()?.Name ?? $"{GetRaga().Name}";
+            }
+        }
+        public string GetParentEntityDisplayName()
+        {
+            return GetComposition()?.Name ?? $"{GetRaga().DisplayName}";
+        }
+        /// <summary>
+        /// returns a csv string containing the artist(s) for this composition or raga
+        /// </summary>
+        /// <returns></returns>
+        public string GetParentArtistsName(bool compressed = false)
+        {
+            if (compressed)
+            {
+                return GetComposition()?.Artist.CompressedName ?? string.Join(string.Empty, RagaPerformances.Select(x => x.Artist.CompressedName));
+            }
+            else
+            {
+                return GetComposition()?.Artist.Name ?? RagaPerformances.Select(x => x.Artist.Name).ToCSV();
+            }
+        }
         public override string ToString()
         {
-            return $"{Composition.Name}, {Movements.Count} movements: \"{GetAllPerformersCSV()}\"";
+            return $"{GetParentEntityName()}, {Movements.Count} movements: \"{GetAllPerformersCSV()}\"";
+        }
+        public string ToLogIdentity()
+        {
+            object pe = GetComposition() as object ?? GetRaga() as object;
+            var text = "";
+            switch(pe)
+            {
+                case Composition c:
+                    text = $"[A-{c.Artist.Id}] {c.Artist.Name}, [C-{c.Id}] {c.Name}, [P-{Id}]";
+                    break;
+                case Raga r:
+                    var artists = RagaPerformances.Select(x => x.Artist);
+                    text = $"[A-{artists.Select(a => a.Id.ToString()).ToCSV()}] {artists.Select(a => a.Name.ToString()).ToCSV()}, [R-{r.Id}] {r.Name}, [P-{Id}]";
+                    break;
+            }
+            return text;
+            //log.Information($"[A-{performance.Composition.Artist.Id}] {performance.Composition.Artist.Name}, [C-{performance.Composition.Id}] {performance.Composition.Name}, [P-{performance.Id}] {performance.GetAllPerformersCSV()} reset");
         }
         public string GetOrchestrasCSV(bool includeAll = false)
         {
@@ -69,16 +121,20 @@ namespace Fastnet.Music.Data
                 .Select(pp => pp.Performer.Name);
             return string.Join(", ", r);
         }
-        private Composition GetComposition()
+        public Composition GetComposition()
         {
             if(StyleId == MusicStyles.WesternClassical)
             {
                 return CompositionPerformances.Select(x => x.Composition).Single();
             }
-            //else
-            //{
-            //    throw new Exception($"performance {ToIdent()} in {StyleId} does not have a composition");
-            //}
+            return null;
+        }
+        public Raga GetRaga()
+        {
+            if (StyleId == MusicStyles.IndianClassical)
+            {
+                return RagaPerformances.Select(x => x.Raga).Distinct().Single();
+            }
             return null;
         }
     }

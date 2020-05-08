@@ -13,22 +13,17 @@ namespace Fastnet.Music.Metatools
 #pragma warning disable CS1591 // Missing XML comment for publicly visible type or member
     public class IndianClassicalRagaSet : BasePerformanceSet
     {
-        //private Raga Raga { get; set; }
-        //private readonly List<MetaPerformer> otherPerformers = new List<MetaPerformer>();
-        //private readonly List<MetaPerformer> artistPerformers = new List<MetaPerformer>();
         private readonly string ragaName;
-
-        internal IndianClassicalRagaSet(MusicDb db, MusicOptions musicOptions,
-            //string ragaName, IEnumerable<MetaPerformer> artists, IEnumerable<MetaPerformer> otherPerformers,
+        private readonly IndianClassicalInformation ici;
+        internal IndianClassicalRagaSet(MusicDb db, MusicOptions musicOptions, IndianClassicalInformation ici,
             IEnumerable<MusicFile> musicFiles, TaskItem taskItem)
             : base(db, musicOptions, MusicStyles.IndianClassical, musicFiles, taskItem)
         {
-            //this.artistPerformers.AddRange(artists);
-            //this.otherPerformers.AddRange(otherPerformers);
+            this.ici = ici;
+            this.ici.PrepareNames();
             var ragaNames = musicFiles.Select(x => x.GetRagaName()).Distinct();
             Debug.Assert(ragaNames.Count() == 1, $"{taskItem} music files have more than one raga name");
             this.ragaName = ragaNames.First();
-            //this.year = musicFiles.Select(f => f.GetYear() ?? 0).Max();
         }
         public async override Task<BaseCatalogueResult> CatalogueAsync()
         {
@@ -73,9 +68,11 @@ namespace Fastnet.Music.Metatools
             var raga = MusicDb.Ragas.SingleOrDefault(r => r.AlphamericName.ToLower() == lowerAlphaNumericName);
             if (raga == null)
             {
+                var alphamericName = name.ToAlphaNumerics();
                 raga = new Raga
                 {
                     Name = name,
+                    DisplayName = ici.Lookup[alphamericName].DisplayName ?? $"Raga {name}",
                     AlphamericName = name.ToAlphaNumerics()
                 };
                 MusicDb.Ragas.Add(raga);

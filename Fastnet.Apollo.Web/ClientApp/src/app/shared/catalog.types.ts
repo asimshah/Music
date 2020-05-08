@@ -49,7 +49,24 @@ export class BaseEntity {
       this.highlightedName = Highlighter.highlight(searchText, text, prefixMode);
    }
 }
-
+export class ArtistSet {
+   public artists: Artist[] = [];// always filled later by the catalog component
+   public artistIds: number[];
+   //
+   //public ragaIds: number[];
+   public performanceCount: number;
+   public ragaCount: number;
+   public ragas: Raga[] = [];
+   public copyProperties(set: ArtistSet) {
+      this.artistIds = set.artistIds;
+      //this.ragas = set.ragas;
+      //this.ragaIds = set.ragaIds;
+      this.performanceCount = set.performanceCount;
+      this.ragaCount = set.ragaCount;
+      this.ragas = set.ragas;
+   }
+   public showMusic: boolean = true;
+}
 export class Artist extends BaseEntity {
    public name: string;
    public lastname: string;
@@ -206,15 +223,17 @@ export class Composition extends BaseEntity {
 export class Raga extends BaseEntity {
    public type = 'raga';
    public name: string;
+   public displayName: string;
    public performances: Performance[] | null = null;
    public showPerformances: boolean;
-   public copyProperties(c: Composition) {
-      this.id = c.id;
-      this.name = c.name;
-      this.highlightedName = c.name;
-      if (c.performances) {
+   public copyProperties(r: Raga) {
+      this.id = r.id;
+      this.name = r.name;
+      this.displayName = r.displayName;
+      this.highlightedName = r.name;
+      if (r.performances) {
          this.performances = [];
-         for (let p1 of c.performances) {
+         for (let p1 of r.performances) {
             let p2 = new Performance();
             p2.copyProperties(p1);
             this.performances.push(p2);

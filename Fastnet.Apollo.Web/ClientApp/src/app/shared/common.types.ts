@@ -23,9 +23,16 @@ export class SearchKey {
    key: number;
    name: string;
 }
-
+export class TrackKey extends SearchKey {
+   number: number;
+}
+export class TrackResult {
+   track: TrackKey;
+}
 export class PerformanceResult {
    performance: SearchKey;
+   performanceIsMatched: boolean;
+   movements: TrackResult[];
 }
 
 export class AudioCapability {

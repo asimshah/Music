@@ -38,7 +38,7 @@ namespace Fastnet.Apollo.Web
                 var dto = track.ToRuntime(dr, majorSequence);
                 dto.Sequence = ++index;
                 dto.Position = new PlaylistPosition(majorSequence, dto.Sequence);
-                dto.Titles = new string[] { track.Performance.Composition.Artist.Name, track.Performance.Composition.Name, track.Performance.GetAllPerformersCSV(), track.Title };
+                dto.Titles = new string[] { track.Performance.GetParentArtistsName(), track.Performance.GetParentEntityDisplayName(), track.Performance.GetAllPerformersCSV(), track.Title };
                 result.Add(dto);
             }
             return result.ToArray();
@@ -51,7 +51,7 @@ namespace Fastnet.Apollo.Web
                 Id = 0,// pli.Id,
                 Type = PlaylistRuntimeItemType.SingleItem,
                 Position = new PlaylistPosition(majorSequence, track.Number),
-                Titles = new string[] { track.Work.Artists.First().Name, track.Performance?.Composition.Name ?? track.Work.Name, track.Title },
+                Titles = new string[] { track.Work.Artists.First().Name, track.Performance.GetParentEntityDisplayName() ?? track.Work.Name, track.Title },
                 Sequence = track.Number,
                 NotPlayableOnCurrentDevice = mf == null,
                 ItemId = track.Id,
@@ -75,10 +75,14 @@ namespace Fastnet.Apollo.Web
                         Id = pli.Id,
                         Type = PlaylistRuntimeItemType.SingleItem,
                         Position = new PlaylistPosition(pli.Sequence, 0),
-                        //Title = pli.Title,
+                        //Titles = new string[] {
+                        //        pli.MusicFile.Track.Performance?.Composition.Artist.Name ?? pli.MusicFile.Track.Work.Artists.First().Name,
+                        //        pli.MusicFile.Track.Performance?.Composition.Name ?? pli.MusicFile.Track.Work.Name,
+                        //        pli.MusicFile.Track.Title
+                        //    },
                         Titles = new string[] {
-                                pli.MusicFile.Track.Performance?.Composition.Artist.Name ?? pli.MusicFile.Track.Work.Artists.First().Name,
-                                pli.MusicFile.Track.Performance?.Composition.Name ?? pli.MusicFile.Track.Work.Name,
+                                pli.MusicFile.Track.Performance?.GetParentArtistsName() ?? pli.MusicFile.Track.Work.Artists.Select(a => a.Name).ToCSV(),
+                                pli.MusicFile.Track.Performance?.GetParentEntityDisplayName() ?? pli.MusicFile.Track.Work.Name,
                                 pli.MusicFile.Track.Title
                             },
                         Sequence = pli.Sequence,
@@ -99,10 +103,9 @@ namespace Fastnet.Apollo.Web
                         Id = pli.Id,
                         Type = PlaylistRuntimeItemType.SingleItem,
                         Position = new PlaylistPosition(pli.Sequence, 0),
-                        //Title = pli.Title,
                         Titles = new string[] {
-                                pli.Track.Performance?.Composition.Artist.Name ?? pli.Track.Work.Artists.First().Name,
-                                pli.Track.Performance?.Composition.Name ?? pli.Track.Work.Name,
+                                pli.Track.Performance?.GetParentArtistsName() ?? pli.Track.Work.Artists.Select(a => a.Name).ToCSV(),
+                                pli.Track.Performance?.GetParentEntityDisplayName() ?? pli.Track.Work.Name,
                                 pli.Track.Title
                             },
                         Sequence = pli.Sequence,

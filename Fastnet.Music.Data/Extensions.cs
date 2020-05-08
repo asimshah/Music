@@ -262,7 +262,16 @@ namespace Fastnet.Music.Data
         }
         private static void Delete(this MusicDb musicDb, Performance performance, DeleteContext context)
         {
-            long artistId = performance.Composition.ArtistId;
+            //long artistId = performance.Composition.ArtistId;
+            List<long> artistIds = new List<long>();
+            if(performance.GetComposition() != null)
+            {
+                artistIds.Add(performance.GetComposition().Artist.Id);
+            }
+            else
+            {
+                artistIds.AddRange(performance.RagaPerformances.Select(x => x.ArtistId));
+            }
             foreach (var movement in performance.Movements)
             {
                 movement.Performance = null;
@@ -313,7 +322,7 @@ namespace Fastnet.Music.Data
                 }
             }
             musicDb.Performances.Remove(performance);
-            context.SetModifiedArtistId(artistId);
+            context.SetModifiedArtistId(artistIds.ToArray());
             log.Information($"{context}: Performance [P-{performance.Id}] deleted: {performersCSV}");
         }
         private static void RemovePlaylistItems<T>(this MusicDb musicDb, T entity)

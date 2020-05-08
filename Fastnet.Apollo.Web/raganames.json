@@ -355,7 +355,8 @@
             },
             {
                 "Name": "Bhatiali",
-                "Aliases": [ "Bhatiali (Boatsong Of Bengal)", "Boatsong Of Bengal" ]
+                "Aliases": [ "Bhatiali (Boatsong Of Bengal)", "Boatsong Of Bengal" ],
+                "DisplayName":  "Bhatiali"
             },
             {
                 "Name": "Bhatiyar (Marwa aang)",

@@ -1,5 +1,5 @@
 import { LibraryService } from "../shared/library.service";
-import { Highlighter } from "../shared/common.types";
+import { Highlighter, Style } from "../shared/common.types";
 import { ViewChild, ElementRef, HostBinding, OnInit, AfterViewInit, OnDestroy } from "@angular/core";
 import { PopupMessageComponent } from "../../fastnet/controls/popup-message.component";
 import { Artist, Work, MusicFile, Track, Performance, Composition, isMusicFile, isTrack, isWork, isPerformance, Movement, ArtistType } from "../shared/catalog.types";
@@ -30,6 +30,7 @@ export abstract class BaseCatalogComponent implements OnInit, OnDestroy, AfterVi
    @ViewChild(PopupMessageComponent, { static: false }) popupMessage: PopupMessageComponent;
 
    protected allArtists: Artist[] = [];
+   protected currentStyle: Style;
    private subscriptions: Subscription[] = [];
    constructor(private elementRef: ElementRef, protected readonly library: LibraryService,
       private messageService: MessageService,
@@ -50,9 +51,10 @@ export abstract class BaseCatalogComponent implements OnInit, OnDestroy, AfterVi
       this.subscriptions.push(this.messageService.deletedArtist.subscribe((id) => this.onDeletedArtist(id)));
    }
    async ngAfterViewInit() {
-      let artistIdList = await this.library.getArtists(this.parameterService.getCurrentStyle());
+      this.currentStyle = this.parameterService.getCurrentStyle();
+      let artistIdList = await this.library.getAllArtists(this.currentStyle);
       for (let id of artistIdList) {
-         let a = await this.library.getArtist(id);
+         let a = await this.library.getArtist(this.currentStyle, id);
          this.addArtistToDefaultView(a);
       }
       console.log(`${artistIdList.length} artist ids loaded`);
@@ -81,12 +83,6 @@ export abstract class BaseCatalogComponent implements OnInit, OnDestroy, AfterVi
       console.log(`${artist.name} clicked`);
       this.setSearch(artist.name);
    }
-   //isMobile() {
-   //   return this.parameterService.isMobileDevice();
-   //}
-   //isIpad() {
-   //   return this.parameterService.isIpad();
-   //}
    isTouchDevice() {
       return this.parameterService.isTouchDevice();
    }
@@ -98,6 +94,21 @@ export abstract class BaseCatalogComponent implements OnInit, OnDestroy, AfterVi
    }
    toggleShowWorks(c: Artist) {
       c.showWorks = !c.showWorks;
+   }
+   onMovementMouse(m: Movement, f: MusicFile, val: boolean) {
+      m.isHighLit = val;
+      f.isHighLit = val;
+   }
+   getPerformanceSource(p: Performance): string {
+      let text: string[] = [];
+      text.push(`"${p.albumName}"`);
+      if (p.performers.trim().length > 0) {
+         text.push(p.performers);
+      }
+      if (p.year > 1900) {
+         text.push(p.year.toString());
+      }
+      return text.join(", ");
    }
    async playMusic(entity: MusicFile | Track | Movement | Work | Performance) {
       if (this.checkDeviceAvailable()) {
@@ -131,6 +142,37 @@ export abstract class BaseCatalogComponent implements OnInit, OnDestroy, AfterVi
    async onQueueMusicFile(musicFile: MusicFile) {
       await this.queueMusic(musicFile);
    }
+   async onPlayPerformance(performance: Performance) {
+      await this.playMusic(performance);
+   }
+   async onQueuePerformance(performance: Performance) {
+      await this.queueMusic(performance);
+   }
+   async onPlayMovement(movement: Movement) {
+      await this.playMusic(movement);
+   }
+   async onQueueMovement(movement: Movement) {
+      await this.queueMusic(movement);
+   }
+   onPerformanceMouse(p: Performance, val: boolean) {
+      p.isHighLit = val;
+   }
+   protected getBrowser() {
+      return this.parameterService.getBrowser();
+   }
+   private async onNewOrModifiedArtist(id: number) {
+      let a = await this.library.getArtist(this.currentStyle, id);
+      if (a.artistType !== ArtistType.Various && a.styles.findIndex((x) => this.parameterService.getCurrentStyle().id === x) > -1) {
+         let index = this.allArtists.findIndex((v, i, obj) => {
+            return v.id === id;
+         });
+         if (index === -1) {
+            this.addArtistToDefaultView(a);
+         } else {
+            this.allArtists[index] = a;
+         }
+      }
+   }
    private checkDeviceAvailable() {
       let deviceAvailable = this.playerService.hasSelectedDevice();
       if (!deviceAvailable) {
@@ -144,23 +186,8 @@ export abstract class BaseCatalogComponent implements OnInit, OnDestroy, AfterVi
       }
       return deviceAvailable;
    }
-   protected getBrowser() {
-      return this.parameterService.getBrowser();
-   }
-   private async onNewOrModifiedArtist(id: number) {
-      let a = await this.library.getArtist(id);
-      if (a.artistType !== ArtistType.Various && a.styles.findIndex((x) => this.parameterService.getCurrentStyle().id === x) > -1) {
-         let index = this.allArtists.findIndex((v, i, obj) => {
-            return v.id === id;
-         });
-         if (index === -1) {
-            this.addArtistToDefaultView(a);
-         } else {
-            this.allArtists[index] = a;
-         }
-      }
-   }
    private onDeletedArtist(id: number) {
+      console.log(`onDeletedArtist() called with artist id ${id}`);
       let index = this.allArtists.findIndex((v, i) => {
          return v.id === id;// ? i : -1;
       });

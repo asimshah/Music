@@ -18,11 +18,18 @@ namespace Fastnet.Apollo.Web
 {
     public static partial class TransferExtensions
     {
-        //private static readonly ILogger log = ApplicationLoggerFactory.CreateLogger("Fastnet.Apollo.Web.TransferExtensions");
-
-        public static ArtistDTO ToDTO(this Artist a)
+        public static ArtistSetDTO ToDTO(this IEnumerable<RagaPerformance> list, IndianClassicalInformation ici)
         {
-            return new ArtistDTO
+            return new ArtistSetDTO
+            {
+                ArtistIds = list.Select(x => x.ArtistId).Distinct().ToArray(),
+                RagaCount = list.Select(x => x.Raga).Distinct()/*.Select(r => r.ToDTO(ici)).OrderBy(x => x.Name)*/.Count(),
+                PerformanceCount = list.Select(x => x.Performance).Distinct().Count()
+            };
+        }
+        public static ArtistDTO ToDTO(this Artist a, MusicStyles style)
+        {            
+            var dto = new ArtistDTO
             {
                 Id = a.Id,
                 Name = a.Name,
@@ -30,13 +37,27 @@ namespace Fastnet.Apollo.Web
                 DisplayName = a.Name,
                 ArtistType = a.Type,
                 Styles = a.ArtistStyles.Select(s => s.StyleId),
-                WorkCount = a.Works.Count(w => w.Type != OpusType.Singles),
-                SinglesCount = a.Works.Where(w => w.Type == OpusType.Singles).SelectMany(x => x.Tracks).Count(),
-                CompositionCount = a.Compositions?.Count() ?? 0,
-                PerformanceCount = a.Compositions?.SelectMany(x => x.Performances).Count() ?? 0,
+
                 Quality = a.ParsingStage.ToMetadataQuality(),
                 ImageUrl = $"lib/get/artist/imageart/{a.Id}"
             };
+            switch(style)
+            {
+                case MusicStyles.IndianClassical:
+                    //dto.WorkCount = a.Works.Count(w => w.Type != OpusType.Singles);
+                    //dto.SinglesCount = a.Works.Where(w => w.Type == OpusType.Singles).SelectMany(x => x.Tracks).Count();
+                    //dto.CompositionCount = a.Compositions?.Count() ?? 0;
+                    dto.RagaCount = a.RagaPerformances.Select(x => x.Raga).Distinct().Count();
+                    dto.PerformanceCount = a.RagaPerformances.Select(x => x.Performance).Distinct().Count();
+                    break;
+                default:
+                    dto.WorkCount = a.Works.Count(w => w.Type != OpusType.Singles);
+                    dto.SinglesCount = a.Works.Where(w => w.Type == OpusType.Singles).SelectMany(x => x.Tracks).Count();
+                    dto.CompositionCount = a.Compositions?.Count() ?? 0;
+                    dto.PerformanceCount = a.Compositions?.SelectMany(x => x.Performances).Count() ?? 0;
+                    break;
+            }
+            return dto;
         }
         public static CompositionDTO ToDTO(this Composition c, bool fullContent = false)
         {
@@ -54,33 +75,60 @@ namespace Fastnet.Apollo.Web
                 Id = c.Id,
                 Name = c.Name,
                 DisplayName = c.Name,
-                Performances = c.Performances.Select(p => p.ToDTO(true)).ToArray()
+                Performances = c.Performances.Select(p => p.ToDTO(c.Name)).ToArray()
             };
         }
-        /// <summary>
-        /// 
-        /// </summary>
-        /// <param name="p"></param>
-        /// <param name="full">movements are included if true</param>
-        /// <returns></returns>
-        public static PerformanceDTO ToDTO(this Performance p, bool full = false)
+        public static RagaDTO ToDTO(this Raga raga)
         {
-            if (!full)
+            //var rn = ici.Lookup[raga.AlphamericName];
+            return new RagaDTO
             {
-                return new PerformanceDTO
-                {
-                    Id = p.Id,
-                    Performers = p.GetAllPerformersCSV(),
-                    Year = p.Year,
-                    AlbumName = p.Movements.First().Work.Name,
-                    DisplayName = p.Movements.First().Work.Name,
-                    AlbumCoverArt = $"lib/get/work/coverart/{p.Movements.First().Work.Id}",// p.Movements.First().Work
-                    MovementCount = p.Movements.Count,
-                    FormattedDuration = p.Movements
-                    .Sum(x => x.MusicFiles.OrderByDescending(mf => mf.Rank()).First().Duration)
-                    .FormatDuration()
-                };
-            }
+                Id = raga.Id,
+                Name = raga.Name,
+                DisplayName = raga.DisplayName// rn.DisplayName ??  $"Raga {raga.Name}"
+            };
+        }
+        ///// <summary>
+        ///// 
+        ///// </summary>
+        ///// <param name="p"></param>
+        ///// <param name="full">movements are included if true</param>
+        ///// <returns></returns>
+        //public static PerformanceDTO ToDTO(this Performance p, Composition composition, bool full/* = false*/)
+        //{
+        //    //if (!full)
+        //    //{
+        //    //    return new PerformanceDTO
+        //    //    {
+        //    //        Id = p.Id,
+        //    //        Performers = p.GetAllPerformersCSV(),
+        //    //        Year = p.Year,
+        //    //        AlbumName = p.Movements.First().Work.Name,
+        //    //        DisplayName = p.Movements.First().Work.Name,
+        //    //        AlbumCoverArt = $"lib/get/work/coverart/{p.Movements.First().Work.Id}",// p.Movements.First().Work
+        //    //        MovementCount = p.Movements.Count,
+        //    //        FormattedDuration = p.Movements
+        //    //        .Sum(x => x.MusicFiles.OrderByDescending(mf => mf.Rank()).First().Duration)
+        //    //        .FormatDuration()
+        //    //    };
+        //    //}
+        //    return new PerformanceDTO
+        //    {
+        //        Id = p.Id,
+        //        Performers = p.GetAllPerformersCSV(),
+        //        Year = p.Year,
+        //        AlbumName = p.Movements.First().Work.Name,
+        //        DisplayName = p.Movements.First().Work.Name,
+        //        AlbumCoverArt = $"lib/get/work/coverart/{p.Movements.First().Work.Id}",
+        //        MovementCount = p.Movements.Count,
+        //        Movements = p.Movements.ToDTO(composition.Name),
+        //        FormattedDuration = p.Movements
+        //            .Sum(x => x.MusicFiles.OrderByDescending(mf => mf.Rank()).First().Duration)
+        //            .FormatDuration()
+        //    };
+        //}
+        public static PerformanceDTO ToDTO(this Performance p, string parentName/*, bool full = false*/)
+        {
             return new PerformanceDTO
             {
                 Id = p.Id,
@@ -90,7 +138,7 @@ namespace Fastnet.Apollo.Web
                 DisplayName = p.Movements.First().Work.Name,
                 AlbumCoverArt = $"lib/get/work/coverart/{p.Movements.First().Work.Id}",
                 MovementCount = p.Movements.Count,
-                Movements = p.Movements.ToDTO(),
+                Movements = p.Movements.ToDTO(parentName),
                 FormattedDuration = p.Movements
                     .Sum(x => x.MusicFiles.OrderByDescending(mf => mf.Rank()).First().Duration)
                     .FormatDuration()
@@ -133,12 +181,37 @@ namespace Fastnet.Apollo.Web
                 };
             }
         }
+        ///// <summary>
+        ///// use ONLY for movements as tracks are renumbered
+        ///// </summary>
+        ///// <param name="movements"></param>
+        ///// <returns></returns>
+        //public static TrackDTO[] ToDTO(this IEnumerable<Track> movements, Composition composition)
+        //{
+        //    // Note: this version is only for movements
+        //    var list = new List<TrackDTO>();
+        //    foreach (var movement in movements.OrderBy((t) => t.Number))
+        //    {
+        //        var dto = movement.ToDTO();
+        //        if (dto.Title.Contains(":"))
+        //        {
+        //            var parts = dto.Title.Split(":");
+        //            if (parts[0].IsEqualIgnoreAccentsAndCase(composition.Name))
+        //            {
+        //                dto.Title = string.Join(":", parts.Skip(1));
+        //            }
+        //        }
+        //        list.Add(dto);
+        //        dto.Number = movement.MovementNumber;// list.Count();
+        //    }
+        //    return list.ToArray();
+        //}
         /// <summary>
         /// use ONLY for movements as tracks are renumbered
         /// </summary>
         /// <param name="movements"></param>
         /// <returns></returns>
-        public static TrackDTO[] ToDTO(this IEnumerable<Track> movements)
+        public static TrackDTO[] ToDTO(this IEnumerable<Track> movements, string parentName)
         {
             // Note: this version is only for movements
             var list = new List<TrackDTO>();
@@ -148,9 +221,7 @@ namespace Fastnet.Apollo.Web
                 if (dto.Title.Contains(":"))
                 {
                     var parts = dto.Title.Split(":");
-                    //if (parts[0].IsEqualIgnoreAccentsAndCase(movement.CompositionName))
-
-                    if (parts[0].IsEqualIgnoreAccentsAndCase(movement.Performance.Composition.Name))
+                    if (parts[0].IsEqualIgnoreAccentsAndCase(parentName))
                     {
                         dto.Title = string.Join(":", parts.Skip(1));
                     }
@@ -253,11 +324,11 @@ namespace Fastnet.Apollo.Web
             return new PerformanceDetails
             {
                 Id = performance.Id,
-                OpusName = performance.Composition.Name,
-                ArtistName = performance.Composition.Artist.Name,
+                OpusName = performance.GetParentEntityName(),//.Composition.Name,
+                ArtistName = performance. GetParentArtistsName(), //.Composition.Artist.Name,
                 TrackDetails = performance.Movements.ToDetails(),
-                CompressedArtistName = performance.Composition.Artist.CompressedName,
-                CompressedOpusName = performance.Composition.CompressedName,
+                CompressedArtistName = performance.GetParentArtistsName(true),// .Composition.Artist.CompressedName,
+                CompressedOpusName = performance.GetParentEntityName(true), //.Composition.CompressedName,
                 CompressedPerformanceName = performance.CompressedName
             };
         }

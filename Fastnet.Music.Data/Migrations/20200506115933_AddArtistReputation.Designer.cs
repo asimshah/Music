@@ -4,14 +4,16 @@ using Fastnet.Music.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 namespace Fastnet.Music.Data.Migrations
 {
     [DbContext(typeof(MusicDb))]
-    partial class MusicDbModelSnapshot : ModelSnapshot
+    [Migration("20200506115933_AddArtistReputation")]
+    partial class AddArtistReputation
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -538,9 +540,6 @@ namespace Fastnet.Music.Data.Migrations
                     b.Property<string>("CompressedName")
                         .HasColumnType("nvarchar(16)")
                         .HasMaxLength(16);
-
-                    b.Property<string>("DisplayName")
-                        .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("Name")
                         .IsRequired()

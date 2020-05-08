@@ -227,7 +227,8 @@ namespace Fastnet.Music.Metatools
                 var r = movementCount > 0;
                 if (!r)
                 {
-                    log.Warning($"{performance.Composition.Artist.Name} [A-{performance.Composition.Artist.Id}], \"{performance.Composition.Name}\" [C-{performance.Composition.Id}] performed by \"{performance.GetAllPerformersCSV()}\" [P-{performance.Id}] has no movements");
+                    //                    log.Warning($"{performance.Composition.Artist.Name} [A-{performance.Composition.Artist.Id}], \"{performance.Composition.Name}\" [C-{performance.Composition.Id}] performed by \"{performance.GetAllPerformersCSV()}\" [P-{performance.Id}] has no movements");
+                    log.Warning($"{performance.ToLogIdentity()} performed by \"{performance.GetAllPerformersCSV()}\" has no movements");
                     if (result == true)
                     {
                         result = false;
@@ -239,7 +240,8 @@ namespace Fastnet.Music.Metatools
                     r = workCount == 1;
                     if (!r)
                     {
-                        log.Warning($"{performance.Composition.Artist.Name} [A-{performance.Composition.Artist.Id}], \"{performance.Composition.Name} [C-{performance.Composition.Id}] movements\" in performance by {performance.GetAllPerformersCSV()} [P-{performance.Id}] have a work count of {workCount}");
+                        //                        log.Warning($"{performance.Composition.Artist.Name} [A-{performance.Composition.Artist.Id}], \"{performance.Composition.Name} [C-{performance.Composition.Id}] movements\" in performance by {performance.GetAllPerformersCSV()} [P-{performance.Id}] have a work count of {workCount}");
+                        log.Warning($"{performance.ToLogIdentity()} in performance by {performance.GetAllPerformersCSV()} has a work count of {workCount}");
                         if (result == true)
                         {
                             result = false;

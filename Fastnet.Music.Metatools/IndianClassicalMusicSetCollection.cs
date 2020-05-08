@@ -10,9 +10,15 @@ namespace Fastnet.Music.Metatools
 {
     public class IndianClassicalMusicSetCollection : BaseMusicSetCollection<IndianClassicalAlbumSet, IndianClassicalRagaSet> //<IndianClassicalMusicTags>
     {
-        public IndianClassicalMusicSetCollection(MusicOptions musicOptions, MusicDb musicDb, OpusFolder musicFolder, List<MusicFile> files, TaskItem taskItem) : base(musicOptions, musicDb, musicFolder, files, taskItem)
+        private readonly IndianClassicalInformation ici;
+        public IndianClassicalMusicSetCollection(MusicOptions musicOptions, IndianClassicalInformation ici, MusicDb musicDb, OpusFolder musicFolder, List<MusicFile> files, TaskItem taskItem) : base(musicOptions, musicDb, musicFolder, files, taskItem)
         {
             //this.log = ApplicationLoggerFactory.CreateLogger<IndianClassicalMusicSetCollection>();
+            this.ici = ici;
+        }
+        protected override IndianClassicalRagaSet CreatePerformanceSet(IEnumerable<MusicFile> files)
+        {
+            return new IndianClassicalRagaSet(musicDb, musicOptions, ici, files, taskItem);
         }
         protected override (string firstLevel, string secondLevel) GetPartitioningKeys(MusicFile mf)
         {

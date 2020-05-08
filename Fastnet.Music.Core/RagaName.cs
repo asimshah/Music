@@ -8,5 +8,6 @@ namespace Fastnet.Music.Core
     {
         public string Name { get; set; }
         public List<string> Aliases { get; set; } = new List<string>();
+        public string DisplayName { get; set; }
     }
 }

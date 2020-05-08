@@ -210,7 +210,7 @@ namespace Fastnet.Apollo.Web
                     case MusicStyles.WesternClassical:
                         return new WesternClassicalMusicSetCollection(musicOptions, db, musicFolder, files, taskItem);
                     case MusicStyles.IndianClassical:
-                        return new IndianClassicalMusicSetCollection(musicOptions, db, musicFolder, files, taskItem);
+                        return new IndianClassicalMusicSetCollection(musicOptions, indianClassicalInformation, db, musicFolder, files, taskItem);
                 }
             }
             else

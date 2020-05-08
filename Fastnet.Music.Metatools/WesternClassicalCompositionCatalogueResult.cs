@@ -12,7 +12,7 @@ namespace Fastnet.Music.Metatools
         public int PerformanceMovementCount { get; set; }
         public WesternClassicalCompositionCatalogueResult(BaseMusicSet set, CatalogueStatus status, Performance performance) : base(set, status)
         {
-            var composition = performance.Composition;
+            var composition = performance.GetComposition();
             CompositionDescr = composition.ToIdent();
             CompositionName = composition?.Name ?? string.Empty;
             PerformanceDescr = performance.ToIdent();

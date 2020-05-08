@@ -41,7 +41,7 @@ namespace Fastnet.Music.Data
                     var _ = icr.GetRagaResult(rqr.Raga, true);
                     //icr.Ragas = icr.Ragas.Append(new IndianClassicalRagaResult { Raga = rqr.Raga, RagaIsMatched = true });
                 }
-            }            
+            }
             foreach (var rpqr in queryResults.Where(x => x.GetType() == typeof(IndianClassicalRagaPerformanceQueryResult)).Cast<IndianClassicalRagaPerformanceQueryResult>())
             {
                 var icr = getIndianClassicalResult(finalList, rpqr.Artists);
@@ -94,11 +94,12 @@ namespace Fastnet.Music.Data
         private IEnumerable<IndianClassicalQueryResult> GetAllMatches(string loweredSearch)
         {
             var list = new List<IndianClassicalQueryResult>();
+            var list2 = new Dictionary<string, IndianClassicalQueryResult>();
             var alphamericSearch = loweredSearch.ToAlphaNumerics();
             var rpList = MusicDb.RagaPerformances.ToArray();
             var q1 = MusicDb.RagaPerformances
                 .Where(rp => rp.Artist.AlphamericName.Contains(alphamericSearch))
-                .Select(x => new _SearchResult { Type = IndianClassicalMatchType.Artist, RagaPerformance = x });
+                .Select(x => new _SearchResult { Type = IndianClassicalMatchType.Artist, RagaPerformance = x }).ToList();
             var q2 = MusicDb.RagaPerformances
                     .Where(rp => rp.Raga.AlphamericName.Contains(alphamericSearch))
                     .Select(x => new _SearchResult { Type = IndianClassicalMatchType.Raga, RagaPerformance = x });
@@ -108,8 +109,27 @@ namespace Fastnet.Music.Data
             var q4 = MusicDb.RagaPerformances
                     .SelectMany(rp => rp.Performance.Movements, (rp, m) => new _SearchResult { Type = IndianClassicalMatchType.Movement, RagaPerformance = rp, Movement = m })
                     .Where(x => x.Movement.AlphamericTitle.Contains(alphamericSearch));
-
-            var query = q1.ToArray()
+            if (q1.Count() > 0)
+            {
+                // we have matched an artist, so we should also match other artists that this one has jointly performed with
+                // as in jugalbandi's
+                var artists = q1.Select(x => x.RagaPerformance.ArtistId).Distinct();
+                foreach (var id in artists.ToArray())
+                {
+                    // for each matched artist id
+                    var performances = MusicDb.RagaPerformances.Where(x => x.ArtistId == id).Select(x => x.Performance);
+                    foreach (var performance in performances)
+                    {
+                        var possibleJoint = MusicDb.RagaPerformances.Where(x => x.Performance == performance);
+                        var jointRps = possibleJoint.Where(x => x.ArtistId != id);//.Select(x => x.ArtistId);
+                        foreach (var rp in jointRps)
+                        {
+                            q1.Add(new _SearchResult { Type = IndianClassicalMatchType.Artist, RagaPerformance = rp });
+                        }
+                    }
+                }
+            }
+            var query = q1
                 .Union(q2.ToArray())
                 .Union(q3.ToArray())
                 .Union(q4.ToArray())
@@ -146,31 +166,54 @@ namespace Fastnet.Music.Data
                 var performance = pg.Key;
                 var artists = pg.Select(x => x.RagaPerformance.Artist).Distinct();
                 var raga = pg.Select(x => x.RagaPerformance.Raga).Distinct().Single();
-                var movements = pg.Select(x => x.Movement).Distinct();//.Single();
+                var movements = pg.Where(x => x.Movement != null).Select(x => x.Movement).Distinct();//.Single();
                 if (matchTypes.Count() > 1)
                 {
                     log.Information($"multiple match types found - interesting???????????");
                 }
+                var artistIdKey = string.Join(",", artists.Select(a => a.Id).OrderBy(x => x));
+                var artistsAreMatchedKey = $"{IndianClassicalMatchType.Artist}|{artistIdKey}";
+                var ragaIsMatchedKey = $"{IndianClassicalMatchType.Raga}|{artistIdKey}|{raga.Id}";
+                //var ragaIsMatchedKey = $"{IndianClassicalMatchType.Raga}|{artistIdKey}|{raga?.Id.ToString() ?? string.Empty}";
+                var performanceIsMatchedKey = $"{IndianClassicalMatchType.Performance}|{artistIdKey}|{raga.Id}|{performance.Id}";
+                var movementsAreMatchedKey = $"{IndianClassicalMatchType.Movement}|{artistIdKey}|{raga.Id}|{performance.Id}|{(string.Join(",", movements.Select(a => a.Id).OrderBy(x => x)))}";
                 foreach (var mt in matchTypes)
                 {
+
                     switch (mt)
                     {
                         case IndianClassicalMatchType.Artist:
+                            if (!list2.ContainsKey(artistsAreMatchedKey))
+                            {
+                                list2.Add(artistsAreMatchedKey, new IndianClassicalArtistQueryResult { Artists = artists.Select(a => new SearchKey { Key = a.Id, Name = a.Name }) });
+                            }
                             list.Add(new IndianClassicalArtistQueryResult { Artists = artists.Select(a => new SearchKey { Key = a.Id, Name = a.Name }) });
                             break;
                         case IndianClassicalMatchType.Raga:
+                            if (!list2.ContainsKey(artistsAreMatchedKey) && !list2.ContainsKey(ragaIsMatchedKey))
+                            {
+                                list2.Add(ragaIsMatchedKey, new IndianClassicalRagaQueryResult(artists, raga));
+                            }
                             list.Add(new IndianClassicalRagaQueryResult(artists, raga));
                             break;
                         case IndianClassicalMatchType.Performance:
+                            if (!list2.ContainsKey(artistsAreMatchedKey) && !list2.ContainsKey(ragaIsMatchedKey) && !list2.ContainsKey(performanceIsMatchedKey))
+                            {
+                                list2.Add(performanceIsMatchedKey, new IndianClassicalRagaPerformanceQueryResult(artists, raga, performance));
+                            }
                             list.Add(new IndianClassicalRagaPerformanceQueryResult(artists, raga, performance));
                             break;
                         case IndianClassicalMatchType.Movement:
+                            if (!list2.ContainsKey(artistsAreMatchedKey) && !list2.ContainsKey(ragaIsMatchedKey) && !list2.ContainsKey(performanceIsMatchedKey) && !list2.ContainsKey(movementsAreMatchedKey))
+                            {
+                                list2.Add(movementsAreMatchedKey, new IndianClassicalRagaPerformanceMovementQueryResult(artists, raga, performance, movements));
+                            }
                             list.Add(new IndianClassicalRagaPerformanceMovementQueryResult(artists, raga, performance, movements));
                             break;
                     }
                 }
             }
-            return list;
+            return list2.Values.AsEnumerable();
         }
     }
 }

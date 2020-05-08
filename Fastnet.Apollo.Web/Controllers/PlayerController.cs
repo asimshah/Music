@@ -1,24 +1,20 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Diagnostics;
-using System.IO;
-using System.Linq;
-using System.Threading.Tasks;
-using Fastnet.Core;
+﻿using Fastnet.Core;
 using Fastnet.Core.Web;
 using Fastnet.Core.Web.Controllers;
 using Fastnet.Music.Core;
 using Fastnet.Music.Data;
 using Fastnet.Music.Messages;
 using Microsoft.AspNetCore.Hosting;
-using Microsoft.AspNetCore.Http;
 //using Microsoft.AspNetCore.Http.Internal;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.SignalR;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
-using Newtonsoft.Json;
+using System;
+using System.Collections.Generic;
+using System.Diagnostics;
+using System.Linq;
+using System.Threading.Tasks;
 
 namespace Fastnet.Apollo.Web.Controllers
 {
@@ -722,10 +718,11 @@ namespace Fastnet.Apollo.Web.Controllers
         }
         private PlaylistItem CreateNewPlaylistItem(Performance performance)
         {
+            //var title = performance.Composition?.Name ?? performance.RagaPerformances.Select(x => x.Raga).Single().Name;
             var pli = new PlaylistItem
             {
                 Type = PlaylistItemType.Performance,
-                Title = performance.Composition.Name,
+                Title = performance.GetParentEntityName(),
                 ItemId = performance.Id,
                 MusicFileId = 0// mf.Id
             };

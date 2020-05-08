@@ -140,10 +140,6 @@ namespace Fastnet.Music.Metatools
                 }
                 return r;
             }
-            //IEnumerable<string> SplitString(string text)
-            //{
-            //    return text.Split(",", StringSplitOptions.RemoveEmptyEntries).Select(x => x.Trim());
-            //}
             static bool CompareTwoArrays(IEnumerable<string> left, IEnumerable<string> right)
             {
                 if(left.Count() == right.Count())
@@ -192,86 +188,72 @@ namespace Fastnet.Music.Metatools
             Debug.Assert(performancesInDb.Count() == 1);
             var performance = performancesInDb.First();
 
-            var composition = performance.Composition;
-            if (!ComposerTag.GetValue<string>().IsEqualIgnoreAccentsAndCase(composition.Artist.Name))
+            var composition = performance.GetComposition();
+            if (composition != null)
             {
-                log.Information($"[A-{composition.Artist.Id}] {composition.Artist.Name}, [C-{composition.Id}] \"{composition.Name}\" [P-{performance.Id}]: Artist changed from {composition.Artist.Name} to {ComposerTag.GetValue<string>()}");
-                log.Warning("Composer name changes are not supported");
-            }
-            if (!CompositionTag.GetValue<string>().IsEqualIgnoreAccentsAndCase(composition.Name))
-            {
-                log.Information($"{composition.Artist.Name}, \"{composition.Name}\": Composition changed from {composition.Name} to {CompositionTag.GetValue<string>()}");
-                var existingCompositions = composition.Artist.Compositions;
-                var newName = CompositionTag.GetValue<string>();
-                var existingComposition = existingCompositions.SingleOrDefault(x => x.Name.IsEqualIgnoreAccentsAndCase(newName));
-                if (existingComposition != null)
+                if (!ComposerTag.GetValue<string>().IsEqualIgnoreAccentsAndCase(composition.Artist.Name))
                 {
-                    // this performance needs to be moved into the existing one
-                    // *NB* it is possible, though unlikely that a performance of exactly the same performers already exists!
-                    // for the present I am not checking for this!!
-                    var oldComposition = performance.Composition;
-                    db.RemovePerformance(oldComposition, performance);
-                    db.AddPerformance(existingComposition, performance);
-                    //performance.Composition = existingComposition;
-                    //oldComposition.Performances.Remove(performance); 
-
-                    if(oldComposition.Performances.Count() == 0)
+                    log.Information($"[A-{composition.Artist.Id}] {composition.Artist.Name}, [C-{composition.Id}] \"{composition.Name}\" [P-{performance.Id}]: Artist changed from {composition.Artist.Name} to {ComposerTag.GetValue<string>()}");
+                    log.Warning("Composer name changes are not supported");
+                }
+                if (!CompositionTag.GetValue<string>().IsEqualIgnoreAccentsAndCase(composition.Name))
+                {
+                    log.Information($"{composition.Artist.Name}, \"{composition.Name}\": Composition changed from {composition.Name} to {CompositionTag.GetValue<string>()}");
+                    var existingCompositions = composition.Artist.Compositions;
+                    var newName = CompositionTag.GetValue<string>();
+                    var existingComposition = existingCompositions.SingleOrDefault(x => x.Name.IsEqualIgnoreAccentsAndCase(newName));
+                    if (existingComposition != null)
                     {
-                        db.Compositions.Remove(oldComposition);
-                    }
-                    var exists = db.Performances.SingleOrDefault(x => x.Id == performance.Id) != null;
-                    if(!exists)
-                    {
-                        Debugger.Break();
-                    }
-                    log.Information($"performance [P-{performance.Id}] moved from composition [C-{oldComposition.Id}] to composition [C-{existingComposition.Id}]");
-                    log.Information($"composition [C-{existingComposition.Id}] now has {existingComposition.Performances.Count()} performances:");
-                    foreach(var p in existingComposition.Performances)
-                    {
-                        log.Information($"performance [P-{p.Id}] \"{p.GetAllPerformersCSV()}\"");
-                    }
-                    foreach(var m in performance.Movements)
-                    {
-                        //m.CompositionName = performance.Composition.Name;
-                        if (m.Title.Contains(":"))
+                        // this performance needs to be moved into the existing one
+                        // *NB* it is possible, though unlikely that a performance of exactly the same performers already exists!
+                        // for the present I am not checking for this!!
+                        var oldComposition = performance.GetComposition();
+                        db.RemovePerformance(oldComposition, performance);
+                        db.AddPerformance(existingComposition, performance);
+                        if (oldComposition.Performances.Count() == 0)
                         {
-                            var parts = m.Title.Split(":");
-                            //if (parts[0].IsEqualIgnoreAccentsAndCase(m.CompositionName))
-                            if (parts[0].IsEqualIgnoreAccentsAndCase(performance.Composition.Name))
+                            db.Compositions.Remove(oldComposition);
+                        }
+                        var exists = db.Performances.SingleOrDefault(x => x.Id == performance.Id) != null;
+                        if (!exists)
+                        {
+                            Debugger.Break();
+                        }
+                        log.Information($"performance [P-{performance.Id}] moved from composition [C-{oldComposition.Id}] to composition [C-{existingComposition.Id}]");
+                        log.Information($"composition [C-{existingComposition.Id}] now has {existingComposition.Performances.Count()} performances:");
+                        foreach (var p in existingComposition.Performances)
+                        {
+                            log.Information($"performance [P-{p.Id}] \"{p.GetAllPerformersCSV()}\"");
+                        }
+                        foreach (var m in performance.Movements)
+                        {
+                            if (m.Title.Contains(":"))
                             {
-                                m.Title = string.Join(":", parts.Skip(1));
+                                var parts = m.Title.Split(":");
+                                if (parts[0].IsEqualIgnoreAccentsAndCase(performance.GetParentEntityName()))
+                                {
+                                    m.Title = string.Join(":", parts.Skip(1));
+                                }
                             }
                         }
                     }
-                }
-                else
-                {
-                    composition.Name = newName; // CompositionTag.GetValue<string>();
+                    else
+                    {
+                        composition.Name = newName; // CompositionTag.GetValue<string>();
+                    }
                 }
             }
-            //if(!CompareTwoArrays(OrchestraTag.GetValues<string>(false), SplitString(performance.Orchestras)))
             if(!compareTagsWithPerformers(OrchestraTag, performance.GetPerformancePerformerSubSet(PerformerType.Orchestra)))
             {
                 updatePerformerSet(performance, OrchestraTag, PerformerType.Orchestra);
-                //var orchestras = string.Join(", ", OrchestraTag.GetValues<string>(false));
-                //log.Information($"[A-{composition.Artist.Id}] {composition.Artist.Name}, [C-{composition.Id}] \"{composition.Name}\" [P-{performance.Id}]: Orchestras changed from {performance.Orchestras} to {orchestras}");
-                //performance.Orchestras = orchestras;
             }
-            //if (!CompareTwoArrays(ConductorTag.GetValues<string>(false), SplitString(performance.Conductors)))
             if (!compareTagsWithPerformers(ConductorTag, performance.GetPerformancePerformerSubSet(PerformerType.Conductor)))
             {
                 updatePerformerSet(performance, ConductorTag, PerformerType.Conductor);
-                //var conductors = string.Join(", ", ConductorTag.GetValues<string>(false));
-                //log.Information($"[A-{composition.Artist.Id}] {composition.Artist.Name}, [C-{composition.Id}] \"{composition.Name}\" [P-{performance.Id}]: Conductors changed from {performance.Conductors} to {conductors}");
-                //performance.Conductors = conductors;
             }
-            //if (!CompareTwoArrays(PerformerTag.GetValues<string>(false), SplitString(performance.Performers)))
             if (!compareTagsWithPerformers(PerformerTag, performance.GetPerformancePerformerSubSet(PerformerType.Other)))
             {
                 updatePerformerSet(performance, PerformerTag, PerformerType.Other);
-                //var performers = string.Join(", ", PerformerTag.GetValues<string>());
-                //log.Information($"[A-{composition.Artist.Id}] {composition.Artist.Name}, [C-{composition.Id}] \"{composition.Name}\" [P-{performance.Id}]: Performers changed from {performance.Performers} to {performers}");
-                //performance.Performers = performers;
             }
             foreach (var m in MovementList)
             {

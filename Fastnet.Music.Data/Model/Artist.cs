@@ -7,6 +7,15 @@ using System.Linq;
 
 namespace Fastnet.Music.Data
 {
+    public enum Reputation
+    {
+        NotDefined = 0,
+        VeryLow = 5,
+        Low = 10,
+        Average = 15,
+        High = 20,
+        VeryHigh = 25
+    }
     // * Important *
     // cannot use a private constructor because of lazy loading
     public class ArtistWork : IManyToManyIdentifier
@@ -31,6 +40,7 @@ namespace Fastnet.Music.Data
         [MaxLength(ILengthConstants.MaxArtistNameLength)]
         public string Name { get; set; }
         [MaxLength(ILengthConstants.MaxArtistNameLength)]
+        public Reputation Reputation { get; set; } = Reputation.Average;
         public string AlphamericName { get; set; }
         [MaxLength(ILengthConstants.MaxCompressedNameLength)]
         public string CompressedName { get; set; }

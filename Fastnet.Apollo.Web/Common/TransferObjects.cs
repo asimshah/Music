@@ -23,6 +23,13 @@ namespace Fastnet.Apollo.Web
         public bool Enabled { get; set; }
         public string DisplayName { get; set; }
     }
+    public class ArtistSetDTO
+    {
+        public long[] ArtistIds { get; set; } // can be a single id, or a list when these are joint artists, e.g. as in jugalbandi's
+        //public RagaDTO[] Ragas { get; set; }
+        public int RagaCount { get; set; }
+        public int PerformanceCount { get; set; }
+    }
     public class ArtistDTO
     {
         public long Id { get; set; }
@@ -52,6 +59,13 @@ namespace Fastnet.Apollo.Web
         public string FormattedDuration { get; set; }
     }
     public class CompositionDTO
+    {
+        public long Id { get; set; }
+        public string Name { get; set; }
+        public string DisplayName { get; set; }
+        public PerformanceDTO[] Performances { get; set; }
+    }
+    public class RagaDTO
     {
         public long Id { get; set; }
         public string Name { get; set; }

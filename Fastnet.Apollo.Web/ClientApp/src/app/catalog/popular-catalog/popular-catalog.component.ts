@@ -178,7 +178,7 @@ export class PopularCatalogComponent extends BaseCatalogComponent {
    }
    private processSearchResults1(r: PopularResults, prefixMode: boolean) {
       r.results.forEach(async (pr) => { //NB; foreach does not wait for all async stuff to finish
-         let artist = await this.library.getArtist(pr.artist.key);
+         let artist = await this.library.getArtist(this.currentStyle, pr.artist.key);
          artist.isMatchedBySearch = pr.artistIsMatched;
          artist.highlightSearch(this.searchText, artist.name, prefixMode);
          this.addArtist(artist);
@@ -196,7 +196,7 @@ export class PopularCatalogComponent extends BaseCatalogComponent {
    }
    private processSearchResults2(r: PopularResults, prefixMode: boolean) {
       r.results.forEach(async (pr) => { //NB; foreach does not wait for all async stuff to finish
-         let artist = await this.library.getArtist(pr.artist.key);
+         let artist = await this.library.getArtist(this.currentStyle, pr.artist.key);
          artist.highlightSearch(this.searchText, artist.name, prefixMode);
          this.addArtist(artist);
          if (pr.artistIsMatched) {

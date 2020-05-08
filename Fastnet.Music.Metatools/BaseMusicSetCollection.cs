@@ -16,17 +16,18 @@ namespace Fastnet.Music.Metatools
         {
         }
         protected abstract (string firstLevel, string secondLevel) GetPartitioningKeys(MusicFile mf);
-        protected override IEnumerable<BaseMusicSet> CreateSets()
+        protected abstract PSET CreatePerformanceSet(IEnumerable<MusicFile> files);
+        protected override IEnumerable<BaseMusicSet> CreateAlbumSets()
         {
-            var albumSets = base.CreateSets();
-            var uSets = CreateUSets();
+            var albumSets = base.CreateAlbumSets();
+            var uSets = CreatePerformanceSets();
             return albumSets.Union(uSets);
         }
-        private IEnumerable<BaseMusicSet> CreateUSets()
+        private IEnumerable<BaseMusicSet> CreatePerformanceSets()
         {
             var result = new List<BaseMusicSet>();
             var fileset = PartitionFiles();
-            return fileset.Select(fs => CreateUSet(fs));
+            return fileset.Select(fs => CreatePerformanceSet(fs));
         }
         private IEnumerable<IEnumerable<MusicFile>> PartitionFiles()
         {
@@ -39,20 +40,20 @@ namespace Fastnet.Music.Metatools
             }
             return fileSets;
         }
-        private PSET CreateUSet(IEnumerable<MusicFile> files)
-        {
-            var type = typeof(PSET);
-            switch (type)
-            {
-                case Type t when (t == typeof(IndianClassicalRagaSet)):
-                    return new IndianClassicalRagaSet(musicDb, musicOptions, files, taskItem) as PSET;
-                case Type t when (t == typeof(WesternClassicalCompositionSet)):
-                    return new WesternClassicalCompositionSet(musicDb, musicOptions, files, taskItem) as PSET;
-            };
-            throw new Exception($"{typeof(PSET)} not supported");
-        }
+        //private PSET CreatePerformanceSet(IEnumerable<MusicFile> files)
+        //{
+        //    var type = typeof(PSET);
+        //    switch (type)
+        //    {
+        //        case Type t when (t == typeof(IndianClassicalRagaSet)):
+        //            return new IndianClassicalRagaSet(musicDb, musicOptions, null, files, taskItem) as PSET;
+        //        case Type t when (t == typeof(WesternClassicalCompositionSet)):
+        //            return new WesternClassicalCompositionSet(musicDb, musicOptions, files, taskItem) as PSET;
+        //    };
+        //    throw new Exception($"{typeof(PSET)} not supported");
+        //}
     }
-    public abstract class BaseMusicSetCollection<T> : IEnumerable<BaseMusicSet>  where T: BaseMusicSet // : IEnumerable<T> where T : BaseMusicSet
+    public abstract class BaseMusicSetCollection<T> : IEnumerable<BaseMusicSet>  where T: BaseAlbumSet
     {
         protected MusicStyles musicStyle;
         protected readonly ILogger log;
@@ -85,7 +86,7 @@ namespace Fastnet.Music.Metatools
         /// return one or more album sets - normally one but multiple sets if dealing with a collection
         /// </summary>
         /// <returns></returns>
-        protected virtual IEnumerable<BaseMusicSet> CreateSets()
+        protected virtual IEnumerable<BaseMusicSet> CreateAlbumSets()
         {
             var result = new List<BaseMusicSet>();
             var fileset =  musicFolder.IsCollection ?
@@ -124,10 +125,10 @@ namespace Fastnet.Music.Metatools
         }       
         public IEnumerator<BaseMusicSet> GetEnumerator() 
         {
-            var result = CreateSets();
+            var result = CreateAlbumSets();
             foreach (var set in result)
             {
-                yield return set;
+                yield return set as BaseMusicSet;
             }
         }
         IEnumerator IEnumerable.GetEnumerator()

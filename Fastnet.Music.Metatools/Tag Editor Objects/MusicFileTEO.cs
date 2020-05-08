@@ -101,8 +101,14 @@ namespace Fastnet.Music.Metatools
             TitleTag = FindTag(TagNames.Title, tags);
             if (TitleTag.GetValue<string>().Contains(':'))
             {
-                var workName = MusicStyle == MusicStyles.WesternClassical ?
-                    mf.Track.Performance.Composition.Name : mf.Track.Work.Name;
+                var workName = MusicStyle switch
+                {
+                    MusicStyles.WesternClassical => mf.Track.Performance.GetComposition().Name,
+                    MusicStyles.IndianClassical => mf.Track.Performance.GetRaga().Name,
+                    _ => mf.Track.Work.Name
+                };
+                //var workName = MusicStyle == MusicStyles.WesternClassical ?
+                //    mf.Track.Performance.Composition.Name : mf.Track.Work.Name;
                 var parts = TitleTag.GetValue<string>().Split(':', StringSplitOptions.RemoveEmptyEntries);
                 if (parts[0].IsEqualIgnoreAccentsAndCase(workName))
                 {

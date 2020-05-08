@@ -71,6 +71,40 @@ $background-stripe-even: theme-colour('background', 'dark');
         color: theme-colour('primary');
     }
 }
+.performance-origin {
+   font-size: 0.8rem;
+   font-style: italic;
+   color: $high-accent-colour; // theme-colour('primary');
+   display: grid;
+   grid-template-columns: 1fr auto auto;
+   grid-column-gap: $theme-gutter-narrow;
+   justify-content: flex-end;
+   align-items: start;
+
+   &.is-highlit {
+      color: theme-colour('accent');
+   }
+
+   .performers {
+      font-size: 0.7rem;
+   }
+}
+
+.performances {
+   padding-right: $theme-gutter;
+   .performance-container {
+      display: grid;
+      grid-template-rows: auto minmax(0, 1fr);
+      .name-row {
+         padding-top: $theme-gutter-fine;
+         display: grid;
+         grid-template-columns: auto 1fr;
+         grid-column-gap: $theme-gutter-narrow;
+         justify-content: left;
+         align-items: start;
+      }
+   }
+}
 
 .movements, .tracks {
    display: grid;

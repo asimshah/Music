@@ -12,5 +12,100 @@
          </ng-container>
       </div>
    </div>
-   <popup-message></popup-message>
-</div>
+   <div *ngIf="catalogView === CatalogView.SearchResults">
+      <div *ngIf="artistSets.length > 0">
+         <div class="artist-panel" *ngFor="let artistSet of artistSets">
+            <div class="identity-panel" (click)="toggleShowMusic(artistSet)">
+               <div class="identity">
+                  <div class="image-container" *ngFor="let artist of artistSet.artists">
+                     <img class="image" *ngIf="artist.imageUrl" [src]="artist.imageUrl" />
+                  </div>
+               </div>
+               <div class="details">
+                  <div class="name" *ngFor="let artist of artistSet.artists">
+                     <highlighted-text [searchText]="searchText" [text]="artist.name" [prefixMode]="prefixMode"></highlighted-text>
+                  </div>
+               </div>
+               <div class="summary">
+                  <div>{{getMusicSummary(artistSet)}}</div>
+               </div>
+            </div>
+            <div class="ragas" *ngIf="artistSet.showMusic">
+               <div class="raga-container" *ngFor="let raga of artistSet.ragas">
+                  <div class="raga">
+                     <div class="raga-name" (tap)="onTapRaga(artistSet, raga)">
+                        <i class="fa " [ngClass]="{'fa-chevron-circle-down': !raga.showPerformances, 'fa-chevron-circle-up': raga.showPerformances}"></i>
+                        <highlighted-text [searchText]="searchText" [text]="raga.displayName" [prefixMode]="prefixMode"></highlighted-text>
+                     </div>
+                     <div class="performances" *ngIf="raga.showPerformances">
+                        <div class="performance-container" *ngFor="let performance of raga.performances">
+                           <div class="name-row">
+                              <div class="image-container" (click)="toggleShowMovements(performance)">
+                                 <img class="image" *ngIf="performance.albumCoverArt" [ngClass]="{'small': isTouchDevice()}" [src]="performance.albumCoverArt" />
+                              </div>
+                              <div class="performance-origin" [ngClass]="{'is-highlit': performance.isHighLit}" (tap)="onTapPerformance(raga, performance)" (contextmenu)="onRightClick($event, composition, performance)">
+                                 <highlighted-text class="performers" [searchText]="searchText" [text]="getPerformanceSource(performance)" [prefixMode]="prefixMode"></highlighted-text>
+                                 <div class="duration">{{performance.formattedDuration}}</div>
+                                 <div class="command-panel" (mouseenter)="onPerformanceMouse(performance, true)" (mouseleave)="onPerformanceMouse(performance, false)">
+                                    <ng-container *ngIf="!isTouchDevice()">
+                                       <i title="play now" class="fa fa-play" (click)="onPlayPerformance(performance)"></i>
+                                       <i title="add to play list" class="fa fa-plus-square" (click)="onQueuePerformance(performance)"></i>
+                                    </ng-container>
+                                 </div>
+                                 <div *ngIf="performance.movements.length > 1">{{performance.movements.length}} movements</div>
+                                 <div *ngIf="performance.movements.length === 1">{{performance.movements.length}} movement</div>
+                              </div>
+
+                           </div>
+                           <div *ngIf="performance.showMovements" class="movements striped-rows">
+                              <ng-container *ngIf="!isTouchDevice()">
+                                 <div *ngFor="let movement of performance.movements">
+                                    <div class="movement" [ngClass]="{'is-highlit': movement.isHighLit}">
+                                       <div class="command-panel" (mouseenter)="onMovementMouse(movement, movement.musicFiles[0], true)" (mouseleave)="onMovementMouse(movement, movement.musicFiles[0], false)">
+                                          <i title="play now" class="fa fa-play" (click)="onPlayMovement(movement)"></i>
+                                          <i title="add to play list" class="fa fa-plus-square" (click)="onQueueMovement(movement)"></i>
+                                       </div>
+                                       <div class="movement-number">{{movement.number}}</div>
+                                       <highlighted-text class="movement-title" [searchText]="searchText" [text]="movement.title" [prefixMode]="prefixMode"></highlighted-text>
+                                       <div class="audio-files">
+                                          <ng-container *ngFor="let file of movement.musicFiles">
+                                             <div class="audio-details" [ngClass]="{'is-highlit': movement.musicFiles[0].isHighLit}">
+                                                <span class="audio-properties">({{file.audioProperties}})</span>
+                                                <span class="duration">{{file.formattedDuration}}</span>
+                                             </div>
+                                             <div class="command-panel" (mouseenter)="onMovementMouse(movement, movement.musicFiles[0], true)" (mouseleave)="onMovementMouse(movement, movement.musicFiles[0], false)">
+                                                <i title="play now" class="fa fa-play" (click)="onPlayMusicFile(file)"></i>
+                                                <i title="add to play list" class="fa fa-plus-square" (click)="onQueueMusicFile(file)"></i>
+                                             </div>
+                                          </ng-container>
+                                       </div>
+                                    </div>
+                                 </div>
+                              </ng-container>
+                              <ng-container *ngIf="isTouchDevice()">
+                                 <div *ngFor="let movement of performance.movements; let even = even">
+                                    <div class="movement" (tap)="onTapMovement(composition, performance, movement)" [ngClass]="{'is-highlit': movement.isHighLit, 'even-row': even}">
+                                       <div><!-- dummy to maintain grid layout--></div>
+                                       <div class="movement-number is-touch-device">{{movement.number}}</div>
+                                       <div class="movement-title  is-touch-device">{{movement.title}}</div>
+                                       <div class="audio-details">
+                                          <span class="duration">{{movement.musicFiles[0].formattedDuration}}</span>
+                                       </div>
+                                       <div><!-- dummy to maintain grid layout--></div>
+                                    </div>
+                                 </div>
+                              </ng-container>
+                           </div>
+                        </div>
+                     </div>
+                  </div>
+               </div>
+            </div>
+         </div>
+      </div>
+      <div *ngIf="searchFoundNothing === true">
+         <div>Search found nothing</div>
+      </div>
+      <command-panel></command-panel>
+      <popup-message></popup-message>
+   </div>

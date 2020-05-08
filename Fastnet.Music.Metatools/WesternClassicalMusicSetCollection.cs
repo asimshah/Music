@@ -18,6 +18,10 @@ namespace Fastnet.Music.Metatools
         {
 
         }
+        protected override WesternClassicalCompositionSet CreatePerformanceSet(IEnumerable<MusicFile> files)
+        {
+            return new WesternClassicalCompositionSet(musicDb, musicOptions, files, taskItem);
+        }
         protected override (string firstLevel, string secondLevel) GetPartitioningKeys(MusicFile mf)
         {
             var allPerformers = mf.GetAllPerformers(musicOptions);
@@ -43,7 +47,7 @@ namespace Fastnet.Music.Metatools
         protected override (string firstLevel, string secondLevel) GetKeysForCollectionPartitioning(MusicFile mf)
         {
             // western classical music collections are kept as a single "album" by "Various Composers"
-            // becuase they have further breakdown into compositions by composer
+            // because they have further breakdown into compositions by composer
             return ("Various Composers", mf.OpusName);
         }
     }

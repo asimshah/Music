@@ -206,13 +206,13 @@ namespace Fastnet.Music.Data
             {
                 Composer = new SearchKey
                 {
-                    Key = x.Composition.Artist.Id,
-                    Name = x.Composition.Artist.Name
+                    Key = x.GetComposition().Artist.Id,
+                    Name = x.GetComposition().Artist.Name
                 },
                 Composition = new SearchKey
                 {
-                    Key = x.Composition.Id,
-                    Name = x.Composition.Name
+                    Key = x.GetComposition().Id,
+                    Name = x.GetComposition().Name
                 },
                 Performance = new SearchKey
                 {
@@ -252,14 +252,14 @@ namespace Fastnet.Music.Data
                 //},
                 Composer = new SearchKey
                 {
-                    Key = x.Performance.Composition.Artist.Id,
-                    Name = x.Performance.Composition.Artist.Name
+                    Key = x.Performance.GetComposition().Artist.Id,
+                    Name = x.Performance.GetComposition().Artist.Name
                 },
                 Composition = new SearchKey
                 {
 
-                    Key = x.Performance.Composition.Id,
-                    Name = x.Performance.Composition.Name
+                    Key = x.Performance.GetComposition().Id,
+                    Name = x.Performance.GetComposition().Name
                 },
                 Performance = new SearchKey
                 {

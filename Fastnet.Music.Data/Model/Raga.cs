@@ -7,6 +7,7 @@ namespace Fastnet.Music.Data
         public override long Id { get; set; }
         [Required, MaxLength(512)]
         public string Name { get; set; }
+        public string DisplayName { get; set; }
         [MaxLength(512)]
         public string AlphamericName { get; set; }
         [MaxLength(ILengthConstants.MaxCompressedNameLength)]
