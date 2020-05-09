@@ -160,20 +160,26 @@ namespace Fastnet.Music.Data
         private void RemoveReferencingEntitiesIfRequired(MusicFile musicFile)
         {
             var track = musicFile.Track;
-            Debug.Assert(track != null);
-            track.MusicFiles.Remove(musicFile);
-            if (track.MusicFiles.Count() > 0 && track.MusicFiles.All(x => x.IsGenerated))
+            if (track != null)
             {
-                // remaining music files are system generated
-                foreach (var mf in track.MusicFiles.ToArray())
+                track.MusicFiles.Remove(musicFile);
+                if (track.MusicFiles.Count() > 0 && track.MusicFiles.All(x => x.IsGenerated))
                 {
-                    RemoveEntity(mf);
+                    // remaining music files are system generated
+                    foreach (var mf in track.MusicFiles.ToArray())
+                    {
+                        RemoveEntity(mf);
+                    }
+                    track.MusicFiles.Clear();
                 }
-                track.MusicFiles.Clear();
+                if (track.MusicFiles.Count() == 0)
+                {
+                    BubbleDelete(track);
+                }
             }
-            if (track.MusicFiles.Count() == 0)
+            else
             {
-                BubbleDelete(track);
+                log.Warning($"{musicFile.File} has no track");
             }
         }
         /// <summary>

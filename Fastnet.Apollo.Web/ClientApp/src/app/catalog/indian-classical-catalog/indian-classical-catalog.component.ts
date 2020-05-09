@@ -129,16 +129,22 @@ export class IndianClassicalCatalogComponent extends BaseCatalogComponent {
             // get all the ragas for this artist set
             set.ragas = await this.library.getAllRagas(set);
          } else {
+            set.ragas = [];
             for (let r of icr.ragas) {
-               set.ragas = [];
                let raga = await this.library.getRaga(r.raga.key);
                set.ragas.push(raga);
                if (r.ragaIsMatched) {
-
+                  // do nothing here as all performances will be loaded when
+                  // the user taps the raga ..
                } else {
+                  raga.performances = [];
                   for (let p of r.performances) {
+                     let performance = await this.library.getPerformance(p.performance.key, true);
+                     raga.performances.push(performance);
+                     // ignore pathaced/unmatched performanecs/movements as we alod each performance in full
+                     // anyway
                      if (p.performanceIsMatched) {
-
+                        
                      } else {
                         // here if one or more movements are matched
                         // show all or only matched?

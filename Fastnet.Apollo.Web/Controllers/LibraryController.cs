@@ -298,12 +298,19 @@ namespace Fastnet.Apollo.Web.Controllers
         public IActionResult GetAllRagas([FromQuery(Name = "id")] long[] ids)
         {
             musicDb.ChangeTracker.AutoDetectChangesEnabled = false;
-            var rpList = musicDb.RagaPerformances
+            var query = musicDb.RagaPerformances
                 .Where(x => ids.Contains(x.ArtistId))
+                .Select(x => x.Performance).Distinct()
+                .Join(musicDb.RagaPerformances, l => l.Id, r => r.PerformanceId, (l, r) => r)
                 .OrderBy(x => x.Raga.DisplayName)
-                .AsEnumerable();
-            var ragas = rpList.GroupBy(k => k.Raga).Where(g => g.Count() == ids.Count())
-                .Select(g => g.Key).Distinct();
+                ;
+            var rpList = query.AsEnumerable();
+            var g1 = rpList.GroupBy(k => new { k.Raga, k.Performance })
+                .Select(x => new { x.Key.Raga, list = x })
+                .Where(x => x.list.Count() == ids.Count());
+            //var ragas = rpList.GroupBy(k => k.Raga).Where(g => g.Count() == ids.Count())
+            //    .Select(g => g.Key).Distinct();
+            var ragas = g1.Select(x => x.Raga).Distinct();
             var list = ragas.Select(x => x.ToDTO());
             return SuccessResult(list);
         }
@@ -576,6 +583,15 @@ namespace Fastnet.Apollo.Web.Controllers
                     }
                 });
             }
+            return new EmptyResult();
+        }
+        [HttpGet("start/rescan/{style}")]
+        public async Task<IActionResult> RescanStyle(MusicStyles style)
+        {
+            log.Information($"Rescan started for {style}");
+
+            await taskPublisher.AddTask(style);
+
             return new EmptyResult();
         }
         [HttpGet("start/musicfilescanner")]

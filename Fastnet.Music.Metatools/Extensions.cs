@@ -359,7 +359,7 @@ namespace Fastnet.Music.Metatools
                     var rName = string.Join(" ", parts.Take(index + 1));
                     if (ici.Lookup.TryGetValue(rName.ToAlphaNumerics(), out RagaName rn))
                     {
-                        log.Information($"{title.Value} is raga {rn.Name}");
+                        //log.Information($"{title.Value} is raga {rn.Name}");
                         var idTag = new IdTag
                         {
                             MusicFile = mf,
