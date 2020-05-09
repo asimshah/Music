@@ -81,8 +81,15 @@ export class IndianClassicalCatalogComponent extends BaseCatalogComponent {
       this.commandPanel.open(MusicStyles.IndianClassical, r, p, t, async (r) => await this.executeCommand(r));
    }
    onTapPerformance(r: Raga, p: Performance) {
-      if (this.isTouchDevice() && p.movements.length > 1) {
-         this.commandPanel.open(MusicStyles.IndianClassical, r, p, null, async (r) => await this.executeCommand(r));
+      //if (this.isTouchDevice() && p.movements.length > 1) {
+      //   this.commandPanel.open(MusicStyles.IndianClassical, r, p, null, async (r) => await this.executeCommand(r));
+      //}
+      if (this.isTouchDevice()) {
+         if (p.movements.length > 1) {
+            this.commandPanel.open(MusicStyles.IndianClassical, r, p, null, async (r) => await this.executeCommand(r));
+         } else {
+            this.commandPanel.open(MusicStyles.IndianClassical, r, p, p.movements[0], async (r) => await this.executeCommand(r));
+         }
       }
    }
    async onRightClick(e: Event, r:Raga, p: Performance) {
@@ -111,11 +118,11 @@ export class IndianClassicalCatalogComponent extends BaseCatalogComponent {
    }
 
    private async processSearchResults(r: IndianClassicalResults, prefixMode: boolean) {
-      let text = JSON.stringify(r, null, 2);
-      console.log(text);
+      //let text = JSON.stringify(r, null, 2);
+      //console.log(text);
       r.results.forEach(async (icr) => {
          let set = await this.getArtists(icr.artists);
-         console.log(JSON.stringify(set, null, 2));
+         //console.log(JSON.stringify(set, null, 2));
          //artist.highlightSearch(this.searchText, artist.name, prefixMode);
          this.addArtists(set);
          if (icr.artistIsMatched) {
