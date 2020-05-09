@@ -373,7 +373,7 @@ namespace Fastnet.Music.Metatools
                 }
                 if (!found)
                 {
-                    log.Information($"no raga entry found for {title.Value}");
+                    log.Error($"no raga entry found for {title.Value}");
                 }
             }
             ici.PrepareNames();
