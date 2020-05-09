@@ -1,5 +1,5 @@
 import { Component, ViewChild } from '@angular/core';
-import { Performance, Track, MusicFile, Work, Composition, isWork, isTrack, isComposition, isPerformance } from "../../shared/catalog.types";
+import { Performance, Track, MusicFile, Work, Composition, isWork, isTrack, isComposition, isPerformance, Raga, isRaga } from "../../shared/catalog.types";
 import { PlayerService } from '../../shared/player.service';
 import { LoggingService } from '../../shared/logging.service';
 import { ParameterService } from '../../shared/parameter.service';
@@ -40,6 +40,7 @@ export class CommandPanelComponent {
    private work: Work;
    private performance: Performance;
    private composition: Composition;
+   private raga: Raga;
    private currentStyle: MusicStyles;
 
    constructor(private parameterService: ParameterService, private playerService: PlayerService,
@@ -54,7 +55,7 @@ export class CommandPanelComponent {
       return this.parameterService.isTouchDevice();// this.isMobile() || this.isIpad();
    }
    open(style: MusicStyles,
-      firstEntity: Work | Track | Composition,
+      firstEntity: Work | Track | Composition | Raga,
       secondEntity: Track | Performance | null,
       thirdEntity: Track | null,
       onClose: (r: CommandPanelResult) => void) {
@@ -73,6 +74,15 @@ export class CommandPanelComponent {
       } else if (isComposition(firstEntity) && secondEntity !== null && isPerformance(secondEntity)) {
          this.targetEntity = TargetEntity.Performance;
          this.composition = firstEntity;
+         this.performance = secondEntity;
+      } else if (isRaga(firstEntity) && secondEntity !== null && isPerformance(secondEntity) && thirdEntity !== null && isTrack(thirdEntity)) {
+         this.targetEntity = TargetEntity.Track;
+         this.raga = firstEntity;
+         this.performance = secondEntity;
+         this.track = thirdEntity;
+      } else if (isRaga(firstEntity) && secondEntity !== null && isPerformance(secondEntity)) {
+         this.targetEntity = TargetEntity.Performance;
+         this.raga = firstEntity;
          this.performance = secondEntity;
       } else {
          console.error(`CommandPanel open() called with incorrect parameters`);
@@ -200,6 +210,7 @@ export class CommandPanelComponent {
                   url = this.work.coverArtUrl;
                   break;
                case MusicStyles.WesternClassical:
+               case MusicStyles.IndianClassical:
                   url = this.performance.albumCoverArt;
                   break;
             }
@@ -227,17 +238,21 @@ export class CommandPanelComponent {
                case MusicStyles.WesternClassical:
                   this.description = `<div>${this.composition.name}</div><div>${this.track.title}</div>`;
                   break;
+               case MusicStyles.IndianClassical:
+                  this.description = `<div>${this.raga.name}</div><div>${this.track.title}</div>`;
+                  break;
             }
             break;
          case TargetEntity.Work:
             this.description = this.work.name;
             break;
          case TargetEntity.Performance:
-            this.description = this.getPerformanceSource(this.composition, this.performance);
+            let source = this.composition == null ? this.raga : this.composition;
+            this.description = this.getPerformanceSource(source, this.performance);
             break;
       }
    }
-   getPerformanceSource(c: Composition, p: Performance): string {
+   getPerformanceSource(c: Composition | Raga, p: Performance): string {
       let text: string[] = [];
       text.push(c.name);
       text.push(` from &ldquo;${p.albumName}&rdquo;`);

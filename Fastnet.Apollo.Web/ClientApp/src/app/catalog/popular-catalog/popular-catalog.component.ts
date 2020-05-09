@@ -263,32 +263,32 @@ export class PopularCatalogComponent extends BaseCatalogComponent {
          return l.title.localeCompare(r.title);
       });
    }
-   private async executeCommand(cmd: CommandPanelResult) {
-      switch (cmd.selectedCommand) {
-         case SelectedCommand.Cancel:
-            break;
-         case SelectedCommand.Play:
-            await this.playMusic(cmd.entity);
-            break;
-         case SelectedCommand.Queue:
-            await this.queueMusic(cmd.entity);
-            break;
-         //case SelectedCommand.Details:
-         //    break;
-         case SelectedCommand.TagEditor:
-            if (cmd.targetEntity === TargetEntity.Work) {
-               //this.popularTagEditor.initialise(cmd.entity as Work);
-               this.popularTagEditor.open(cmd.entity as Work, (changesMade) => {
-               });
-            }
-            break;
-         case SelectedCommand.Reset:
-            switch (cmd.targetEntity) {
-               case TargetEntity.Work:
-                  await this.library.resetWork((cmd.entity as Work).id);
-                  break;
-            }
-            break;
-      }
-   }
+   //private async executeCommand(cmd: CommandPanelResult) {
+   //   switch (cmd.selectedCommand) {
+   //      case SelectedCommand.Cancel:
+   //         break;
+   //      case SelectedCommand.Play:
+   //         await this.playMusic(cmd.entity);
+   //         break;
+   //      case SelectedCommand.Queue:
+   //         await this.queueMusic(cmd.entity);
+   //         break;
+   //      //case SelectedCommand.Details:
+   //      //    break;
+   //      case SelectedCommand.TagEditor:
+   //         if (cmd.targetEntity === TargetEntity.Work) {
+   //            //this.popularTagEditor.initialise(cmd.entity as Work);
+   //            this.popularTagEditor.open(cmd.entity as Work, (changesMade) => {
+   //            });
+   //         }
+   //         break;
+   //      case SelectedCommand.Reset:
+   //         switch (cmd.targetEntity) {
+   //            case TargetEntity.Work:
+   //               await this.library.resetWork((cmd.entity as Work).id);
+   //               break;
+   //         }
+   //         break;
+   //   }
+   //}
 }

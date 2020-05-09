@@ -6,7 +6,7 @@ import { Artist, Work, MusicFile, Track, Performance, Composition, isMusicFile, 
 import { PlayerService } from "../shared/player.service";
 import { LoggingService } from "../shared/logging.service";
 import { ParameterService } from "../shared/parameter.service";
-import { CommandPanelComponent } from "./command-panel/command-panel.component";
+import { CommandPanelComponent, CommandPanelResult, SelectedCommand, TargetEntity } from "./command-panel/command-panel.component";
 import { DomSanitizer } from "@angular/platform-browser";
 import { DialogResult } from "../../fastnet/core/core.types";
 import { sortedInsert } from "../../fastnet/core/common.functions";
@@ -59,7 +59,6 @@ export abstract class BaseCatalogComponent implements OnInit, OnDestroy, AfterVi
       }
       console.log(`${artistIdList.length} artist ids loaded`);
    }
-
    protected async abstract onSearch();
    protected abstract addArtistToDefaultView(a: Artist);
    public async setSearch(text: string) {
@@ -159,6 +158,38 @@ export abstract class BaseCatalogComponent implements OnInit, OnDestroy, AfterVi
    }
    protected getBrowser() {
       return this.parameterService.getBrowser();
+   }
+   protected async executeCommand(cmd: CommandPanelResult) {
+      switch (cmd.selectedCommand) {
+         case SelectedCommand.Cancel:
+            break;
+         case SelectedCommand.Play:
+            await this.playMusic(cmd.entity);
+            break;
+         case SelectedCommand.Queue:
+            await this.queueMusic(cmd.entity);
+            break;
+         case SelectedCommand.TagEditor:
+            //if (cmd.targetEntity === TargetEntity.Performance) {
+            //   // await this.westernClassicalTagEditor.initialise(cmd.entity as Performance);
+            //   this.westernClassicalTagEditor.open(cmd.entity as Performance, async (changesMade) => {
+            //      if (changesMade) {
+            //         await this.onSearch();
+            //      }
+            //   });
+            //}
+            break;
+         case SelectedCommand.Reset:
+            switch (cmd.targetEntity) {
+               case TargetEntity.Work:
+                  await this.library.resetWork((cmd.entity as Work).id);
+                  break;
+               case TargetEntity.Performance:
+                  await this.library.resetPerformance((cmd.entity as Performance).id);
+                  break;
+            }
+            break;
+      }
    }
    private async onNewOrModifiedArtist(id: number) {
       let a = await this.library.getArtist(this.currentStyle, id);

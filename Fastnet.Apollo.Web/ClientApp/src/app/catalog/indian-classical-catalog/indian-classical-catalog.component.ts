@@ -6,9 +6,10 @@ import { ParameterService } from '../../shared/parameter.service';
 import { DomSanitizer } from '@angular/platform-browser';
 import { PlayerService } from '../../shared/player.service';
 import { LoggingService } from '../../shared/logging.service';
-import { Artist, Raga, ArtistSet, Performance } from '../../shared/catalog.types';
+import { Artist, Raga, ArtistSet, Performance, Track } from '../../shared/catalog.types';
 import { sortedInsert } from '../../../fastnet/core/common.functions';
 import { SearchKey, PerformanceResult } from '../../shared/common.types';
+import { MusicStyles } from '../../shared/common.enums';
 
 class IndianClassicalRagaResult {
    raga: SearchKey;
@@ -75,10 +76,21 @@ export class IndianClassicalCatalogComponent extends BaseCatalogComponent {
    toggleShowMovements(performance: Performance) {
       performance.showMovements = !performance.showMovements;
    }
+   onTapMovement(r: Raga, p: Performance, t: Track) {
+      //this.log.information("onTapTrack()");
+      this.commandPanel.open(MusicStyles.IndianClassical, r, p, t, async (r) => await this.executeCommand(r));
+   }
    onTapPerformance(r: Raga, p: Performance) {
       if (this.isTouchDevice() && p.movements.length > 1) {
-         //this.commandPanel.open(MusicStyles.WesternClassical, c, p, null, async (r) => await this.executeCommand(r));
+         this.commandPanel.open(MusicStyles.IndianClassical, r, p, null, async (r) => await this.executeCommand(r));
       }
+   }
+   async onRightClick(e: Event, r:Raga, p: Performance) {
+      e.preventDefault();
+      if (!this.isTouchDevice()) {
+         this.commandPanel.open(MusicStyles.IndianClassical, r, p, null, async (r) => await this.executeCommand(r));
+      }
+      return false;
    }
    protected async onSearch() {
       this.artistSets = [];
@@ -102,7 +114,6 @@ export class IndianClassicalCatalogComponent extends BaseCatalogComponent {
       let text = JSON.stringify(r, null, 2);
       console.log(text);
       r.results.forEach(async (icr) => {
-         //let artist = await this.library.getArtist(icr.artist.key);
          let set = await this.getArtists(icr.artists);
          console.log(JSON.stringify(set, null, 2));
          //artist.highlightSearch(this.searchText, artist.name, prefixMode);
@@ -134,7 +145,6 @@ export class IndianClassicalCatalogComponent extends BaseCatalogComponent {
 
    private async loadPerformances(set: ArtistSet, r: Raga) {
       r.performances = await this.library.getAllRagaPerformances(this.parameterService.getCurrentStyle(), set, r)
-      //c.performances = await this.library.getAllPerformances(c.id, true);
       for (let p of r.performances) {
          p.highlightSearch(this.searchText, p.performers, false);
       }
@@ -145,18 +155,11 @@ export class IndianClassicalCatalogComponent extends BaseCatalogComponent {
          let artist = await this.library.getArtist(this.currentStyle, artistId);
          set.artists.push(artist);
       }
-      //let artists: Artist[] = [];
-      //for(let key of artistKeys) {
-      //   let artist = await this.library.getArtist(this.currentStyle, key.key);
-      //   artists.push(artist);
-      //}
       return set;
    }
    private addArtists(artistSet: ArtistSet) {
       sortedInsert(this.artistSets, artistSet, (l, r) => {
-         //console.log(`${l.name} with ${r.name}`);
          return l.artistIds.sort().toString().localeCompare(r.artistIds.sort().toString())
-         //return l[0].name.localeCompare(r[0].name);
       });
    }
 }

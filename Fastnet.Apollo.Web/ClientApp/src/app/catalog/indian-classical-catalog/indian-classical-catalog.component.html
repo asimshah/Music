@@ -43,7 +43,7 @@
                               <div class="image-container" (click)="toggleShowMovements(performance)">
                                  <img class="image" *ngIf="performance.albumCoverArt" [ngClass]="{'small': isTouchDevice()}" [src]="performance.albumCoverArt" />
                               </div>
-                              <div class="performance-origin" [ngClass]="{'is-highlit': performance.isHighLit}" (tap)="onTapPerformance(raga, performance)" (contextmenu)="onRightClick($event, composition, performance)">
+                              <div class="performance-origin" [ngClass]="{'is-highlit': performance.isHighLit}" (tap)="onTapPerformance(raga, performance)" (contextmenu)="onRightClick($event, raga, performance)">
                                  <highlighted-text class="performers" [searchText]="searchText" [text]="getPerformanceSource(performance)" [prefixMode]="prefixMode"></highlighted-text>
                                  <div class="duration">{{performance.formattedDuration}}</div>
                                  <div class="command-panel" (mouseenter)="onPerformanceMouse(performance, true)" (mouseleave)="onPerformanceMouse(performance, false)">
@@ -84,7 +84,7 @@
                               </ng-container>
                               <ng-container *ngIf="isTouchDevice()">
                                  <div *ngFor="let movement of performance.movements; let even = even">
-                                    <div class="movement" (tap)="onTapMovement(composition, performance, movement)" [ngClass]="{'is-highlit': movement.isHighLit, 'even-row': even}">
+                                    <div class="movement" (tap)="onTapMovement(raga, performance, movement)" [ngClass]="{'is-highlit': movement.isHighLit, 'even-row': even}">
                                        <div><!-- dummy to maintain grid layout--></div>
                                        <div class="movement-number is-touch-device">{{movement.number}}</div>
                                        <div class="movement-title  is-touch-device">{{movement.title}}</div>

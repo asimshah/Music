@@ -356,18 +356,21 @@ export class PerformanceTEO {//extends TEOBase<WesternClassicalMusicFileTEO> {
    public movementList: WesternClassicalMusicFileTEO[];
    public movementFilenames: string[];
 }
-export function isWork(item: MusicFile | Work | Track | Composition | Performance): item is Work {
+export function isWork(item: MusicFile | Work | Track | Composition | Raga | Performance): item is Work {
    return (item as Work).type === 'work';
 }
-export function isTrack(item: MusicFile | Work | Track | Composition | Performance): item is Track {
+export function isTrack(item: MusicFile | Work | Track | Composition | Raga | Performance): item is Track {
    return (item as Track).type === 'track';
 }
-export function isComposition(item: MusicFile | Work | Track | Composition | Performance): item is Composition {
+export function isComposition(item: MusicFile | Work | Track | Composition | Raga | Performance): item is Composition {
    return (item as Composition).type === 'composition';
 }
-export function isPerformance(item: MusicFile | Work | Track | Composition | Performance): item is Performance {
+export function isRaga(item: MusicFile | Work | Track | Composition | Performance): item is Raga {
+   return (item as Composition).type === 'raga';
+}
+export function isPerformance(item: MusicFile | Work | Track | Composition | Raga | Performance): item is Performance {
    return (item as Performance).type === 'performance';
 }
-export function isMusicFile(item: MusicFile | Work | Track | Composition | Performance): item is MusicFile {
+export function isMusicFile(item: MusicFile | Work | Track | Composition | Raga | Performance): item is MusicFile {
    return (item as MusicFile).type === 'musicfile';
 }
