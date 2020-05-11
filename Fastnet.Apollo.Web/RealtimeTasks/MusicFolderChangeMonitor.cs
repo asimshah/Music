@@ -61,31 +61,34 @@ namespace Fastnet.Apollo.Web
         }
         private void Restart()
         {
-            try
+            if (!cancellationToken.IsCancellationRequested)
             {
-                log.Information($"{nameof(Restart)}");
-                CleanUp();
-                Initialise();
-                Task.Run(async () =>
+                try
                 {
-                    while (true)
+                    log.Information($"{nameof(Restart)}");
+                    CleanUp();
+                    Initialise();
+                    Task.Run(async () =>
                     {
-                        try
+                        while (true)
                         {
-                            await ProcessChanges();
-                            log.Error("ProcessChanges() ended!!!!!!!!!!!!!!!");
-                        }
-                        catch (Exception xe)
-                        {
-                            log.Error(xe, "ProcessChanges() failed");
+                            try
+                            {
+                                await ProcessChanges();
+                                log.Error("ProcessChanges() ended!!!!!!!!!!!!!!!");
+                            }
+                            catch (Exception xe)
+                            {
+                                log.Error(xe, "ProcessChanges() failed");
                             //throw;
-                        } 
-                    }
-                }, cancellationToken);
-            }
-            catch (Exception xe)
-            {
-                log.Error(xe, "Restart failed");
+                        }
+                        }
+                    }, cancellationToken);
+                }
+                catch (Exception xe)
+                {
+                    log.Error(xe, "Restart failed");
+                } 
             }
             return;
         }

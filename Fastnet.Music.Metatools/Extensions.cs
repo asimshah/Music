@@ -322,6 +322,41 @@ namespace Fastnet.Music.Metatools
         }
         private static void CreateIndianClassicalTags(MusicFile mf, IndianClassicalInformation ici)
         {
+            static bool Parse(MusicFile mf, IndianClassicalInformation ici, IdTag title, IEnumerable<string> words)
+            {
+                bool found = false;
+                for (int index = words.Count() - 1; index >= 0; --index)
+                {
+                    var rName = string.Join(" ", words.Take(index + 1));
+                    if (ici.Lookup.TryGetValue(rName.ToAlphaNumerics(), out RagaName rn))
+                    {
+                        //log.Information($"{title.Value} is raga {rn.Name}");
+                        var idTag = new IdTag
+                        {
+                            MusicFile = mf,
+                            Name = "RAGA",
+                            Value = rn.Name
+                        };
+                        mf.IdTags.Add(idTag);
+                        found = true;
+                        break;
+                    }
+                }
+                if (!found)
+                {
+                    log.Error($"no raga entry found for {title.Value}");
+                }
+                return found;
+            }
+            static bool ParseWords(MusicFile mf, IndianClassicalInformation ici, string words, IdTag title)
+            {
+                IEnumerable<string> wordList = words.Split(" ");
+                if (wordList.First().IsEqualIgnoreAccentsAndCase("raga") || wordList.First().IsEqualIgnoreAccentsAndCase("raag") || wordList.First().IsEqualIgnoreAccentsAndCase("rag"))
+                {
+                    wordList = wordList.Skip(1);
+                }
+                return Parse(mf, ici, title, wordList);
+            }
             static bool CheckTagsForRaga(MusicFile mf, IndianClassicalInformation ici)
             {
                 var ragaTag = mf.IdTags.SingleOrDefault(x => string.Compare(x.Name, "Raga", true) == 0);
@@ -345,43 +380,47 @@ namespace Fastnet.Music.Metatools
                 }
                 return false;
             }
-            static void ExtractRagaFromTitle(MusicFile mf, IndianClassicalInformation ici)
+            static bool ExtractRagaFromTitle(MusicFile mf, IndianClassicalInformation ici)
+            {
+                bool found = false;
+                var title = mf.IdTags.SingleOrDefault(x => string.Compare(x.Name, "Title", true) == 0);
+                var parts = title.Value.Split(new char[] {':', '-' });
+                if(parts.Length > 1)
+                {
+                    var leadPart = parts[0].Trim();
+                    found = ParseWords(mf, ici, leadPart, title);
+                    //IEnumerable<string> words = leadPart.Split(" ");
+                    //if (words.First().IsEqualIgnoreAccentsAndCase("raga"))
+                    //{
+                    //    words = words.Skip(1);
+                    //}
+                    //found = Parse(mf, ici, title, words);
+                }
+                return found;
+            }
+            static void ExtractRagaFromTitleUsingWords(MusicFile mf, IndianClassicalInformation ici)
             {
                 var title = mf.IdTags.SingleOrDefault(x => string.Compare(x.Name, "Title", true) == 0);
-                IEnumerable<string> parts = title.Value.Split(" ");
-                if (parts.First().IsEqualIgnoreAccentsAndCase("raga"))
-                {
-                    parts = parts.Skip(1);
-                }
-                bool found = false;
-                for (int index = parts.Count() - 1; index >= 0; --index)
-                {
-                    var rName = string.Join(" ", parts.Take(index + 1));
-                    if (ici.Lookup.TryGetValue(rName.ToAlphaNumerics(), out RagaName rn))
-                    {
-                        //log.Information($"{title.Value} is raga {rn.Name}");
-                        var idTag = new IdTag
-                        {
-                            MusicFile = mf,
-                            Name = "RAGA",
-                            Value = rn.Name
-                        };
-                        mf.IdTags.Add(idTag);
-                        found = true;
-                        break;
-                    }
-                }
-                if (!found)
-                {
-                    log.Error($"no raga entry found for {title.Value}");
-                }
+                ParseWords(mf, ici, title.Value, title);
+                IEnumerable<string> words = title.Value.Split(" ");
+                //if (words.First().IsEqualIgnoreAccentsAndCase("raga"))
+                //{
+                //    words = words.Skip(1);
+                //}
+                //Parse(mf, ici, title, words);
             }
             ici.PrepareNames();
             if (!CheckTagsForRaga(mf, ici))
             {
-                ExtractRagaFromTitle(mf, ici);
+                if (!ExtractRagaFromTitle(mf, ici))
+                {
+                    ExtractRagaFromTitleUsingWords(mf, ici);
+                }
             }
         }
+
+
+
         private static void CreateWesternClassicalTags(MusicFile mf)
         {
             if (mf.IdTags.SingleOrDefault(x => string.Compare(x.Name, "COMPOSITION", true) == 0) == null)

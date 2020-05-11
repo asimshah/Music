@@ -356,7 +356,7 @@
             {
                 "Name": "Bhatiali",
                 "Aliases": [ "Bhatiali (Boatsong Of Bengal)", "Boatsong Of Bengal" ],
-                "DisplayName":  "Bhatiali"
+                "DisplayName": "Bhatiali"
             },
             {
                 "Name": "Bhatiyar (Marwa aang)",
@@ -400,7 +400,7 @@
             },
             {
                 "Name": "Bhimpalasi",
-                "Aliases": []
+                "Aliases": [ "Bheempalasee", "Bhimpalassi" ]
             },
             {
                 "Name": "Bhinna Bhairav",
@@ -591,14 +591,6 @@
                 "Aliases": []
             },
             {
-                "Name": "Chandrakauns (Agra Gharana)",
-                "Aliases": []
-            },
-            {
-                "Name": "Chandrakauns (Bageshree aang)",
-                "Aliases": []
-            },
-            {
                 "Name": "Chandrakauns",
                 "Aliases": []
             },
@@ -704,7 +696,7 @@
             },
             {
                 "Name": "Desh",
-                "Aliases": ["Des"]
+                "Aliases": [ "Des" ]
             },
             {
                 "Name": "Deshi (raagini)",
@@ -839,6 +831,10 @@
                 "Aliases": []
             },
             {
+                "Name": "Emni Bilawal",
+                "Aliases": []
+            },
+            {
                 "Name": "Enayatkhani Kanada",
                 "Aliases": []
             },
@@ -875,7 +871,7 @@
                 "Aliases": []
             },
             {
-                "Name": "Gara (raag)",
+                "Name": "Gara",
                 "Aliases": []
             },
             {
@@ -1155,7 +1151,7 @@
                 "Aliases": []
             },
             {
-                "Name": "Hemshri (created by Pt. Acharya Vishwanath Rao Ringe 'Tanarang')",
+                "Name": "Hemshri",
                 "Aliases": []
             },
             {
@@ -1248,14 +1244,6 @@
             },
             {
                 "Name": "Jaijaiwanti",
-                "Aliases": []
-            },
-            {
-                "Name": "Jaijaiwanti ( kaphi aang)",
-                "Aliases": []
-            },
-            {
-                "Name": "Jaijaiwanti (Desh aang)",
                 "Aliases": []
             },
             {
@@ -1711,7 +1699,7 @@
                 "Aliases": []
             },
             {
-                "Name": "Lalit (putra raag)",
+                "Name": "Lalit",
                 "Aliases": []
             },
             {
@@ -1889,6 +1877,10 @@
             {
                 "Name": "Malhar",
                 "Aliases": []
+            },
+            {
+                "Name": "Malhar Ke Prakar",
+                "Aliases": [ "Malhaar Ke Prakar" ]
             },
             {
                 "Name": "Maligaura (d)",
@@ -2088,7 +2080,7 @@
             },
             {
                 "Name": "Miyan ki Malhar",
-                "Aliases": [ "Mian ki Malhar" ]
+                "Aliases": [ "Mian ki Malhar", "Miya Malhar", "Miyan Malhar" ]
             },
             {
                 "Name": "Miyan ki Sarang",

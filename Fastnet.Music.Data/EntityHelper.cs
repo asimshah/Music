@@ -253,8 +253,8 @@ namespace Fastnet.Music.Data
                     // there are no more performances of that raga - in which case delete the raga
                     // REMEMBER that artists in IndianClassical must all have works and therefore are
                     // bubble deleted if the work gets deleted
-                    Debug.Assert(rplist.Select(x => x.Raga).Count() == 1);
-                    var raga = rplist.Select(x => x.Raga).Single();
+                    Debug.Assert(rplist.Select(x => x.Raga).Distinct().Count() == 1);
+                    var raga = rplist.Select(x => x.Raga).Distinct().Single();
                     db.RagaPerformances.RemoveRange(rplist);
                     log.Information($"{ToIdent()} {rplist.Select(x => x.ToIdent()).ToCSV()} deleted");
                     if (db.RagaPerformances.Where(x => x.Raga == raga).Count() == 0)
