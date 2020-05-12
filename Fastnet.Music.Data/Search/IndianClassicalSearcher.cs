@@ -68,7 +68,8 @@ namespace Fastnet.Music.Data
                     }
                 }
             }
-            return (prefixMatch, finalList);
+            //finalList.OrderBy(x => x.Artists.Count())
+            return (prefixMatch, finalList.OrderBy(x => x.Artists.Count()));
         }
 #pragma warning disable IDE1006 // Naming Styles
         class _SearchResult
@@ -122,13 +123,13 @@ namespace Fastnet.Music.Data
                 .Union(q4.ToArray())
                 .Distinct().OrderBy(x => x.Type).AsEnumerable();
 
-            var temp = new List<_SearchResult>();
+            var itemsToRemove = new List<_SearchResult>();
             // removes ragas, performances and movements that are for a matched artist
             foreach (var q in query.Where(x => x.Type == IndianClassicalMatchType.Artist)/*.ToArray()*/)
             {
                 var removable = query.Where(x => x.Type != IndianClassicalMatchType.Artist
                     && x.RagaPerformance.ArtistId == q.RagaPerformance.ArtistId);
-                temp.AddRange(removable);
+                itemsToRemove.AddRange(removable);
                 //query = query.Except(removable);
             }
             // removes performances and movements that are for a matched raga
@@ -137,7 +138,7 @@ namespace Fastnet.Music.Data
                 var removable = query.Where(x => (x.Type != IndianClassicalMatchType.Artist
                     && x.Type != IndianClassicalMatchType.Raga)
                     && x.RagaPerformance.RagaId == q.RagaPerformance.RagaId);
-                temp.AddRange(removable);
+                itemsToRemove.AddRange(removable);
                 //query = query.Except(removable);
             }
             // removes movements that are for a matched performance
@@ -147,10 +148,10 @@ namespace Fastnet.Music.Data
                     && x.Type != IndianClassicalMatchType.Raga
                     && x.Type != IndianClassicalMatchType.Performance)
                     && x.RagaPerformance.PerformanceId == q.RagaPerformance.PerformanceId);
-                temp.AddRange(removable);
+                itemsToRemove.AddRange(removable);
                 //query = query.Except(removable);
             }
-            query = query.Except(temp);
+            query = query.Except(itemsToRemove);
             var performanceGroups = query.GroupBy(k => k.RagaPerformance.Performance).Select(g => g);
             foreach (var pg in performanceGroups)
             {

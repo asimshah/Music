@@ -140,24 +140,24 @@ namespace Fastnet.Apollo.Web.Controllers
                 var performances = musicDb.RagaPerformances
                     .Where(x => ids.Contains(x.ArtistId))
                     .Select(x => x.Performance);
-                var r0 = performances.Join(musicDb.RagaPerformances, p => p.Id, rp => rp.PerformanceId, (p, rp) => new { performance = p, ragaPerformance = rp })
-                    .Distinct()
-                    .AsEnumerable()
-                    .GroupBy(k => k.performance)
-                    ;
+                //var r0 = performances.Join(musicDb.RagaPerformances, p => p.Id, rp => rp.PerformanceId, (p, rp) => new { performance = p, ragaPerformance = rp })
+                //    .Distinct()
+                //    .AsEnumerable()
+                //    .GroupBy(k => k.performance)
+                //    ;
                 var r1 = performances.Join(musicDb.RagaPerformances, p => p.Id, rp => rp.PerformanceId, (p, rp) => new { performance = p, ragaPerformance = rp })
                     //.Where(x => ids.Contains( x.ragaPerformance.ArtistId))
                     .Distinct()
                     .AsEnumerable()
                     .GroupBy(k => k.performance)
                     ;
-                var r2 = r0.Where(x => x.Select(z => z.ragaPerformance.ArtistId).OrderBy(k => k).SequenceEqual(ids))
-                    ;
+                //var r2 = r0.Where(x => x.Select(z => z.ragaPerformance.ArtistId).OrderBy(k => k).SequenceEqual(ids))
+                //    ;
                 var r3 = r1.Where(x => x.Select(z => z.ragaPerformance.ArtistId).OrderBy(k => k).SequenceEqual(ids))
                     ;
 
-                var rplist1 = r2.SelectMany(x => x.Select(g => g.ragaPerformance));
-                var dto1 = rplist1.ToDTO(ici);
+                //var rplist1 = r2.SelectMany(x => x.Select(g => g.ragaPerformance));
+                //var dto1 = rplist1.ToDTO(ici);
 
                 var rplist2 = r3.SelectMany(x => x.Select(g => g.ragaPerformance));
                 var dto2 = rplist2.ToDTO(ici);

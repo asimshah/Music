@@ -173,7 +173,11 @@ export class IndianClassicalCatalogComponent extends BaseCatalogComponent {
    }
    private addArtists(artistSet: ArtistSet) {
       sortedInsert(this.artistSets, artistSet, (l, r) => {
-         return l.artistIds.sort().toString().localeCompare(r.artistIds.sort().toString())
+         if (l.artistIds.length == 1 && r.artistIds.length == 1) {
+            return l.artistIds.sort().toString().localeCompare(r.artistIds.sort().toString());
+         } else {
+            return l.artistIds.length < r.artistIds.length ? -1 : +1;
+         }
       });
    }
 }
