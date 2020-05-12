@@ -7,6 +7,6 @@ namespace Fastnet.Music.Data
     {
         public SearchKey Raga { get; set; }
         public bool RagaIsMatched { get; set; }
-        public IEnumerable<PerformanceResult> Performances { get; set; } = Enumerable.Empty<PerformanceResult>();
+        public List<PerformanceResult> Performances { get; set; } = new List<PerformanceResult>();
     }
 }

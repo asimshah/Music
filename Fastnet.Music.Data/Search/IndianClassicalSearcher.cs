@@ -39,45 +39,32 @@ namespace Fastnet.Music.Data
                 if (icr.ArtistIsMatched == false)
                 {
                     var _ = icr.GetRagaResult(rqr.Raga, true);
-                    //icr.Ragas = icr.Ragas.Append(new IndianClassicalRagaResult { Raga = rqr.Raga, RagaIsMatched = true });
                 }
             }
             foreach (var rpqr in queryResults.Where(x => x.GetType() == typeof(IndianClassicalRagaPerformanceQueryResult)).Cast<IndianClassicalRagaPerformanceQueryResult>())
             {
                 var icr = getIndianClassicalResult(finalList, rpqr.Artists);
-                //var rr = icr.Ragas.SingleOrDefault(x => x.Raga.Key == rpqr.Raga.Key);
-                //if (rr == null)
-                //{
-                //    rr = new IndianClassicalRagaResult { Raga = rpqr.Raga, RagaIsMatched = false };
-                //    icr.Ragas = icr.Ragas.Append(rr);
-                //}
                 var rr = icr.GetRagaResult(rpqr.Raga);
                 if (rr.RagaIsMatched == false)
                 {
-                    rr.Performances = rr.Performances.Append(new PerformanceResult { Performance = rpqr.Performance, PerformanceIsMatched = true });
+                    /*rr.Performances = */rr.Performances.Add(new PerformanceResult { Performance = rpqr.Performance, PerformanceIsMatched = true });
                 }
             }
             foreach (var rpqr in queryResults.Where(x => x.GetType() == typeof(IndianClassicalRagaPerformanceMovementQueryResult)).Cast<IndianClassicalRagaPerformanceMovementQueryResult>())
             {
                 var icr = getIndianClassicalResult(finalList, rpqr.Artists);
-                //var rr = icr.Ragas.SingleOrDefault(x => x.Raga.Key == rpqr.Raga.Key);
-                //if (rr == null)
-                //{
-                //    rr = new IndianClassicalRagaResult { Raga = rpqr.Raga, RagaIsMatched = false };
-                //    icr.Ragas = icr.Ragas.Append(rr);
-                //}
                 var rr = icr.GetRagaResult(rpqr.Raga);
                 var pr = rr.Performances.SingleOrDefault(x => x.Performance.Key == rpqr.Performance.Key);
                 if (pr == null)
                 {
                     pr = new PerformanceResult { Performance = rpqr.Performance, PerformanceIsMatched = false };
-                    rr.Performances = rr.Performances.Append(pr);
+                    /*rr.Performances = */rr.Performances.Add(pr);
                 }
                 if (pr.PerformanceIsMatched == false)
                 {
                     foreach (var m in rpqr.Movements)
                     {
-                        pr.Movements = pr.Movements.Append(new TrackResult { Track = m });
+                        /*pr.Movements = */pr.Movements.Add(new TrackResult { Track = m });
                     }
                 }
             }
@@ -96,7 +83,7 @@ namespace Fastnet.Music.Data
             var list = new List<IndianClassicalQueryResult>();
             var list2 = new Dictionary<string, IndianClassicalQueryResult>();
             var alphamericSearch = loweredSearch.ToAlphaNumerics();
-            var rpList = MusicDb.RagaPerformances.ToArray();
+            //var rpList = MusicDb.RagaPerformances.ToArray();
             var q1 = MusicDb.RagaPerformances
                 .Where(rp => rp.Artist.AlphamericName.Contains(alphamericSearch))
                 .Select(x => new _SearchResult { Type = IndianClassicalMatchType.Artist, RagaPerformance = x }).ToList();
@@ -135,12 +122,14 @@ namespace Fastnet.Music.Data
                 .Union(q4.ToArray())
                 .Distinct().OrderBy(x => x.Type).AsEnumerable();
 
+            var temp = new List<_SearchResult>();
             // removes ragas, performances and movements that are for a matched artist
             foreach (var q in query.Where(x => x.Type == IndianClassicalMatchType.Artist).ToArray())
             {
                 var removable = query.Where(x => x.Type != IndianClassicalMatchType.Artist
                     && x.RagaPerformance.ArtistId == q.RagaPerformance.ArtistId);
-                query = query.Except(removable);
+                temp.AddRange(removable);
+                //query = query.Except(removable);
             }
             // removes performances and movements that are for a matched raga
             foreach (var q in query.Where(x => x.Type == IndianClassicalMatchType.Raga).ToArray())
@@ -148,7 +137,8 @@ namespace Fastnet.Music.Data
                 var removable = query.Where(x => (x.Type != IndianClassicalMatchType.Artist
                     && x.Type != IndianClassicalMatchType.Raga)
                     && x.RagaPerformance.RagaId == q.RagaPerformance.RagaId);
-                query = query.Except(removable);
+                temp.AddRange(removable);
+                //query = query.Except(removable);
             }
             // removes movements that are for a matched performance
             foreach (var q in query.Where(x => x.Type == IndianClassicalMatchType.Performance).ToArray())
@@ -157,8 +147,10 @@ namespace Fastnet.Music.Data
                     && x.Type != IndianClassicalMatchType.Raga
                     && x.Type != IndianClassicalMatchType.Performance)
                     && x.RagaPerformance.PerformanceId == q.RagaPerformance.PerformanceId);
-                query = query.Except(removable);
+                temp.AddRange(removable);
+                //query = query.Except(removable);
             }
+            query = query.Except(temp);
             var performanceGroups = query.GroupBy(k => k.RagaPerformance.Performance).Select(g => g);
             foreach (var pg in performanceGroups)
             {

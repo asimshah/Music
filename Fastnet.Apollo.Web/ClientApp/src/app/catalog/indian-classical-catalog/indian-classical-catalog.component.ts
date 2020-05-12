@@ -127,6 +127,7 @@ export class IndianClassicalCatalogComponent extends BaseCatalogComponent {
          this.addArtists(set);
          if (icr.artistIsMatched) {
             // get all the ragas for this artist set
+            console.log(`asking for artist ids: ${set.artistIds.join(', ')}`);
             set.ragas = await this.library.getAllRagas(set);
          } else {
             set.ragas = [];

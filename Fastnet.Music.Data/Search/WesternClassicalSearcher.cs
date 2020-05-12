@@ -134,7 +134,7 @@ namespace Fastnet.Music.Data
                         };
                         cr.Performances.Add(pr);
                     }
-                    pr.Movements = pr.Movements.Append(new TrackResult { Track = mr.Movement });
+                    /*pr.Movements = */pr.Movements.Add(new TrackResult { Track = mr.Movement });
                 }
             }
 

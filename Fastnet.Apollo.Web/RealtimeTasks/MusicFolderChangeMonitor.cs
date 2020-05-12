@@ -70,7 +70,7 @@ namespace Fastnet.Apollo.Web
                     Initialise();
                     Task.Run(async () =>
                     {
-                        while (true)
+                        while (!cancellationToken.IsCancellationRequested)
                         {
                             try
                             {

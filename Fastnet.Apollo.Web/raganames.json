@@ -203,7 +203,7 @@
             },
             {
                 "Name": "Bageshri",
-                "Aliases": []
+                "Aliases": [ "Bageshwari" ]
             },
             {
                 "Name": "Bageshri Bahar",
@@ -660,7 +660,7 @@
             },
             {
                 "Name": "Darbari Kanada",
-                "Aliases": []
+                "Aliases": [ "Darbari Kanhra", "Darbari Kanhara" ]
             },
             {
                 "Name": "Darbari Todi",
@@ -695,24 +695,8 @@
                 "Aliases": []
             },
             {
-                "Name": "Desh",
-                "Aliases": [ "Des" ]
-            },
-            {
-                "Name": "Deshi (raagini)",
-                "Aliases": []
-            },
-            {
-                "Name": "Desh Malhar",
-                "Aliases": []
-            },
-            {
-                "Name": "Deshi Tilang",
-                "Aliases": []
-            },
-            {
-                "Name": "Desi Todi",
-                "Aliases": []
+                "Name": "Des",
+                "Aliases": [ "Desh" ]
             },
             {
                 "Name": "Deshkar (Purvi aang)",
@@ -721,6 +705,22 @@
             {
                 "Name": "Deshkar",
                 "Aliases": []
+            },
+            {
+                "Name": "Desi",
+                "Aliases": [ "Deshi" ]
+            },
+            {
+                "Name": "Des Malhar",
+                "Aliases": [ "Desh Malhar" ]
+            },
+            {
+                "Name": "Desi Tilang",
+                "Aliases": [ "Deshi Tilang" ]
+            },
+            {
+                "Name": "Desi Todi",
+                "Aliases": [ "Deshi Todi" ]
             },
             {
                 "Name": "Devkari (raagini)",
@@ -797,6 +797,11 @@
             {
                 "Name": "Dhulia Sarang",
                 "Aliases": []
+            },
+            {
+                "Name": "Dhun",
+                "Aliases": [],
+                "DisplayName": "Dhun"
             },
             {
                 "Name": "Dinka Shankara",
@@ -1331,7 +1336,7 @@
                 "Aliases": []
             },
             {
-                "Name": "Jogeshwari (raag)",
+                "Name": "Jogeshwari",
                 "Aliases": []
             },
             {
@@ -1397,6 +1402,11 @@
             {
                 "Name": "Kaisiki (raagini)",
                 "Aliases": []
+            },
+            {
+                "Name": "Kajri",
+                "Aliases": [ "Kajari" ],
+                "DisplayName": "Kajri"
             },
             {
                 "Name": "Kakubha (raagini)",
@@ -1792,7 +1802,7 @@
             },
             {
                 "Name": "Madhuwanti",
-                "Aliases": []
+                "Aliases": [ "Madhuvanti" ]
             },
             {
                 "Name": "Madhukauns",
@@ -1940,15 +1950,15 @@
             },
             {
                 "Name": "Mand Bhairav",
-                "Aliases": []
+                "Aliases": [ "Maand Bhairav" ]
             },
             {
                 "Name": "Mand Bhatiyar",
-                "Aliases": []
+                "Aliases": [ "Maand Bhatiyar" ]
             },
             {
                 "Name": "Mand",
-                "Aliases": []
+                "Aliases": [ "Maand" ]
             },
             {
                 "Name": "Mangal Bhairav 1",
@@ -2059,6 +2069,10 @@
                 "Aliases": []
             },
             {
+                "Name": "Misra Bhairavi",
+                "Aliases": []
+            },
+            {
                 "Name": "Misra Desh",
                 "Aliases": []
             },
@@ -2067,15 +2081,27 @@
                 "Aliases": []
             },
             {
+                "Name": "Misra Jangla",
+                "Aliases": [ "Mishra Jangla" ]
+            },
+            {
+                "Name": "Misra Jhinjhoti",
+                "Aliases": [ "Mishra Jhinjhoti" ]
+            },
+            {
                 "Name": "Misra Khamaj",
                 "Aliases": [ "Mishra Khamaj" ]
             },
             {
-                "Name": "Misra Todi",
+                "Name": "Misra Mel Ki Malhar",
                 "Aliases": []
             },
             {
-                "Name": "Misra Bhairavi",
+                "Name": "Misra Tilak Kamod",
+                "Aliases": [ "Mishra Tilak Kamod" ]
+            },
+            {
+                "Name": "Misra Todi",
                 "Aliases": []
             },
             {
@@ -2084,11 +2110,11 @@
             },
             {
                 "Name": "Miyan ki Sarang",
-                "Aliases": []
+                "Aliases": [ "Mian ki Sarang", "Miya ki Sarang", "Miyan Sarang" ]
             },
             {
                 "Name": "Miyan ki Todi",
-                "Aliases": []
+                "Aliases": [ "Mian ki Todi", "Miya ki Todi", "Miyan Todi" ]
             },
             {
                 "Name": "Mohankauns",
@@ -2367,6 +2393,10 @@
                 "Aliases": []
             },
             {
+                "Name": "Purab Ang",
+                "Aliases": []
+            },
+            {
                 "Name": "Purabi Kalyan",
                 "Aliases": []
             },
@@ -2400,7 +2430,7 @@
             },
             {
                 "Name": "Rageshri",
-                "Aliases": []
+                "Aliases": [ "Rageshwari" ]
             },
             {
                 "Name": "Rageshri Bahar",
@@ -3083,7 +3113,7 @@
                 "Aliases": []
             },
             {
-                "Name": "Tilak kamod",
+                "Name": "Tilak Kamod",
                 "Aliases": []
             },
             {
@@ -3116,6 +3146,10 @@
             },
             {
                 "Name": "Todika (raagini)",
+                "Aliases": []
+            },
+            {
+                "Name": "Tribute To America",
                 "Aliases": []
             },
             {
@@ -3231,8 +3265,8 @@
                 "Aliases": []
             },
             {
-                "Name": "Vrindavani Sarang (it is somethings called as Brindabani Sarang)",
-                "Aliases": []
+                "Name": "Vrindavani Sarang",
+                "Aliases": [ "Brindabani Sarang" ]
             },
             {
                 "Name": "Vyjayanti",
@@ -3252,11 +3286,11 @@
             },
             {
                 "Name": "Yaman",
-                "Aliases": []
+                "Aliases": ["Iman"]
             },
             {
-                "Name": "Yaman kalyan",
-                "Aliases": []
+                "Name": "Yaman Kalyan",
+                "Aliases": ["Iman Kalyan"]
             },
             {
                 "Name": "Zeelaf (Bhairav aang)",
