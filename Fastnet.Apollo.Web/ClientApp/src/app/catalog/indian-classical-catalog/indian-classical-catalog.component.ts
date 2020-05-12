@@ -113,7 +113,7 @@ export class IndianClassicalCatalogComponent extends BaseCatalogComponent {
    }
    protected addArtistToDefaultView(a: Artist) {
       sortedInsert(this.allArtists, a, (l, r) => {
-         return l.lastname.localeCompare(r.lastname);
+         return l.name.localeCompare(r.name);
       });
    }
 
