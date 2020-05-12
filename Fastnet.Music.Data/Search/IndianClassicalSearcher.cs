@@ -124,7 +124,7 @@ namespace Fastnet.Music.Data
 
             var temp = new List<_SearchResult>();
             // removes ragas, performances and movements that are for a matched artist
-            foreach (var q in query.Where(x => x.Type == IndianClassicalMatchType.Artist).ToArray())
+            foreach (var q in query.Where(x => x.Type == IndianClassicalMatchType.Artist)/*.ToArray()*/)
             {
                 var removable = query.Where(x => x.Type != IndianClassicalMatchType.Artist
                     && x.RagaPerformance.ArtistId == q.RagaPerformance.ArtistId);
@@ -132,7 +132,7 @@ namespace Fastnet.Music.Data
                 //query = query.Except(removable);
             }
             // removes performances and movements that are for a matched raga
-            foreach (var q in query.Where(x => x.Type == IndianClassicalMatchType.Raga).ToArray())
+            foreach (var q in query.Where(x => x.Type == IndianClassicalMatchType.Raga)/*.ToArray()*/)
             {
                 var removable = query.Where(x => (x.Type != IndianClassicalMatchType.Artist
                     && x.Type != IndianClassicalMatchType.Raga)
@@ -141,7 +141,7 @@ namespace Fastnet.Music.Data
                 //query = query.Except(removable);
             }
             // removes movements that are for a matched performance
-            foreach (var q in query.Where(x => x.Type == IndianClassicalMatchType.Performance).ToArray())
+            foreach (var q in query.Where(x => x.Type == IndianClassicalMatchType.Performance)/*.ToArray()*/)
             {
                 var removable = query.Where(x => (x.Type != IndianClassicalMatchType.Artist
                     && x.Type != IndianClassicalMatchType.Raga
