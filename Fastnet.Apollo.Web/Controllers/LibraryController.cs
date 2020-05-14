@@ -137,31 +137,34 @@ namespace Fastnet.Apollo.Web.Controllers
             ids = ids.OrderBy(k => k).ToArray();
             if (style == MusicStyles.IndianClassical)
             {
-                var performances = musicDb.RagaPerformances
-                    .Where(x => ids.Contains(x.ArtistId))
-                    .Select(x => x.Performance);
-                //var r0 = performances.Join(musicDb.RagaPerformances, p => p.Id, rp => rp.PerformanceId, (p, rp) => new { performance = p, ragaPerformance = rp })
+                var list = GetRagaPerformancesForArtistSet(ids);
+                var dto = list.ToDTO();
+                return SuccessResult(dto);
+                //var performances = musicDb.RagaPerformances
+                //    .Where(x => ids.Contains(x.ArtistId))
+                //    .Select(x => x.Performance);
+                ////var r0 = performances.Join(musicDb.RagaPerformances, p => p.Id, rp => rp.PerformanceId, (p, rp) => new { performance = p, ragaPerformance = rp })
+                ////    .Distinct()
+                ////    .AsEnumerable()
+                ////    .GroupBy(k => k.performance)
+                ////    ;
+                //var r1 = performances.Join(musicDb.RagaPerformances, p => p.Id, rp => rp.PerformanceId, (p, rp) => new { performance = p, ragaPerformance = rp })
+                //    //.Where(x => ids.Contains( x.ragaPerformance.ArtistId))
                 //    .Distinct()
                 //    .AsEnumerable()
                 //    .GroupBy(k => k.performance)
                 //    ;
-                var r1 = performances.Join(musicDb.RagaPerformances, p => p.Id, rp => rp.PerformanceId, (p, rp) => new { performance = p, ragaPerformance = rp })
-                    //.Where(x => ids.Contains( x.ragaPerformance.ArtistId))
-                    .Distinct()
-                    .AsEnumerable()
-                    .GroupBy(k => k.performance)
-                    ;
-                //var r2 = r0.Where(x => x.Select(z => z.ragaPerformance.ArtistId).OrderBy(k => k).SequenceEqual(ids))
+                ////var r2 = r0.Where(x => x.Select(z => z.ragaPerformance.ArtistId).OrderBy(k => k).SequenceEqual(ids))
+                ////    ;
+                //var r3 = r1.Where(x => x.Select(z => z.ragaPerformance.ArtistId).OrderBy(k => k).SequenceEqual(ids))
                 //    ;
-                var r3 = r1.Where(x => x.Select(z => z.ragaPerformance.ArtistId).OrderBy(k => k).SequenceEqual(ids))
-                    ;
 
-                //var rplist1 = r2.SelectMany(x => x.Select(g => g.ragaPerformance));
-                //var dto1 = rplist1.ToDTO(ici);
+                ////var rplist1 = r2.SelectMany(x => x.Select(g => g.ragaPerformance));
+                ////var dto1 = rplist1.ToDTO(ici);
 
-                var rplist2 = r3.SelectMany(x => x.Select(g => g.ragaPerformance));
-                var dto2 = rplist2.ToDTO(ici);
-                return SuccessResult(dto2);
+                //var rplist2 = r3.SelectMany(x => x.Select(g => g.ragaPerformance));
+                //var dto2 = rplist2.ToDTO();
+                //return SuccessResult(dto2);
             }
             else
             {
@@ -295,15 +298,30 @@ namespace Fastnet.Apollo.Web.Controllers
             return ErrorResult("Composition and/or performances not found");
         }
         [HttpGet("get/{style}/{ragaId}/allperformances/artistSet")]
-        public async Task<IActionResult> GetAllPerformances(MusicStyles style, long ragaId, [FromQuery(Name = "id")] long[] ids)
+        public IActionResult GetAllPerformances(MusicStyles style, long ragaId, [FromQuery(Name = "id")] long[] ids)
         {
-            var raga = await musicDb.Ragas.FindAsync(ragaId);
-            var rpList = musicDb.RagaPerformances
-                .Where(x => x.Raga == raga && ids.Contains(x.ArtistId))
-                .AsEnumerable();
-            var performances = rpList.GroupBy(k => k.Performance).Where(g => g.Count() == ids.Count())
-                .Select(g => g.Key);
-            return SuccessResult(performances.Select(p => p.ToDTO(raga.Name)));
+            var list = GetRagaPerformancesForArtistSet(ids)
+                .Where(x => x.Raga.Id == ragaId);
+            if(list.Count() > 0)
+            {
+                var raga = list.First().Raga.Name;
+                return SuccessResult(list.Select(x => x.Performance.ToDTO(raga)));
+            }
+            return SuccessResult(null);
+        }
+
+        private IEnumerable<ArtistSetRagaPerformance> GetRagaPerformancesForArtistSet(long[] artistIds)
+        {
+            artistIds = artistIds.OrderBy(k => k).ToArray();
+            // get all performances by these artists singly or jointly
+            var allPerformancesByTheseArtists = musicDb.RagaPerformances
+                .Where(x => artistIds.Contains(x.ArtistId))
+                .Select(x => x.Performance).Distinct();
+            var rpListForThesePerformances = allPerformancesByTheseArtists.AsEnumerable()
+                .Join(musicDb.RagaPerformances, p => p.Id, rp => rp.PerformanceId, (p, rp) => rp);
+            return rpListForThesePerformances.GroupBy(x => x.Performance)
+                .Where(x => x.Select(r => r.ArtistId).OrderBy(n => n).SequenceEqual(artistIds))
+                .Select(x => new ArtistSetRagaPerformance { Performance = x.Key, Raga = x.First().Raga, Artists = x.Select(z => z.Artist).ToArray() });            
         }
         [HttpGet("get/raga/{id}")]
         public async Task<IActionResult> GetRaga(long id)
@@ -315,25 +333,28 @@ namespace Fastnet.Apollo.Web.Controllers
         [HttpGet("get/artist/allragas")]
         public IActionResult GetAllRagas([FromQuery(Name = "id")] long[] ids)
         {
-            ids = ids.OrderBy(k => k).ToArray();
-            musicDb.ChangeTracker.AutoDetectChangesEnabled = false;
-            var query = musicDb.RagaPerformances
-                .Where(x => ids.Contains(x.ArtistId))
-                .Select(x => x.Performance).Distinct()
-                .Join(musicDb.RagaPerformances, l => l.Id, r => r.PerformanceId, (l, r) => r)
-                .OrderBy(x => x.Raga.DisplayName)
-                ;
-            var rpList = query.AsEnumerable();
-            var g1 = rpList.GroupBy(k => new { k.Raga, k.Performance })
-                .Select(x => new { x.Key.Raga, list = x })
-                .Where(x => x.list.Select(l => l.ArtistId).OrderBy(k => k).SequenceEqual(ids.OrderBy(j => j)))
-                ;
-                //.Where(x => x.list.Count() == ids.Count());
-            //var ragas = rpList.GroupBy(k => k.Raga).Where(g => g.Count() == ids.Count())
-            //    .Select(g => g.Key).Distinct();
-            var ragas = g1.Select(x => x.Raga).Distinct();
-            var list = ragas.Select(x => x.ToDTO());
-            return SuccessResult(list);
+            var list = GetRagaPerformancesForArtistSet(ids)
+                .Select(x => x.Raga).Distinct();
+            return SuccessResult(list.Select(r => r.ToDTO()));
+            //ids = ids.OrderBy(k => k).ToArray();
+            //musicDb.ChangeTracker.AutoDetectChangesEnabled = false;
+            //var query = musicDb.RagaPerformances
+            //    .Where(x => ids.Contains(x.ArtistId))
+            //    .Select(x => x.Performance).Distinct()
+            //    .Join(musicDb.RagaPerformances, l => l.Id, r => r.PerformanceId, (l, r) => r)
+            //    .OrderBy(x => x.Raga.DisplayName)
+            //    ;
+            //var rpList = query.AsEnumerable();
+            //var g1 = rpList.GroupBy(k => new { k.Raga, k.Performance })
+            //    .Select(x => new { x.Key.Raga, list = x })
+            //    .Where(x => x.list.Select(l => l.ArtistId).OrderBy(k => k).SequenceEqual(ids.OrderBy(j => j)))
+            //    ;
+            //    //.Where(x => x.list.Count() == ids.Count());
+            ////var ragas = rpList.GroupBy(k => k.Raga).Where(g => g.Count() == ids.Count())
+            ////    .Select(g => g.Key).Distinct();
+            //var ragas = g1.Select(x => x.Raga).Distinct();
+            //var list = ragas.Select(x => x.ToDTO());
+            //return SuccessResult(list);
         }
         [HttpGet("get/artist/allcompositions/{id}/{full?}")]
         public IActionResult GetAllCompositions(long id, bool full = false)

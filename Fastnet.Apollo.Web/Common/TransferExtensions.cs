@@ -16,9 +16,24 @@ using System.Threading.Tasks;
 
 namespace Fastnet.Apollo.Web
 {
+    public class ArtistSetRagaPerformance
+    {
+        public Artist[] Artists;
+        public Raga Raga;
+        public Performance Performance;
+    }
     public static partial class TransferExtensions
     {
-        public static ArtistSetDTO ToDTO(this IEnumerable<RagaPerformance> list, IndianClassicalInformation ici)
+        public static ArtistSetDTO ToDTO(this IEnumerable<ArtistSetRagaPerformance> list)
+        {
+            return new ArtistSetDTO
+            {
+                ArtistIds = list.First().Artists.Select(x => x.Id).ToArray(),
+                RagaCount = list.Select(x => x.Raga).Distinct().Count(),
+                PerformanceCount = list.Select(x => x.Performance).Distinct().Count()
+            };
+        }
+        public static ArtistSetDTO ToDTO(this IEnumerable<RagaPerformance> list/*, IndianClassicalInformation ici*/)
         {
             return new ArtistSetDTO
             {

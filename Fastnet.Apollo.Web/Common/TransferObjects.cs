@@ -23,6 +23,7 @@ namespace Fastnet.Apollo.Web
         public bool Enabled { get; set; }
         public string DisplayName { get; set; }
     }
+
     public class ArtistSetDTO
     {
         public long[] ArtistIds { get; set; } // can be a single id, or a list when these are joint artists, e.g. as in jugalbandi's

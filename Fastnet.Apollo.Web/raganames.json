@@ -327,7 +327,7 @@
             },
             {
                 "Name": "Bhairav Bahar",
-                "Aliases": []
+                "Aliases": [ "Bhairo Bahar" ]
             },
             {
                 "Name": "Bhairav Bhatiyar",
@@ -2094,7 +2094,7 @@
             },
             {
                 "Name": "Misra Mel Ki Malhar",
-                "Aliases": []
+                "Aliases": [ "Mishra Mel Ki Malhar" ]
             },
             {
                 "Name": "Misra Tilak Kamod",
@@ -2418,6 +2418,10 @@
             },
             {
                 "Name": "Patdeep",
+                "Aliases": []
+            },
+            {
+                "Name": "Rachna Purab Ang",
                 "Aliases": []
             },
             {
@@ -3286,11 +3290,11 @@
             },
             {
                 "Name": "Yaman",
-                "Aliases": ["Iman"]
+                "Aliases": [ "Iman" ]
             },
             {
                 "Name": "Yaman Kalyan",
-                "Aliases": ["Iman Kalyan"]
+                "Aliases": [ "Iman Kalyan" ]
             },
             {
                 "Name": "Zeelaf (Bhairav aang)",
