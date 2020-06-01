@@ -18,7 +18,8 @@ export enum SelectedCommand {
    Queue,
    //Details,
    TagEditor,
-   Reset
+   Reset,
+   Resample
 }
 export class CommandPanelResult {
    selectedCommand: SelectedCommand;
@@ -98,6 +99,22 @@ export class CommandPanelComponent {
    close() {
       let cpr = new CommandPanelResult();
       cpr.selectedCommand = SelectedCommand.Cancel;
+      this.popup.close(cpr);
+   }
+   onResample() {
+      let cpr = new CommandPanelResult();
+      switch (this.targetEntity) {
+         case TargetEntity.Work:
+            cpr.entity = this.work;
+            cpr.targetEntity = TargetEntity.Work;
+            cpr.selectedCommand = SelectedCommand.Resample;
+            break;
+         case TargetEntity.Performance:
+            cpr.entity = this.performance;
+            cpr.targetEntity = TargetEntity.Performance;
+            cpr.selectedCommand = SelectedCommand.Resample;
+            break;
+      }
       this.popup.close(cpr);
    }
    onReset() {

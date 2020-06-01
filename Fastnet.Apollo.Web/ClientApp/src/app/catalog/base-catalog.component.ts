@@ -191,6 +191,15 @@ export abstract class BaseCatalogComponent implements OnInit, OnDestroy, AfterVi
                   await this.library.resetPerformance((cmd.entity as Performance).id);
                   break;
             }
+         case SelectedCommand.Resample:
+            switch (cmd.targetEntity) {
+               case TargetEntity.Work:
+                  await this.library.resampleWork((cmd.entity as Work).id);
+                  break;
+               case TargetEntity.Performance:
+                  await this.library.resamplePerformance((cmd.entity as Performance).id);
+                  break;
+            }
             break;
       }
    }

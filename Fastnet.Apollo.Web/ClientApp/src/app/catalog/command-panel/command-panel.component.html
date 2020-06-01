@@ -12,6 +12,9 @@
                 <div class="menu-item" (tap)="onPlay()" [ngClass]="{'disabled': !audioDeviceAvailable}">Play</div>
                 <div class="menu-item" (tap)="onQueue()" [ngClass]="{'disabled': !audioDeviceAvailable}">Queue</div>
             </ng-container>
+            <ng-container *ngIf="!isTouchDevice()">
+               <div class="menu-item" (click)="onResample()">Resample</div>
+            </ng-container>
             <!--<ng-container *ngIf="!isTouchDevice()">
                 <div *ngIf="isTagEditorAvailable()" class="menu-item" (click)="onTagEditor()">Tag Editor ...</div>
                 <div *ngIf="!isTagEditorAvailable()" class="menu-item  disabled">(increase browser window height for Tag Editor)</div>

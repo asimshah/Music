@@ -36,22 +36,11 @@ namespace Fastnet.Apollo.Web.Controllers
         //private IndianClassicalInformation ici;
         //private readonly IOptionsMonitor<IndianClassicalInformation> monitoredIci;
         public LibraryController( IWebHostEnvironment env,
-            IOptions<MusicServerOptions> mso, /*IServiceProvider sp,*/
+            IOptions<MusicServerOptions> mso,
             TaskPublisher tp,  TaskRunner tr,
-            //IOptions<IndianClassicalInformation> indianClassical,
-            //IOptionsMonitor<IndianClassicalInformation> indianClassical,
             IOptionsMonitor<MusicOptions> mo, ILogger<LibraryController> logger, MusicDb mdb) : base(logger, env)
         {
             this.musicOptions = mo.CurrentValue;
-            //this.monitoredIci = indianClassical;
-            //this.monitoredIci.OnChangeWithDelay((x) =>
-            //{
-            //    this.ici = x;
-            //    this.ici.PrepareNames();
-            //    log.Information("IndianClassicalInformation changed");
-            //});
-            //this.ici = this.monitoredIci.CurrentValue;// indianClassical.Value;
-            //this.ici.PrepareNames();
             mo.OnChangeWithDelay((opt) =>
             {
                 this.musicOptions = opt;
@@ -542,6 +531,53 @@ namespace Fastnet.Apollo.Web.Controllers
             return ErrorResult($"Work with id {id} not found");
             //}
         }
+        [HttpGet("resample/work/{id}")]
+        public async Task<IActionResult> ResampleWork(long id)
+        {
+            var work = await musicDb.Works
+                .SingleOrDefaultAsync(x => x.Id == id);
+            if (work != null)
+            {
+                var musicFiles = work.Tracks.SelectMany(t => t.MusicFiles).Where(x => !x.IsGenerated);
+                var style = musicFiles.First().Style;
+                var artists = musicDb.ArtistWorkList
+                    .Where(awl => awl.Work == work).Select(awl => awl.Artist);
+                var artistNames = string.Join(", ", artists.Select(a => a.Name));
+                if (musicFiles.All(f => f.Encoding == EncodingType.flac))
+                {
+                    var now = DateTimeOffset.Now;
+                    var resamplingTask = new TaskItem
+                    {
+                        Status = Music.Core.TaskStatus.Pending,
+                        Type = TaskType.ResampleWork,
+                        CreatedAt = now,
+                        ScheduledAt = now,
+                        MusicStyle = style,
+                        TaskString = work.UID.ToString(),
+                        Force = true
+                    };
+                    await musicDb.TaskItems.AddAsync(resamplingTask);
+                    await musicDb.SaveChangesAsync();
+                    log.Information($"{artistNames}, {work.ToIdent()} {work.Name} forcibly resampled");
+                }
+            }
+            return SuccessResult();
+        }
+        [HttpGet("resample/performance/{id}")]
+        public async Task<IActionResult> ResamplePerformance(long id)
+        {
+            var performance = await musicDb.Performances.SingleOrDefaultAsync(x => x.Id == id);
+            if (performance != null)
+            {
+                var works = performance.Movements.Select(m => m.Work).Distinct();
+                foreach (var work in works)
+                {
+                    await ResampleWork(work.Id);
+                }
+            }
+            log.Information($"{performance.ToLogIdentity()}  {performance.GetAllPerformersCSV()} resampled");
+            return SuccessResult();
+        }
         //[HttpPost("update/performance")]
         //public async Task<IActionResult> UpdatePerformance()
         //{
@@ -596,9 +632,6 @@ namespace Fastnet.Apollo.Web.Controllers
                 var tracks = work.Tracks;// artist.Works.SelectMany(x => x.Tracks);
                 var musicFiles = tracks.SelectMany(x => x.MusicFiles)
                     .Where(x => x.IsGenerated == false);
-                //var paths = work.Type == OpusType.Collection ?
-                //    musicFiles.Select(x => Path.Combine(x.DiskRoot, x.StylePath, "Collections", x.OpusPath)).Distinct(StringComparer.CurrentCultureIgnoreCase)
-                //    : musicFiles.Select(x => Path.Combine(x.DiskRoot, x.StylePath, x.OpusPath)).Distinct(StringComparer.CurrentCultureIgnoreCase);
                 var paths = musicFiles.Select(x => x.GetRootPath()).Distinct(StringComparer.CurrentCultureIgnoreCase);
                 foreach (var path in paths)
                 {

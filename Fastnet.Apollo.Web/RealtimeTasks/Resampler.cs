@@ -56,7 +56,6 @@ namespace Fastnet.Apollo.Web
             var counter = 0;
             while (!cancellationToken.IsCancellationRequested)
             {
-
                 ++ counter;
                 try
                 {
@@ -117,7 +116,7 @@ namespace Fastnet.Apollo.Web
                             var srcFi = new FileInfo(mf.File);
                             var vbrFi = new FileInfo(destinationFile);
                             bool vbrIsGood = true;
-                            if (!vbrFi.Exists || srcFi.LastWriteTimeUtc > vbrFi.LastWriteTimeUtc)
+                            if (!vbrFi.Exists || srcFi.LastWriteTimeUtc > vbrFi.LastWriteTimeUtc || taskItem.Force)
                             {
                                 vbrIsGood = await Resample(taskItem, srcFi.FullName, vbrFi.FullName);
                                 if (vbrIsGood)

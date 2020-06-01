@@ -242,6 +242,12 @@ export class LibraryService extends BaseService {
       return this.postAsync(`update/work/${MusicStyles.WesternClassical}`, albumTeo);
    }
    //
+   public async resampleWork(id: number) {
+      return this.getAsync(`resample/work/${id}`);
+   }
+   public async resamplePerformance(id: number) {
+      return this.getAsync(`resample/performance/${id}`);
+   }
    public async startMusicScanner() {
       return this.getAsync("start/musicfilescanner");
    }
