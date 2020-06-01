@@ -1,19 +1,32 @@
-<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
     <TargetFramework>netstandard2.1</TargetFramework>
-    <Version>2.4.1</Version>
-    <AssemblyVersion>2.$([System.DateTime]::Now.ToString('yyyy')).$([System.DateTime]::Now.ToString('Mdd')).$([System.DateTime]::Now.ToString('HHmm'))</AssemblyVersion>
+    <Authors>Asim Shah</Authors>
+    <Copyright>@2018-20</Copyright>
+    <DayCount>$([System.DateTime]::UtcNow.Date.Subtract($([System.DateTime]::Parse("2020-01-01"))).TotalDays)</DayCount>
+    <MinuteCount>$([System.DateTime]::UtcNow.TimeOfDay.TotalMinutes.ToString("000#"))</MinuteCount>
+    <DayVersion>2.$(DayCount).$(MinuteCount)</DayVersion>
+    <FastnetVersion>2.$([System.DateTime]::Now.ToString('yyMM')).$([System.DateTime]::Now.ToString('ddHH')).$([System.DateTime]::Now.ToString("mmss"))</FastnetVersion>
+    <Version>$(DayVersion)</Version>
+    <AssemblyVersion>$(FastnetVersion)</AssemblyVersion>
+    <FileVersion>$(FastnetVersion)</FileVersion>
+    <GenerateDocumentationFile>true</GenerateDocumentationFile>
+  </PropertyGroup>
+
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">
+    <NoWarn>1701,1702,1591,63</NoWarn>
+  </PropertyGroup>
+
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
+    <NoWarn>1701,1702,1591,63</NoWarn>
   </PropertyGroup>
 
   <ItemGroup>
+    <PackageReference Include="Fastnet.Core" Version="2.151.1299" />
     <PackageReference Include="Microsoft.Extensions.Logging.Abstractions" Version="3.1.3" />
     <PackageReference Include="NAudio" Version="1.10.0" />
     <PackageReference Include="NAudio.Lame" Version="1.1.1" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <ProjectReference Include="..\Fastnet.Music.Core\Fastnet.Music.Core.csproj" />
   </ItemGroup>
 
   <ItemGroup>
@@ -24,6 +37,18 @@
 
   <ItemGroup>
     <None Update="C:\Users\Asim\.nuget\packages\naudio.lame\1.1.0\build\libmp3lame.64.dll">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Update="C:\Users\Asim\.nuget\packages\naudio.lame\1.1.1\build\libmp3lame.32.dll">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Update="C:\Users\Asim\.nuget\packages\naudio.lame\1.1.1\build\libmp3lame.64.dll">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
   </ItemGroup>

@@ -20,7 +20,7 @@ namespace Fastnet.Music.Metatools
             : base(db, musicOptions, MusicStyles.IndianClassical, musicFiles, taskItem)
         {
             this.ici = ici;
-            this.ici.PrepareNames();
+            //this.ici.PrepareNames();
             var ragaNames = musicFiles.Select(x => x.GetRagaName()).Distinct();
             Debug.Assert(ragaNames.Count() == 1, $"{taskItem} music files have more than one raga name");
             this.ragaName = ragaNames.First();
@@ -72,7 +72,8 @@ namespace Fastnet.Music.Metatools
                 raga = new Raga
                 {
                     Name = name,
-                    DisplayName = ici.Lookup[alphamericName].DisplayName ?? $"Raga {name}",
+                    DisplayName = string.IsNullOrWhiteSpace(ici.Lookup[alphamericName].DisplayName) ? $"Raga {name}" : ici.Lookup[alphamericName].DisplayName,
+                    //DisplayName = ici.Lookup[alphamericName].DisplayName ?? $"Raga {name}",
                     AlphamericName = name.ToAlphaNumerics()
                 };
                 MusicDb.Ragas.Add(raga);

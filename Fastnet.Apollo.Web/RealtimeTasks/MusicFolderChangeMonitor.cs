@@ -32,26 +32,27 @@ namespace Fastnet.Apollo.Web
     {
         private readonly Queue<List<(string Path, bool Deleted)>> changeListList = new Queue<List<(string Path, bool Deleted)>>();
         private List<FolderChange> changeList;
-        private MusicOptions musicOptions;
+        //private MusicOptions musicOptions;
         private CancellationToken cancellationToken;
-        //private DateTimeOffset lastChangeTime = DateTimeOffset.Now;
         private IDictionary<string, FileSystemMonitor> sources;
         private readonly FileSystemMonitorFactory mf;
         private readonly TaskPublisher publisher;
         private readonly string connectionString;
+        private readonly IOptionsMonitor<MusicOptions> musicOptionsMonitor;
         public MusicFolderChangeMonitor(IConfiguration cfg, IWebHostEnvironment environment,
-            TaskPublisher publisher, IOptionsMonitor<MusicOptions> mo,
+            TaskPublisher publisher, IOptionsMonitor<MusicOptions> musicOptionsMonitor,
             FileSystemMonitorFactory mf, ILogger<MusicFolderChangeMonitor> logger) : base(logger)
         {
             connectionString = environment.LocaliseConnectionString(cfg.GetConnectionString("MusicDb"));
             this.publisher = publisher;
-            this.musicOptions = mo.CurrentValue;
+            this.musicOptionsMonitor = musicOptionsMonitor;
+            //this.musicOptions = musicOptionsMonitor.CurrentValue;
             this.mf = mf;
-            mo.OnChangeWithDelay<MusicOptions>((opt) =>
-            {
-                this.musicOptions = opt;
-                Restart();
-            });
+            //musicOptionsMonitor.OnChangeWithDelay<MusicOptions>((opt) =>
+            //{
+            //    this.musicOptions = opt;
+            //    Restart();
+            //});
         }
         protected override async Task ExecuteAsync(CancellationToken cancellationToken)
         {
@@ -112,7 +113,7 @@ namespace Fastnet.Apollo.Web
             // this loop simply holds this coomponent active
             while (!this.cancellationToken.IsCancellationRequested)
             {
-                await Task.Delay(musicOptions.FolderChangeDiskAccessCheckInterval, cancellationToken);
+                await Task.Delay(musicOptionsMonitor.CurrentValue.FolderChangeDiskAccessCheckInterval, cancellationToken);
                 if (!CheckPathsAccessible())
                 {
                     Restart();
@@ -127,9 +128,9 @@ namespace Fastnet.Apollo.Web
         private void Initialise()
         {
             sources = new Dictionary<string, FileSystemMonitor>();
-            foreach (var style in musicOptions.Styles)
+            foreach (var style in musicOptionsMonitor.CurrentValue.Styles)
             {
-                var stylePaths = style.Style.GetPaths(musicOptions, false, false);
+                var stylePaths = style.Style.GetPaths(musicOptionsMonitor.CurrentValue, false, false);
                 foreach (var sp in stylePaths)
                 {
                     var fsm = AddMonitor(sp);
@@ -144,17 +145,6 @@ namespace Fastnet.Apollo.Web
 
             changeList = new List<FolderChange>();
         }
-        //private void OnChangeOccurred(string folderName, IEnumerable<FileSystemMonitorEvent> actions)
-        //{
-        //    foreach (FileSystemMonitorEvent item in actions)
-        //    {
-        //        if (!item.Path.EndsWith(".txt") && !item.Path.EndsWith(".json"))
-        //        {
-        //            log.Debug($"{item.Type}, path {item.Path}, old path {item.OldPath ?? "none"}");
-        //            ShouldProcess(item.Path, item.Type == WatcherChangeTypes.Deleted);
-        //        }
-        //    }
-        //}
         private void ProcessChangeList(List<(string Path, bool Deleted)> list)
         {
             log.Information($"processing list of {list.Count()} items");
@@ -185,7 +175,7 @@ namespace Fastnet.Apollo.Web
                     //log.Debug($"{oldPath} changed to {path}");
                     break;
             }
-            var pd = MusicMetaDataMethods.GetPathData(musicOptions, path, true);
+            var pd = MusicMetaDataMethods.GetPathData(musicOptionsMonitor.CurrentValue, path, true);
             if (pd != null)
             {
                 if (pd.IsPortraits)
@@ -230,10 +220,10 @@ namespace Fastnet.Apollo.Web
                                     {
                                         DateTime getCoverFileDate()
                                         {
-                                            IEnumerable<string> imageFiles = null;
-                                            foreach(var pattern in musicOptions.CoverFilePatterns)
+                                            IEnumerable<string> imageFiles = Enumerable.Empty<string>();// null;
+                                            foreach(var pattern in musicOptionsMonitor.CurrentValue.CoverFilePatterns)
                                             {
-                                                imageFiles = imageFiles?.Union(Directory.EnumerateFiles(path, pattern, SearchOption.AllDirectories)) ?? Directory.EnumerateFiles(path, pattern, SearchOption.AllDirectories);
+                                                imageFiles = imageFiles.Union(Directory.EnumerateFiles(path, pattern, SearchOption.AllDirectories));// ?? Directory.EnumerateFiles(path, pattern, SearchOption.AllDirectories);
                                             }
                                             if(imageFiles.Count() > 0)
                                             {
@@ -284,7 +274,7 @@ namespace Fastnet.Apollo.Web
                                     var fullPath = Path.Combine(pd.DiskRoot, pd.StylePath, op);
                                     if (!Directory.Exists(fullPath))
                                     {
-                                        var pdt = MusicMetaDataMethods.GetPathData(musicOptions, fullPath, true);
+                                        var pdt = MusicMetaDataMethods.GetPathData(musicOptionsMonitor.CurrentValue, fullPath, true);
                                         log.Information($"{fullPath}, music files on disk deleted");
                                         addIfNotPresent(pdt, true);
                                     }
@@ -301,14 +291,7 @@ namespace Fastnet.Apollo.Web
             log.Information($"{nameof(ProcessChanges)} started");
             while (!cancellationToken.IsCancellationRequested)
             {
-                await Task.Delay(musicOptions.FolderChangePollingInterval, cancellationToken); //default 3 sec
-                //var target = lastChangeTime.Add(musicOptions.FolderChangeAfterChangesInterval); // default 10secs
-                //var now = DateTimeOffset.Now;
-                //log.Debug($"{changeList.Count()} changes, lastchange = {lastChangeTime.ToDefaultWithTime()}, target {target.ToDefaultWithTime()} waiting for {(target - now).TotalMilliseconds} ms");
-                //if (now > target)
-                //{
-
-                //}
+                await Task.Delay(musicOptionsMonitor.CurrentValue.FolderChangePollingInterval, cancellationToken); //default 3 sec
                 if (changeListList.Count() > 0)
                 {
                     List<(string Path, bool Deleted)> list = null;

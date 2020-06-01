@@ -2,36 +2,45 @@
 
 
 .menu-panel {
-    height: 48px;
-    font-size: 24px;
-    color: theme-colour('surface');
-    background-color: theme-colour('primary', 'dark');
-    display: grid;
-    grid-template-columns: auto 1fr;
-    align-items: center;
-    justify-content: center;
+   height: 48px;
+   font-size: 24px;
+   color: theme-colour('surface');
+   background-color: theme-colour('primary', 'dark');
+   display: grid;
+   grid-template-columns: auto 1fr;
+   align-items: center;
+   justify-content: center;
 
-    .title {
-        cursor: pointer;
-    }
-    /*.style-name {
+   .title {
+      cursor: pointer;
+   }
+   /*.style-name {
         text-align: center;
     }*/
-    .top-button, .title, .style-name {
-        margin: $theme-gutter;
-    }
+   .top-button, .title, .style-name {
+      margin: $theme-gutter;
+   }
 
-    .top-button {
-        cursor: pointer;
+   .top-button {
+      cursor: pointer;
 
-        &:hover {
-            color: theme-colour('warning');
-        }
-    }
+      &:hover {
+         color: theme-colour('warning');
+      }
+   }
 
-    .current-style {
-        text-align: right;
-    }
+   .current-style {
+      display: grid;
+      grid-template-columns: 1fr auto;
+
+      .style-totals {
+         font-size: 9px;
+         align-self: center;
+         margin-right: $theme-gutter;
+         font-style: italic;
+         color: theme-colour('surface', 'dark');
+      }
+   }
 }
 
 .menu-items {

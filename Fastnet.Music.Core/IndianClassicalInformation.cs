@@ -2,16 +2,32 @@
 using System.Collections.Generic;
 using System.Diagnostics;
 using Fastnet.Core;
+using Newtonsoft.Json;
 
 namespace Fastnet.Music.Core
 {
     public class IndianClassicalInformation
     {
+        [JsonIgnore]
+        private IDictionary<string, RagaName> lookup;
         public IEnumerable<RagaName> RagaNames { get; set; }
-        public IDictionary<string, RagaName> Lookup { get; private set; }
-        public void PrepareNames()
+        //public RagaName[] RagaNames { get; set; }
+        [JsonIgnore]
+        public IDictionary<string, RagaName> Lookup
         {
-            if (Lookup == null)
+            get
+            {
+                if(lookup == null)
+                {
+                    PrepareNames();
+                }
+                return lookup;
+            }
+            private set => lookup = value;
+        }
+        private void PrepareNames()
+        {
+            if (lookup == null)
             {
                 var dict = new Dictionary<string, RagaName>(StringComparer.CurrentCultureIgnoreCase);
                 foreach (var rn in RagaNames)
@@ -24,13 +40,13 @@ namespace Fastnet.Music.Core
                             dict.Add(alias.ToAlphaNumerics(), rn);
                         }
                     }
-                    catch (System.Exception)
+                    catch (Exception)
                     {
                         Debugger.Break();
                         throw;
                     }
                 }
-                Lookup = dict;
+                lookup = dict;
             }
         }
     }

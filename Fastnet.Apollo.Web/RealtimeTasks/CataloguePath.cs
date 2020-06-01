@@ -133,7 +133,7 @@ namespace Fastnet.Apollo.Web
                 }
                 else
                 {
-                    log.Error($"{taskItem} {(due is DbUpdateConcurrencyException ? due.Message : due.InnerException.Message)}");
+                    log.Warning($"{taskItem} {(due is DbUpdateConcurrencyException ? due.Message : due.InnerException.Message)}");
                 }
                 throw new CatalogueFailed { TaskId = taskId };
             }
@@ -215,7 +215,7 @@ namespace Fastnet.Apollo.Web
             }
             else
             {
-                log.Warning($"{musicFolder.ToString()} not catalogued");
+                log.Error($"{musicFolder.ToString()} not catalogued");
                 return null;
             }
         }

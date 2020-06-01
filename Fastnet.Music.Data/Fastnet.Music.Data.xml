@@ -1,0 +1,130 @@
+<?xml version="1.0"?>
+<doc>
+    <assembly>
+        <name>Fastnet.Music.Data</name>
+    </assembly>
+    <members>
+        <member name="T:Fastnet.Music.Data.ArtistSetComparer">
+            <summary>
+            Note: tried to do this using IEquatable on ArtistSet (to avoid having this comaparer)
+            but the Distinct call always failed somewhere inside Linq
+            </summary>
+        </member>
+        <member name="P:Fastnet.Music.Data.ArtistSet.Artists">
+            <summary>
+            Only available if constructed using Artists (as opposed to Artist Ids)
+            (this is a bit odd: is there a better way?)
+            </summary>
+        </member>
+        <member name="M:Fastnet.Music.Data.EntityHelper.BubbleDelete``1(``0)">
+            <summary>
+            Delete entity and any related parent entities that should also be deleted 
+            </summary>
+            <typeparam name="T"></typeparam>
+            <param name="entity"></param>
+        </member>
+        <member name="M:Fastnet.Music.Data.EntityHelper.RemoveReferencingEntitiesIfRequired(Fastnet.Music.Data.MusicFile)">
+            <summary>
+            removes any entity that refers to music file if that entity is now 'empty'
+            currently checks the Track property
+            </summary>
+            <param name="musicFile"></param>
+        </member>
+        <member name="M:Fastnet.Music.Data.EntityHelper.RemoveReferencingEntitiesIfRequired(Fastnet.Music.Data.Track)">
+            <summary>
+            removes any entity that refers to track if that entity is now 'empty'
+            currently checks the Performance and Work properties
+            </summary>
+            <param name="track"></param>
+        </member>
+        <member name="M:Fastnet.Music.Data.Extensions.GetPerformers(Fastnet.Music.Data.MusicDb,System.Collections.Generic.IEnumerable{Fastnet.Music.Data.MetaPerformer},Fastnet.Music.Data.TaskItem)">
+            <summary>
+            Gets a collection of Performer entries, creating any that are new
+            </summary>
+            <param name="db"></param>
+            <param name="list"></param>
+            <param name="taskItem"></param>
+            <returns></returns>
+        </member>
+        <member name="M:Fastnet.Music.Data.Extensions.GetPerformers(Fastnet.Music.Data.MusicDb,System.Collections.Generic.IEnumerable{System.String},Fastnet.Music.Data.PerformerType)">
+            <summary>
+            Gets a collection of Performer entries, creating any that are new
+            </summary>
+            <param name="db"></param>
+            <param name="names"></param>
+            <param name="type"></param>
+            <returns></returns>
+        </member>
+        <member name="M:Fastnet.Music.Data.Extensions.GetPerformer(Fastnet.Music.Data.MusicDb,Fastnet.Music.Data.MetaPerformer,Fastnet.Music.Data.TaskItem)">
+            <summary>
+            Gets the correspnding Performer nentry, creating one if required
+            </summary>
+            <param name="db"></param>
+            <param name="mp"></param>
+            <param name="taskItem"></param>
+            <returns></returns>
+        </member>
+        <member name="M:Fastnet.Music.Data.Extensions.GetPerformer(Fastnet.Music.Data.MusicDb,System.String,Fastnet.Music.Data.PerformerType)">
+            <summary>
+            Gets the corresponding Performer nentry, creating one if required
+            </summary>
+            <param name="db"></param>
+            <param name="name"></param>
+            <param name="type"></param>
+            <returns></returns>
+        </member>
+        <member name="M:Fastnet.Music.Data.Extensions.FindPerformers(Fastnet.Music.Data.MusicDb,System.Collections.Generic.IEnumerable{System.String},Fastnet.Music.Data.PerformerType)">
+            <summary>
+            returns a collection of performers that exist in the database
+            i.e. the collection may not conatin all the names asked for (as they were not found in the db)
+            </summary>
+            <param name="db"></param>
+            <param name="names"></param>
+            <param name="type"></param>
+            <returns></returns>
+        </member>
+        <member name="T:Fastnet.Music.Data.ArtistStyle">
+            <summary>
+            Remember: a composer may be in WesternClassical as well as Opera
+            </summary>
+        </member>
+        <member name="P:Fastnet.Music.Data.Device.MACAddress">
+            <summary>
+            MAC address for logitech, some string id for others
+            </summary>
+        </member>
+        <member name="M:Fastnet.Music.Data.Performance.GetParentEntityName(System.Boolean)">
+            <summary>
+            returns either the composition or the raga name as appropriate
+            </summary>
+            <returns></returns>
+        </member>
+        <member name="M:Fastnet.Music.Data.Performance.GetParentArtistsName(System.Boolean)">
+            <summary>
+            returns a csv string containing the artist(s) for this composition or raga
+            </summary>
+            <returns></returns>
+        </member>
+        <member name="T:Fastnet.Music.Data.PerformerType">
+            <summary>
+            types of performers in ascending order of 'primariness'
+            </summary>
+        </member>
+        <member name="T:Fastnet.Music.Data.PlaylistItem">
+            <summary>
+            This is a work or a track that is in a playlist
+            </summary>
+        </member>
+        <member name="P:Fastnet.Music.Data.Track.MovementNumber">
+            <summary>
+            Valid if this track is a movement in some performance
+            </summary>
+        </member>
+        <member name="M:Fastnet.Music.Data.MusicDb.UpgradeContent(Fastnet.Music.Core.MusicOptions)">
+            <summary>
+            Called at the end of the database Initialiser and used to repair and/or upgrade the database
+            Note this method must contain re-runnable code as it executes at every app startup
+            </summary>
+        </member>
+    </members>
+</doc>

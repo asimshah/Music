@@ -157,40 +157,24 @@ namespace Fastnet.Apollo.Web
                 var strategy = db.Database.CreateExecutionStrategy() as RetryStrategy;
                 if (strategy != null)
                 {
-                    try
+                    await strategy.ExecuteAsync(async () =>
                     {
-                        await strategy.ExecuteAsync(async () =>
-                            {
-                                //try
-                                //{
-                                if (strategy.RetryNumber > 0)
-                                {
-                                    await Task.Delay(TimeSpan.FromSeconds(10));
-                                    log.Information($"[TI-{taskId}] execution restarted, retry {strategy.RetryNumber}");
-                                }
+                        if (strategy.RetryNumber > 0)
+                        {
+                            await Task.Delay(TimeSpan.FromSeconds(10));
+                            log.Warning($"[TI-{taskId}] execution restarted, retry {strategy.RetryNumber}");
+                        }
 
-                                using (var db2 = new MusicDb(connectionString))
-                                {
-                                    using (var tran = db2.Database.BeginTransaction())
-                                    {
-                                        r = await methodAsync(db2);
-                                        tran.Commit();
-                                        log.Debug($"[TI-{taskId}] execution strategy: transaction committed");
-                                    }
-                                }
-                                //}
-                                //catch (Exception xe)
-                                //{
-                                //    log.Error(xe, $"[TI-{taskId}]");
-                                //    throw;
-                                //}
-                            });
-                    }
-                    catch (Exception xe)
-                    {
-                        log.Error(xe, $"[TI-{taskId}]");
-                        throw;
-                    }
+                        using (var db2 = new MusicDb(connectionString))
+                        {
+                            using (var tran = db2.Database.BeginTransaction())
+                            {
+                                r = await methodAsync(db2);
+                                tran.Commit();
+                                log.Debug($"[TI-{taskId}] execution strategy: transaction committed");
+                            }
+                        }
+                    });
                 }
                 return r;
             }
@@ -216,7 +200,7 @@ namespace Fastnet.Apollo.Web
                 t.Status = Music.Core.TaskStatus.Failed;
                 t.FinishedAt = DateTimeOffset.Now;
                 db.SaveChanges();
-                log.Warning($"{t} {t.TaskString} abandoned");
+                log.Error($"{t} {t.TaskString} abandoned");
             }
         }
     }

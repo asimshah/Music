@@ -1,19 +1,19 @@
 <div class="menu-panel">
-    <span class="fa fa-bars top-button" (click)="clickMenuBars($event)"></span>
-    <popup-panel>
-        <div class="menu-items">
-            <ng-container *ngFor="let style of getEnabledStyles()">
-                <div class="menu-item" (click)="setCurrentStyle(style)">{{style.displayName}}</div>
-            </ng-container>
-            <div *ngIf="!isMobileDevice()" class="menu-item separation" (click)="onSettingsClick()">Settings</div>
-            <!--<ng-container *ngIf="getMode() === UIMode.LibraryOnly || getMode() === UIMode.PlayerOnly">
-
-                <div class="menu-item separation" (click)="setMode(UIMode.PlayerOnly)">Player</div>
-                <div class="menu-item" (click)="setMode(UIMode.LibraryOnly)">Library</div>
-            </ng-container>-->
-        </div>
-    </popup-panel>
-    <!--<div *ngIf="!isMobileDevice()" class="title">{{parameters.appName}}</div>-->
-    <div class="style-name">{{currentStyle.displayName}}</div>
+   <span class="fa fa-bars top-button" (click)="clickMenuBars($event)"></span>
+   <popup-panel>
+      <div class="menu-items">
+         <ng-container *ngFor="let style of getEnabledStyles()">
+            <div class="menu-item" (click)="setCurrentStyle(style)">{{style.displayName}}</div>
+         </ng-container>
+         <div *ngIf="!isMobileDevice()" class="menu-item separation" (click)="onSettingsClick()">Settings</div>
+      </div>
+   </popup-panel>
+   <div class="current-style">
+      <div class="style-name">{{currentStyle.displayName}}</div>
+      <div class="style-totals">
+         <div>{{currentTotals[0]}}</div>
+         <div>{{currentTotals[1]}}</div>
+      </div>
+   </div>
 </div>
 <app-settings></app-settings>

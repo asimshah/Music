@@ -33,25 +33,25 @@ namespace Fastnet.Apollo.Web.Controllers
         private readonly MusicDb musicDb;
         private readonly TaskRunner taskRunner;
         private readonly TaskPublisher taskPublisher;
-        private IndianClassicalInformation ici;
-        private readonly IOptionsMonitor<IndianClassicalInformation> monitoredIci;
+        //private IndianClassicalInformation ici;
+        //private readonly IOptionsMonitor<IndianClassicalInformation> monitoredIci;
         public LibraryController( IWebHostEnvironment env,
             IOptions<MusicServerOptions> mso, /*IServiceProvider sp,*/
             TaskPublisher tp,  TaskRunner tr,
             //IOptions<IndianClassicalInformation> indianClassical,
-            IOptionsMonitor<IndianClassicalInformation> indianClassical,
+            //IOptionsMonitor<IndianClassicalInformation> indianClassical,
             IOptionsMonitor<MusicOptions> mo, ILogger<LibraryController> logger, MusicDb mdb) : base(logger, env)
         {
             this.musicOptions = mo.CurrentValue;
-            this.monitoredIci = indianClassical;
-            this.monitoredIci.OnChangeWithDelay((x) =>
-            {
-                this.ici = x;
-                this.ici.PrepareNames();
-                log.Information("IndianClassicalInformation changed");
-            });
-            this.ici = this.monitoredIci.CurrentValue;// indianClassical.Value;
-            this.ici.PrepareNames();
+            //this.monitoredIci = indianClassical;
+            //this.monitoredIci.OnChangeWithDelay((x) =>
+            //{
+            //    this.ici = x;
+            //    this.ici.PrepareNames();
+            //    log.Information("IndianClassicalInformation changed");
+            //});
+            //this.ici = this.monitoredIci.CurrentValue;// indianClassical.Value;
+            //this.ici.PrepareNames();
             mo.OnChangeWithDelay((opt) =>
             {
                 this.musicOptions = opt;
@@ -73,10 +73,17 @@ namespace Fastnet.Apollo.Web.Controllers
                 log.Information($"new browser key {key} allocated");
             }
 
-            var styles = this.musicOptions.Styles.Select(s => new StyleDTO { Id = s.Style, Enabled = s.Enabled, DisplayName = s.Style.ToDescription() }).ToArray();
+            var styles = this.musicOptions.Styles.Select(s => new StyleDTO
+            {
+                Id = s.Style,
+                Enabled = s.Enabled,
+                DisplayName = s.Style.ToDescription(),
+                Totals = GetStyleTotals(s.Style)
+
+            }).ToArray();
             var dto = new ParametersDTO
             {
-                Version = GetPackageVersion(),
+                Version = $"{GetPackageVersion()} [{GetAssemblyVersion()}]",
                 BrowserKey = key,
                 AppName = this.environment.IsDevelopment() ? "Apollo Dev" : "Apollo",
                 IsMobile = this.Request.IsMobileBrowser(),
@@ -93,11 +100,55 @@ namespace Fastnet.Apollo.Web.Controllers
         {
             return SuccessResult(musicOptions);
         }
-        //[HttpGet("style/information")]
-        //public IActionResult GetStyleInformation()
-        //{
-        //    return SuccessResult(options.Styles);
-        //}
+        [HttpGet("information/{style}")]
+        public IActionResult GetStyleInformation(MusicStyles style)
+        {
+            (string, string) defaultTotals(IEnumerable<Artist> artists)
+            {
+                var albums = artists.SelectMany(x => x.ArtistWorkList.Select(x => x.Work));
+                var tracks = albums.SelectMany(x => x.Tracks).ToArray();
+                var duration = TimeSpan.FromMilliseconds(tracks.Select(t => t.GetBestQuality()).Sum(mf => mf.Duration ?? 0));
+                return ($"{artists.Count()} artists, {albums.Count()} works, {tracks.Count()} tracks",  $"{duration.ToDefault()}");
+            }
+            (string, string) westernClassicalTotals(IEnumerable<Artist> artists)
+            {
+                var compositions = artists.SelectMany(a => a.Compositions);
+                var performances = compositions.SelectMany(c => c.Performances);
+                var movements = performances.SelectMany(p => p.Movements);
+                var duration = TimeSpan.FromMilliseconds(movements.Select(t => t.GetBestQuality()).Sum(mf => mf.Duration ?? 0));
+                return ($"{artists.Count()} artists, {compositions.Count()} compositions, {performances.Count()} performances", $"{duration.ToDefault()}");
+            }
+            (string, string) indianClassicalTotals(IEnumerable<RagaPerformance> rpList)
+            {
+                var artists = rpList.Select(rp => rp.Artist).Distinct();
+                var ragas = rpList.Select(rp => rp.Raga).Distinct();
+                var performances = rpList.Select(rp => rp.Performance).Distinct();
+                var movements = performances.SelectMany(p => p.Movements);
+                var duration = TimeSpan.FromMilliseconds(movements.Select(t => t.GetBestQuality()).Sum(mf => mf.Duration ?? 0));
+                return ($"{artists.Count()} artists, {ragas.Count()} ragas, {performances.Count()} performances", $"{duration.ToDefault()}");
+            }
+            var result = new List<string>();
+            var artists = musicDb.ArtistStyles.Where(x => x.StyleId == style).Select(x => x.Artist);
+            string a,  b;
+            switch(style)
+            {
+                default:
+                case MusicStyles.Popular:
+                    (a, b) = defaultTotals(artists);
+                    break;
+                case MusicStyles.WesternClassical:
+                    (a, b) = westernClassicalTotals(artists);
+                    break;
+                case MusicStyles.IndianClassical:
+                    //var ragas = musicDb.Ragas;
+                    (a, b) = indianClassicalTotals(musicDb.RagaPerformances);
+                    break;
+            }
+            result.Add(a);
+            result.Add(b);
+            //log.Information(result);
+            return SuccessResult(result);
+        }
         [HttpGet("search/{style}/{searchText}")]
         public async Task<IActionResult> Search(MusicStyles style, string searchText)
         {
@@ -134,37 +185,14 @@ namespace Fastnet.Apollo.Web.Controllers
         [HttpGet("get/{style}/artistSet")]
         public IActionResult GetArtistInfo(MusicStyles style, [FromQuery(Name="id")] long[] ids)
         {
-            ids = ids.OrderBy(k => k).ToArray();
+            //ids = ids.OrderBy(k => k).ToArray();
+            var set = new ArtistSet(ids);
             if (style == MusicStyles.IndianClassical)
             {
-                var list = GetRagaPerformancesForArtistSet(ids);
+                //var list = musicDb.GetRagaPerformancesForArtistSet(ids);
+                var list = musicDb.GetRagaPerformancesForArtistSet(set);
                 var dto = list.ToDTO();
                 return SuccessResult(dto);
-                //var performances = musicDb.RagaPerformances
-                //    .Where(x => ids.Contains(x.ArtistId))
-                //    .Select(x => x.Performance);
-                ////var r0 = performances.Join(musicDb.RagaPerformances, p => p.Id, rp => rp.PerformanceId, (p, rp) => new { performance = p, ragaPerformance = rp })
-                ////    .Distinct()
-                ////    .AsEnumerable()
-                ////    .GroupBy(k => k.performance)
-                ////    ;
-                //var r1 = performances.Join(musicDb.RagaPerformances, p => p.Id, rp => rp.PerformanceId, (p, rp) => new { performance = p, ragaPerformance = rp })
-                //    //.Where(x => ids.Contains( x.ragaPerformance.ArtistId))
-                //    .Distinct()
-                //    .AsEnumerable()
-                //    .GroupBy(k => k.performance)
-                //    ;
-                ////var r2 = r0.Where(x => x.Select(z => z.ragaPerformance.ArtistId).OrderBy(k => k).SequenceEqual(ids))
-                ////    ;
-                //var r3 = r1.Where(x => x.Select(z => z.ragaPerformance.ArtistId).OrderBy(k => k).SequenceEqual(ids))
-                //    ;
-
-                ////var rplist1 = r2.SelectMany(x => x.Select(g => g.ragaPerformance));
-                ////var dto1 = rplist1.ToDTO(ici);
-
-                //var rplist2 = r3.SelectMany(x => x.Select(g => g.ragaPerformance));
-                //var dto2 = rplist2.ToDTO();
-                //return SuccessResult(dto2);
             }
             else
             {
@@ -300,7 +328,8 @@ namespace Fastnet.Apollo.Web.Controllers
         [HttpGet("get/{style}/{ragaId}/allperformances/artistSet")]
         public IActionResult GetAllPerformances(MusicStyles style, long ragaId, [FromQuery(Name = "id")] long[] ids)
         {
-            var list = GetRagaPerformancesForArtistSet(ids)
+            var set = new ArtistSet(ids);
+            var list = musicDb.GetRagaPerformancesForArtistSet(set)
                 .Where(x => x.Raga.Id == ragaId);
             if(list.Count() > 0)
             {
@@ -309,20 +338,66 @@ namespace Fastnet.Apollo.Web.Controllers
             }
             return SuccessResult(null);
         }
-
-        private IEnumerable<ArtistSetRagaPerformance> GetRagaPerformancesForArtistSet(long[] artistIds)
+        private string[] GetStyleTotals(MusicStyles style)
         {
-            artistIds = artistIds.OrderBy(k => k).ToArray();
-            // get all performances by these artists singly or jointly
-            var allPerformancesByTheseArtists = musicDb.RagaPerformances
-                .Where(x => artistIds.Contains(x.ArtistId))
-                .Select(x => x.Performance).Distinct();
-            var rpListForThesePerformances = allPerformancesByTheseArtists.AsEnumerable()
-                .Join(musicDb.RagaPerformances, p => p.Id, rp => rp.PerformanceId, (p, rp) => rp);
-            return rpListForThesePerformances.GroupBy(x => x.Performance)
-                .Where(x => x.Select(r => r.ArtistId).OrderBy(n => n).SequenceEqual(artistIds))
-                .Select(x => new ArtistSetRagaPerformance { Performance = x.Key, Raga = x.First().Raga, Artists = x.Select(z => z.Artist).ToArray() });            
+            (string, string) defaultTotals(IEnumerable<Artist> artists)
+            {
+                var albums = artists.SelectMany(x => x.ArtistWorkList.Select(x => x.Work));
+                var tracks = albums.SelectMany(x => x.Tracks).ToArray();
+                var duration = TimeSpan.FromMilliseconds(tracks.Select(t => t.GetBestQuality()).Sum(mf => mf.Duration ?? 0));
+                return ($"{artists.Count()} artists, {albums.Count()} works, {tracks.Count()} tracks", $"{duration.ToDefault()}");
+            }
+            (string, string) westernClassicalTotals(IEnumerable<Artist> artists)
+            {
+                var compositions = artists.SelectMany(a => a.Compositions);
+                var performances = compositions.SelectMany(c => c.Performances);
+                var movements = performances.SelectMany(p => p.Movements);
+                var duration = TimeSpan.FromMilliseconds(movements.Select(t => t.GetBestQuality()).Sum(mf => mf.Duration ?? 0));
+                return ($"{artists.Count()} artists, {compositions.Count()} compositions, {performances.Count()} performances", $"{duration.ToDefault()}");
+            }
+            (string, string) indianClassicalTotals(IEnumerable<RagaPerformance> rpList)
+            {
+                var artists = rpList.Select(rp => rp.Artist).Distinct();
+                var ragas = rpList.Select(rp => rp.Raga).Distinct();
+                var performances = rpList.Select(rp => rp.Performance).Distinct();
+                var movements = performances.SelectMany(p => p.Movements);
+                var duration = TimeSpan.FromMilliseconds(movements.Select(t => t.GetBestQuality()).Sum(mf => mf.Duration ?? 0));
+                return ($"{artists.Count()} artists, {ragas.Count()} ragas, {performances.Count()} performances", $"{duration.ToDefault()}");
+            }
+            var result = new List<string>();
+            var artists = musicDb.ArtistStyles.Where(x => x.StyleId == style).Select(x => x.Artist);
+            string a, b;
+            switch (style)
+            {
+                default:
+                case MusicStyles.Popular:
+                    (a, b) = defaultTotals(artists);
+                    break;
+                case MusicStyles.WesternClassical:
+                    (a, b) = westernClassicalTotals(artists);
+                    break;
+                case MusicStyles.IndianClassical:
+                    //var ragas = musicDb.Ragas;
+                    (a, b) = indianClassicalTotals(musicDb.RagaPerformances);
+                    break;
+            }
+            result.Add(a);
+            result.Add(b);
+            return result.ToArray();
         }
+        //private IEnumerable<ArtistSetRagaPerformance> GetRagaPerformancesForArtistSet(long[] artistIds)
+        //{
+        //    artistIds = artistIds.OrderBy(k => k).ToArray();
+        //    // get all performances by these artists singly or jointly
+        //    var allPerformancesByTheseArtists = musicDb.RagaPerformances
+        //        .Where(x => artistIds.Contains(x.ArtistId))
+        //        .Select(x => x.Performance).Distinct();
+        //    var rpListForThesePerformances = allPerformancesByTheseArtists.AsEnumerable()
+        //        .Join(musicDb.RagaPerformances, p => p.Id, rp => rp.PerformanceId, (p, rp) => rp);
+        //    return rpListForThesePerformances.GroupBy(x => x.Performance)
+        //        .Where(x => x.Select(r => r.ArtistId).OrderBy(n => n).SequenceEqual(artistIds))
+        //        .Select(x => new ArtistSetRagaPerformance { Performance = x.Key, Raga = x.First().Raga, Artists = x.Select(z => z.Artist).ToArray() });            
+        //}
         [HttpGet("get/raga/{id}")]
         public async Task<IActionResult> GetRaga(long id)
         {
@@ -333,28 +408,12 @@ namespace Fastnet.Apollo.Web.Controllers
         [HttpGet("get/artist/allragas")]
         public IActionResult GetAllRagas([FromQuery(Name = "id")] long[] ids)
         {
-            var list = GetRagaPerformancesForArtistSet(ids)
-                .Select(x => x.Raga).Distinct();
+            var set = new ArtistSet(ids);
+            var list = musicDb.GetRagaPerformancesForArtistSet(set)
+                .Select(x => x.Raga).Distinct()
+                .OrderBy(r => r.DisplayName)
+                ;
             return SuccessResult(list.Select(r => r.ToDTO()));
-            //ids = ids.OrderBy(k => k).ToArray();
-            //musicDb.ChangeTracker.AutoDetectChangesEnabled = false;
-            //var query = musicDb.RagaPerformances
-            //    .Where(x => ids.Contains(x.ArtistId))
-            //    .Select(x => x.Performance).Distinct()
-            //    .Join(musicDb.RagaPerformances, l => l.Id, r => r.PerformanceId, (l, r) => r)
-            //    .OrderBy(x => x.Raga.DisplayName)
-            //    ;
-            //var rpList = query.AsEnumerable();
-            //var g1 = rpList.GroupBy(k => new { k.Raga, k.Performance })
-            //    .Select(x => new { x.Key.Raga, list = x })
-            //    .Where(x => x.list.Select(l => l.ArtistId).OrderBy(k => k).SequenceEqual(ids.OrderBy(j => j)))
-            //    ;
-            //    //.Where(x => x.list.Count() == ids.Count());
-            ////var ragas = rpList.GroupBy(k => k.Raga).Where(g => g.Count() == ids.Count())
-            ////    .Select(g => g.Key).Distinct();
-            //var ragas = g1.Select(x => x.Raga).Distinct();
-            //var list = ragas.Select(x => x.ToDTO());
-            //return SuccessResult(list);
         }
         [HttpGet("get/artist/allcompositions/{id}/{full?}")]
         public IActionResult GetAllCompositions(long id, bool full = false)
@@ -668,115 +727,122 @@ namespace Fastnet.Apollo.Web.Controllers
             }
             return new EmptyResult();
         }
-        [HttpGet("resample")]
-        public async Task TestResample()
-        {
-            //D:\temp\source
-            //D:\temp\dest
-            var sources = Directory.EnumerateFiles(@"D:\temp\source", "*.flac");
-            var source = sources.First();
-            var destination = Path.Combine(@"D:\temp\dest", Path.GetFileNameWithoutExtension(source) + ".mp3");
-            var resampler = new FlacResampler();
-            await resampler.Resample(source, destination);
-        }
-        [HttpGet("test/{n}")]
-        public IActionResult Test(int n)
-        {
-            var folder = $@"D:\Music\flac\Western\Classical\Johannes Brahms\Complete Works\CD{n.ToString("00")}";
-            var l1 = new List<string>();
-            var sw1 = new Stopwatch();
-            sw1.Start();
-            foreach (var file in System.IO.Directory.EnumerateFiles(folder, "*.flac"))
-            {
-                //Debug.WriteLine($"{file}");
+        //[HttpGet("test")]
+        //public IActionResult Test()
+        //{
+        //    musicDb.Test1();
+        //    return new EmptyResult();
+        //}
 
-                using (var flacFile = new FlacLibSharp.FlacFile(file))
-                {
-                    var vorbisComment = flacFile.VorbisComment;
-                    if (vorbisComment != null)
-                    {
-                        foreach (var tag in vorbisComment)
-                        {
-                            var values = string.Join("|", tag.Value.Select(x => x.Trim()).ToArray());
-                            l1.Add(tag.Key);
-                        }
-                    }
-                }
-            }
-            sw1.Stop();
-            Debug.WriteLine($"{l1.Count()} read in {sw1.ElapsedMilliseconds} ms");
-            var l2 = new List<string>();
-            var sw2 = new Stopwatch();
-            sw2.Start();
-            foreach (var file in System.IO.Directory.EnumerateFiles(folder, "*.flac"))
-            {
-                //Debug.WriteLine($"{file}");
+        //[HttpGet("resample")]
+        //public async Task TestResample()
+        //{
+        //    //D:\temp\source
+        //    //D:\temp\dest
+        //    var sources = Directory.EnumerateFiles(@"D:\temp\source", "*.flac");
+        //    var source = sources.First();
+        //    var destination = Path.Combine(@"D:\temp\dest", Path.GetFileNameWithoutExtension(source) + ".mp3");
+        //    var resampler = new FlacResampler();
+        //    await resampler.Resample(source, destination);
+        //}
+        //[HttpGet("test/{n}")]
+        //public IActionResult Test(int n)
+        //{
+        //    var folder = $@"D:\Music\flac\Western\Classical\Johannes Brahms\Complete Works\CD{n.ToString("00")}";
+        //    var l1 = new List<string>();
+        //    var sw1 = new Stopwatch();
+        //    sw1.Start();
+        //    foreach (var file in System.IO.Directory.EnumerateFiles(folder, "*.flac"))
+        //    {
+        //        //Debug.WriteLine($"{file}");
 
-                var t = new Music.MediaTools.FlacTools(file);
-                var vorbisComment = t.GetVorbisCommenTs();
-                if (vorbisComment != null)
-                {
-                    foreach (var kvp in vorbisComment.comments)
-                    {
-                        l2.Add(kvp.Key);
-                    }
-                }
-            }
-            sw2.Stop();
-            Debug.WriteLine($"{l2.Count()} read in {sw2.ElapsedMilliseconds} ms");
-            return new EmptyResult();
-        }
-        [HttpGet("metatest/{n}")]
-        public async Task<IActionResult> MetaTest(int n)
-        {
-            switch (n)
-            {
-                case 1:
-                    await CataloguePopular();
-                    break;
-                case 2:
-                    await CatalogueWesternClassical(/*@"Pyotr Il'yich Tchaikovsky"*/);
-                    break;
-                case 3:
-                    GetPopularArtists();
-                    break;
-                case 4:
-                    GetSelectedPopularArtists();
-                    break;
-                case 5:
-                    GetSelectedWesternClassicalArtists();
-                    break;
-                case 6:
-                    await CatalogueJoanBaez();
-                    break;
-                case 7:
-                    await AddPortraitsTask(MusicStyles.Popular);
-                    break;
-                case 8:
-                    Catalogue();
-                    break;
-                case 9:
-                    await CatalogueFolder(MusicStyles.WesternClassical, @"D:\Music\flac\Western\Classical\Wolfgang Amadeus Mozart\Concerto for Flute and Harp");
-                    break;
-                case 10:
-                    await TestPopularAlbumTEO();
-                    break;
-                //case 11:
-                //    await TestWesternClassicalAlbumTEO();
-                //    break;
-            }
+        //        using (var flacFile = new FlacLibSharp.FlacFile(file))
+        //        {
+        //            var vorbisComment = flacFile.VorbisComment;
+        //            if (vorbisComment != null)
+        //            {
+        //                foreach (var tag in vorbisComment)
+        //                {
+        //                    var values = string.Join("|", tag.Value.Select(x => x.Trim()).ToArray());
+        //                    l1.Add(tag.Key);
+        //                }
+        //            }
+        //        }
+        //    }
+        //    sw1.Stop();
+        //    Debug.WriteLine($"{l1.Count()} read in {sw1.ElapsedMilliseconds} ms");
+        //    var l2 = new List<string>();
+        //    var sw2 = new Stopwatch();
+        //    sw2.Start();
+        //    foreach (var file in System.IO.Directory.EnumerateFiles(folder, "*.flac"))
+        //    {
+        //        //Debug.WriteLine($"{file}");
 
-            return new EmptyResult();
-        }
-        private async Task TestPopularAlbumTEO()
-        {
-            var work = await musicDb.Works.FirstAsync(w => w.StyleId == MusicStyles.Popular);
-            if(work != null)
-            {
-                var teo = await work.ToPopularAlbumTEO(musicOptions);
-                
-            }
-        }
+        //        var t = new Music.MediaTools.FlacTools(file);
+        //        var vorbisComment = t.GetVorbisCommenTs();
+        //        if (vorbisComment != null)
+        //        {
+        //            foreach (var kvp in vorbisComment.comments)
+        //            {
+        //                l2.Add(kvp.Key);
+        //            }
+        //        }
+        //    }
+        //    sw2.Stop();
+        //    Debug.WriteLine($"{l2.Count()} read in {sw2.ElapsedMilliseconds} ms");
+        //    return new EmptyResult();
+        //}
+        //[HttpGet("metatest/{n}")]
+        //public async Task<IActionResult> MetaTest(int n)
+        //{
+        //    switch (n)
+        //    {
+        //        case 1:
+        //            await CataloguePopular();
+        //            break;
+        //        case 2:
+        //            await CatalogueWesternClassical(/*@"Pyotr Il'yich Tchaikovsky"*/);
+        //            break;
+        //        case 3:
+        //            GetPopularArtists();
+        //            break;
+        //        case 4:
+        //            GetSelectedPopularArtists();
+        //            break;
+        //        case 5:
+        //            GetSelectedWesternClassicalArtists();
+        //            break;
+        //        case 6:
+        //            await CatalogueJoanBaez();
+        //            break;
+        //        case 7:
+        //            await AddPortraitsTask(MusicStyles.Popular);
+        //            break;
+        //        case 8:
+        //            Catalogue();
+        //            break;
+        //        case 9:
+        //            await CatalogueFolder(MusicStyles.WesternClassical, @"D:\Music\flac\Western\Classical\Wolfgang Amadeus Mozart\Concerto for Flute and Harp");
+        //            break;
+        //        case 10:
+        //            await TestPopularAlbumTEO();
+        //            break;
+        //        case 11:
+        //            await TestWesternClassicalAlbumTEO();
+        //            break;
+        //    }
+
+        //    return new EmptyResult();
+        //}
+        //private async Task TestPopularAlbumTEO()
+        //{
+        //    var work = await musicDb.Works.FirstAsync(w => w.StyleId == MusicStyles.Popular);
+        //    if(work != null)
+        //    {
+        //        var teo = await work.ToPopularAlbumTEO(musicOptions);
+
+        //    }
+        //}
         //private async Task TestWesternClassicalAlbumTEO()
         //{
         //    var work = await musicDb.Works.FirstAsync(w => w.StyleId == MusicStyles.WesternClassical);
@@ -788,232 +854,238 @@ namespace Fastnet.Apollo.Web.Controllers
         //        var teo2 = text.ToInstance<WesternClassicalAlbumTEO>();
         //    }
         //}
-        private async Task CatalogueJoanBaez(string artistName)
-        {
-            await taskPublisher.AddTask(MusicStyles.Popular, "Joan Baez",   true);
-        }
-        private async Task  CatalogueFolder(MusicStyles style, string path)
-        {
-            //D:\Music\flac\Western\Classical\Wolfgang Amadeus Mozart\Concerto for Flute and Harp
-            await taskPublisher.AddTask(style, TaskType.DiskPath, path, true);
-        }
-        private async Task AddPortraitsTask(MusicStyles style)
-        {
-            await taskPublisher.AddPortraitsTask(style);
-        }
-        private async Task CatalogueJoanBaez()
-        {
-            await taskPublisher.AddTask(MusicStyles.Popular, "Joan Baez", force: true);
-        }
-        private void Catalogue()
-        {
-            void ListFiles(OpusFolder folder)
-            {
-                var files = folder.GetFilesOnDisk();
-                var partCount = files.Where(x => x.part != null).Select(x => x.part.Number).Distinct().Count();
-                log.Information($"{(folder.IsCollection ? "Collection" : folder.ArtistName)}, {folder.OpusName}, {folder.Source}, {files.Count()} files in {partCount} parts {(folder.IsGenerated ? ", (generated)" : "")}");
-            }
-            var names = new string[]
-            {
-                @"D:\Music\flac\Western\Popular\Bruce Springsteen",
-                @"D:\Music\flac\Western\Popular\Elton John",
-                @"D:\Music\flac\Western\Popular\Bruce Springsteen\Born In The USA",
-                @"D:\Music\flac\Western\Popular\Bruce Springsteen\The River",
-                @"D:\Music\flac\Western\Popular\Collections",
-                @"D:\Music\flac\Western\Opera\Collections\The Essential Maria Callas",
-                @"D:\Music\flac\Western\Classical"
-            };
-            foreach (var name in names)
-            {                
-                var pd = MusicMetaDataMethods.GetPathData(musicOptions, name);
-                if(pd?.OpusPath != null)
-                {
-                    // single opus folder
-                    var folder = new OpusFolder(musicOptions, pd);
-                    ListFiles(folder);
-                }
-                else if (pd?.OpusPath == null && (pd?.IsCollections ?? false))
-                {
-                    var cf = new CollectionsFolder(musicOptions, pd.MusicStyle);
-                    foreach (var folder in cf.GetOpusFolders())
-                    {
-                        ListFiles(folder);
-                    }
-                }
-                else if (pd?.OpusPath == null && pd?.ArtistPath != null)
-                {
-                    // artist folder
-                    var af = new ArtistFolder(musicOptions, pd.MusicStyle, pd.ArtistPath);
-                    foreach (var folder in af.GetOpusFolders(name))
-                    {
-                        ListFiles(folder);
-                    }
-                }
-                else if(pd != null)
-                {
-                    //style folder
-                    foreach(var af in pd.MusicStyle.GetArtistFolders(musicOptions))
-                    {
-                        foreach (var folder in af.GetOpusFolders(name))
-                        {
-                            ListFiles(folder);
-                        }
-                    }
-                    foreach(var folder in pd.MusicStyle.GetCollectionsFolder(musicOptions).GetOpusFolders(name))
-                    {
-                        ListFiles(folder);
-                    }
-                }
-            }
+        //private async Task CatalogueJoanBaez(string artistName)
+        //{
+        //    await taskPublisher.AddTask(MusicStyles.Popular, "Joan Baez",   true);
+        //}
+        //private async Task  CatalogueFolder(MusicStyles style, string path)
+        //{
+        //    //D:\Music\flac\Western\Classical\Wolfgang Amadeus Mozart\Concerto for Flute and Harp
+        //    await taskPublisher.AddTask(style, TaskType.DiskPath, path, true);
+        //}
+        //private async Task AddPortraitsTask(MusicStyles style)
+        //{
+        //    await taskPublisher.AddPortraitsTask(style);
+        //}
+        //private async Task CatalogueJoanBaez()
+        //{
+        //    await taskPublisher.AddTask(MusicStyles.Popular, "Joan Baez", force: true);
+        //}
+        //private void Catalogue()
+        //{
+        //    void ListFiles(OpusFolder folder)
+        //    {
+        //        var files = folder.GetFilesOnDisk();
+        //        var partCount = files.Where(x => x.part != null).Select(x => x.part.Number).Distinct().Count();
+        //        log.Information($"{(folder.IsCollection ? "Collection" : folder.ArtistName)}, {folder.OpusName}, {folder.Source}, {files.Count()} files in {partCount} parts {(folder.IsGenerated ? ", (generated)" : "")}");
+        //    }
+        //    var names = new string[]
+        //    {
+        //        @"D:\Music\flac\Western\Popular\Bruce Springsteen",
+        //        @"D:\Music\flac\Western\Popular\Elton John",
+        //        @"D:\Music\flac\Western\Popular\Bruce Springsteen\Born In The USA",
+        //        @"D:\Music\flac\Western\Popular\Bruce Springsteen\The River",
+        //        @"D:\Music\flac\Western\Popular\Collections",
+        //        @"D:\Music\flac\Western\Opera\Collections\The Essential Maria Callas",
+        //        @"D:\Music\flac\Western\Classical"
+        //    };
+        //    foreach (var name in names)
+        //    {                
+        //        var pd = MusicMetaDataMethods.GetPathData(musicOptions, name);
+        //        if(pd?.OpusPath != null)
+        //        {
+        //            // single opus folder
+        //            var folder = new OpusFolder(musicOptions, pd);
+        //            ListFiles(folder);
+        //        }
+        //        else if (pd?.OpusPath == null && (pd?.IsCollections ?? false))
+        //        {
+        //            var cf = new CollectionsFolder(musicOptions, pd.MusicStyle);
+        //            foreach (var folder in cf.GetOpusFolders())
+        //            {
+        //                ListFiles(folder);
+        //            }
+        //        }
+        //        else if (pd?.OpusPath == null && pd?.ArtistPath != null)
+        //        {
+        //            // artist folder
+        //            var af = new ArtistFolder(musicOptions, pd.MusicStyle, pd.ArtistPath);
+        //            foreach (var folder in af.GetOpusFolders(name))
+        //            {
+        //                ListFiles(folder);
+        //            }
+        //        }
+        //        else if(pd != null)
+        //        {
+        //            //style folder
+        //            foreach(var af in pd.MusicStyle.GetArtistFolders(musicOptions))
+        //            {
+        //                foreach (var folder in af.GetOpusFolders(name))
+        //                {
+        //                    ListFiles(folder);
+        //                }
+        //            }
+        //            foreach(var folder in pd.MusicStyle.GetCollectionsFolder(musicOptions).GetOpusFolders(name))
+        //            {
+        //                ListFiles(folder);
+        //            }
+        //        }
+        //    }
 
-        }
-        private void GetSelectedWesternClassicalArtists()
-        {
-            var names = new string[]
-                {
-                    //@"Franz Schubert",
-                    //@"Gabriel Faure",
-                    //@"Johann Sebastian Bach",
-                    //@"Antonio Vivaldi",
-                    //@"Johann Strauss II",
-                    @"Pyotr Il'yich Tchaikovsky"
-                };
-            GetSelectedArtists(MusicStyles.WesternClassical, names);
-        }
-        private void GetSelectedPopularArtists()
-        {
-            var names = new string[]
-                {
-                    @"Bill Withers",
-                    @"Buddy Guy",
-                    @"David Bowie",
-                    @"Blood Sweat & Tears"
-                };
-            GetSelectedArtists(MusicStyles.Popular, names);
-        }
-        private void GetSelectedArtists(MusicStyles musicStyle, IEnumerable<string> names)
-        {
-            foreach (var name in names)
-            {
-                var af = new ArtistFolder(musicOptions, musicStyle, name);
-                var opusFolders = af.GetOpusFolders();
-                if (musicStyle == MusicStyles.Popular)
-                {
-                    log.Information($"{af} has {opusFolders.Count()} album folders (of which {opusFolders.Where(f => f.ForSinglesOnly).Count()} are for singles only");
-                }
-                else
-                {
-                    log.Information($"{af} has {opusFolders.Count()} album folders");
-                }
-                foreach (var wf in opusFolders)
-                {
-                    var files = wf.GetFilesOnDisk();
-                    if (files.Count() > 0)
-                    {
-                        log.Information($"   {wf}, {files.Count()} music files");
-                    }
-                }
-            }
-        }
-        private void GetPopularArtists()
-        {
-            var list = MusicStyles.Popular.GetArtistFolders(musicOptions);
-            foreach(var item in list)
-            {
-                var opusFolders = item.GetOpusFolders();
-                log.Information($"{item} has {opusFolders.Count()} album folders (of which {opusFolders.Where(f => f.ForSinglesOnly).Count()} are for singles only");
-            }
-        }
-        private async Task CataloguePopular()
-        {
-            await taskPublisher.AddTask(MusicStyles.Popular);
-        }
-        private async Task CatalogueWesternClassical(/*string name*/)
-        {
-            await taskPublisher.AddTask(MusicStyles.WesternClassical/*, name*/);
-        }
+        //}
+        //private void GetSelectedWesternClassicalArtists()
+        //{
+        //    var names = new string[]
+        //        {
+        //            //@"Franz Schubert",
+        //            //@"Gabriel Faure",
+        //            //@"Johann Sebastian Bach",
+        //            //@"Antonio Vivaldi",
+        //            //@"Johann Strauss II",
+        //            @"Pyotr Il'yich Tchaikovsky"
+        //        };
+        //    GetSelectedArtists(MusicStyles.WesternClassical, names);
+        //}
+        //private void GetSelectedPopularArtists()
+        //{
+        //    var names = new string[]
+        //        {
+        //            @"Bill Withers",
+        //            @"Buddy Guy",
+        //            @"David Bowie",
+        //            @"Blood Sweat & Tears"
+        //        };
+        //    GetSelectedArtists(MusicStyles.Popular, names);
+        //}
+        //private void GetSelectedArtists(MusicStyles musicStyle, IEnumerable<string> names)
+        //{
+        //    foreach (var name in names)
+        //    {
+        //        var af = new ArtistFolder(musicOptions, musicStyle, name);
+        //        var opusFolders = af.GetOpusFolders();
+        //        if (musicStyle == MusicStyles.Popular)
+        //        {
+        //            log.Information($"{af} has {opusFolders.Count()} album folders (of which {opusFolders.Where(f => f.ForSinglesOnly).Count()} are for singles only");
+        //        }
+        //        else
+        //        {
+        //            log.Information($"{af} has {opusFolders.Count()} album folders");
+        //        }
+        //        foreach (var wf in opusFolders)
+        //        {
+        //            var files = wf.GetFilesOnDisk();
+        //            if (files.Count() > 0)
+        //            {
+        //                log.Information($"   {wf}, {files.Count()} music files");
+        //            }
+        //        }
+        //    }
+        //}
+        //private void GetPopularArtists()
+        //{
+        //    var list = MusicStyles.Popular.GetArtistFolders(musicOptions);
+        //    foreach(var item in list)
+        //    {
+        //        var opusFolders = item.GetOpusFolders();
+        //        log.Information($"{item} has {opusFolders.Count()} album folders (of which {opusFolders.Where(f => f.ForSinglesOnly).Count()} are for singles only");
+        //    }
+        //}
+        //private async Task CataloguePopular()
+        //{
+        //    await taskPublisher.AddTask(MusicStyles.Popular);
+        //}
+        //private async Task CatalogueWesternClassical(/*string name*/)
+        //{
+        //    await taskPublisher.AddTask(MusicStyles.WesternClassical/*, name*/);
+        //}
         private IActionResult GetImageResult(Image image)
         {
             var ms = new MemoryStream(image.Data);
             return CacheableResult(new FileStreamResult(ms, image.MimeType), image.LastModified);
         }
-        private bool CheckDbIntegrity(MusicDb db)
-        {
-            var result = true;
-            var artistsWithoutWorks = db.Artists.Where(a => a.Works.Count() == 0);
-            if (artistsWithoutWorks.Count() > 0)
-            {
-                // result = false;
-                // artist without works is possible in the case
-                // where a collection has been recorded as a work and the individual artists
-                // may not have works themselves
+        //private bool CheckDbIntegrity(MusicDb db)
+        //{
+        //    var result = true;
+        //    var artistsWithoutWorks = db.Artists.Where(a => a.Works.Count() == 0);
+        //    if (artistsWithoutWorks.Count() > 0)
+        //    {
+        //        // result = false;
+        //        // artist without works is possible in the case
+        //        // where a collection has been recorded as a work and the individual artists
+        //        // may not have works themselves
 
-                foreach (var artist in artistsWithoutWorks)
-                {
-                    log.Trace($"Artist {artist.Name} has no works");
-                }
-            }
-            var worksWithoutTracks = db.Works.Where(a => a.Tracks.Count() == 0);
-            if (worksWithoutTracks.Count() > 0)
-            {
-                result = false;
-                foreach (var work in worksWithoutTracks)
-                {
-                    log.Error($"Artist(s) {work.GetArtistNames()}, work {work.Name} has no tracks");
-                }
-            }
-            var tracksWithoutMusic = db.Tracks.Where(a => a.MusicFiles.Count() == 0);
-            if (tracksWithoutMusic.Count() > 0)
-            {
-                result = false;
-                foreach (var track in tracksWithoutMusic)
-                {
-                    log.Error($"Artist(s) {track.Work.GetArtistNames()}, work {track.Work.Name}, track {track.Title}  has no tracks");
-                }
-            }
-            var tracksWithOnlyGeneratedMusic = db.Tracks.Where(a => a.MusicFiles.All(x => x.IsGenerated));
-            if (tracksWithOnlyGeneratedMusic.Count() > 0)
-            {
-                result = false;
-                foreach (var track in tracksWithOnlyGeneratedMusic)
-                {
-                    log.Error($"Artist(s) {track.Work.GetArtistNames()}, work {track.Work.Name}, track {track.Title} only has generated music");
-                }
-            }
-            var compositionsWithoutPerformances = db.Compositions.Where(a => a.Performances.Count() == 0);
-            if (compositionsWithoutPerformances.Count() > 0)
-            {
-                result = false;
-                foreach (var composition in compositionsWithoutPerformances)
-                {
-                    log.Error($"Artist {composition.Artist.Name}, composition {composition.Name},  has no performances");
-                }
-            }
-            var performancesWithoutMovements = db.Performances.Where(a => a.Movements.Count() == 0);
-            if (performancesWithoutMovements.Count() > 0)
-            {
-                result = false;
-                foreach (var performance in performancesWithoutMovements)
-                {
-                    log.Error($"Artist(s) {performance.GetParentArtistsName()}, {performance.GetParentEntityName()},  {performance.GetAllPerformersCSV()} has no movemenents");
-                }
-            }
-            var performancesWhereMovementsAreInvalid = db.Performances.Where(p => p.Movements.Where(m => m.Performance != p).Count() > 0);
-            if (performancesWhereMovementsAreInvalid.Count() > 0)
-            {
-                result = false;
-                foreach (var performance in performancesWhereMovementsAreInvalid)
-                {
-                    log.Error($"Artist {performance.GetParentArtistsName()}, {performance.GetParentEntityName()},  {performance.GetAllPerformersCSV()} has suspect movements");
-                }
-            }
-            return result;
-        }
+        //        foreach (var artist in artistsWithoutWorks)
+        //        {
+        //            log.Trace($"Artist {artist.Name} has no works");
+        //        }
+        //    }
+        //    var worksWithoutTracks = db.Works.Where(a => a.Tracks.Count() == 0);
+        //    if (worksWithoutTracks.Count() > 0)
+        //    {
+        //        result = false;
+        //        foreach (var work in worksWithoutTracks)
+        //        {
+        //            log.Error($"Artist(s) {work.GetArtistNames()}, work {work.Name} has no tracks");
+        //        }
+        //    }
+        //    var tracksWithoutMusic = db.Tracks.Where(a => a.MusicFiles.Count() == 0);
+        //    if (tracksWithoutMusic.Count() > 0)
+        //    {
+        //        result = false;
+        //        foreach (var track in tracksWithoutMusic)
+        //        {
+        //            log.Error($"Artist(s) {track.Work.GetArtistNames()}, work {track.Work.Name}, track {track.Title}  has no tracks");
+        //        }
+        //    }
+        //    var tracksWithOnlyGeneratedMusic = db.Tracks.Where(a => a.MusicFiles.All(x => x.IsGenerated));
+        //    if (tracksWithOnlyGeneratedMusic.Count() > 0)
+        //    {
+        //        result = false;
+        //        foreach (var track in tracksWithOnlyGeneratedMusic)
+        //        {
+        //            log.Error($"Artist(s) {track.Work.GetArtistNames()}, work {track.Work.Name}, track {track.Title} only has generated music");
+        //        }
+        //    }
+        //    var compositionsWithoutPerformances = db.Compositions.Where(a => a.Performances.Count() == 0);
+        //    if (compositionsWithoutPerformances.Count() > 0)
+        //    {
+        //        result = false;
+        //        foreach (var composition in compositionsWithoutPerformances)
+        //        {
+        //            log.Error($"Artist {composition.Artist.Name}, composition {composition.Name},  has no performances");
+        //        }
+        //    }
+        //    var performancesWithoutMovements = db.Performances.Where(a => a.Movements.Count() == 0);
+        //    if (performancesWithoutMovements.Count() > 0)
+        //    {
+        //        result = false;
+        //        foreach (var performance in performancesWithoutMovements)
+        //        {
+        //            log.Error($"Artist(s) {performance.GetParentArtistsName()}, {performance.GetParentEntityName()},  {performance.GetAllPerformersCSV()} has no movemenents");
+        //        }
+        //    }
+        //    var performancesWhereMovementsAreInvalid = db.Performances.Where(p => p.Movements.Where(m => m.Performance != p).Count() > 0);
+        //    if (performancesWhereMovementsAreInvalid.Count() > 0)
+        //    {
+        //        result = false;
+        //        foreach (var performance in performancesWhereMovementsAreInvalid)
+        //        {
+        //            log.Error($"Artist {performance.GetParentArtistsName()}, {performance.GetParentEntityName()},  {performance.GetAllPerformersCSV()} has suspect movements");
+        //        }
+        //    }
+        //    return result;
+        //}
         // move this to Fastnet.Core
         private string GetPackageVersion()
         {
-            var assemblyLocation = System.Reflection.Assembly.GetExecutingAssembly().Location;
-            return System.Diagnostics.FileVersionInfo.GetVersionInfo(assemblyLocation).ProductVersion;
+            //var assemblyLocation = System.Reflection.Assembly.GetExecutingAssembly().Location;
+            //return System.Diagnostics.FileVersionInfo.GetVersionInfo(assemblyLocation).ProductVersion;
+            return System.Reflection.Assembly.GetExecutingAssembly().GetPackageVersion();
+        }
+        private string GetAssemblyVersion()
+        {
+            //return System.Reflection.Assembly.GetExecutingAssembly().GetName().Version.ToString();
+            return System.Reflection.Assembly.GetExecutingAssembly().GetAssemblyVersion();
         }
     }
 }

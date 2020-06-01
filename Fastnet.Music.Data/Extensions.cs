@@ -14,10 +14,52 @@ using System.Threading.Tasks;
 
 namespace Fastnet.Music.Data
 {
+#pragma warning disable CS1591 // Missing XML comment for publicly visible type or member
+    public class ArtistSetRagaPerformance
+    {
+        //public IEnumerable<Artist> Artists;
+        public ArtistSet ArtistSet;
+        public Raga Raga;
+        public Performance Performance;
+    }
+    public static partial class Extensions
+    {
+        //public static void GetPerformancesByRagaAndArtists(this MusicDb musicDb)
+        //{
+        //    var performancesByRagaAndArtists = GetPerformancesByRagaAndArtists(musicDb);
+        //    var artistSetsOld = performancesByRagaAndArtists.Select(x => x.ArtistSet);
+        //    var r = artistSetsOld.Distinct(new ArtistSetComparer());
+        //    //var artistSets = performancesByRagaAndArtists.Select(x => x.ArtistSet).Distinct(new ArtistSetComparer());
+        //}
+        public static IEnumerable<ArtistSetRagaPerformance> GetPerformancesByRagaAndArtists(this MusicDb musicDb)
+        {
+            return musicDb.RagaPerformances
+                .AsEnumerable()
+                .GroupBy(x => x.Performance)
+                //.Select(g => (performance: g.Key, raga: g.Select(r => r.Raga).Distinct().Single(), artists: g.Select(a => a.Artist).OrderBy(a => a.Reputation).AsEnumerable()));
+                .Select(g => new ArtistSetRagaPerformance { Performance = g.Key, Raga = g.Select(r => r.Raga).Distinct().Single(), ArtistSet = new ArtistSet(g.Select(z => z.Artist)) });
+        }
+        public static IEnumerable<ArtistSetRagaPerformance> GetRagaPerformancesForArtistSet(this MusicDb musicDb, ArtistSet artistSet)
+        //public static IEnumerable<ArtistSetRagaPerformance> GetRagaPerformancesForArtistSet(this MusicDb musicDb, long[] artistIds)
+        {
+            //artistIds = artistIds.OrderBy(k => k).ToArray();
+            // get all performances by these artists singly or jointly
+            var allPerformancesByTheseArtists = musicDb.RagaPerformances
+                .Where(x => artistSet.ArtistIds.Contains(x.ArtistId))
+                .Select(x => x.Performance).Distinct();
+            var rpListForThesePerformances = allPerformancesByTheseArtists.AsEnumerable()
+                .Join(musicDb.RagaPerformances, p => p.Id, rp => rp.PerformanceId, (p, rp) => rp);
+            return rpListForThesePerformances.GroupBy(x => x.Performance)
+                //.Where(x => x.Select(r => r.ArtistId).OrderBy(n => n).SequenceEqual(artistIds))
+                .Where(x => artistSet.Matches(x.Select(r => r.ArtistId)))
+                .Select(x => new ArtistSetRagaPerformance { Performance = x.Key, Raga = x.First().Raga, ArtistSet = new ArtistSet(x.Select(z => z.Artist)) });
+        }
+    }
     public static partial class Extensions
     {
         private static readonly ILogger log = ApplicationLoggerFactory.CreateLogger("Fastnet.Music.Data.Extensions");
         // musicdb extensions
+
         private static void Delete(this MusicDb musicDb, MusicFile mf, /*Opus*/DeleteContext context)
         {
             void clearRelatedEntities(MusicFile file)
@@ -55,6 +97,7 @@ namespace Fastnet.Music.Data
         /// </summary>
         /// <param name="db"></param>
         /// <param name="list"></param>
+        /// <param name="taskItem"></param>
         /// <returns></returns>
         public static IEnumerable<Performer> GetPerformers(this MusicDb db, IEnumerable<MetaPerformer> list, TaskItem taskItem = null)
         {
@@ -77,6 +120,7 @@ namespace Fastnet.Music.Data
         /// </summary>
         /// <param name="db"></param>
         /// <param name="mp"></param>
+        /// <param name="taskItem"></param>
         /// <returns></returns>
         public static Performer GetPerformer(this MusicDb db, MetaPerformer mp, TaskItem taskItem = null)
         {
@@ -617,4 +661,5 @@ namespace Fastnet.Music.Data
         }
 
     }
+#pragma warning restore CS1591 // Missing XML comment for publicly visible type or member
 }

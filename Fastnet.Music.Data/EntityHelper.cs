@@ -100,14 +100,22 @@ namespace Fastnet.Music.Data
         }
         private void RemoveEntity(Composition composition)
         {
-            Debug.Assert(composition.Performances.Count() == 0);
+            //Debug.Assert(composition.Performances.Count() == 0);
+            if (composition.Performances.Count() == 0)
+            {
+                log.Warning($"{composition.Artist.ToIdent()} {composition.Artist.Name} {composition.ToIdent()} {composition.Name} has zero performances!");
+            }
             context.SetModifiedArtistId(composition.ArtistId);
             db.Compositions.Remove(composition);
             log.Information($"{ToIdent()} {composition.ToIdent()} {composition.Name} removed");
         }
         private void RemoveEntity(Performance performance)
         {
-            Debug.Assert(performance.Movements.Count() == 0);
+            //Debug.Assert(performance.Movements.Count() == 0);
+            if(performance.Movements.Count() == 0)
+            {
+                log.Warning($"{performance.ToIdent()} {performance.GetAllPerformersCSV()} has zero movements!");
+            }
             switch (performance.StyleId)
             {
                 case MusicStyles.WesternClassical:
@@ -124,27 +132,43 @@ namespace Fastnet.Music.Data
         }
         private void RemoveEntity(Track track)
         {
-            Debug.Assert(track.MusicFiles.Count() == 0);
+            //Debug.Assert(track.MusicFiles.Count() == 0);
+            if (track.MusicFiles.Count() == 0)
+            {
+                log.Warning($"{track.Work.ToIdent()} {track.Work.Name} {track.ToIdent()} {track.Title} has zero music files!");
+            }
             context.SetModifiedArtistId(track.Work.ArtistWorkList.Select(x => x.ArtistId).ToArray());
             db.Tracks.Remove(track);
             log.Information($"{ToIdent()} {track.ToIdent()} {track.Title} removed");
         }
         private void RemoveEntity(Work work)
         {
-            Debug.Assert(work.Tracks.Count() == 0);
+            //Debug.Assert(work.Tracks.Count() == 0);
+            if (work.Tracks.Count() == 0)
+            {
+                log.Warning($"{work.ToIdent()} {work.Name} has zero tracks!");
+            }
             context.SetModifiedArtistId(work.ArtistWorkList.Select(x => x.ArtistId).ToArray());
             db.Works.Remove(work);
             log.Information($"{ToIdent()} {work.ToIdent()} {work.Name} removed");
         }
         private void RemoveEntity(Raga raga)
         {
-            Debug.Assert(db.RagaPerformances.Where(x => x.Raga == raga).Count() == 0);
+            //Debug.Assert(db.RagaPerformances.Where(x => x.Raga == raga).Count() == 0);
+            if(db.RagaPerformances.Where(x => x.Raga == raga).Count() == 0)
+            {
+                log.Warning($"{raga.ToIdent()} {raga.Name} has zero ragaperformances!");
+            }
             db.Ragas.Remove(raga); // i don't bubble delete becuase ragas have no parents
             log.Information($"{ToIdent()} {raga.ToIdent()} {raga.Name} deleted");
         }
         private void RemoveEntity(Artist artist)
         {
-            Debug.Assert(artist.Works.Count() == 0);
+            //Debug.Assert(artist.Works.Count() == 0);
+            if(artist.Works.Count() == 0)
+            {
+                log.Warning($"{artist.ToIdent()} {artist.Name} has zero works!");
+            }
             var aslist = db.ArtistStyles.Where(x => x.Artist == artist);
             db.ArtistStyles.RemoveRange(aslist);
             log.Information($"{ToIdent()} {aslist.Select(x => x.ToIdent()).ToCSV()} removed");

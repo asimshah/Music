@@ -16,19 +16,15 @@ using System.Threading.Tasks;
 
 namespace Fastnet.Apollo.Web
 {
-    public class ArtistSetRagaPerformance
-    {
-        public Artist[] Artists;
-        public Raga Raga;
-        public Performance Performance;
-    }
+
     public static partial class TransferExtensions
     {
+        private static readonly ILogger log = ApplicationLoggerFactory.CreateLogger("Fastnet.Apollo.Web.TransferExtensions");
         public static ArtistSetDTO ToDTO(this IEnumerable<ArtistSetRagaPerformance> list)
         {
             return new ArtistSetDTO
             {
-                ArtistIds = list.First().Artists.Select(x => x.Id).ToArray(),
+                ArtistIds = list.First().ArtistSet.ArtistIds.ToArray(),//.Artists, //.Select(x => x.Id).ToArray(),
                 RagaCount = list.Select(x => x.Raga).Distinct().Count(),
                 PerformanceCount = list.Select(x => x.Performance).Distinct().Count()
             };
@@ -56,14 +52,13 @@ namespace Fastnet.Apollo.Web
                 Quality = a.ParsingStage.ToMetadataQuality(),
                 ImageUrl = $"lib/get/artist/imageart/{a.Id}"
             };
-            switch(style)
+            switch (style)
             {
                 case MusicStyles.IndianClassical:
-                    //dto.WorkCount = a.Works.Count(w => w.Type != OpusType.Singles);
-                    //dto.SinglesCount = a.Works.Where(w => w.Type == OpusType.Singles).SelectMany(x => x.Tracks).Count();
-                    //dto.CompositionCount = a.Compositions?.Count() ?? 0;
                     dto.RagaCount = a.RagaPerformances.Select(x => x.Raga).Distinct().Count();
                     dto.PerformanceCount = a.RagaPerformances.Select(x => x.Performance).Distinct().Count();
+                    //var trackCount = a.RagaPerformances.SelectMany(x => x.Performance.Movements).Count();
+                    //log.Information($"{a.Name} {trackCount}");
                     break;
                 default:
                     dto.WorkCount = a.Works.Count(w => w.Type != OpusType.Singles);
@@ -389,6 +384,58 @@ namespace Fastnet.Apollo.Web
                 list.Add(td);
             }
             return list.ToArray();
+        }
+        public static StatsDTO ToStats(this MusicStyles style,  IEnumerable<Artist> artists)
+        {
+            (int artistCount, int albumCount, int trackCount, TimeSpan duration) popularTotals(IEnumerable<Artist> artists)
+            {
+                var albums = artists.SelectMany(x => x.ArtistWorkList.Select(x => x.Work));
+                var tracks = albums.SelectMany(x => x.Tracks).ToArray();
+                var duration = TimeSpan.FromMilliseconds(tracks.Select(t => t.GetBestQuality()).Sum(mf => mf.Duration ?? 0));
+                return (artists.Count(), albums.Count(), tracks.Count(), duration);
+                //return ($"{artists.Count()} artists, {albums.Count()} works, {tracks.Count()} tracks", $"{duration.ToDefault()}");
+            }
+            (int artistCount, int compositionCount, int performanceCount, int movementCount, TimeSpan duration) westernClassicalTotals(IEnumerable<Artist> artists)
+            {
+                var compositions = artists.SelectMany(a => a.Compositions);
+                var performances = compositions.SelectMany(c => c.Performances);
+                var movements = performances.SelectMany(p => p.Movements);
+                var duration = TimeSpan.FromMilliseconds(movements.Select(t => t.GetBestQuality()).Sum(mf => mf.Duration ?? 0));
+                return (artists.Count(), compositions.Count(), performances.Count(), movements.Count(), duration);
+                //return ($"{artists.Count()} artists, {compositions.Count()} compositions, {performances.Count()} performances", $"{duration.ToDefault()}");
+            }
+            switch (style)
+            {
+                case MusicStyles.Popular:
+                    var (a, b, c, d) = popularTotals(artists);
+                    return new PopularStatsDTO { ArtistCount = a, AlbumCount = b, TrackCount = c, Duration = d };
+                case MusicStyles.WesternClassical:
+                    var (e, f, g, h, i) = westernClassicalTotals(artists);
+                    return new WesternClassicalStatsDTO { ArtistCount = e, CompositionCount = f, PerformanceCount = g, MovementCount = h, Duration = i };
+                default:
+                    throw new ArgumentException($"method invalid for {style}", "style");
+            }
+        }
+        public static StatsDTO ToStats(this MusicStyles style, IEnumerable<RagaPerformance> rpList)
+        {
+            (int artistCount, int ragaCount, int performanceCount, int movementCount, TimeSpan duration) indianClassicalTotals(IEnumerable<RagaPerformance> rpList)
+            {
+                var artists = rpList.Select(rp => rp.Artist).Distinct();
+                var ragas = rpList.Select(rp => rp.Raga).Distinct();
+                var performances = rpList.Select(rp => rp.Performance).Distinct();
+                var movements = performances.SelectMany(p => p.Movements);
+                var duration = TimeSpan.FromMilliseconds(movements.Select(t => t.GetBestQuality()).Sum(mf => mf.Duration ?? 0));
+                return (artists.Count(), ragas.Count(), performances.Count(), movements.Count(), duration);
+                //return ($"{artists.Count()} artists, {ragas.Count()} ragas, {performances.Count()} performances", $"{duration.ToDefault()}");
+            }
+            switch (style)
+            {
+                case MusicStyles.IndianClassical:
+                    var (a, b, c, d, e) = indianClassicalTotals(rpList);
+                    return new IndianClassicalStatsDTO { ArtistCount = a, RagaCount = b, PerformanceCount= c, MovementCount = d,  Duration = e };
+                default:
+                    throw new ArgumentException($"method invalid for {style}", "style");
+            }
         }
     }
 }

@@ -1,146 +1,88 @@
 ﻿using Fastnet.Core;
+using Fastnet.Music.Core;
+using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
-using System.Text.RegularExpressions;
+using System.Linq;
 using System.Threading.Tasks;
 
 namespace RagaGenerator
 {
     class Program
     {
-        const string source = @"C:\devroot\Music\RagaGenerator\WikiList.txt";
-        const string destination = @"C:\temp\raganames.json";
+        const string hindustaniSource = @"C:\devroot\Music\RagaGenerator\WikiList.txt";
+        const string carnaticSource = @"C:\devroot\Music\RagaGenerator\originalCarnaticList.txt";
+        const string hindustaniDestination = @"C:\temp\raganames.json";
+        const string carnaticDestination = @"C:\temp\carnaticRagaNames.json";
+
+        const string liveRaganames = @"C:\devroot\Music\Fastnet.Apollo.Web\raganames.json";
+        const string mergedOutput = @"C:\temp\merged-names.json";
         static async Task Main(string[] args)
         {
             Console.WriteLine("Hello World!");
-            var generator = new Generator(source, destination);
-            await generator.RunAsync();
+            //var generator = new HindustaniGenerator(hindustaniSource, destination);
+            //await generator.RunAsync();
+            //var generator = new CarnaticGenerator(carnaticSource, hindustaniDestination);
+            //var list = await generator.RunAsync();
+            //generator.WriteRagaNames(list);
+            var merger = new Merger(liveRaganames, carnaticDestination, mergedOutput);
+            await merger.RunAsync();
         }
     }
-    public class RagaName
+    class Merger
     {
-        public string Name { get; set; }
-        public List<string> Aliases { get; set; } = new List<string>();
-    }
-    public class Generator
-    {
-        private readonly string source;
-        private readonly string destination;
-
-        public Generator(string source, string destination)
+        private readonly string liveRaganames;
+        private readonly string carnaticSource;
+        private readonly string mergedOutput;
+        public Merger(string liveRaganames, string carnaticSource, string mergedOutput)
         {
-            if (string.IsNullOrEmpty(source))
-            {
-                throw new ArgumentException("message", nameof(source));
-            }
-
-            if (string.IsNullOrEmpty(destination))
-            {
-                throw new ArgumentException("message", nameof(destination));
-            }
-
-            this.source = source;
-            this.destination = destination;
+            this.liveRaganames = liveRaganames;
+            this.carnaticSource = carnaticSource;
+            this.mergedOutput = mergedOutput;
         }
         public async Task RunAsync()
         {
-            var listEntries = new List<string>();
-            var lines = await File.ReadAllLinesAsync(source);
-            foreach(var line in lines)
+            var liveNames = await GetLiveNames();
+            var ici = new IndianClassicalInformation();// so we can use the lookup technique
+            ici.RagaNames = liveNames;
+            var caranaticNames = await GetCarnaticNames();
+            foreach(var cn in caranaticNames)
             {
-
-                if(line.StartsWith("<li>"))
+                var alphamericName = cn.Name.ToAlphaNumerics();
+                if(ici.Lookup.ContainsKey(alphamericName))
                 {
-                    listEntries.Add(line);
+                    Debug.WriteLine($"{cn.Name} already exists!!!!!!!");
+                    var en = ici.Lookup[alphamericName];
+                    if(en.Name != cn.Name)
+                    {
+                        Debug.WriteLine($"{cn.Name} id {en.Name} needs to be added as an alias");
+                    }
                 }
                 else
                 {
-                    //Debug.WriteLine($"discarded: {line}");
+                    Debug.WriteLine($"{cn.Name} to be added ...");
+                    liveNames.Add(cn);
                 }
             }
-            var names = Process(listEntries);
-            WriteRagaNames(names, destination);
-            Debug.WriteLine($"{destination} written");
+            var jsonText = liveNames.OrderBy(x => x.Name).ToJson();
+            await File.WriteAllTextAsync(mergedOutput, jsonText);
         }
-        private void WriteRagaNames(IEnumerable<string> names, string destination)
+        private async Task<List<RagaName>> GetCarnaticNames()
         {
-            var ragaNames = new List<RagaName>();
-            foreach(var name in names)
-            {
-                var rn = new RagaName { Name = name };
-                ragaNames.Add(rn);
-            }
-            var wrapper = new { RagaNames = ragaNames };
-            var jsonText = wrapper.ToJson(true);
-            File.WriteAllText(destination, jsonText);
+            var jsonText = await File.ReadAllTextAsync(carnaticSource);
+            var jo = JObject.Parse(jsonText);
+            var nameJson = jo["RagaNames"].ToString();
+            return nameJson.ToInstance<List<RagaName>>();
         }
-        private IEnumerable<string> Process(List<string> lines)
+        private async Task<List<RagaName>> GetLiveNames()
         {
-            var firstRegex = new Regex(@"^<li>([a-z0-9ā\-/,’'\(\)\s]+)[</li>|<sup]", RegexOptions.IgnoreCase);
-            var secondRegex = new Regex(@"^<li>([a-z0-9ā\-/.,’'\(\)\s]*)<a.+>([a-z0-9ā\-/,’'\(\)\s]+)</a>([a-z0-9ā\-/,’'\(\)\s]*)</li>", RegexOptions.IgnoreCase);
-            (bool success, string value) firstMatch(string line)
-            {
-                if (!line.Contains("<a", StringComparison.CurrentCultureIgnoreCase))
-                {
-                    var m = firstRegex.Match(line);
-                    if (m.Success)
-                    {
-                        var val = m.Groups[1].Value;
-                        //names.Add(val.Trim());
-                        return (true, val.Trim());
-                    }
-                }
-                return (false, string.Empty);
-            }
-            (bool success, string value) secondMatch(string line)
-            {
-                var m = secondRegex.Match(line);
-                if (m.Success)
-                {
-                    var parts = new List<string>();
-                    for(int index = 1;index < m.Groups.Count;++index)
-                    {
-                        var t = m.Groups[index].Value.Trim();
-                        if (t.Length > 0)
-                        {
-                            parts.Add(t);
-                        }
-                    }
-                    var val = string.Join(" ", parts).Replace("( ", "(").Replace(" )", ")");
-                    //names.Add(val.Trim());
-                    return (true, val);
-                }
-                return (false, string.Empty);
-            }
-            var names = new List<string>();
-            var removeSup = new Regex(@"<sup.*</sup>");
-            foreach(var l in lines)
-            {
-                var line = removeSup.Replace(l, string.Empty);
-                var (success, value) = firstMatch(line);
-                if(success)
-                {
-                    names.Add(value);
-                }
-                else
-                {
-                    (success, value) = secondMatch(line);
-                    if (success)
-                    {
-                        names.Add(value);
-                    }
-                }
-                if (!success)
-                {
-                    Debug.WriteLine($"discarded: {line}");
-                }
-            }
-            return names;
+            var jsonText = await File.ReadAllTextAsync(liveRaganames);
+            var jo = JObject.Parse(jsonText);
+            var nameJson = jo["IndianClassicalInformation"]["RagaNames"].ToString();
+            return nameJson.ToInstance<List<RagaName>>();
         }
-
-
     }
-
 }

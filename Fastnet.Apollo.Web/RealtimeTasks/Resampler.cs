@@ -56,7 +56,7 @@ namespace Fastnet.Apollo.Web
             var counter = 0;
             while (!cancellationToken.IsCancellationRequested)
             {
-                await Task.Delay(TimeSpan.FromMinutes(1));
+
                 ++ counter;
                 try
                 {
@@ -76,6 +76,10 @@ namespace Fastnet.Apollo.Web
                     if (taskItem != null)
                     {
                         await ResampleAsync(taskItem.Id);
+                    }
+                    else
+                    {
+                        await Task.Delay(TimeSpan.FromMinutes(1));
                     }
                 }
                 catch (Exception xe)

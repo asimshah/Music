@@ -96,7 +96,7 @@ namespace Fastnet.Apollo.Web
                     ProcessId = System.Diagnostics.Process.GetCurrentProcess().Id,
                     //Url = $"http://{ipAddress.ToString()}:{musicServerOptions.Port}"
                 };
-                if(environment.IsDevelopment())
+                if(false || environment.IsDevelopment())
                 {
                     // in development, I use IISExpress which by default only listens to "localhost"
                     si.Url = $"http://localhost:{musicServerOptions.Port}";
@@ -105,6 +105,7 @@ namespace Fastnet.Apollo.Web
                 {
                     si.Url = $"http://{ipAddress.ToString()}:{musicServerOptions.Port}";
                 }
+                si.Url = $"http://{ipAddress.ToString()}:{musicServerOptions.Port}";
                 log.Information($"music server url is {si.Url}");
             }
             catch (Exception xe)

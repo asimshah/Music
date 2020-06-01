@@ -48,7 +48,7 @@ namespace Fastnet.Music.Metatools
                 {
                     composer = artistPerformers.First();
                     artistPerformers.Remove(composer);
-                    log.Warning($"{taskItem} no composer found, using {composer.Name}");
+                    log.Debug($"{taskItem} no composer found, using {composer.Name}");
                     composer.Reset(PerformerType.Composer);                   
                 }
             }

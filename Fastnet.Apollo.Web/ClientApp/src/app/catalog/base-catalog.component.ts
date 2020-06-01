@@ -19,7 +19,7 @@ export enum CatalogView {
 }
 
 export abstract class BaseCatalogComponent implements OnInit, OnDestroy, AfterViewInit/*, ITagEditorCallback*/ {
-   
+   private guard = false;
    CatalogView = CatalogView;
    prefixMode: boolean = false;
    searchText: string;
@@ -51,13 +51,16 @@ export abstract class BaseCatalogComponent implements OnInit, OnDestroy, AfterVi
       this.subscriptions.push(this.messageService.deletedArtist.subscribe((id) => this.onDeletedArtist(id)));
    }
    async ngAfterViewInit() {
-      this.currentStyle = this.parameterService.getCurrentStyle();
-      let artistIdList = await this.library.getAllArtists(this.currentStyle);
-      for (let id of artistIdList) {
-         let a = await this.library.getArtist(this.currentStyle, id);
-         this.addArtistToDefaultView(a);
+      if (this.guard === false) {
+         this.guard = true;
+         this.currentStyle = this.parameterService.getCurrentStyle();
+         let artistIdList = await this.library.getAllArtists(this.currentStyle);
+         for (let id of artistIdList) {
+            let a = await this.library.getArtist(this.currentStyle, id);
+            this.addArtistToDefaultView(a);
+         }
+         console.log(`${artistIdList.length} artist ids loaded`);
       }
-      console.log(`${artistIdList.length} artist ids loaded`);
    }
    protected async abstract onSearch();
    protected abstract addArtistToDefaultView(a: Artist);

@@ -1,5 +1,6 @@
 ﻿using Fastnet.Core;
 using Fastnet.Music.Core;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 
@@ -22,8 +23,8 @@ namespace Fastnet.Apollo.Web
         public MusicStyles Id { get; set; }
         public bool Enabled { get; set; }
         public string DisplayName { get; set; }
+        public string[] Totals { get; set; }
     }
-
     public class ArtistSetDTO
     {
         public long[] ArtistIds { get; set; } // can be a single id, or a list when these are joint artists, e.g. as in jugalbandi's
@@ -185,14 +186,29 @@ namespace Fastnet.Apollo.Web
         public string DisplayName { get; set; }
         public IEnumerable<PlaylistItemDTO> Items { get; set; }
     }
+    public abstract class StatsDTO
+    {
+        public int ArtistCount { get; set; }
+        public TimeSpan Duration { get; set; }
+        public IEnumerable<string> Lines { get; set; }
 
+    }
+    public class PopularStatsDTO : StatsDTO
+    {
+        public int AlbumCount { get; set; }
+        public int TrackCount { get; set; }
 
-
-
-
-
-
-
-
-
+    }
+    public class WesternClassicalStatsDTO : StatsDTO
+    {
+        public int CompositionCount { get; set; }
+        public int PerformanceCount { get; set; }
+        public int MovementCount { get; set; }
+    }
+    public class IndianClassicalStatsDTO : StatsDTO
+    {
+        public int RagaCount { get; set; }
+        public int PerformanceCount { get; set; }
+        public int MovementCount { get; set; }
+    }
 }

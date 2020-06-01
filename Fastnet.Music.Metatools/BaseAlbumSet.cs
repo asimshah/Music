@@ -77,10 +77,13 @@ namespace Fastnet.Music.Metatools
         private Work GetWork(IEnumerable<Artist> artists)
         {
             var alphamericName = AlbumName.ToAlphaNumerics();
-            var artistIdList = artists.Select(a => a.Id);
-            var work = MusicDb.ArtistWorkList
-                .Where(aw => aw.Work.AlphamericName == alphamericName && artistIdList.Contains(aw.Artist.Id))
-                .Select(aw => aw.Work).SingleOrDefault();
+            var artistIdList = artists.Select(a => a.Id).OrderBy(n => n);
+            //var q1 = MusicDb.ArtistWorkList
+            //    .Where(aw => aw.Work.AlphamericName == alphamericName && artistIdList.Contains(aw.Artist.Id)).AsEnumerable();
+            //var q2 = q1.GroupBy(x => x.Work)
+            //    .Where(g => g.Select(x => x.ArtistId).OrderBy(id => id).SequenceEqual(artistIdList));
+            //var work = q2.Select(aw => aw.Key).SingleOrDefault();
+            var work = FindWorkByArtistIdsAndName(MusicDb, artistIdList, AlbumName);
             if (work == null)
             {
                 work = new Work
@@ -145,17 +148,6 @@ namespace Fastnet.Music.Metatools
                 }
             }
             return title;
-        }
-        private Track CreateTrackIfRequired(Work album, MusicFile mf, string title)
-        {
-            var alphamericTitle = title.ToAlphaNumerics();
-            var tracks = album.Tracks.Where(x => x.AlphamericTitle == alphamericTitle);
-            var track = tracks.Count() > 0 ?
-                SelectMatchingTrack(tracks, mf)
-                : null;
-            track ??= new Track {Work = album, OriginalTitle = mf.Title, UID = Guid.NewGuid() };
-            album.Tracks.Add(track);
-            return track;
         }
         /// <summary>
         /// Called during track creation when existing tracks are found with the same alphameric title as the current music file - parameter mf.
@@ -233,6 +225,31 @@ namespace Fastnet.Music.Metatools
                 log.Error($"[{taskItem}] {xe.Message}");
                 throw;
             }
+        }
+        private Track CreateTrackIfRequired(Work album, MusicFile mf, string title)
+        {
+            var alphamericTitle = title.ToAlphaNumerics();
+            var tracks = album.Tracks.Where(x => x.AlphamericTitle == alphamericTitle);
+            var track = tracks.Count() > 0 ?
+                SelectMatchingTrack(tracks, mf)
+                : null;
+            track ??= new Track { Work = album, OriginalTitle = mf.Title, UID = Guid.NewGuid() };
+            album.Tracks.Add(track);
+            return track;
+        }
+        private Work FindWorkByArtistIdsAndName(MusicDb db,IEnumerable<long> idlist, string name)
+        {
+            idlist = idlist.OrderBy(x => x);
+            var alphamericName = name.ToAlphaNumerics();
+            var q1 = db.ArtistWorkList
+                .Where(aw => aw.Work.AlphamericName == alphamericName && idlist.Contains(aw.Artist.Id))
+                .Select(x => x.Work).Distinct()
+                .Join(db.ArtistWorkList, w => w.Id, awl => awl.WorkId, (w, awl) => awl)
+                .AsEnumerable();
+            var q2 = q1.GroupBy(x => x.Work)
+                .Where(g => g.Select(x => x.ArtistId).OrderBy(id => id).SequenceEqual(idlist));
+            var work = q2.Select(aw => aw.Key).SingleOrDefault();
+            return work;
         }
     }
 }

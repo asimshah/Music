@@ -1,0 +1,3373 @@
+{
+    "IndianClassicalInformation":    {
+        "RagaNames": [
+            {
+                "Name": "Aarabi",
+                "Aliases": []
+            },
+            {
+                "Name": "Abhari (raagini)",
+                "Aliases": []
+            },
+            {
+                "Name": "Abheri Todi",
+                "Aliases": []
+            },
+            {
+                "Name": "Abhiri (raagini)",
+                "Aliases": []
+            },
+            {
+                "Name": "Abhogi",
+                "Aliases": []
+            },
+            {
+                "Name": "Abhogi Kanada",
+                "Aliases": []
+            },
+            {
+                "Name": "Achob",
+                "Aliases": []
+            },
+            {
+                "Name": "Adambari Kedar",
+                "Aliases": []
+            },
+            {
+                "Name": "Adana",
+                "Aliases": []
+            },
+            {
+                "Name": "Adana Bahar",
+                "Aliases": []
+            },
+            {
+                "Name": "Adana Malhar",
+                "Aliases": []
+            },
+            {
+                "Name": "Adbhut Kalyan",
+                "Aliases": []
+            },
+            {
+                "Name": "Adbhut Ranjani",
+                "Aliases": []
+            },
+            {
+                "Name": "Ahir Bhairav",
+                "Aliases": []
+            },
+            {
+                "Name": "Ahimohini",
+                "Aliases": []
+            },
+            {
+                "Name": "Ahir Kanada",
+                "Aliases": []
+            },
+            {
+                "Name": "Ahir Lalat",
+                "Aliases": []
+            },
+            {
+                "Name": "Ahiri (raagini)",
+                "Aliases": []
+            },
+            {
+                "Name": "Ahiri Malhar",
+                "Aliases": []
+            },
+            {
+                "Name": "Ahiri Todi",
+                "Aliases": []
+            },
+            {
+                "Name": "Alamgiri",
+                "Aliases": []
+            },
+            {
+                "Name": "Amba Manohari",
+                "Aliases": []
+            },
+            {
+                "Name": "Ambika Sarang",
+                "Aliases": []
+            },
+            {
+                "Name": "Amritvarshini (raag)",
+                "Aliases": []
+            },
+            {
+                "Name": "Ananda (raag's son)",
+                "Aliases": []
+            },
+            {
+                "Name": "Ananda Bhairav",
+                "Aliases": [ "Ananda Bhairava" ]
+            },
+            {
+                "Name": "Ananda Malhar",
+                "Aliases": []
+            },
+            {
+                "Name": "Anandi kedar",
+                "Aliases": []
+            },
+            {
+                "Name": "Anandi",
+                "Aliases": []
+            },
+            {
+                "Name": "Andiyali (raagini)",
+                "Aliases": []
+            },
+            {
+                "Name": "Anjani Kalyan",
+                "Aliases": []
+            },
+            {
+                "Name": "Anjani Todi",
+                "Aliases": []
+            },
+            {
+                "Name": "Anuranjani",
+                "Aliases": []
+            },
+            {
+                "Name": "Alhaiya Bilaval",
+                "Aliases": []
+            },
+            {
+                "Name": "Araj",
+                "Aliases": []
+            },
+            {
+                "Name": "Arun Malhar",
+                "Aliases": []
+            },
+            {
+                "Name": "Asa",
+                "Aliases": []
+            },
+            {
+                "Name": "Asa Bhairav",
+                "Aliases": []
+            },
+            {
+                "Name": "Asa Kafi",
+                "Aliases": []
+            },
+            {
+                "Name": "Asa Mand",
+                "Aliases": []
+            },
+            {
+                "Name": "Asa Todi",
+                "Aliases": []
+            },
+            {
+                "Name": "Asa Asavari",
+                "Aliases": []
+            },
+            {
+                "Name": "Asavari (Shuddh Rishabh Asavari)",
+                "Aliases": []
+            },
+            {
+                "Name": "Asavari Todi (Komal Rishabh Asavari)",
+                "Aliases": []
+            },
+            {
+                "Name": "Aslekhi (raagini)",
+                "Aliases": []
+            },
+            {
+                "Name": "Averi Bhairavi",
+                "Aliases": []
+            },
+            {
+                "Name": "Audav Bilawal",
+                "Aliases": []
+            },
+            {
+                "Name": "Audav Devgiri (raagini)",
+                "Aliases": []
+            },
+            {
+                "Name": "Audav Dhannasri (raagini)",
+                "Aliases": []
+            },
+            {
+                "Name": "Badhamsa Sarang (Badhans Sarang)",
+                "Aliases": []
+            },
+            {
+                "Name": "Bageshri",
+                "Aliases": [ "Bageshwari" ]
+            },
+            {
+                "Name": "Bageshri Bahar",
+                "Aliases": []
+            },
+            {
+                "Name": "Bageshri Kanada",
+                "Aliases": []
+            },
+            {
+                "Name": "Bahaduri Todi",
+                "Aliases": []
+            },
+            {
+                "Name": "Bahar",
+                "Aliases": []
+            },
+            {
+                "Name": "Bairagi Bhairav",
+                "Aliases": []
+            },
+            {
+                "Name": "Bairagi",
+                "Aliases": []
+            },
+            {
+                "Name": "Bairagi Todi",
+                "Aliases": []
+            },
+            {
+                "Name": "Bakul Bhairav",
+                "Aliases": []
+            },
+            {
+                "Name": "Ban (putra raag)",
+                "Aliases": []
+            },
+            {
+                "Name": "Bangal Bhairav",
+                "Aliases": []
+            },
+            {
+                "Name": "Bangal Bilawal",
+                "Aliases": []
+            },
+            {
+                "Name": "Bangal (putra raag)",
+                "Aliases": []
+            },
+            {
+                "Name": "Bangli (raagini)",
+                "Aliases": []
+            },
+            {
+                "Name": "Barari (Marwa aang)",
+                "Aliases": []
+            },
+            {
+                "Name": "Barari (Purvi aang)",
+                "Aliases": []
+            },
+            {
+                "Name": "Barathi Todi",
+                "Aliases": []
+            },
+            {
+                "Name": "Barhams Sarang",
+                "Aliases": []
+            },
+            {
+                "Name": "Barahansika (raagini)",
+                "Aliases": []
+            },
+            {
+                "Name": "Barwa (raag)",
+                "Aliases": []
+            },
+            {
+                "Name": "Basant",
+                "Aliases": []
+            },
+            {
+                "Name": "Basant Bahar",
+                "Aliases": []
+            },
+            {
+                "Name": "Basant Hindol",
+                "Aliases": []
+            },
+            {
+                "Name": "Basanta Mukhari",
+                "Aliases": []
+            },
+            {
+                "Name": "Basanti (raagini)",
+                "Aliases": []
+            },
+            {
+                "Name": "Basanti Kanada",
+                "Aliases": []
+            },
+            {
+                "Name": "Basanti Kauns",
+                "Aliases": []
+            },
+            {
+                "Name": "Basanti Kedar",
+                "Aliases": []
+            },
+            {
+                "Name": "Baul",
+                "Aliases": [],
+                "DisplayName": "Baul"
+            },
+            {
+                "Name": "Bayati",
+                "Aliases": []
+            },
+            {
+                "Name": "Bhairav",
+                "Aliases": []
+            },
+            {
+                "Name": "Beehad Bhairav",
+                "Aliases": []
+            },
+            {
+                "Name": "Bhairav Bahar",
+                "Aliases": [ "Bhairo Bahar" ]
+            },
+            {
+                "Name": "Bhairav Bhatiyar",
+                "Aliases": []
+            },
+            {
+                "Name": "Bhairavam",
+                "Aliases": []
+            },
+            {
+                "Name": "Bhairavi",
+                "Aliases": []
+            },
+            {
+                "Name": "Bhankhar",
+                "Aliases": [ "Bhankar" ]
+            },
+            {
+                "Name": "Bhankhari",
+                "Aliases": []
+            },
+            {
+                "Name": "Bhaskali",
+                "Aliases": []
+            },
+            {
+                "Name": "Bhasker (putra raag)",
+                "Aliases": []
+            },
+            {
+                "Name": "Bhatiali",
+                "Aliases": [ "Bhatiyali", "Bhatiali (Boatsong Of Bengal)", "Boatsong Of Bengal" ],
+                "DisplayName": "Bhatiali"
+            },
+            {
+                "Name": "Bhatiyar",
+                "Aliases": []
+            },
+            {
+                "Name": "Bhatiyari Bhairav",
+                "Aliases": []
+            },
+            {
+                "Name": "Bhavmat Bhairav",
+                "Aliases": []
+            },
+            {
+                "Name": "Bhav Kauns",
+                "Aliases": []
+            },
+            {
+                "Name": "Bhavsakh",
+                "Aliases": []
+            },
+            {
+                "Name": "Bhawani Bahar",
+                "Aliases": []
+            },
+            {
+                "Name": "Bhawani",
+                "Aliases": []
+            },
+            {
+                "Name": "Bhilalu",
+                "Aliases": []
+            },
+            {
+                "Name": "Bhim (Kafi thaat)",
+                "Aliases": []
+            },
+            {
+                "Name": "Bhimpalasi",
+                "Aliases": [ "Bheempalasee", "Bhimpalassi" ]
+            },
+            {
+                "Name": "Bhinna Bhairav",
+                "Aliases": []
+            },
+            {
+                "Name": "Bhinna Kauns",
+                "Aliases": []
+            },
+            {
+                "Name": "Bhinna Lalat",
+                "Aliases": []
+            },
+            {
+                "Name": "Bhinna Rageshri",
+                "Aliases": []
+            },
+            {
+                "Name": "Bhinna Shadaja",
+                "Aliases": []
+            },
+            {
+                "Name": "Bhora (putra raag)",
+                "Aliases": []
+            },
+            {
+                "Name": "Bhoopal (bhairav thaat)",
+                "Aliases": []
+            },
+            {
+                "Name": "Bhoopal Todi",
+                "Aliases": []
+            },
+            {
+                "Name": "Bhoopeshwar",
+                "Aliases": []
+            },
+            {
+                "Name": "Bhoopali",
+                "Aliases": [ "Bhoop", "Bhopali", "Bhupali" ]
+            },
+            {
+                "Name": "Bhup Bilawal",
+                "Aliases": []
+            },
+            {
+                "Name": "Bhup Nat",
+                "Aliases": []
+            },
+            {
+                "Name": "Bhupawali",
+                "Aliases": []
+            },
+            {
+                "Name": "Bhupkali",
+                "Aliases": []
+            },
+            {
+                "Name": "Bhuplai",
+                "Aliases": []
+            },
+            {
+                "Name": "Bibhas (Marwa aang)",
+                "Aliases": []
+            },
+            {
+                "Name": "Bibhas (Purvi aang)",
+                "Aliases": []
+            },
+            {
+                "Name": "Bibhas Parbhati",
+                "Aliases": []
+            },
+            {
+                "Name": "Bihagada",
+                "Aliases": [ "Bihagara", "Bihagda" ]
+            },
+            {
+                "Name": "Bihari",
+                "Aliases": []
+            },
+            {
+                "Name": "Bihag",
+                "Aliases": []
+            },
+            {
+                "Name": "Bilaskhani Todi",
+                "Aliases": [ "Bilashkhani Todi", "Bilashkani Todi" ]
+            },
+            {
+                "Name": "Bilawal",
+                "Aliases": []
+            },
+            {
+                "Name": "Bilawal Dakhani",
+                "Aliases": []
+            },
+            {
+                "Name": "Bilawal Gond",
+                "Aliases": []
+            },
+            {
+                "Name": "Bilawal Malhar",
+                "Aliases": []
+            },
+            {
+                "Name": "Bilawali (raagini)",
+                "Aliases": []
+            },
+            {
+                "Name": "Binoda (putra raag)",
+                "Aliases": []
+            },
+            {
+                "Name": "Biradhar (putra raag)",
+                "Aliases": []
+            },
+            {
+                "Name": "Birju ki Malhar",
+                "Aliases": []
+            },
+            {
+                "Name": "Chaiti Bhup",
+                "Aliases": []
+            },
+            {
+                "Name": "Chakradhar",
+                "Aliases": []
+            },
+            {
+                "Name": "Chakravakam",
+                "Aliases": [ "Chakravaham" ]
+            },
+            {
+                "Name": "Chalnat",
+                "Aliases": []
+            },
+            {
+                "Name": "Champak bilawal",
+                "Aliases": []
+            },
+            {
+                "Name": "Champak (putra raag)",
+                "Aliases": []
+            },
+            {
+                "Name": "Champakali",
+                "Aliases": []
+            },
+            {
+                "Name": "Chand (putra raag)",
+                "Aliases": []
+            },
+            {
+                "Name": "Chanchalsas Malhar",
+                "Aliases": []
+            },
+            {
+                "Name": "Chandani Bihag",
+                "Aliases": []
+            },
+            {
+                "Name": "Chandani Kalyan",
+                "Aliases": []
+            },
+            {
+                "Name": "Chandani Kedar",
+                "Aliases": []
+            },
+            {
+                "Name": "Chandra Bhairav",
+                "Aliases": []
+            },
+            {
+                "Name": "Chandra Bhankar",
+                "Aliases": []
+            },
+            {
+                "Name": "Chandra-Bimb (putra raag)",
+                "Aliases": []
+            },
+            {
+                "Name": "Chandradhwani",
+                "Aliases": []
+            },
+            {
+                "Name": "Chandrakauns",
+                "Aliases": []
+            },
+            {
+                "Name": "Chandramouli",
+                "Aliases": []
+            },
+            {
+                "Name": "Chandranandan",
+                "Aliases": []
+            },
+            {
+                "Name": "Chandraprabha",
+                "Aliases": []
+            },
+            {
+                "Name": "Charju ki Malhar",
+                "Aliases": []
+            },
+            {
+                "Name": "Charukauns",
+                "Aliases": []
+            },
+            {
+                "Name": "Charukeshi",
+                "Aliases": []
+            },
+            {
+                "Name": "Chhaya bihag",
+                "Aliases": []
+            },
+            {
+                "Name": "Chhaya Gaud Sarang",
+                "Aliases": []
+            },
+            {
+                "Name": "Chhaya Hindol",
+                "Aliases": []
+            },
+            {
+                "Name": "Chhaya Kalyan",
+                "Aliases": []
+            },
+            {
+                "Name": "Chhaya Malhar",
+                "Aliases": []
+            },
+            {
+                "Name": "Chhaya Tilak",
+                "Aliases": []
+            },
+            {
+                "Name": "Chhaya",
+                "Aliases": []
+            },
+            {
+                "Name": "Chhayanat",
+                "Aliases": []
+            },
+            {
+                "Name": "Composition",
+                "Aliases": [],
+                "DisplayName": "Composition"
+            },
+            {
+                "Name": "Dagori",
+                "Aliases": []
+            },
+            {
+                "Name": "Darbari",
+                "Aliases": []
+            },
+            {
+                "Name": "Darbari Kanada",
+                "Aliases": [ "Darbari Kanhra", "Darbari Kanhara" ]
+            },
+            {
+                "Name": "Darbari Todi",
+                "Aliases": []
+            },
+            {
+                "Name": "Dayabati",
+                "Aliases": []
+            },
+            {
+                "Name": "Deepak (Bilawal Thaat)",
+                "Aliases": []
+            },
+            {
+                "Name": "Deepak Kedar",
+                "Aliases": []
+            },
+            {
+                "Name": "Deepawali",
+                "Aliases": []
+            },
+            {
+                "Name": "Deepranjani",
+                "Aliases": []
+            },
+            {
+                "Name": "Deosakh",
+                "Aliases": []
+            },
+            {
+                "Name": "Deogandhara (raag's son)",
+                "Aliases": []
+            },
+            {
+                "Name": "Des",
+                "Aliases": [ "Desh" ]
+            },
+            {
+                "Name": "Deshkar (Purvi aang)",
+                "Aliases": []
+            },
+            {
+                "Name": "Deshkar",
+                "Aliases": []
+            },
+            {
+                "Name": "Desi",
+                "Aliases": [ "Deshi" ]
+            },
+            {
+                "Name": "Des Malhar",
+                "Aliases": [ "Desh Malhar" ]
+            },
+            {
+                "Name": "Desi Tilang",
+                "Aliases": [ "Deshi Tilang" ]
+            },
+            {
+                "Name": "Desi Todi",
+                "Aliases": [ "Deshi Todi" ]
+            },
+            {
+                "Name": "Devkari (raagini)",
+                "Aliases": []
+            },
+            {
+                "Name": "Dev Gandhar (Jogia aang)",
+                "Aliases": []
+            },
+            {
+                "Name": "Dev Gandhar",
+                "Aliases": []
+            },
+            {
+                "Name": "Devgaandhari (raagini)",
+                "Aliases": []
+            },
+            {
+                "Name": "Devaranjani",
+                "Aliases": []
+            },
+            {
+                "Name": "Devata Bhairav",
+                "Aliases": []
+            },
+            {
+                "Name": "Devgiri Bilawal",
+                "Aliases": []
+            },
+            {
+                "Name": "Devkauns",
+                "Aliases": []
+            },
+            {
+                "Name": "Dhan Basanti",
+                "Aliases": []
+            },
+            {
+                "Name": "Dhanakoni Kalyan",
+                "Aliases": []
+            },
+            {
+                "Name": "Dhanashri (Bhairavi aang)",
+                "Aliases": []
+            },
+            {
+                "Name": "Dhanashri (Kafi aang)",
+                "Aliases": []
+            },
+            {
+                "Name": "Dhanashri (Khamaj aang)",
+                "Aliases": []
+            },
+            {
+                "Name": "Dhanawarchi Kalyan",
+                "Aliases": []
+            },
+            {
+                "Name": "Dhani",
+                "Aliases": []
+            },
+            {
+                "Name": "Dhanikauns",
+                "Aliases": []
+            },
+            {
+                "Name": "Dhanya Dhaivat",
+                "Aliases": []
+            },
+            {
+                "Name": "Dharmavati",
+                "Aliases": [ "Dharmavathi" ]
+            },
+            {
+                "Name": "Dhulia Malhar",
+                "Aliases": []
+            },
+            {
+                "Name": "Dhulia Sarang",
+                "Aliases": []
+            },
+            {
+                "Name": "Dhun",
+                "Aliases": [],
+                "DisplayName": "Dhun"
+            },
+            {
+                "Name": "Dinka Shankara",
+                "Aliases": []
+            },
+            {
+                "Name": "Dinki Puriya",
+                "Aliases": []
+            },
+            {
+                "Name": "Dishakh (putra raag)",
+                "Aliases": []
+            },
+            {
+                "Name": "Durga",
+                "Aliases": [ "Durga (Khamaj thaat)" ]
+            },
+            {
+                "Name": "Durga Kedar",
+                "Aliases": []
+            },
+            {
+                "Name": "Durgeshwari 1",
+                "Aliases": []
+            },
+            {
+                "Name": "Durgeshwari 2",
+                "Aliases": []
+            },
+            {
+                "Name": "Dwijavanthi",
+                "Aliases": []
+            },
+            {
+                "Name": "Emni Bilawal",
+                "Aliases": []
+            },
+            {
+                "Name": "Enayatkhani Kanada",
+                "Aliases": [ "Enayetkhani Kanada" ]
+            },
+            {
+                "Name": "Gagan Vihang",
+                "Aliases": []
+            },
+            {
+                "Name": "Gajdhar (putra raag)",
+                "Aliases": []
+            },
+            {
+                "Name": "Gandhara (putra raag)",
+                "Aliases": []
+            },
+            {
+                "Name": "Gandhari 1 (raagini)",
+                "Aliases": []
+            },
+            {
+                "Name": "Gandhari 2 (raagini)",
+                "Aliases": []
+            },
+            {
+                "Name": "Gandhari 3 (raagini)",
+                "Aliases": []
+            },
+            {
+                "Name": "Gandhi Malhar",
+                "Aliases": []
+            },
+            {
+                "Name": "Ganeshwari",
+                "Aliases": []
+            },
+            {
+                "Name": "Gara",
+                "Aliases": []
+            },
+            {
+                "Name": "Gara Bageshri",
+                "Aliases": []
+            },
+            {
+                "Name": "Gara Kanada",
+                "Aliases": []
+            },
+            {
+                "Name": "Gaud Bahar",
+                "Aliases": []
+            },
+            {
+                "Name": "Gaud Bilawal",
+                "Aliases": []
+            },
+            {
+                "Name": "Gaud Malhar",
+                "Aliases": []
+            },
+            {
+                "Name": "Gaud Sarang",
+                "Aliases": []
+            },
+            {
+                "Name": "Gaudgiri Bahar",
+                "Aliases": []
+            },
+            {
+                "Name": "Gaudi (putra raag)",
+                "Aliases": []
+            },
+            {
+                "Name": "Gaudi Lalat",
+                "Aliases": []
+            },
+            {
+                "Name": "Gaudi Malari (putra raag)",
+                "Aliases": []
+            },
+            {
+                "Name": "Gauri (Bhairav thaat)",
+                "Aliases": []
+            },
+            {
+                "Name": "Gauri (Kalingada aang) (2 M’s)",
+                "Aliases": []
+            },
+            {
+                "Name": "Gauri (Marwa aang)",
+                "Aliases": []
+            },
+            {
+                "Name": "Gauri Bairagan",
+                "Aliases": []
+            },
+            {
+                "Name": "Gauri Basant",
+                "Aliases": []
+            },
+            {
+                "Name": "Gauri Chayti",
+                "Aliases": []
+            },
+            {
+                "Name": "Gauri Dakhani",
+                "Aliases": []
+            },
+            {
+                "Name": "Gauri Deepaki",
+                "Aliases": []
+            },
+            {
+                "Name": "Gauri Guarairi",
+                "Aliases": []
+            },
+            {
+                "Name": "Gauri Majh",
+                "Aliases": []
+            },
+            {
+                "Name": "Gauri Mala",
+                "Aliases": []
+            },
+            {
+                "Name": "Gauri Malva",
+                "Aliases": []
+            },
+            {
+                "Name": "Gauri Purbi",
+                "Aliases": []
+            },
+            {
+                "Name": "Gauri Purbi Deepaki",
+                "Aliases": []
+            },
+            {
+                "Name": "Gauri Sorath",
+                "Aliases": []
+            },
+            {
+                "Name": "Gaundkari (raagini)",
+                "Aliases": []
+            },
+            {
+                "Name": "Gawati",
+                "Aliases": [ "Gauti", "Gavti", "Gavati" ]
+            },
+            {
+                "Name": "Godagir (raagini)",
+                "Aliases": []
+            },
+            {
+                "Name": "Gopika Basant",
+                "Aliases": []
+            },
+            {
+                "Name": "Gorakh Kalyan",
+                "Aliases": []
+            },
+            {
+                "Name": "Govardhani Todi",
+                "Aliases": []
+            },
+            {
+                "Name": "Gound",
+                "Aliases": []
+            },
+            {
+                "Name": "Gujjari (raagini)",
+                "Aliases": []
+            },
+            {
+                "Name": "Guna Kalyan",
+                "Aliases": [ "Gun Kalyan" ]
+            },
+            {
+                "Name": "Guna Sagra",
+                "Aliases": []
+            },
+            {
+                "Name": "Gunkiri (raagini)",
+                "Aliases": []
+            },
+            {
+                "Name": "Gunguni (putra raag)",
+                "Aliases": []
+            },
+            {
+                "Name": "Gunakali",
+                "Aliases": [ "Gunkali" ]
+            },
+            {
+                "Name": "Gunakali Jogia",
+                "Aliases": []
+            },
+            {
+                "Name": "Gunakree",
+                "Aliases": []
+            },
+            {
+                "Name": "Gunaranjani",
+                "Aliases": []
+            },
+            {
+                "Name": "Gund (putra raag)",
+                "Aliases": []
+            },
+            {
+                "Name": "Gunji Kanada",
+                "Aliases": []
+            },
+            {
+                "Name": "Gunjikauns",
+                "Aliases": []
+            },
+            {
+                "Name": "Gurjri (raagini)",
+                "Aliases": []
+            },
+            {
+                "Name": "Gurjari todi",
+                "Aliases": []
+            },
+            {
+                "Name": "Guru Kalyan",
+                "Aliases": []
+            },
+            {
+                "Name": "Gyankali",
+                "Aliases": []
+            },
+            {
+                "Name": "Hameer Bahar",
+                "Aliases": []
+            },
+            {
+                "Name": "Hameer Kalyan",
+                "Aliases": []
+            },
+            {
+                "Name": "Hameer Kedar",
+                "Aliases": []
+            },
+            {
+                "Name": "Hameer",
+                "Aliases": []
+            },
+            {
+                "Name": "Hameeri Bilawal",
+                "Aliases": []
+            },
+            {
+                "Name": "Hamviri (raagini)",
+                "Aliases": []
+            },
+            {
+                "Name": "Hamsadhvani",
+                "Aliases": [ "Hamsadhwani" ]
+            },
+            {
+                "Name": "Hamsakinkini",
+                "Aliases": []
+            },
+            {
+                "Name": "Himala (raag's son)",
+                "Aliases": []
+            },
+            {
+                "Name": "Hansanarayani (Purvi thaat)",
+                "Aliases": []
+            },
+            {
+                "Name": "Hanskinkini",
+                "Aliases": []
+            },
+            {
+                "Name": "Hansvinod",
+                "Aliases": []
+            },
+            {
+                "Name": "Harakh (putra raag)",
+                "Aliases": []
+            },
+            {
+                "Name": "Harsha (raag's son)",
+                "Aliases": []
+            },
+            {
+                "Name": "Harasringara (raagini)",
+                "Aliases": []
+            },
+            {
+                "Name": "Harikauns",
+                "Aliases": []
+            },
+            {
+                "Name": "Haripriya",
+                "Aliases": []
+            },
+            {
+                "Name": "Hem Bihag",
+                "Aliases": []
+            },
+            {
+                "Name": "Hem Kalyan",
+                "Aliases": []
+            },
+            {
+                "Name": "Hem Lalit",
+                "Aliases": [ "Hem Lalat" ]
+            },
+            {
+                "Name": "Hem Nat",
+                "Aliases": []
+            },
+            {
+                "Name": "Hemshri",
+                "Aliases": []
+            },
+            {
+                "Name": "Hemant",
+                "Aliases": []
+            },
+            {
+                "Name": "Hemavati",
+                "Aliases": [ "Hemavathi", "Hemavathy" ]
+            },
+            {
+                "Name": "Hijaj Bhairav",
+                "Aliases": []
+            },
+            {
+                "Name": "Hindol",
+                "Aliases": []
+            },
+            {
+                "Name": "Hindol Bahar",
+                "Aliases": []
+            },
+            {
+                "Name": "Hindol Basant",
+                "Aliases": []
+            },
+            {
+                "Name": "Hindol Hem",
+                "Aliases": []
+            },
+            {
+                "Name": "Hindol Kalyan",
+                "Aliases": []
+            },
+            {
+                "Name": "Hindol Pancham",
+                "Aliases": []
+            },
+            {
+                "Name": "Hindoli (raagini)",
+                "Aliases": []
+            },
+            {
+                "Name": "Hindolita",
+                "Aliases": []
+            },
+            {
+                "Name": "Hussaini Kanada 1",
+                "Aliases": []
+            },
+            {
+                "Name": "Hussaini Kanada 2",
+                "Aliases": []
+            },
+            {
+                "Name": "Hussani Bhairavi",
+                "Aliases": []
+            },
+            {
+                "Name": "Hussani Todi",
+                "Aliases": []
+            },
+            {
+                "Name": "Iman (raag's son)",
+                "Aliases": []
+            },
+            {
+                "Name": "Imratkauns",
+                "Aliases": []
+            },
+            {
+                "Name": "Indumati",
+                "Aliases": []
+            },
+            {
+                "Name": "Jablidhar (putra raag)",
+                "Aliases": []
+            },
+            {
+                "Name": "Jaij Bilawal",
+                "Aliases": []
+            },
+            {
+                "Name": "Jait",
+                "Aliases": []
+            },
+            {
+                "Name": "Jaitsri",
+                "Aliases": []
+            },
+            {
+                "Name": "Jait Kalyan",
+                "Aliases": []
+            },
+            {
+                "Name": "Jaijaiwanti",
+                "Aliases": [ "Jaijaivanti" ]
+            },
+            {
+                "Name": "Jaijaiwanti Kanada",
+                "Aliases": [ "Jaijaivanti Kanada" ]
+            },
+            {
+                "Name": "Jaijaiwanti Todi",
+                "Aliases": [ "Jaijaivanti Todi" ]
+            },
+            {
+                "Name": "Jaldhara (putra raag)",
+                "Aliases": []
+            },
+            {
+                "Name": "Jaladhar Basanti",
+                "Aliases": []
+            },
+            {
+                "Name": "Jaladhar Desa",
+                "Aliases": []
+            },
+            {
+                "Name": "Jaladhar Kedar",
+                "Aliases": []
+            },
+            {
+                "Name": "Janasammohini",
+                "Aliases": []
+            },
+            {
+                "Name": "Jangla Purvi",
+                "Aliases": []
+            },
+            {
+                "Name": "Jangula (Asavari aang)",
+                "Aliases": []
+            },
+            {
+                "Name": "Jaunkali",
+                "Aliases": []
+            },
+            {
+                "Name": "Jaunpuri",
+                "Aliases": []
+            },
+            {
+                "Name": "Jaunpuri Bahar",
+                "Aliases": []
+            },
+            {
+                "Name": "Jaunpuri Todi",
+                "Aliases": []
+            },
+            {
+                "Name": "Jayant Malhar (Jaijaiwanti and Malhar)",
+                "Aliases": []
+            },
+            {
+                "Name": "Jayanti (raagini)",
+                "Aliases": []
+            },
+            {
+                "Name": "Jaya",
+                "Aliases": []
+            },
+            {
+                "Name": "Jayet",
+                "Aliases": []
+            },
+            {
+                "Name": "Jetashree",
+                "Aliases": []
+            },
+            {
+                "Name": "Jhanjh Malhar",
+                "Aliases": []
+            },
+            {
+                "Name": "Jhinjhoti",
+                "Aliases": []
+            },
+            {
+                "Name": "Jog",
+                "Aliases": []
+            },
+            {
+                "Name": "Jog Bahar",
+                "Aliases": []
+            },
+            {
+                "Name": "Jogeshwari",
+                "Aliases": []
+            },
+            {
+                "Name": "Jogi Bhairavi",
+                "Aliases": []
+            },
+            {
+                "Name": "Jogi Mand",
+                "Aliases": []
+            },
+            {
+                "Name": "Jogia Kalingada",
+                "Aliases": []
+            },
+            {
+                "Name": "Jogia",
+                "Aliases": []
+            },
+            {
+                "Name": "Jogiya Asavari",
+                "Aliases": []
+            },
+            {
+                "Name": "Jogkauns",
+                "Aliases": []
+            },
+            {
+                "Name": "Jogwanti",
+                "Aliases": []
+            },
+            {
+                "Name": "Joun Bhairav",
+                "Aliases": []
+            },
+            {
+                "Name": "Kabir Bhairav 1",
+                "Aliases": []
+            },
+            {
+                "Name": "Kabir Bhairav 2",
+                "Aliases": []
+            },
+            {
+                "Name": "Kachheli (raagini)",
+                "Aliases": []
+            },
+            {
+                "Name": "Kafi",
+                "Aliases": []
+            },
+            {
+                "Name": "Kafi Bahar",
+                "Aliases": []
+            },
+            {
+                "Name": "Kafi Kanada",
+                "Aliases": []
+            },
+            {
+                "Name": "Kafi Malhar",
+                "Aliases": []
+            },
+            {
+                "Name": "Kaisiki (raagini)",
+                "Aliases": []
+            },
+            {
+                "Name": "Kajri",
+                "Aliases": [ "Kajari" ],
+                "DisplayName": "Kajri"
+            },
+            {
+                "Name": "Kakubha (raagini)",
+                "Aliases": []
+            },
+            {
+                "Name": "Kalahans",
+                "Aliases": []
+            },
+            {
+                "Name": "Kaalanka (putra raag)",
+                "Aliases": []
+            },
+            {
+                "Name": "Kalaranjani",
+                "Aliases": []
+            },
+            {
+                "Name": "Kalashree",
+                "Aliases": []
+            },
+            {
+                "Name": "Kalavati",
+                "Aliases": []
+            },
+            {
+                "Name": "Kalian",
+                "Aliases": []
+            },
+            {
+                "Name": "Kalian Bhopali",
+                "Aliases": []
+            },
+            {
+                "Name": "Kalingada",
+                "Aliases": []
+            },
+            {
+                "Name": "Kalyani",
+                "Aliases": []
+            },
+            {
+                "Name": "Kamakshani",
+                "Aliases": []
+            },
+            {
+                "Name": "Kamal (putra raag)",
+                "Aliases": []
+            },
+            {
+                "Name": "Kamal Shree",
+                "Aliases": []
+            },
+            {
+                "Name": "Kamalaranjani",
+                "Aliases": []
+            },
+            {
+                "Name": "Kameshwari",
+                "Aliases": []
+            },
+            {
+                "Name": "Kamod",
+                "Aliases": []
+            },
+            {
+                "Name": "Kamod Nat",
+                "Aliases": []
+            },
+            {
+                "Name": "Kamodi (raagini)",
+                "Aliases": []
+            },
+            {
+                "Name": "Kamodwanti",
+                "Aliases": []
+            },
+            {
+                "Name": "Kampili (raagini)",
+                "Aliases": []
+            },
+            {
+                "Name": "Kanada (raag)",
+                "Aliases": []
+            },
+            {
+                "Name": "Kaanara",
+                "Aliases": []
+            },
+            {
+                "Name": "Kannadi (raagini)",
+                "Aliases": []
+            },
+            {
+                "Name": "Kanada Bahar",
+                "Aliases": []
+            },
+            {
+                "Name": "Kanaraya (raag's son)",
+                "Aliases": []
+            },
+            {
+                "Name": "Kanmala (raag's son)",
+                "Aliases": []
+            },
+            {
+                "Name": "Kanra",
+                "Aliases": []
+            },
+            {
+                "Name": "Kapar Gauri",
+                "Aliases": []
+            },
+            {
+                "Name": "Karnati (raagini)",
+                "Aliases": []
+            },
+            {
+                "Name": "Karnataki (raagini)",
+                "Aliases": []
+            },
+            {
+                "Name": "Kaushi Kanada",
+                "Aliases": []
+            },
+            {
+                "Name": "Kaushiki (raagini)",
+                "Aliases": []
+            },
+            {
+                "Name": "Kedar",
+                "Aliases": []
+            },
+            {
+                "Name": "Kedari (raagini)",
+                "Aliases": []
+            },
+            {
+                "Name": "Kedar Bahar",
+                "Aliases": []
+            },
+            {
+                "Name": "Kedar Bhairav",
+                "Aliases": []
+            },
+            {
+                "Name": "Kedar Bhankar",
+                "Aliases": []
+            },
+            {
+                "Name": "Kedar Mand",
+                "Aliases": []
+            },
+            {
+                "Name": "Kedar Nand",
+                "Aliases": []
+            },
+            {
+                "Name": "Kedari Malhar",
+                "Aliases": []
+            },
+            {
+                "Name": "Kesari Kalyan",
+                "Aliases": []
+            },
+            {
+                "Name": "Khamaj",
+                "Aliases": []
+            },
+            {
+                "Name": "Khamaj Bahar",
+                "Aliases": []
+            },
+            {
+                "Name": "Khambavati",
+                "Aliases": []
+            },
+            {
+                "Name": "Khammaji Bhatiyar",
+                "Aliases": []
+            },
+            {
+                "Name": "Khat",
+                "Aliases": []
+            },
+            {
+                "Name": "Khat Dhanashree",
+                "Aliases": []
+            },
+            {
+                "Name": "Khat Todi",
+                "Aliases": []
+            },
+            {
+                "Name": "Khem Kalyan",
+                "Aliases": []
+            },
+            {
+                "Name": "Khemb",
+                "Aliases": []
+            },
+            {
+                "Name": "Khemdhwan",
+                "Aliases": []
+            },
+            {
+                "Name": "Khokar",
+                "Aliases": []
+            },
+            {
+                "Name": "Kiranranjani",
+                "Aliases": []
+            },
+            {
+                "Name": "Kirwani",
+                "Aliases": []
+            },
+            {
+                "Name": "Klawanti",
+                "Aliases": []
+            },
+            {
+                "Name": "Komal Bageshri",
+                "Aliases": []
+            },
+            {
+                "Name": "Kola (raag's son)",
+                "Aliases": []
+            },
+            {
+                "Name": "Kokar (raag's son)",
+                "Aliases": []
+            },
+            {
+                "Name": "Khokat (putra raag)",
+                "Aliases": []
+            },
+            {
+                "Name": "Krulanda (raag's son)",
+                "Aliases": []
+            },
+            {
+                "Name": "Kumbh (putra raag)",
+                "Aliases": []
+            },
+            {
+                "Name": "Kumbhara (raag's son)",
+                "Aliases": []
+            },
+            {
+                "Name": "Kumodini (raagini)",
+                "Aliases": []
+            },
+            {
+                "Name": "Kuntal (putra raag)",
+                "Aliases": []
+            },
+            {
+                "Name": "Kusha (raag's son)",
+                "Aliases": []
+            },
+            {
+                "Name": "Kusum (putra raag)",
+                "Aliases": []
+            },
+            {
+                "Name": "Lachari Kanada",
+                "Aliases": []
+            },
+            {
+                "Name": "Lachari Todi",
+                "Aliases": []
+            },
+            {
+                "Name": "Lachchasakh",
+                "Aliases": []
+            },
+            {
+                "Name": "Lagan Gandhar",
+                "Aliases": []
+            },
+            {
+                "Name": "Lajwanti",
+                "Aliases": []
+            },
+            {
+                "Name": "Lakshmi Todi",
+                "Aliases": []
+            },
+            {
+                "Name": "Lalat",
+                "Aliases": []
+            },
+            {
+                "Name": "Lalat Bahar",
+                "Aliases": []
+            },
+            {
+                "Name": "Lalat Pancham",
+                "Aliases": []
+            },
+            {
+                "Name": "Lalit",
+                "Aliases": []
+            },
+            {
+                "Name": "Lalit Bhatiyar",
+                "Aliases": []
+            },
+            {
+                "Name": "Lalit Bilas",
+                "Aliases": []
+            },
+            {
+                "Name": "Lalita (raagini)",
+                "Aliases": []
+            },
+            {
+                "Name": "Lalita Gauri (Bhairava aang)",
+                "Aliases": []
+            },
+            {
+                "Name": "Lalita Sohani",
+                "Aliases": []
+            },
+            {
+                "Name": "Lalitdhwani",
+                "Aliases": []
+            },
+            {
+                "Name": "Lalitkali",
+                "Aliases": []
+            },
+            {
+                "Name": "Lankadahan Sarang",
+                "Aliases": []
+            },
+            {
+                "Name": "Lankeshri 1",
+                "Aliases": []
+            },
+            {
+                "Name": "Lankeshri 2",
+                "Aliases": []
+            },
+            {
+                "Name": "Lankeshri Kanada",
+                "Aliases": []
+            },
+            {
+                "Name": "Lankeshwari",
+                "Aliases": []
+            },
+            {
+                "Name": "Lom",
+                "Aliases": []
+            },
+            {
+                "Name": "Madha Kalyan",
+                "Aliases": []
+            },
+            {
+                "Name": "Madhava (putra raag)",
+                "Aliases": []
+            },
+            {
+                "Name": "Madhasuraja",
+                "Aliases": []
+            },
+            {
+                "Name": "Madhu (putra raag)",
+                "Aliases": []
+            },
+            {
+                "Name": "Madhu Basant",
+                "Aliases": []
+            },
+            {
+                "Name": "Madhu Kalyan",
+                "Aliases": []
+            },
+            {
+                "Name": "Madhu Malhar",
+                "Aliases": []
+            },
+            {
+                "Name": "Madhu Sarang",
+                "Aliases": []
+            },
+            {
+                "Name": "Madhu Saraswati",
+                "Aliases": []
+            },
+            {
+                "Name": "Madhuwanti",
+                "Aliases": [ "Madhuvanti" ]
+            },
+            {
+                "Name": "Madhukauns",
+                "Aliases": []
+            },
+            {
+                "Name": "Madhumadh Sarang",
+                "Aliases": []
+            },
+            {
+                "Name": "Madhumalati",
+                "Aliases": []
+            },
+            {
+                "Name": "Madhumadhavi (raagini)",
+                "Aliases": []
+            },
+            {
+                "Name": "Madhuranjani",
+                "Aliases": []
+            },
+            {
+                "Name": "Madhusurawali",
+                "Aliases": []
+            },
+            {
+                "Name": "Madhyamad Sarang",
+                "Aliases": []
+            },
+            {
+                "Name": "Majh",
+                "Aliases": []
+            },
+            {
+                "Name": "Malagunji",
+                "Aliases": []
+            },
+            {
+                "Name": "Malashree",
+                "Aliases": []
+            },
+            {
+                "Name": "Malavasri (raagini)",
+                "Aliases": []
+            },
+            {
+                "Name": "Malati Basant",
+                "Aliases": []
+            },
+            {
+                "Name": "Malati Bihag",
+                "Aliases": []
+            },
+            {
+                "Name": "Malati",
+                "Aliases": []
+            },
+            {
+                "Name": "Malava",
+                "Aliases": []
+            },
+            {
+                "Name": "Malavi (Marwa thaat)",
+                "Aliases": []
+            },
+            {
+                "Name": "Malavi (Purvi thaat)",
+                "Aliases": []
+            },
+            {
+                "Name": "Malawa  Bihag",
+                "Aliases": []
+            },
+            {
+                "Name": "Malawati",
+                "Aliases": []
+            },
+            {
+                "Name": "Malayalam",
+                "Aliases": []
+            },
+            {
+                "Name": "Malhar",
+                "Aliases": []
+            },
+            {
+                "Name": "Malhar Ke Prakar",
+                "Aliases": [ "Malhaar Ke Prakar" ]
+            },
+            {
+                "Name": "Maligaura (d)",
+                "Aliases": []
+            },
+            {
+                "Name": "Maligaura (d, D)",
+                "Aliases": []
+            },
+            {
+                "Name": "Malini Basant",
+                "Aliases": []
+            },
+            {
+                "Name": "Malkauns",
+                "Aliases": []
+            },
+            {
+                "Name": "Malkauns Bahar",
+                "Aliases": []
+            },
+            {
+                "Name": "Malkauns Kanada",
+                "Aliases": []
+            },
+            {
+                "Name": "Malkauns Pancham",
+                "Aliases": []
+            },
+            {
+                "Name": "Malavi (raagini)",
+                "Aliases": []
+            },
+            {
+                "Name": "Maluha Bihag",
+                "Aliases": []
+            },
+            {
+                "Name": "Maluha Kalyan",
+                "Aliases": []
+            },
+            {
+                "Name": "Maluha Kedar",
+                "Aliases": []
+            },
+            {
+                "Name": "Maluha Mand",
+                "Aliases": []
+            },
+            {
+                "Name": "Mallari (raagini)",
+                "Aliases": []
+            },
+            {
+                "Name": "Manavi",
+                "Aliases": []
+            },
+            {
+                "Name": "Mand Bhairav",
+                "Aliases": [ "Maand Bhairav" ]
+            },
+            {
+                "Name": "Mand Bhatiyar",
+                "Aliases": [ "Maand Bhatiyar" ]
+            },
+            {
+                "Name": "Mand",
+                "Aliases": [ "Maand" ]
+            },
+            {
+                "Name": "Mangal Bhairav 1",
+                "Aliases": []
+            },
+            {
+                "Name": "Mangal Bhairav 2",
+                "Aliases": []
+            },
+            {
+                "Name": "Mangal Todi",
+                "Aliases": []
+            },
+            {
+                "Name": "Mangaldhwani",
+                "Aliases": []
+            },
+            {
+                "Name": "Mangalgujari",
+                "Aliases": []
+            },
+            {
+                "Name": "Mangalan (putra raag)",
+                "Aliases": []
+            },
+            {
+                "Name": "Mangiya Bhusani",
+                "Aliases": []
+            },
+            {
+                "Name": "Manj Khamaj",
+                "Aliases": []
+            },
+            {
+                "Name": "Manjari Bihag",
+                "Aliases": []
+            },
+            {
+                "Name": "Manjari",
+                "Aliases": []
+            },
+            {
+                "Name": "Marga Bihag",
+                "Aliases": []
+            },
+            {
+                "Name": "Maru (putra raag)",
+                "Aliases": []
+            },
+            {
+                "Name": "Maru Basant",
+                "Aliases": []
+            },
+            {
+                "Name": "Maru Bihag",
+                "Aliases": []
+            },
+            {
+                "Name": "Maru Dakhani",
+                "Aliases": []
+            },
+            {
+                "Name": "Maru Kalyan",
+                "Aliases": []
+            },
+            {
+                "Name": "Maru Kafi",
+                "Aliases": []
+            },
+            {
+                "Name": "Maru Khamaj",
+                "Aliases": []
+            },
+            {
+                "Name": "Maru Sarang",
+                "Aliases": []
+            },
+            {
+                "Name": "Marwa",
+                "Aliases": []
+            },
+            {
+                "Name": "Marwa Shree",
+                "Aliases": []
+            },
+            {
+                "Name": "Medhavi",
+                "Aliases": []
+            },
+            {
+                "Name": "Megh",
+                "Aliases": []
+            },
+            {
+                "Name": "Meghranji",
+                "Aliases": []
+            },
+            {
+                "Name": "Mehkali",
+                "Aliases": []
+            },
+            {
+                "Name": "Mewara (putra raag)",
+                "Aliases": []
+            },
+            {
+                "Name": "Mayuri (raagini)",
+                "Aliases": []
+            },
+            {
+                "Name": "Mirabai ki Malhar",
+                "Aliases": []
+            },
+            {
+                "Name": "Misra Bhairavi",
+                "Aliases": []
+            },
+            {
+                "Name": "Misra Desh",
+                "Aliases": []
+            },
+            {
+                "Name": "Misra Gara",
+                "Aliases": [ "Mishra Gara" ]
+            },
+            {
+                "Name": "Misra Jangla",
+                "Aliases": [ "Mishra Jangla" ]
+            },
+            {
+                "Name": "Misra Jhinjhoti",
+                "Aliases": [ "Mishra Jhinjhoti" ]
+            },
+            {
+                "Name": "Misra Kafi",
+                "Aliases": [ "Mishra Kafi" ]
+            },
+            {
+                "Name": "Misra Khamaj",
+                "Aliases": [ "Mishra Khamaj" ]
+            },
+            {
+                "Name": "Misra Mand",
+                "Aliases": [ "Mishra Mand" ]
+            },
+            {
+                "Name": "Misra Mel Ki Malhar",
+                "Aliases": [ "Mishra Mel Ki Malhar" ]
+            },
+            {
+                "Name": "Misra Piloo",
+                "Aliases": [ "Mishra Piloo", "Misra Pilu", "Mishra Pilu" ]
+            },
+            {
+                "Name": "Misra Tilak Kamod",
+                "Aliases": [ "Mishra Tilak Kamod" ]
+            },
+            {
+                "Name": "Misra Todi",
+                "Aliases": []
+            },
+            {
+                "Name": "Miyan ki Malhar",
+                "Aliases": [ "Mian ki Malhar", "Miya Malhar", "Miyan Malhar" ]
+            },
+            {
+                "Name": "Miyan ki Sarang",
+                "Aliases": [ "Mian ki Sarang", "Miya ki Sarang", "Miyan Sarang" ]
+            },
+            {
+                "Name": "Miyan ki Todi",
+                "Aliases": [ "Mian ki Todi", "Miya ki Todi", "Miyan Todi" ]
+            },
+            {
+                "Name": "Mohankauns",
+                "Aliases": []
+            },
+            {
+                "Name": "Motaki",
+                "Aliases": []
+            },
+            {
+                "Name": "MotakiTodi",
+                "Aliases": []
+            },
+            {
+                "Name": "Mrig Savani",
+                "Aliases": []
+            },
+            {
+                "Name": "Mudrika Kanada",
+                "Aliases": []
+            },
+            {
+                "Name": "Multani",
+                "Aliases": []
+            },
+            {
+                "Name": "Multani dhanashree",
+                "Aliases": []
+            },
+            {
+                "Name": "Mustang (putra raag)",
+                "Aliases": []
+            },
+            {
+                "Name": "Nad (putra raag)",
+                "Aliases": []
+            },
+            {
+                "Name": "Nagadhwani Kanada",
+                "Aliases": []
+            },
+            {
+                "Name": "Nagaswaravali",
+                "Aliases": []
+            },
+            {
+                "Name": "Nanad",
+                "Aliases": []
+            },
+            {
+                "Name": "Nanak Malhar",
+                "Aliases": []
+            },
+            {
+                "Name": "Nand Basant",
+                "Aliases": []
+            },
+            {
+                "Name": "Nand Kauns",
+                "Aliases": []
+            },
+            {
+                "Name": "Nand",
+                "Aliases": []
+            },
+            {
+                "Name": "Narayani",
+                "Aliases": []
+            },
+            {
+                "Name": "Nat (putra raag)",
+                "Aliases": []
+            },
+            {
+                "Name": "Nat Bhairav",
+                "Aliases": []
+            },
+            {
+                "Name": "Nat Bihag",
+                "Aliases": []
+            },
+            {
+                "Name": "Nat Bilawal",
+                "Aliases": []
+            },
+            {
+                "Name": "Nat Kamod",
+                "Aliases": []
+            },
+            {
+                "Name": "Nat Kedar",
+                "Aliases": []
+            },
+            {
+                "Name": "Nat Malhar",
+                "Aliases": []
+            },
+            {
+                "Name": "Nat nagari",
+                "Aliases": []
+            },
+            {
+                "Name": "Natachandra",
+                "Aliases": []
+            },
+            {
+                "Name": "Natahams",
+                "Aliases": []
+            },
+            {
+                "Name": "Natika (raagini)",
+                "Aliases": []
+            },
+            {
+                "Name": "Natnarayan",
+                "Aliases": []
+            },
+            {
+                "Name": "Natnarayani 1",
+                "Aliases": []
+            },
+            {
+                "Name": "Natnarayani 2",
+                "Aliases": []
+            },
+            {
+                "Name": "Nayaki Kanada",
+                "Aliases": []
+            },
+            {
+                "Name": "Neelambari",
+                "Aliases": []
+            },
+            {
+                "Name": "Nindiyari",
+                "Aliases": []
+            },
+            {
+                "Name": "Niranjani Todi",
+                "Aliases": []
+            },
+            {
+                "Name": "Pahadi",
+                "Aliases": []
+            },
+            {
+                "Name": "Palas Kafi",
+                "Aliases": []
+            },
+            {
+                "Name": "Palasi",
+                "Aliases": []
+            },
+            {
+                "Name": "Pancha Jogeshwari",
+                "Aliases": []
+            },
+            {
+                "Name": "Pancham (Basant aang)",
+                "Aliases": []
+            },
+            {
+                "Name": "Pancham (Hindol aang)",
+                "Aliases": []
+            },
+            {
+                "Name": "Pancham Malkauns",
+                "Aliases": []
+            },
+            {
+                "Name": "Pancham se Gara",
+                "Aliases": []
+            },
+            {
+                "Name": "Pancham (putra raag)",
+                "Aliases": []
+            },
+            {
+                "Name": "Parbal (putra raag)",
+                "Aliases": []
+            },
+            {
+                "Name": "Parbhati",
+                "Aliases": []
+            },
+            {
+                "Name": "Parbhati Bibhas",
+                "Aliases": []
+            },
+            {
+                "Name": "Parbhati Dakhani",
+                "Aliases": []
+            },
+            {
+                "Name": "Paraj Basant",
+                "Aliases": []
+            },
+            {
+                "Name": "Paraj Kalingada",
+                "Aliases": []
+            },
+            {
+                "Name": "Paraj (putra raag)",
+                "Aliases": []
+            },
+            {
+                "Name": "Parameshwari",
+                "Aliases": []
+            },
+            {
+                "Name": "Pat Bihag",
+                "Aliases": []
+            },
+            {
+                "Name": "Pat Kafi",
+                "Aliases": []
+            },
+            {
+                "Name": "Pat Ranjani",
+                "Aliases": []
+            },
+            {
+                "Name": "Patdeepak",
+                "Aliases": []
+            },
+            {
+                "Name": "Patmanjari (raagini)",
+                "Aliases": []
+            },
+            {
+                "Name": "Patmanjari 2",
+                "Aliases": []
+            },
+            {
+                "Name": "Patmanjari 3 (Talwandi Gharana)",
+                "Aliases": []
+            },
+            {
+                "Name": "Phulashree",
+                "Aliases": []
+            },
+            {
+                "Name": "Piloo",
+                "Aliases": [ "Pilu" ]
+            },
+            {
+                "Name": "Poorbya",
+                "Aliases": []
+            },
+            {
+                "Name": "Prabhakali",
+                "Aliases": []
+            },
+            {
+                "Name": "Prabhat Bhairav",
+                "Aliases": []
+            },
+            {
+                "Name": "Prabhateshwari",
+                "Aliases": []
+            },
+            {
+                "Name": "Pradeepaki",
+                "Aliases": []
+            },
+            {
+                "Name": "Pratapvarali",
+                "Aliases": []
+            },
+            {
+                "Name": "Priya Kalyan",
+                "Aliases": []
+            },
+            {
+                "Name": "Punyaki (raagini)",
+                "Aliases": []
+            },
+            {
+                "Name": "Purab Ang",
+                "Aliases": []
+            },
+
+            {
+                "Name": "Purva (Purvi thaat)",
+                "Aliases": []
+            },
+            {
+                "Name": "Purva Kalyan",
+                "Aliases": []
+            },
+            {
+                "Name": "Purvi Bihag",
+                "Aliases": []
+            },
+            {
+                "Name": "Purvi Kalyan",
+                "Aliases": [ "Purabi Kalyan" ]
+            },
+            {
+                "Name": "Puriya",
+                "Aliases": []
+            },
+            {
+                "Name": "Puriya Dhanashree",
+                "Aliases": [ "Puriya Dhanashri" ]
+            },
+            {
+                "Name": "Puriya Kalyan",
+                "Aliases": [ "Puriyaa Kalyan" ]
+            },
+            {
+                "Name": "Patdeep",
+                "Aliases": []
+            },
+            {
+                "Name": "Rachna Purab Ang",
+                "Aliases": []
+            },
+            {
+                "Name": "Raganga Sarang",
+                "Aliases": []
+            },
+            {
+                "Name": "Ragmala",
+                "Aliases": []
+            },
+            {
+                "Name": "Rageshri",
+                "Aliases": [ "Rageshwari", "Rageshree" ]
+            },
+            {
+                "Name": "Rageshri Bahar",
+                "Aliases": [ "Rageshwari Bahar", "Rageshree Bahar" ]
+            },
+            {
+                "Name": "Rageshri Kanada",
+                "Aliases": [ "Rageshwari Kanada", "Rageshree Kanada" ]
+            },
+            {
+                "Name": "Rageshri Kauns",
+                "Aliases": [ "Rageshwari Kauns", "Rageshree Kauns" ]
+            },
+            {
+                "Name": "Ragamalika",
+                "Aliases": [],
+                "DisplayName": "Ragamalika"
+            },
+            {
+                "Name": "Rahi",
+                "Aliases": []
+            },
+            {
+                "Name": "Raja Kalyan",
+                "Aliases": []
+            },
+            {
+                "Name": "Rajani Kalyan",
+                "Aliases": []
+            },
+            {
+                "Name": "Rama (putra raag)",
+                "Aliases": []
+            },
+            {
+                "Name": "Ram Gauri",
+                "Aliases": []
+            },
+            {
+                "Name": "Ramkali",
+                "Aliases": []
+            },
+            {
+                "Name": "RamKali Dakhani",
+                "Aliases": []
+            },
+            {
+                "Name": "Ram Kalyan",
+                "Aliases": []
+            },
+            {
+                "Name": "Ramdasi Malhar",
+                "Aliases": [ "Ramdas Malhar" ]
+            },
+            {
+                "Name": "Ramsakh",
+                "Aliases": []
+            },
+            {
+                "Name": "Ramakiri (raagini)",
+                "Aliases": []
+            },
+            {
+                "Name": "Rangeshwari",
+                "Aliases": []
+            },
+            {
+                "Name": "Rasia (raga)",
+                "Aliases": []
+            },
+            {
+                "Name": "Rasia Kanada",
+                "Aliases": []
+            },
+            {
+                "Name": "Rasranjani Rasavati",
+                "Aliases": []
+            },
+            {
+                "Name": "Rati Bhairav",
+                "Aliases": []
+            },
+            {
+                "Name": "Rayasa Kanada",
+                "Aliases": []
+            },
+            {
+                "Name": "Reethigowlai",
+                "Aliases": [ "Reethi Gowla" ]
+            },
+            {
+                "Name": "Rewa (Purvi aang)",
+                "Aliases": []
+            },
+            {
+                "Name": "Rupawati Kalyan",
+                "Aliases": []
+            },
+            {
+                "Name": "Rupkali",
+                "Aliases": []
+            },
+            {
+                "Name": "Rupmanjari Malhar",
+                "Aliases": []
+            },
+            {
+                "Name": "Sagara",
+                "Aliases": []
+            },
+            {
+                "Name": "Sagera",
+                "Aliases": []
+            },
+            {
+                "Name": "Sagra (putra raag)",
+                "Aliases": []
+            },
+            {
+                "Name": "Sagunaranjani",
+                "Aliases": []
+            },
+            {
+                "Name": "Sahanki (raagini)",
+                "Aliases": []
+            },
+            {
+                "Name": "Saheli todi",
+                "Aliases": []
+            },
+            {
+                "Name": "Saindhava (raag's son)",
+                "Aliases": []
+            },
+            {
+                "Name": "Saindhavi (raagini)",
+                "Aliases": []
+            },
+            {
+                "Name": "Sajan",
+                "Aliases": []
+            },
+            {
+                "Name": "Salagvarali",
+                "Aliases": []
+            },
+            {
+                "Name": "Salang Sarang",
+                "Aliases": []
+            },
+            {
+                "Name": "Salu (putra raag)",
+                "Aliases": []
+            },
+            {
+                "Name": "Samanta Sarang",
+                "Aliases": []
+            },
+            {
+                "Name": "Sampurna Bageshri",
+                "Aliases": []
+            },
+            {
+                "Name": "Sampurna Bangala (raag's son)",
+                "Aliases": []
+            },
+            {
+                "Name": "Sampurna Bhairavi (raagini)",
+                "Aliases": []
+            },
+            {
+                "Name": "Sampurna Basakta (raag's son)",
+                "Aliases": []
+            },
+            {
+                "Name": "Sampurna Gauda (raag's son)",
+                "Aliases": []
+            },
+            {
+                "Name": "Sampurna Hindol",
+                "Aliases": []
+            },
+            {
+                "Name": "Sampurna Kedar",
+                "Aliases": []
+            },
+            {
+                "Name": "Sampurna Malkauns",
+                "Aliases": []
+            },
+            {
+                "Name": "Sampurna Sarang",
+                "Aliases": []
+            },
+            {
+                "Name": "Sampurna Ramkali (raagini)",
+                "Aliases": []
+            },
+            {
+                "Name": "Sandhya Shree",
+                "Aliases": []
+            },
+            {
+                "Name": "Sanjani",
+                "Aliases": []
+            },
+            {
+                "Name": "Sanjh Barari",
+                "Aliases": []
+            },
+            {
+                "Name": "Sanjh Sarawali",
+                "Aliases": [ "Sanjh Saravali" ]
+            },
+            {
+                "Name": "Sanjh Tarini",
+                "Aliases": []
+            },
+            {
+                "Name": "Sanjh",
+                "Aliases": []
+            },
+            {
+                "Name": "Santuri Todi",
+                "Aliases": []
+            },
+            {
+                "Name": "Sar Nat",
+                "Aliases": []
+            },
+            {
+                "Name": "Sarag (putra raag)",
+                "Aliases": []
+            },
+            {
+                "Name": "Sarpada",
+                "Aliases": []
+            },
+            {
+                "Name": "Sarang",
+                "Aliases": []
+            },
+            {
+                "Name": "Sarangi (raagini)",
+                "Aliases": []
+            },
+            {
+                "Name": "Sarang Kauns",
+                "Aliases": []
+            },
+            {
+                "Name": "Saradi (putra raag)",
+                "Aliases": []
+            },
+            {
+                "Name": "Saraswati",
+                "Aliases": []
+            },
+            {
+                "Name": "Saraswati Kalyan",
+                "Aliases": []
+            },
+            {
+                "Name": "Saraswati Kedar",
+                "Aliases": []
+            },
+            {
+                "Name": "Saraswati Sarang",
+                "Aliases": []
+            },
+            {
+                "Name": "Saraswatipriya",
+                "Aliases": [ "Sarasvatipriya" ]
+            },
+            {
+                "Name": "Salang",
+                "Aliases": []
+            },
+            {
+                "Name": "Sathanka (raag's son)",
+                "Aliases": []
+            },
+            {
+                "Name": "Saurati (raagini)",
+                "Aliases": []
+            },
+            {
+                "Name": "Savani 1",
+                "Aliases": []
+            },
+            {
+                "Name": "Savani 2",
+                "Aliases": []
+            },
+            {
+                "Name": "Savani Barwa",
+                "Aliases": []
+            },
+            {
+                "Name": "Savani Bhatiyar",
+                "Aliases": []
+            },
+            {
+                "Name": "Savani Bihag",
+                "Aliases": []
+            },
+            {
+                "Name": "Savani Bilawal",
+                "Aliases": []
+            },
+            {
+                "Name": "Savani Kalyan",
+                "Aliases": []
+            },
+            {
+                "Name": "Savani Nat",
+                "Aliases": []
+            },
+            {
+                "Name": "Saveri (raagini)",
+                "Aliases": []
+            },
+            {
+                "Name": "Saveri Todi",
+                "Aliases": []
+            },
+            {
+                "Name": "Sazgiri",
+                "Aliases": [ "Saazgiri" ]
+            },
+            {
+                "Name": "Sehra by Sultan Khan",
+                "Aliases": []
+            },
+            {
+                "Name": "Seehute (raagini)",
+                "Aliases": []
+            },
+            {
+                "Name": "Shahana",
+                "Aliases": []
+            },
+            {
+                "Name": "Shahana Bahar",
+                "Aliases": []
+            },
+            {
+                "Name": "Shahana Kanada",
+                "Aliases": []
+            },
+            {
+                "Name": "Shamvati",
+                "Aliases": []
+            },
+            {
+                "Name": "Shankara",
+                "Aliases": []
+            },
+            {
+                "Name": "Shankara Bihag",
+                "Aliases": []
+            },
+            {
+                "Name": "Shankara Kalyan",
+                "Aliases": []
+            },
+            {
+                "Name": "Sharada",
+                "Aliases": []
+            },
+            {
+                "Name": "Shiv Abhogi",
+                "Aliases": []
+            },
+            {
+                "Name": "Shiv Kauns",
+                "Aliases": []
+            },
+            {
+                "Name": "Shivari (raagini)",
+                "Aliases": []
+            },
+            {
+                "Name": "Shivmat Bhairav",
+                "Aliases": []
+            },
+            {
+                "Name": "Shivapriya",
+                "Aliases": [ "Sivapriya" ]
+            },
+            {
+                "Name": "Shivaranjani",
+                "Aliases": []
+            },
+            {
+                "Name": "Shobhavari",
+                "Aliases": []
+            },
+            {
+                "Name": "Shree",
+                "Aliases": []
+            },
+            {
+                "Name": "Shree Kalyan 1",
+                "Aliases": []
+            },
+            {
+                "Name": "Shree Kalyan 2",
+                "Aliases": []
+            },
+            {
+                "Name": "Shreetanki",
+                "Aliases": []
+            },
+            {
+                "Name": "Shuddha Barari",
+                "Aliases": []
+            },
+            {
+                "Name": "Shuddha Basant",
+                "Aliases": []
+            },
+            {
+                "Name": "Shuddha Bhairavi",
+                "Aliases": []
+            },
+            {
+                "Name": "Shuddha Bihag",
+                "Aliases": []
+            },
+            {
+                "Name": "Shuddha Dhanashree",
+                "Aliases": []
+            },
+            {
+                "Name": "Shuddha Kalyan",
+                "Aliases": []
+            },
+            {
+                "Name": "Shuddha Kedar",
+                "Aliases": []
+            },
+            {
+                "Name": "Shuddha Lalat",
+                "Aliases": []
+            },
+            {
+                "Name": "Shuddha Malhar (Bilawal thaat)",
+                "Aliases": []
+            },
+            {
+                "Name": "Shuddha Malu",
+                "Aliases": []
+            },
+            {
+                "Name": "Shuddha Nat",
+                "Aliases": []
+            },
+            {
+                "Name": "Shuddha Sarang",
+                "Aliases": [ "Shuddh Sarang" ]
+            },
+            {
+                "Name": "Shuddha Shyam",
+                "Aliases": []
+            },
+            {
+                "Name": "Shuddha Todi",
+                "Aliases": []
+            },
+            {
+                "Name": "Shukla Bilawal",
+                "Aliases": []
+            },
+            {
+                "Name": "Shyam (putra raag)",
+                "Aliases": []
+            },
+            {
+                "Name": "Shyam Kalyan 1",
+                "Aliases": []
+            },
+            {
+                "Name": "Shyam Kalyan 2",
+                "Aliases": []
+            },
+            {
+                "Name": "Shyam Kalyan",
+                "Aliases": []
+            },
+            {
+                "Name": "Shyam Kauns",
+                "Aliases": []
+            },
+            {
+                "Name": "Shyam Kedar",
+                "Aliases": []
+            },
+            {
+                "Name": "Shyam Sarang",
+                "Aliases": []
+            },
+            {
+                "Name": "Shyam Shree",
+                "Aliases": []
+            },
+            {
+                "Name": "Simhendramadhyam",
+                "Aliases": []
+            },
+            {
+                "Name": "Sindhavi Asavari (raagini)",
+                "Aliases": []
+            },
+            {
+                "Name": "Sindhava",
+                "Aliases": []
+            },
+            {
+                "Name": "Sindhu Bhairav",
+                "Aliases": []
+            },
+            {
+                "Name": "Sindhu Bhairavi",
+                "Aliases": []
+            },
+            {
+                "Name": "Sindhura Bahar",
+                "Aliases": []
+            },
+            {
+                "Name": "Sindhura Kafi",
+                "Aliases": []
+            },
+            {
+                "Name": "Sindhura",
+                "Aliases": []
+            },
+            {
+                "Name": "Sindhuri (raagini)",
+                "Aliases": []
+            },
+            {
+                "Name": "Sohani",
+                "Aliases": [ "Sohini" ]
+            },
+            {
+                "Name": "Sohani Bhatiyar",
+                "Aliases": [ "Sohini Bhatiyar" ]
+            },
+            {
+                "Name": "Sohani Pancham",
+                "Aliases": [ "Sohini Pancham" ]
+            },
+            {
+                "Name": "Soma",
+                "Aliases": []
+            },
+            {
+                "Name": "Sorati (raagini)",
+                "Aliases": []
+            },
+            {
+                "Name": "Sorath",
+                "Aliases": []
+            },
+            {
+                "Name": "Sorath Malhar",
+                "Aliases": []
+            },
+            {
+                "Name": "Sorathi (raag's son's wife)",
+                "Aliases": []
+            },
+            {
+                "Name": "Sourashtra",
+                "Aliases": []
+            },
+            {
+                "Name": "Shuddha Bahar",
+                "Aliases": []
+            },
+            {
+                "Name": "Siri Raag",
+                "Aliases": []
+            },
+            {
+                "Name": "Sugandh",
+                "Aliases": []
+            },
+            {
+                "Name": "Sugharai",
+                "Aliases": [ "Sughrai" ]
+            },
+            {
+                "Name": "Sugharai Kanada",
+                "Aliases": [ "Sughrai Kanada" ]
+            },
+            {
+                "Name": "Suha Adana",
+                "Aliases": []
+            },
+            {
+                "Name": "Suha Kanada",
+                "Aliases": []
+            },
+            {
+                "Name": "Suha Malhar",
+                "Aliases": []
+            },
+            {
+                "Name": "Suha Sughrai",
+                "Aliases": []
+            },
+            {
+                "Name": "Suha Todi",
+                "Aliases": []
+            },
+            {
+                "Name": "Suha",
+                "Aliases": []
+            },
+            {
+                "Name": "Suhi (raga)",
+                "Aliases": []
+            },
+            {
+                "Name": "Suhi Kafi",
+                "Aliases": []
+            },
+            {
+                "Name": "Suhi lalit",
+                "Aliases": []
+            },
+            {
+                "Name": "Suho/Suhai",
+                "Aliases": []
+            },
+            {
+                "Name": "Sujani Malhar",
+                "Aliases": []
+            },
+            {
+                "Name": "Sukhiya Bilawal",
+                "Aliases": []
+            },
+            {
+                "Name": "Sukul Bilawal",
+                "Aliases": []
+            },
+            {
+                "Name": "Sundar Kali",
+                "Aliases": []
+            },
+            {
+                "Name": "Sundar Kauns",
+                "Aliases": []
+            },
+            {
+                "Name": "Sur Malhar",
+                "Aliases": []
+            },
+            {
+                "Name": "Surdasi Malhar",
+                "Aliases": []
+            },
+            {
+                "Name": "Surmanand (putra raag)",
+                "Aliases": []
+            },
+            {
+                "Name": "Swanandi",
+                "Aliases": []
+            },
+            {
+                "Name": "Swarparda",
+                "Aliases": []
+            },
+            {
+                "Name": "Tanka (raagini)",
+                "Aliases": []
+            },
+            {
+                "Name": "Tanseni Madhuwanti",
+                "Aliases": []
+            },
+            {
+                "Name": "Telangi (raagini)",
+                "Aliases": []
+            },
+            {
+                "Name": "Tilak Bihag",
+                "Aliases": []
+            },
+            {
+                "Name": "Tilak Des",
+                "Aliases": []
+            },
+            {
+                "Name": "Tilak Kamod",
+                "Aliases": []
+            },
+            {
+                "Name": "Tilak Kedar",
+                "Aliases": []
+            },
+            {
+                "Name": "Tilak Shyam",
+                "Aliases": []
+            },
+            {
+                "Name": "Tirbhukti",
+                "Aliases": []
+            },
+            {
+                "Name": "Tilang",
+                "Aliases": []
+            },
+            {
+                "Name": "Tilang Bahar",
+                "Aliases": []
+            },
+            {
+                "Name": "Tilang Kafi",
+                "Aliases": []
+            },
+            {
+                "Name": "Todi",
+                "Aliases": []
+            },
+            {
+                "Name": "Todika (raagini)",
+                "Aliases": []
+            },
+            {
+                "Name": "Tribute To America",
+                "Aliases": []
+            },
+            {
+                "Name": "Triveni Gauri",
+                "Aliases": []
+            },
+            {
+                "Name": "Triveni",
+                "Aliases": []
+            },
+            {
+                "Name": "Tukhari",
+                "Aliases": []
+            },
+            {
+                "Name": "Utari Gunakali",
+                "Aliases": []
+            },
+            {
+                "Name": "Vachspati",
+                "Aliases": []
+            },
+            {
+                "Name": "Vada Hamsa (raag's son's wife)",
+                "Aliases": []
+            },
+            {
+                "Name": "Vadhans",
+                "Aliases": []
+            },
+            {
+                "Name": "Vadhans Dakhani",
+                "Aliases": []
+            },
+            {
+                "Name": "Vankā (raagini)",
+                "Aliases": []
+            },
+            {
+                "Name": "Varati (raagini)",
+                "Aliases": []
+            },
+            {
+                "Name": "Vasanta",
+                "Aliases": []
+            },
+            {
+                "Name": "Vasantapriya",
+                "Aliases": []
+            },
+            {
+                "Name": "Vasanta Carnatic",
+                "Aliases": []
+            },
+            {
+                "Name": "Vasanti (raagini)",
+                "Aliases": []
+            },
+            {
+                "Name": "Vaya (dasi raagini)",
+                "Aliases": []
+            },
+            {
+                "Name": "Velaval (raag's son)",
+                "Aliases": []
+            },
+            {
+                "Name": "Velāvali (raagini)",
+                "Aliases": []
+            },
+            {
+                "Name": "Vibhas",
+                "Aliases": []
+            },
+            {
+                "Name": "Vibhavari",
+                "Aliases": []
+            },
+            {
+                "Name": "Vibhasaka",
+                "Aliases": []
+            },
+            {
+                "Name": "Vihang",
+                "Aliases": []
+            },
+            {
+                "Name": "Vigiswari (dasi raagini)",
+                "Aliases": []
+            },
+            {
+                "Name": "Vijayaranjani",
+                "Aliases": []
+            },
+            {
+                "Name": "Vikram bhairav",
+                "Aliases": []
+            },
+            {
+                "Name": "Vilolika (raagini)",
+                "Aliases": []
+            },
+            {
+                "Name": "Vinod",
+                "Aliases": []
+            },
+            {
+                "Name": "Virat Bhairav",
+                "Aliases": []
+            },
+            {
+                "Name": "Virari (raagini)",
+                "Aliases": []
+            },
+            {
+                "Name": "Viyogvarali",
+                "Aliases": []
+            },
+            {
+                "Name": "Vrindavani Sarang",
+                "Aliases": [ "Brindabani Sarang" ]
+            },
+            {
+                "Name": "Vyjayanti",
+                "Aliases": []
+            },
+            {
+                "Name": "Yamani Basant",
+                "Aliases": []
+            },
+            {
+                "Name": "Yamani Bilawal",
+                "Aliases": []
+            },
+            {
+                "Name": "Yamani Hindol",
+                "Aliases": []
+            },
+            {
+                "Name": "Yaman",
+                "Aliases": [ "Iman" ]
+            },
+            {
+                "Name": "Yaman Kalyan",
+                "Aliases": [ "Iman Kalyan" ]
+            },
+            {
+                "Name": "Zeelaf (Bhairav aang)",
+                "Aliases": []
+            },
+            {
+                "Name": "Zila Kafi",
+                "Aliases": []
+            }
+        ]
+    }
+}

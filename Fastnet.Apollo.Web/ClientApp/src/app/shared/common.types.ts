@@ -5,6 +5,7 @@ export class Style {
    id: MusicStyles;
    enabled: boolean;
    displayName: string;
+   totals: string[] = [];
 }
 
 export class Parameters {

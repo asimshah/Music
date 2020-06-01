@@ -20,7 +20,7 @@ namespace Fastnet.Apollo.Web
             WebHost.CreateDefaultBuilder(args)
             .ConfigureAppConfiguration((hostingContext, config) =>
             {
-                config.AddJsonFile("raganames.json", optional: false);
+                config.AddJsonFile("raganames.json", optional: false, reloadOnChange: true);
             })
             .ConfigureLogging(lb => lb.AddRollingFile())
             .UseStartup<Startup>();

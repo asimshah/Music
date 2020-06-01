@@ -25,8 +25,10 @@ export class ParameterService extends BaseService {
    private popularSettingsKey: string;
    private parameters: Parameters;
    public ready$ = new BehaviorSubject<boolean>(false);
+   public currentStyleChanged$ = new BehaviorSubject<boolean>(false);
    public popularSettings: BehaviorSubject<PopularSettings>;
    public currentStyle: BehaviorSubject<Style>;
+   public currentTotals: string[] = [];
    constructor(http: HttpClient,
       private log: LoggingService) {
       super(http, "lib");
@@ -51,6 +53,7 @@ export class ParameterService extends BaseService {
       };
       this.currentStyle = new BehaviorSubject<Style>(cs);
       setLocalStorageValue(this.savedStyleKey, cs.id.toString());
+      await this.updateStyleTotals(cs.id);      
       this.popularSettings = new BehaviorSubject<PopularSettings>(this.getPopularSettings());
       this.ready$.next(true);
       this.log.information("parameterService: init()");
@@ -80,9 +83,11 @@ export class ParameterService extends BaseService {
    getCurrentStyle(): Style {
       return this.currentStyle.getValue();
    }
-   setCurrentStyle(musicStyle: MusicStyles) {
+   async setCurrentStyle(musicStyle: MusicStyles) {
       let cs = this.getStyle(musicStyle);
       setLocalStorageValue(this.savedStyleKey, cs.id.toString());
+      await this.updateStyleTotals(musicStyle);
+      //this.currentTotals = await this.getAsync<string[]>(`information/${musicStyle}`);
       this.currentStyle.next(cs);
    }
    setPopularSettings(val: PopularSettings) {
@@ -92,6 +97,11 @@ export class ParameterService extends BaseService {
    getPopularSettings(): PopularSettings {
       let settings: PopularSettings = JSON.parse(getLocalStorageValue(this.popularSettingsKey, JSON.stringify(new PopularSettings())));
       return settings;
+   }
+   private async updateStyleTotals(musicStyle: MusicStyles) {
+      this.currentTotals = this.parameters.styles[musicStyle - 1].totals;
+      //this.currentTotals = await this.getAsync<string[]>(`information/${musicStyle}`);
+      this.currentStyleChanged$.next(true);
    }
    private getStyle(s: MusicStyles): Style {
       let r = this.parameters.styles.find(x => x.id === s);

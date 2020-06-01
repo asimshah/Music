@@ -51,7 +51,7 @@ namespace Fastnet.Apollo.Web
                 Id = 0,// pli.Id,
                 Type = PlaylistRuntimeItemType.SingleItem,
                 Position = new PlaylistPosition(majorSequence, track.Number),
-                Titles = new string[] { track.Work.Artists.First().Name, track.Performance.GetParentEntityDisplayName() ?? track.Work.Name, track.Title },
+                Titles = new string[] { track.Work.Artists.First().Name, track.Performance?.GetParentEntityDisplayName() ?? track.Work.Name, track.Title },
                 Sequence = track.Number,
                 NotPlayableOnCurrentDevice = mf == null,
                 ItemId = track.Id,

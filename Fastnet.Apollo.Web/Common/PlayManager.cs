@@ -12,10 +12,8 @@ using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
 
-
 namespace Fastnet.Apollo.Web
 {
-
     // possibly rename this as it now handles player and library messages
     public partial class PlayManager : HostedService // RealtimeTask
     {

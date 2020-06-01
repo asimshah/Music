@@ -54,7 +54,6 @@ namespace Fastnet.Apollo.Web
             this.Groups.AddToGroupAsync(this.Context.ConnectionId, "WebAudio");
             log.Debug($"connection id {this.Context.ConnectionId} added to WebAudioGroup");
         }
-
         protected override void Dispose(bool disposing)
         {
             log.Debug($"PlayHub disposing");

@@ -29,7 +29,7 @@ namespace Fastnet.Apollo.Web
         private readonly IServiceProvider serviceProvider;
         private readonly string connectionString;
         private readonly IOptionsMonitor<IndianClassicalInformation> monitoredIndianClassicalInformation;
-        private IndianClassicalInformation indianClassicalInformation;
+        //private IndianClassicalInformation indianClassicalInformation;
         public TaskRunner(IServiceProvider sp, IOptions<MusicOptions> options, /*IOptions<IndianClassicalInformation> iciOptions,*/
             IOptionsMonitor<IndianClassicalInformation> monitoredIci,
             IConfiguration cfg, IWebHostEnvironment environment,
@@ -38,13 +38,13 @@ namespace Fastnet.Apollo.Web
             this.serviceProvider = sp;
             this.options = options.Value;
             monitoredIndianClassicalInformation = monitoredIci;
-            monitoredIndianClassicalInformation.OnChangeWithDelay((x) =>
-            {
-                this.indianClassicalInformation = x;
-                this.indianClassicalInformation.PrepareNames();
-                log.Information("IndianClassicalInformation changed");
-            });
-            this.indianClassicalInformation = monitoredIci.CurrentValue;
+            //monitoredIndianClassicalInformation.OnChangeWithDelay((x) =>
+            //{
+            //    this.indianClassicalInformation = x;
+            //    this.indianClassicalInformation.PrepareNames();
+            //    log.Information("IndianClassicalInformation changed");
+            //});
+            //this.indianClassicalInformation = monitoredIci.CurrentValue;
             maxConsumerThreads = Math.Max(1, this.options.MaxTaskThreads);
             connectionString = environment.LocaliseConnectionString(cfg.GetConnectionString("MusicDb"));
         }
@@ -67,7 +67,7 @@ namespace Fastnet.Apollo.Web
         {
             for(int i = 0; i < maxConsumerThreads;++i)
             {
-                var th = new TaskHost(this.serviceProvider, options, TaskQueue, indianClassicalInformation, connectionString, cancellationToken);
+                var th = new TaskHost(this.serviceProvider, options, TaskQueue, monitoredIndianClassicalInformation, connectionString, cancellationToken);
                 var t = Task.Run(async () =>
                 {
                     while (!cancellationToken.IsCancellationRequested)

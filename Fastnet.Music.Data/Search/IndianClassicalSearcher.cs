@@ -19,7 +19,8 @@ namespace Fastnet.Music.Data
         {
             static IndianClassicalResult getIndianClassicalResult(List<IndianClassicalResult> finalList, IEnumerable<SearchKey> artists)
             {
-                var icr = finalList.SingleOrDefault(x => x.Artists.Select(a => a.Key).SequenceEqual(artists.Select(z => z.Key)));
+                var keys = artists.Select(z => z.Key).OrderBy(n => n);
+                var icr = finalList.SingleOrDefault(x => x.Artists.Select(a => a.Key).OrderBy(n => n).SequenceEqual(keys));
                 if (icr == null)
                 {
                     icr = new IndianClassicalResult { Artists = artists, ArtistIsMatched = false };

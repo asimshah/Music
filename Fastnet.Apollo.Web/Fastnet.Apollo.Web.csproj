@@ -7,20 +7,30 @@
     <IsPackable>false</IsPackable>
     <SpaRoot>ClientApp\</SpaRoot>
     <DefaultItemExcludes>$(DefaultItemExcludes);$(SpaRoot)node_modules\**</DefaultItemExcludes>
-
+    <Authors>Asim Shah</Authors>
+    <Copyright>@2018-20</Copyright>
+    <DayCount>$([System.DateTime]::UtcNow.Date.Subtract($([System.DateTime]::Parse("2020-01-01"))).TotalDays)</DayCount>
+    <MinuteCount>$([System.DateTime]::UtcNow.TimeOfDay.TotalMinutes.ToString("000#"))</MinuteCount>
+    <DayVersion>2.$(DayCount).$(MinuteCount)</DayVersion>
+    <FastnetVersion>2.$([System.DateTime]::Now.ToString('yyMM')).$([System.DateTime]::Now.ToString('ddHH')).$([System.DateTime]::Now.ToString("mmss"))</FastnetVersion>
+    <Version>$(DayVersion)</Version>
+    <AssemblyVersion>$(FastnetVersion)</AssemblyVersion>
+    <FileVersion>$(FastnetVersion)</FileVersion>
     <!-- Set this to true if you enable server-side prerendering -->
     <BuildServerSideRenderer>false</BuildServerSideRenderer>
-    <Version>2.4.9</Version>
     <Authors>Asim Shah</Authors>
     <Product>Apollo Music Server</Product>
     <Copyright>@2020</Copyright>
-    <AssemblyVersion>2.$([System.DateTime]::Now.ToString('yyyy')).$([System.DateTime]::Now.ToString('Mdd')).$([System.DateTime]::Now.ToString('HHmm'))</AssemblyVersion>
     <RunAnalyzersDuringBuild>false</RunAnalyzersDuringBuild>
     <RunAnalyzersDuringLiveAnalysis>false</RunAnalyzersDuringLiveAnalysis>
   </PropertyGroup>
 
 
   <ItemGroup>
+    <PackageReference Include="Fastnet.Core.Web" Version="2.151.1302" />
+    <PackageReference Include="Fastnet.Music.Messages" Version="2.151.1304" />
+    <PackageReference Include="Fastnet.Music.Metatools" Version="2.151.1308" />
+    <PackageReference Include="Fastnet.Music.Resampler" Version="2.151.1305" />
     <PackageReference Include="Microsoft.AspNetCore.Mvc.NewtonsoftJson" Version="3.1.3" />
     <PackageReference Include="Microsoft.AspNetCore.SpaServices.Extensions" Version="3.1.3" />
     <PackageReference Include="Microsoft.EntityFrameworkCore.Tools" Version="3.1.3">
@@ -43,13 +53,12 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\..\Core\Fastnet.Core.Web\Fastnet.Core.Web.csproj" />
-    <ProjectReference Include="..\..\Core\Fastnet.Core\Fastnet.Core.csproj" />
-    <ProjectReference Include="..\Fastnet.Music.Core\Fastnet.Music.Core.csproj" />
-    <ProjectReference Include="..\Fastnet.Music.Data\Fastnet.Music.Data.csproj" />
-    <ProjectReference Include="..\Fastnet.Music.Messages\Fastnet.Music.Messages.csproj" />
-    <ProjectReference Include="..\Fastnet.Music.Metatools\Fastnet.Music.Metatools.csproj" />
-    <ProjectReference Include="..\Fastnet.Music.Resampler\Fastnet.Music.Resampler.csproj" />
+    <None Update="libmp3lame.32.dll">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Update="libmp3lame.64.dll">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
   </ItemGroup>
 
   <Target Name="DebugEnsureNodeEnv" BeforeTargets="Build" Condition=" '$(Configuration)' == 'Debug' And !Exists('$(SpaRoot)node_modules') ">

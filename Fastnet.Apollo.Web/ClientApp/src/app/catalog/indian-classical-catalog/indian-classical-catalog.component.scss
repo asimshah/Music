@@ -5,8 +5,20 @@
    display: flex;
    height: 100%;
    overflow-y: auto;
-}
 
+
+}
+:host {
+   &::-webkit-scrollbar {
+      background-color: theme-colour('background', 'dark');
+      width: $theme-gutter-narrow * 3;
+   }
+
+   &::-webkit-scrollbar-thumb {
+      background-color: theme-colour('surface');
+      border-radius: $theme-gutter-narrow;
+   }
+}
 :host(.is-edge) {
    /* there is hard coded 111px here because overflow-y on Edge does not work with a height set to 100%
         the 111px is the result of summing
@@ -23,7 +35,9 @@
    $raga-name-colour: theme-colour('surface');
    $section-separator-colour: darken($high-accent-colour, 35%); // darken(theme-colour('surface', 'light'), 30%);
    $section-width: $theme-gutter-narrow;
-   /*height: 100%;*/
+
+
+
    width: 100%;
 
    .artist-panel {
@@ -72,13 +86,30 @@
       }
 
       .ragas {
+         &::-webkit-scrollbar {
+            background-color: darken($high-accent-colour, 35%);
+            width: $theme-gutter-narrow * 3;
+         }
+
+         &::-webkit-scrollbar-track {
+            width: $theme-gutter-narrow;
+         }
+
+         &::-webkit-scrollbar-thumb {
+            background-color: $high-accent-colour;
+            border-radius: $theme-gutter-narrow;
+         }
+
+         max-height: 45vh;
+         margin-right: $theme-gutter;
+         overflow-y: auto;
+
          .raga-container {
             .raga {
                .raga-name {
                   background-color: $raga-background-colour;
                   color: $raga-name-colour;
                   margin-top: $theme-gutter-fine;
-                  margin-right: $theme-gutter;
                   padding: $theme-gutter;
                   font-size: 1rem;
                   font-style: italic;

@@ -204,6 +204,10 @@ namespace Fastnet.Music.Data
                 .HasIndex(e => e.PerformanceId)
                 .IsUnique();
 
+            modelBuilder.Entity<Raga>()
+                .HasIndex(e => e.AlphamericName)
+                .IsUnique();
+
             modelBuilder.Entity<RagaPerformance>()
                 .HasKey(k => new { k.ArtistId, k.RagaId, k.PerformanceId });
 
