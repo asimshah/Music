@@ -327,7 +327,9 @@ export class PlayerService extends BaseService implements OnDestroy {
             await this.setInitialDevice();
          }
       } else {
-         this.log.error(`disabled device ${d.displayName} not found in local list`);
+         if (d.type !== AudioDeviceType.Browser) {
+            this.log.error(`disabled device ${d.displayName} not found in local list`);
+         }
       }
    }
    private async onDeviceNameChanged(d: AudioDevice) {
@@ -337,7 +339,9 @@ export class PlayerService extends BaseService implements OnDestroy {
          let device = this.devices[index];
          device.displayName = d.displayName;
       } else {
-         this.log.error(`device ${d.displayName} not found in local list`);
+         if (d.type !== AudioDeviceType.Browser) {
+            this.log.error(`device ${d.displayName} not found in local list`);
+         }
       }
    }
    private async getCurrentDeviceStatusInternal() {

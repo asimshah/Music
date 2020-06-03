@@ -83,6 +83,7 @@ export class WebAudioComponent implements AfterViewInit, OnDestroy {
    @ViewChild('audio', { static: false }) audioElement: ElementRef;
    audio: HTMLAudioElement;
    enableAudioButtonVisible = false;
+   private isUnlocked = false;
    pendingStreamurl: string;
    pendingVolume: number
    private waitForEventTimer: any;
@@ -109,17 +110,23 @@ export class WebAudioComponent implements AfterViewInit, OnDestroy {
       //this.testWebAudio();
       //this.unlockAudioContext();
    }
-   async unlockAudioContextAsync() {
+   private async unlockAudioContextAsync() {
+      //this.log.information(`starting unlockAudioContextAsync() ...`);
       var AudioContext = (<any>window).AudioContext || (<any>window).webkitAudioContext;
       var audioCtx: any = new AudioContext();
       return new Promise<string>((resolve) => {
+         if (!audioCtx.state || audioCtx.state === null) {
+            this.log.information(`audio context state is undefined or null`);
+            resolve("null");
+         }
          if (audioCtx.state !== 'suspended') {
-            //this.log.information(`audio context state is ${audioCtx.state}`);
+            //this.log.information(`(1) audio context state is ${audioCtx.state}`);
             resolve(audioCtx.state);
          } else {
+            //this.log.information(`(2) audio context state is ${audioCtx.state}`);
             const b = document.body;
             const events = ['touchstart', 'touchend', 'mousedown', 'keydown'];
-            //this.log.information(`audio context starting unlock`);
+            this.log.information(`audio context starting unlock`);
             events.forEach(e => b.addEventListener(e, () => {
                unlockF();
             }, false));
@@ -137,7 +144,7 @@ export class WebAudioComponent implements AfterViewInit, OnDestroy {
 
       });
    }
-   unlockAudioContext() {
+   private unlockAudioContext() {
       var AudioContext = (<any>window).AudioContext || (<any>window).webkitAudioContext;
       var audioCtx: any = new AudioContext();
       if (audioCtx.state !== 'suspended') {
@@ -179,6 +186,7 @@ export class WebAudioComponent implements AfterViewInit, OnDestroy {
    }
    async ngAfterViewInit() {
       this.audio = this.audioElement.nativeElement;
+      //this.createAudio();
    }
    private onEvent(event: PlayerEvents, ...args: any[]) {
       if (this.stateMachine) {
@@ -250,19 +258,21 @@ export class WebAudioComponent implements AfterViewInit, OnDestroy {
          PlayerStates.SilentIdle, PlayerStates.Idle,
          PlayerStates.Playing, PlayerStates.Paused, PlayerStates.WaitingNext/*, PlayerStates.WaitingAudioEnable*/
       ], PlayerEvents.Play, async (s, e, args) => {
+            //this.log.information(`state ${PlayerStates[s]},  event ${PlayerEvents[e]}, args length ${args.length}`);
          if (args.length === 1) {
             let parameters: any[] = args[0];
             if (parameters.length > 1) {
                let streamUrl = <string>parameters[0];
                let volume = <number>parameters[1];
+               //this.log.information(`about to await this.play(..) ...`);
                if (await this.play(streamUrl, volume)) {
+                  //this.log.information(`await this.play(..) completed`);
                   return PlayerStates.Playing;
                } else {
                   this.log.error(`[WebAudioComponent] unable to play ${streamUrl}`);
                   this.enableAudioButtonVisible = true;
-                  return PlayerStates.Idle;// PlayerStates.WaitingAudioEnable;
+                  return PlayerStates.Idle;
                }
-
             }
          }
          this.log.warning(`[WebAudioComponent] ${this.stateMachine.name}: play requires a stream url and initial volume`);
@@ -293,6 +303,7 @@ export class WebAudioComponent implements AfterViewInit, OnDestroy {
          return this.stateMachine.getState();// new Promise(r => r(this.stateMachine.getState()));
       });
       this.stateMachine.addAction(PlayerStates.Playing, PlayerEvents.PlayCompleted, (s, e, args) => {
+         this.stopPlaying();
          this.requestNext(s, e, args);
          return PlayerStates.WaitingNext;
       });
@@ -340,19 +351,56 @@ export class WebAudioComponent implements AfterViewInit, OnDestroy {
       this.log.information(`[WebAudioComponent] play ended event`);
       this.onEvent(PlayerEvents.PlayCompleted);
    }
-   //onAudioEnable() {
-   //    this.enableAudioButtonVisible = false;
-   //    this.audio.src = this.pendingStreamurl;
-   //    this.audio.volume = this.pendingVolume;
-   //    this.audio.play()
-   //        .then(_ => {
-   //            this.stateMachine.currentState = PlayerStates.Playing;
-   //            this.log.information(`web-audio: play started after button click`);
-   //        })
-   //        .catch(_ => {
-   //            alert("does not play!!")
-   //        });
-   //    //this.onEvent(PlayerEvents.Play, this.pendingStreamurl, this.pendingVolume);
+
+   //private playV2(streamurl: string, volume: number) {
+   //   let currentState = this.stateMachine.getState();
+   //   if (currentState === PlayerStates.Playing) {
+   //      this.audio.pause();
+   //      this.audio.currentTime = 0.0;
+   //   }
+   //   this.audio.src = streamurl;
+   //   this.audio.volume = volume;
+   //   return new Promise<Boolean>(async (resolve) => {
+   //      try {
+   //         if (this.isUnlocked === false) {
+   //            var state = await this.unlockAudioContextAsync();
+   //            this.log.information(`[WebAudioComponent] audio context state is ${state}`);
+   //            this.isUnlocked = true;
+   //         }
+   //         try {
+   //            //this.createAudio();
+   //            await this.audio.play();
+   //            resolve(true);
+   //         } catch (e) {
+   //            let error = <any>this.audio.error;
+   //            if (error != null) {
+   //               this.log.error(`[WebAudioComponent] ${error.code}, ${error.message}`);
+   //            } else {
+   //               this.log.error(`[WebAudioComponent] no error indicated }`);
+   //            }
+   //            this.pendingStreamurl = streamurl;
+   //            this.pendingVolume = volume;
+   //            resolve(false);
+   //         }
+   //         //this.audio.play()
+   //         //   .then(_ => {
+   //         //      resolve(true);
+   //         //   })
+   //         //   .catch(_ => {
+   //         //      let error = <any>this.audio.error;
+   //         //      if (error != null) {
+   //         //         this.log.error(`[WebAudioComponent] ${error.code}, ${error.message}`);
+   //         //      } else {
+   //         //         this.log.error(`[WebAudioComponent] no error indicated [_ = ${JSON.stringify(_)}]}`);
+   //         //      }
+   //         //      this.pendingStreamurl = streamurl;
+   //         //      this.pendingVolume = volume;
+   //         //      resolve(false);
+   //         //   });
+   //      } catch (err) {
+   //         alert(`caught error ${err}`);
+   //      }
+   //   });
    //}
    private play(streamurl: string, volume: number) {
       let currentState = this.stateMachine.getState();
@@ -364,8 +412,10 @@ export class WebAudioComponent implements AfterViewInit, OnDestroy {
       this.audio.volume = volume;
       return new Promise<Boolean>(async (resolve) => {
          try {
-            var state = await this.unlockAudioContextAsync();
-            this.log.information(`[WebAudioComponent] audio context state is ${state}`);
+            if (this.isUnlocked === false) {
+               var state = await this.unlockAudioContextAsync();
+               this.log.information(`[WebAudioComponent] audio context state is ${state}`);
+            }
             this.audio.play()
                .then(_ => {
                   resolve(true);
@@ -385,7 +435,6 @@ export class WebAudioComponent implements AfterViewInit, OnDestroy {
             alert(`caught error ${err}`);
          }
       });
-
    }
    private togglePlayPause(): boolean {
       if (this.audio.paused) {
@@ -405,6 +454,7 @@ export class WebAudioComponent implements AfterViewInit, OnDestroy {
    }
    private stopPlaying() {
       this.audio.pause();
+      //this.audio.load();
       this.audio.currentTime = 0.0;
    }
    private requestNext(state: PlayerStates, ev: PlayerEvents, ...args: any[]) {
@@ -414,4 +464,14 @@ export class WebAudioComponent implements AfterViewInit, OnDestroy {
 
       this.startWaitTimer();
    }
+   //private createAudio() {
+   //   if (this.audio) {
+   //      // remove events
+   //      this.audio.removeEventListener('ended', this.onPlayEnded);
+   //      this.audio = null;
+   //   }
+   //   this.audio = new Audio();
+   //   this.audio.addEventListener('ended', this.onPlayEnded);
+   //   this.log.information(`new audio instance created`);
+   //}
 }

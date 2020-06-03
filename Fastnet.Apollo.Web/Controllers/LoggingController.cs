@@ -65,7 +65,12 @@ namespace Fastnet.Apollo.Web.Controllers
             var isMobile = Request.IsMobileBrowser();
             var browser = Request.GetBrowser().ToString();
             var isIpad = Request.IsIpad();
-            return $"[{browser}{(isMobile ? "/mobile": "")}{(isIpad ? "/ipad" : "")}]:{cl.Text}";
+            var clientIPAddress = this.Request.HttpContext.GetRemoteIPAddress();
+            if (clientIPAddress == "::1")
+            {
+                clientIPAddress = NetInfo.GetLocalIPAddress().ToString();
+            }
+            return $"[{clientIPAddress}-{browser}{(isMobile ? "/mobile": "")}{(isIpad ? "/ipad" : "")}]:{cl.Text}";
         }
     }
 }
