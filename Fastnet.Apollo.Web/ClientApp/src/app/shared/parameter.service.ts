@@ -21,8 +21,10 @@ export function ParameterServiceFactory(ps: ParameterService) {
 @Injectable()
 export class ParameterService extends BaseService {
    private emulateTouchDevice = false;
-   private savedStyleKey: string;
-   private popularSettingsKey: string;
+   //private currentDeviceStorageKey: string;
+   private savedStyleStorageKey: string;
+   private savedBrowserStorageKey: string;
+   private popularSettingsStorageKey: string;
    private parameters: Parameters;
    public ready$ = new BehaviorSubject<boolean>(false);
    public currentStyleChanged$ = new BehaviorSubject<boolean>(false);
@@ -32,31 +34,36 @@ export class ParameterService extends BaseService {
    constructor(http: HttpClient,
       private log: LoggingService) {
       super(http, "lib");
-      this.savedStyleKey = this.getStorageKey(LocalStorageKeys.currentStyle);// LocalStorageKeys[LocalStorageKeys.currentStyle];
-      this.popularSettingsKey = this.getStorageKey(LocalStorageKeys.popularSettings);// LocalStorageKeys[LocalStorageKeys.popularSettings];
+      //this.currentDeviceStorageKey = `music:${LocalStorageKeys[LocalStorageKeys.currentDevice]}`;
+      this.savedStyleStorageKey = `music:${LocalStorageKeys[LocalStorageKeys.currentStyle]}`;// this.getStorageKey(LocalStorageKeys.currentStyle);// LocalStorageKeys[LocalStorageKeys.currentStyle];
+      this.savedBrowserStorageKey = `music:${LocalStorageKeys[LocalStorageKeys.browserKey]}`; //this.getStorageKey(LocalStorageKeys.browserKey)
+      this.popularSettingsStorageKey = `music:${LocalStorageKeys[LocalStorageKeys.popularSettings]}`;//this.getStorageKey(LocalStorageKeys.popularSettings);// LocalStorageKeys[LocalStorageKeys.popularSettings];
    }
+   //getStorageKey(key: LocalStorageKeys) {
+   //   return `music:${LocalStorageKeys[key]}`;
+   //}
    async init() {
-      //console.log("ParameterService: init()");
+      console.log("ParameterService: init()");
       let currentKey = this.getStoredBrowserKey();
       this.parameters = await this.getAsync<Parameters>(`parameters/get/${currentKey}`);
       if (currentKey !== this.parameters.browserKey) {
-         setLocalStorageValue(this.getStorageKey(LocalStorageKeys.browserKey), this.parameters.browserKey);
+         setLocalStorageValue(this.savedBrowserStorageKey, this.parameters.browserKey);
          console.log(`browser key changed from ${currentKey} to ${this.parameters.browserKey}`);
       }
       //console.log(`Parameters: ${JSON.stringify(this.parameters)}`);
-      this.log.information(`client started on ip address ${this.parameters.clientIPAddress}`);
+      this.log.information(`[ParameterService] client started on ip address ${this.parameters.clientIPAddress}`);
       let firstStyle = this.getFirstEnabledStyle();
-      let savedMusicStyle = parseInt(getLocalStorageValue(this.savedStyleKey, firstStyle.id.toString())) as MusicStyles;
+      let savedMusicStyle = parseInt(getLocalStorageValue(this.savedStyleStorageKey, firstStyle.id.toString())) as MusicStyles;
       let cs = this.getStyle(savedMusicStyle);
       if (!cs || cs.enabled === false) {
          cs = firstStyle;
       };
       this.currentStyle = new BehaviorSubject<Style>(cs);
-      setLocalStorageValue(this.savedStyleKey, cs.id.toString());
-      await this.updateStyleTotals(cs.id);      
+      setLocalStorageValue(this.savedStyleStorageKey, cs.id.toString());
+      //await this.updateStyleTotals(cs.id);      
       this.popularSettings = new BehaviorSubject<PopularSettings>(this.getPopularSettings());
+      this.log.information(`[ParameterService] ready, browser (and local audio) key is ${this.getStoredBrowserKey()}`);
       this.ready$.next(true);
-      this.log.information("parameterService: init()");
    }
    getParameters() {
       return this.parameters;
@@ -67,15 +74,14 @@ export class ParameterService extends BaseService {
    getBrowser() {
       return this.parameters.browser.toLowerCase();
    }
+
    isTouchDevice() {
       return this.emulateTouchDevice || this.isMobileDevice() || this.isIpad();
    }
    isIpad() {
       return this.parameters.isIpad;
    }
-   getStorageKey(key: LocalStorageKeys) {
-      return `music:${LocalStorageKeys[key]}`;
-   }
+
    isMobileDevice() {
       let mq = matchMedia("(hover: none) and (pointer: coarse)");
       return this.parameters.isMobile || mq.matches;
@@ -85,24 +91,24 @@ export class ParameterService extends BaseService {
    }
    async setCurrentStyle(musicStyle: MusicStyles) {
       let cs = this.getStyle(musicStyle);
-      setLocalStorageValue(this.savedStyleKey, cs.id.toString());
-      await this.updateStyleTotals(musicStyle);
+      setLocalStorageValue(this.savedStyleStorageKey, cs.id.toString());
+      //await this.updateStyleTotals(musicStyle);
       //this.currentTotals = await this.getAsync<string[]>(`information/${musicStyle}`);
       this.currentStyle.next(cs);
    }
    setPopularSettings(val: PopularSettings) {
-      setLocalStorageValue(this.popularSettingsKey, JSON.stringify(val));
+      setLocalStorageValue(this.popularSettingsStorageKey, JSON.stringify(val));
       this.popularSettings.next(val);
    }
    getPopularSettings(): PopularSettings {
-      let settings: PopularSettings = JSON.parse(getLocalStorageValue(this.popularSettingsKey, JSON.stringify(new PopularSettings())));
+      let settings: PopularSettings = JSON.parse(getLocalStorageValue(this.popularSettingsStorageKey, JSON.stringify(new PopularSettings())));
       return settings;
    }
-   private async updateStyleTotals(musicStyle: MusicStyles) {
-      this.currentTotals = this.parameters.styles[musicStyle - 1].totals;
-      //this.currentTotals = await this.getAsync<string[]>(`information/${musicStyle}`);
-      this.currentStyleChanged$.next(true);
-   }
+   //private async updateStyleTotals(musicStyle: MusicStyles) {
+   //   this.currentTotals = this.parameters.styles[musicStyle - 1].totals;
+   //   //this.currentTotals = await this.getAsync<string[]>(`information/${musicStyle}`);
+   //   this.currentStyleChanged$.next(true);
+   //}
    private getStyle(s: MusicStyles): Style {
       let r = this.parameters.styles.find(x => x.id === s);
       if (r) {
@@ -121,6 +127,6 @@ export class ParameterService extends BaseService {
       throw `No enabled styles found`;
    }
    private getStoredBrowserKey() {
-      return getLocalStorageValue(this.getStorageKey(LocalStorageKeys.browserKey), "");
+      return getLocalStorageValue(this.savedBrowserStorageKey, "");
    }
 }

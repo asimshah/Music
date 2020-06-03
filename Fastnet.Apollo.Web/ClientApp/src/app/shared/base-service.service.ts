@@ -97,7 +97,7 @@ export abstract class BaseService {
             }));
     }
     protected postResponse<DataResult, T>(url: string, data: T): Observable<DataResult> {
-        console.log(`post response`);
+        //console.log(`post response`);
         url = `${this.urlPrefix}/${url}`;
         return this.http.post<DataResult>(url, data)
             .pipe(

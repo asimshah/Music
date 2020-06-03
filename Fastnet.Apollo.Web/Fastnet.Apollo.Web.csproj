@@ -27,8 +27,8 @@
 
 
   <ItemGroup>
-    <PackageReference Include="Fastnet.Core.Web" Version="2.151.1302" />
-    <PackageReference Include="Fastnet.Music.Messages" Version="2.151.1304" />
+    <PackageReference Include="Fastnet.Core.Web" Version="2.153.619" />
+    <PackageReference Include="Fastnet.Music.Messages" Version="2.153.622" />
     <PackageReference Include="Fastnet.Music.Metatools" Version="2.151.1308" />
     <PackageReference Include="Fastnet.Music.Resampler" Version="2.151.1305" />
     <PackageReference Include="Microsoft.AspNetCore.Mvc.NewtonsoftJson" Version="3.1.3" />

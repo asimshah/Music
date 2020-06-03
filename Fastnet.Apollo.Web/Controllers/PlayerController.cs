@@ -493,16 +493,23 @@ namespace Fastnet.Apollo.Web.Controllers
             var device = await musicDb.Devices.SingleOrDefaultAsync(x => x.KeyName == deviceKey);
             if (device == null)
             {
+                var ipAddress = this.Request.HttpContext.GetRemoteIPAddress();
+                //var hostMachine = ipAddress;
+                if(ipAddress == "::1")
+                {
+                    ipAddress = NetInfo.GetLocalIPAddress().ToString();
+                    //hostMachine = Environment.MachineName.ToLower();
+                }
                 device = new Device
                 {
                     KeyName = deviceKey,
-                    Name = this.Request.HttpContext.GetRemoteIPAddress(),
+                    Name = $"browser audio on {ipAddress}",
                     Type = AudioDeviceType.Browser,
-                    //MACAddress = audioDevice.MACAddress,
+                    MACAddress = deviceKey,
                     IsDefaultOnHost = false,
                     IsDisabled = false,
-                    HostMachine = this.Request.HttpContext.GetRemoteIPAddress(),
-                    DisplayName = "Current",
+                    HostMachine =  ipAddress, //this.Request.HttpContext.GetRemoteIPAddress(),
+                    DisplayName = "(local audio)",
                     Volume = 0.0F,
                     MaxSampleRate = 0,
                     CanReposition = true,

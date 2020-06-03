@@ -39,11 +39,17 @@ export class AppComponent {
         this.screenHeight = innerHeight;
         this.screenWidth = innerWidth;
 
-        this.parameters = this.ps.getParameters();
-        this.log.isMobileDevice = this.isMobileDevice();
 
-        ControlBase.deviceSensitivity = true;
-        this.log.information(`apollo version ${appInfo.version.toString()} : client ${this.parameters.clientIPAddress} started (window inner dimensions: ${innerWidth}w x ${innerHeight}h), isMobile = ${this.isMobileDevice()}, isIpad = ${this.isIpad()}`);
+
+       ControlBase.deviceSensitivity = true;
+       this.ps.ready$.subscribe(async (v) => {
+          if (v === true) {
+             this.parameters = this.ps.getParameters();
+             this.log.isMobileDevice = this.isMobileDevice();
+             this.log.information(`[AppComponent] apollo version ${appInfo.version.toString()} : client ${this.parameters.clientIPAddress} started (window inner dimensions: ${innerWidth}w x ${innerHeight}h), isMobile = ${this.isMobileDevice()}, isIpad = ${this.isIpad()}`);
+          }
+       });
+
     }
 
 
@@ -59,14 +65,14 @@ export class AppComponent {
         return this.currentPanelNumber;
     }
     onSwipe(e: AnimationEvent) {
-        this.log.information(`swipe ${JSON.stringify(e)}`);
+        //this.log.information(`swipe ${JSON.stringify(e)}`);
     }
     onSwipeLeft(e: AnimationEvent) {
-        this.log.information(`swipe left ${JSON.stringify(e)}`);
+        //this.log.information(`swipe left ${JSON.stringify(e)}`);
         this.currentPanelNumber = this.slidingPanels.changePanel();
     }
     onSwipeRight(e: AnimationEvent) {
-        this.log.information(`swipe right ${JSON.stringify(e)}`);
+        //this.log.information(`swipe right ${JSON.stringify(e)}`);
         this.currentPanelNumber = this.slidingPanels.changePanel(true);
     }
     toggleSlidingPanels() {

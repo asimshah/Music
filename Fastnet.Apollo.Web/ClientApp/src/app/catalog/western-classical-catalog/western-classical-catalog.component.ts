@@ -69,7 +69,7 @@ export class WesternClassicalCatalogComponent extends BaseCatalogComponent {
       }
    }
    onTapMovement(c: Composition, p: Performance, t: Track) {
-      this.log.information("onTapTrack()");
+      //this.log.information("onTapTrack()");
       this.commandPanel.open(MusicStyles.WesternClassical, c, p, t, async (r) => await this.executeCommand(r));
    }
 

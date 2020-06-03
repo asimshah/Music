@@ -29,10 +29,10 @@ export class MenuPanelComponent implements OnInit {
    }
 
    ngOnInit() {
-      this.ps.currentStyleChanged$.subscribe(() => {
-         console.log(`style changed received`);
-         this.currentTotals = this.ps.currentTotals;
-      });
+      //this.ps.currentStyleChanged$.subscribe((v) => {
+      //   console.log(`style changed received, v is ${v}`);
+      //   this.currentTotals = this.ps.currentTotals;
+      //});
    }
    clickMenuBars(e) {
       this.menu.open(e);

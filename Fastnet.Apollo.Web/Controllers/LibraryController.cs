@@ -56,18 +56,24 @@ namespace Fastnet.Apollo.Web.Controllers
         public IActionResult GetParameters(string key = null)
         {
             Debug.Assert(key != "undefined");
+            var clientIPAddress = this.Request.HttpContext.GetRemoteIPAddress();
+            if (clientIPAddress == "::1")
+            {
+                clientIPAddress = NetInfo.GetLocalIPAddress().ToString();
+            }
             if (string.IsNullOrWhiteSpace(key))
             {
-                key = Guid.NewGuid().ToString().ToLower();
-                log.Information($"new browser key {key} allocated");
+                key = GetBrowserKey(clientIPAddress);
+                //key = Guid.NewGuid().ToString().ToLower();
+                //log.Information($"new browser key {key} allocated");
             }
 
             var styles = this.musicOptions.Styles.Select(s => new StyleDTO
             {
                 Id = s.Style,
                 Enabled = s.Enabled,
-                DisplayName = s.Style.ToDescription(),
-                Totals = GetStyleTotals(s.Style)
+                DisplayName = s.Style.ToDescription()
+                //Totals = GetStyleTotals(s.Style)
 
             }).ToArray();
             var dto = new ParametersDTO
@@ -78,11 +84,27 @@ namespace Fastnet.Apollo.Web.Controllers
                 IsMobile = this.Request.IsMobileBrowser(),
                 IsIpad = this.Request.IsIpad(),// this.IsMobile == false && ipadRegex.IsMatch(Request.UserAgent()),
                 Browser = this.Request.GetBrowser().ToString(),
-                ClientIPAddress = this.Request.HttpContext.GetRemoteIPAddress(),
+                ClientIPAddress = clientIPAddress,// this.Request.HttpContext.GetRemoteIPAddress(),
                 CompactLayoutWidth = this.musicServerOptions.CompactLayoutWidth,
                 Styles = styles
             };
+
             return SuccessResult(dto);
+        }
+        private string GetBrowserKey(string clientIPAddress)
+        {
+            var key = string.Empty;
+            var device = musicDb.Devices.SingleOrDefault(d => d.Type == AudioDeviceType.Browser && d.HostMachine == clientIPAddress);
+            if(device == null)
+            {
+                key = Guid.NewGuid().ToString().ToLower();
+                log.Information($"new browser key {key} allocated to {clientIPAddress}");
+            }
+            else
+            {
+                key = device.KeyName;
+            }
+            return key;
         }
         [HttpGet("music/options")]
         public IActionResult GetMusicOptions()

@@ -192,7 +192,7 @@ export class CommandPanelComponent {
       return (innerHeight / screen.height) * 100.0 > 80.0;
    }
    onTagEditor() {
-      this.log.information(`tag editor, target entity ${TargetEntity[this.targetEntity]}`);
+      this.log.information(`[CommandPanelComponent] tag editor, target entity ${TargetEntity[this.targetEntity]}`);
       let cpr = new CommandPanelResult();
       switch (this.targetEntity) {
          case TargetEntity.Performance:
@@ -208,7 +208,7 @@ export class CommandPanelComponent {
             this.popup.close(cpr);
             break;
          default:
-            this.log.information(`tag editor not implemented`);
+            this.log.information(`[CommandPanelComponent] tag editor not implemented`);
             cpr.selectedCommand = SelectedCommand.Cancel;
             this.popup.close(cpr);
             break;

@@ -98,7 +98,7 @@ export class PopularCatalogComponent extends BaseCatalogComponent {
       }
    }
    onTapTrack(w: Work, t: Track) {
-      this.log.information("onTapTrack()");
+      //this.log.information("onTapTrack()");
       //this.commandPanel.setTrack(t);
       //this.commandPanel.open(MusicStyles.Popular);
       this.commandPanel.open(MusicStyles.Popular, w, t, null, async (r) => await this.executeCommand(r));

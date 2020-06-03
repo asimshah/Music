@@ -1,37 +1,38 @@
 <div [ngClass]="{'mobile-device': isMobileDevice()}">
-    <ng-container *ngIf="deviceStatus">
-        <div class="cover">
-            <ng-container *ngIf="playlistItem">
-                <img [src]="playlistItem.coverArtUrl" />
-                <ng-container *ngFor="let title of playlistItem.titles; let first = first; let last = last">
-                    <div class="title" [ngClass]="{'artist-name': first, 'track-name': last}">{{title}}</div>
-                </ng-container>
-                <div class="audio-properties">{{playlistItem.audioProperties}}</div>
+   <ng-container *ngIf="deviceStatus">
+      <div class="cover">
+         <ng-container *ngIf="playlistItem">
+            <img [src]="playlistItem.coverArtUrl" />
+            <ng-container *ngFor="let title of playlistItem.titles; let first = first; let last = last">
+               <div class="title" [ngClass]="{'artist-name': first, 'track-name': last}">{{title}}</div>
             </ng-container>
-        </div>
-        <ng-container *ngIf="deviceStatus">
-            <div class="playing-slider">
-                <div class="duration">{{deviceStatus.formattedCurrentTime}}</div>
-                <div #playSlider class="groove" [ngClass]="{'repositioning-disabled': canReposition() === false}" (mouseup)="onPlayingSliderMouseUp($event)">
-                    <div #playBead class="bead fa fa-circle" [ngStyle]="{left: playBeadPosition}"></div>
-                </div>
-                <div class="duration">{{deviceStatus.formattedRemainingTime}}</div>
+            <div class="audio-properties">{{playlistItem.audioProperties}}</div>
+         </ng-container>
+      </div>
+      <ng-container *ngIf="deviceStatus">
+         <div class="playing-slider">
+            <div class="duration">{{deviceStatus.formattedCurrentTime}}</div>
+            <div #playSlider class="groove" [ngClass]="{'repositioning-disabled': canReposition() === false}" (mouseup)="onPlayingSliderMouseUp($event)">
+               <div #playBead class="bead fa fa-circle" [ngStyle]="{left: playBeadPosition}"></div>
             </div>
-        </ng-container>
-    </ng-container>
-    <ng-container>
-        <div class="audio-controls">
-            <div class="fa fa-fast-backward skip-back" title="Skip to previous" (click)="skipBackward()"></div>
-            <div class="fa  fa-2x toggle-play-pause" title="Toggle play/pause" [ngClass]="{'fa-pause-circle-o' : isPlaying(), 'fa-play-circle-o': !isPlaying()}" (click)="togglePlayPause()"></div>
-            <div class="fa fa-fast-forward skip-forward" title="Skip to next" (click)="skipForward()"></div>
-        </div>
-        <div class="volume-slider">
-            <i class="fa fa-volume-off volume-down" (click)="volumeDown()"></i>
-            <div #volumeSlider class="groove" (mouseup)="onVolumeSliderMouseUp($event)">
-                <div #volumeBead class="bead fa fa-circle" [ngStyle]="{left: volumeBeadPosition}"></div>
-            </div>
-            <i class="fa fa-volume-up volume-up" (click)="volumeUp()"></i>
-        </div>
-    </ng-container>    
-    <web-audio *ngIf="isMobileDevice()"></web-audio>
+            <div class="duration">{{deviceStatus.formattedRemainingTime}}</div>
+         </div>
+      </ng-container>
+   </ng-container>
+   <ng-container>
+      <div class="audio-controls">
+         <div class="fa fa-fast-backward skip-back" title="Skip to previous" (click)="skipBackward()"></div>
+         <div class="fa  fa-2x toggle-play-pause" title="Toggle play/pause" [ngClass]="{'fa-pause-circle-o' : isPlaying(), 'fa-play-circle-o': !isPlaying()}" (click)="togglePlayPause()"></div>
+         <div class="fa fa-fast-forward skip-forward" title="Skip to next" (click)="skipForward()"></div>
+      </div>
+      <div class="volume-slider">
+         <i class="fa fa-volume-off volume-down" (click)="volumeDown()"></i>
+         <div #volumeSlider class="groove" (mouseup)="onVolumeSliderMouseUp($event)">
+            <div #volumeBead class="bead fa fa-circle" [ngStyle]="{left: volumeBeadPosition}"></div>
+         </div>
+         <i class="fa fa-volume-up volume-up" (click)="volumeUp()"></i>
+      </div>
+   </ng-container>
+   <!--<web-audio *ngIf="isMobileDevice()"></web-audio>-->
+   <web-audio ></web-audio>
 </div>

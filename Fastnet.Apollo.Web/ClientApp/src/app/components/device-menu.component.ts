@@ -10,57 +10,66 @@ import { getLocalStorageValue } from '../shared/common.functions';
 import { LocalStorageKeys } from '../shared/common.enums';
 
 @Component({
-    selector: 'device-menu',
-    templateUrl: './device-menu.component.html',
-    styleUrls: ['./device-menu.component.scss']
+   selector: 'device-menu',
+   templateUrl: './device-menu.component.html',
+   styleUrls: ['./device-menu.component.scss']
 })
 export class DeviceMenuComponent implements OnInit, OnDestroy {
-    @ViewChild(PopupPanelComponent, { static: false }) menu: PopupPanelComponent;
-    devices: AudioDevice[] = [];
-    currentDevice: AudioDevice | null = null;
+   @ViewChild(PopupPanelComponent, { static: false }) menu: PopupPanelComponent;
+   devices: AudioDevice[] = [];
+   currentDevice: AudioDevice | null = null;
 
-    private subscriptions: Subscription[] = [];
-    constructor(private playerService: PlayerService, private messageService: MessageService,
-        private log: LoggingService) {
+   private subscriptions: Subscription[] = [];
+   constructor(private playerService: PlayerService, private messageService: MessageService,
+      private log: LoggingService) {
+      
+   }
+   ngOnDestroy() {
+      for (let sub of this.subscriptions) {
+         sub.unsubscribe();
+      }
+      this.subscriptions = [];
+   }
 
-    }
-    ngOnDestroy() {
-        for (let sub of this.subscriptions) {
-            sub.unsubscribe();
-        }
-        this.subscriptions = [];
-    }
+   async ngOnInit() {
 
-    async ngOnInit() {
-
-        this.subscriptions.push(this.playerService.currentDeviceChanged.subscribe((d) => {
-            this.currentDevice = d;
-        }));
-        this.subscriptions.push(this.messageService.deviceDisabled.subscribe((d) => {
-            this.updateDevices();
-            //console.log(`device ${d.displayName} disabled, list is now ${this.devices.length}`);
-        }));
-        this.subscriptions.push(this.messageService.deviceEnabled.subscribe((d) => {
-            this.updateDevices();
-            //console.log(`device ${d.displayName} enabled, list is now ${this.devices.length}`);
-        }));
-        this.subscriptions.push(this.playerService.playerServiceStarted.subscribe((d) => {
-            this.updateDevices();
-            //console.log(`list is now ${this.devices.length}`);
-        }));
-        this.updateDevices();        
-        console.log(`current device is ${!this.currentDevice ? "null": this.currentDevice.displayName }`);
-    }
-
-    private updateDevices() {
-        this.devices = this.playerService.getAvailableDevices();
-        this.currentDevice = this.playerService.getCurrentDeviceBeingControlled();
-    }
-    onDeviceNameClick(e) {
-        this.updateDevices();
-        this.menu.open(e);
-    }
-    async setDevice(d: AudioDevice) {
-        this.playerService.setDevice(d);
-    }
+      //this.subscriptions.push(this.playerService.currentDeviceChanged.subscribe((d) => {
+      //   this.currentDevice = d;
+      //}));
+      this.subscriptions.push(this.messageService.deviceDisabled.subscribe((d) => {
+         this.updateDevices();
+         //console.log(`device ${d.displayName} disabled, list is now ${this.devices.length}`);
+      }));
+      this.subscriptions.push(this.messageService.deviceEnabled.subscribe((d) => {
+         this.updateDevices();
+         //console.log(`device ${d.displayName} enabled, list is now ${this.devices.length}`);
+      }));
+      this.subscriptions.push(this.playerService.playerServiceStarted.subscribe((d) => {
+         this.onPlayerServiceStarted();
+         //this.updateDevices();
+         //console.log(`list is now ${this.devices.length}`);
+      }));
+      //this.updateDevices();
+      //console.log(`current device is ${!this.currentDevice ? "null" : this.currentDevice.displayName}`);
+   }
+   private onPlayerServiceStarted() {
+      this.subscriptions.push(this.playerService.currentDeviceChanged.subscribe((d) => {
+         this.currentDevice = d;
+      }));
+      this.updateDevices();
+      console.log(`current device is ${!this.currentDevice ? "null" : this.currentDevice.displayName}`);
+   }
+   private updateDevices() {
+      this.devices = this.playerService.getAvailableDevices();
+      this.currentDevice = this.playerService.getCurrentDeviceBeingControlled();
+   }
+   onDeviceNameClick(e) {
+      this.updateDevices();
+      if (this.devices.length > 1) {
+         this.menu.open(e);
+      }
+   }
+   async setDevice(d: AudioDevice) {
+      this.playerService.setDevice(d);
+   }
 }

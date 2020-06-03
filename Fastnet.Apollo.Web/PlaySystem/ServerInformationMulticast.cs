@@ -84,12 +84,13 @@ namespace Fastnet.Apollo.Web
             Debug.Assert(messengerOptions.LocalCIDR != null);
             try
             {
-                var list = NetInfo.GetMatchingIPV4Addresses(messengerOptions.LocalCIDR);
-                if (list.Count() > 1)
-                {
-                    log.Warning($"Multiple local ipaddresses: {(string.Join(", ", list.Select(l => l.ToString()).ToArray()))}, cidr is {messengerOptions.LocalCIDR}, config error?");
-                }
-                var ipAddress = list.First();
+                //var list = NetInfo.GetMatchingIPV4Addresses(messengerOptions.LocalCIDR);
+                //if (list.Count() > 1)
+                //{
+                //    log.Warning($"Multiple local ipaddresses: {(string.Join(", ", list.Select(l => l.ToString()).ToArray()))}, cidr is {messengerOptions.LocalCIDR}, config error?");
+                //}
+                //var ipAddress = list.First();
+                var ipAddress = NetInfo.GetLocalIPAddress();
                 si = new MusicServerInformation
                 {
                     MachineName = Environment.MachineName.ToLower(),
