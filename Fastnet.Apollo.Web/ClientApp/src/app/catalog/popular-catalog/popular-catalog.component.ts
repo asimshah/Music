@@ -183,7 +183,7 @@ export class PopularCatalogComponent extends BaseCatalogComponent {
          artist.highlightSearch(this.searchText, artist.name, prefixMode);
          this.addArtist(artist);
          if (pr.artistIsMatched) {
-            artist.works = await this.library.getAllWorks(artist);
+            artist.works = await this.library.getAllWorks(this.currentStyle, artist);
             for (let w of artist.works) {
                this.addWork(w);
             }
@@ -201,7 +201,7 @@ export class PopularCatalogComponent extends BaseCatalogComponent {
          this.addArtist(artist);
          if (pr.artistIsMatched) {
             artist.isMatchedBySearch = true;
-            artist.works = await this.library.getAllWorks(artist, true);
+            artist.works = await this.library.getAllWorks(this.currentStyle, artist, true);
             for (let w of artist.works) {
                this.addWork(w);
             }

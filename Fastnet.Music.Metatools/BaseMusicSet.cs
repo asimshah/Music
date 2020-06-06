@@ -109,6 +109,14 @@ namespace Fastnet.Music.Metatools
             {
                 artist = await CreateNewArtist(performer.Name);
             }
+            else
+            {
+                if(artist.ArtistStyles.SingleOrDefault(x => x.StyleId == MusicStyle) == null)
+                {
+                    artist.ArtistStyles.Add(new ArtistStyle { Artist = artist, StyleId = MusicStyle });
+                    log.Information($"Existing artist {artist.ToIdent()} {artist.Name} added to style {MusicStyle}");
+                }
+            }
             if (artist.Type != ArtistType.Various)
             {
                 var portrait = artist.GetPortraitFile(MusicOptions);

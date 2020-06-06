@@ -301,8 +301,22 @@ namespace Fastnet.Music.Data
             EnsureArtistWorkRefactored();
             EnsureCompositionPerformanceRefactored();
             EnsurePerformerAlphamericNames();
+            CleanUpOrphanedPlaylists();
             SaveChanges();
         }
+
+        private void CleanUpOrphanedPlaylists()
+        {
+            var allDevicePlaylists = Playlists.Where(x => x.Type == PlaylistType.DeviceList);
+            var validDevicePlaylists = Devices.Select(x => x.Playlist);
+            var removableDevicePlaylists = allDevicePlaylists.Except(validDevicePlaylists);
+            foreach(var pl in removableDevicePlaylists)
+            {
+                Playlists.Remove(pl);
+                log.Information($"orphaned device playlist {((IIdentifier)pl).ToIdent()} removed");
+            }
+        }
+
         private void EnsureArtistAlphamericNames()
         {
             var artists = Artists.Where(x => string.IsNullOrWhiteSpace(x.AlphamericName));

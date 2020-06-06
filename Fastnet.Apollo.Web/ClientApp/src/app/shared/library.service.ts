@@ -145,9 +145,9 @@ export class LibraryService extends BaseService {
       });
 
    }
-   public async getAllWorks(artist: Artist, full: boolean = false): Promise<Work[]> {
+   public async getAllWorks(style: Style, artist: Artist, full: boolean = false): Promise<Work[]> {
       //let list = await this.getAsync<Work[]>(`get/artist/allworks/${artist.id}`);
-      let query = full ? `get/artist/allworks/${artist.id}/true` : `get/artist/allworks/${artist.id}`;
+      let query = full ? `get/artist/${style.id}/allworks/${artist.id}/true` : `get/artist/allworks/${artist.id}`;
       let list = await this.getAsync<Work[]>(query);
       return new Promise<Work[]>(resolve => {
          let works: Work[] = [];

@@ -437,21 +437,18 @@ namespace Fastnet.Apollo.Web.Controllers
             var list = compositions.Select(x => x.ToDTO(full));
             return SuccessResult(list);
         }
-        [HttpGet("get/artist/allworks/{id}/{full?}")]
-        public async Task<IActionResult> GetAllWorks(long id, bool full = false)
+        [HttpGet("get/artist/{style}/allworks/{id}/{full?}")]
+        public IActionResult GetAllWorks(MusicStyles style, long id, bool full = false)
         {
-            //using (new TimedAction((t) => log.Trace($"Get All Compositions for Artist id {id} completed in {t.ToString("c")}")))
-            //{
-            await Task.Delay(0);
             musicDb.ChangeTracker.AutoDetectChangesEnabled = false;
-            var works = musicDb.Works.AsEnumerable()
-                //.Where(w => w.ArtistId == id)
-                .Where(w => w.Artists.Select(x => x.Id).Contains(id))
-                .ToArray()
-                .OrderBy(x => x.Name, new NaturalStringComparer());
-            var list = works.Select(x => x.ToDTO(full));
+            var works = musicDb.ArtistWorkList.Where(awl => awl.ArtistId == id)
+                .Select(x => x.Work)
+                .Where(w => w.StyleId == style)
+                .AsEnumerable();
+            var list = works
+                .OrderBy(x => x.Name, new NaturalStringComparer())
+                .Select(x => x.ToDTO(full));
             return SuccessResult(list);
-            //}
         }
         [HttpGet("get/performance/allmovements/{id}")]
         public async Task<IActionResult> GetPerformanceAllMovements(long id)

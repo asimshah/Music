@@ -148,8 +148,21 @@ namespace Fastnet.Music.Data
             {
                 log.Warning($"{work.ToIdent()} {work.Name} has zero tracks!");
             }
-            context.SetModifiedArtistId(work.ArtistWorkList.Select(x => x.ArtistId).ToArray());
+            var artists = work.ArtistWorkList.Select(x => x.Artist);
+            context.SetModifiedArtistId(artists.Select(x => x.Id).ToArray());
             db.Works.Remove(work);
+            var style = work.StyleId;
+            foreach(var artist in artists)
+            {
+                if(artist.ArtistWorkList.Where(x => x.WorkId != work.Id)
+                    .Select(x => x.Work).Where(w => w.StyleId == style)
+                    .Count() == 0)
+                {
+                    var x = db.ArtistStyles.Single(x => x.StyleId == style && x.ArtistId == artist.Id);
+                    db.ArtistStyles.Remove(x);
+                    log.Information($"{artist.ToIdent()} {artist.Name} removed from {style}");
+                }
+            }
             log.Information($"{ToIdent()} {work.ToIdent()} {work.Name} removed");
         }
         private void RemoveEntity(Raga raga)

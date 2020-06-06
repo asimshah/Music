@@ -61,8 +61,8 @@ namespace Fastnet.Apollo.Web
                     //log.Information($"{a.Name} {trackCount}");
                     break;
                 default:
-                    dto.WorkCount = a.Works.Count(w => w.Type != OpusType.Singles);
-                    dto.SinglesCount = a.Works.Where(w => w.Type == OpusType.Singles).SelectMany(x => x.Tracks).Count();
+                    dto.WorkCount = a.Works.Count(w => w.StyleId == style && w.Type != OpusType.Singles);
+                    dto.SinglesCount = a.Works.Where(w => w.StyleId == style && w.Type == OpusType.Singles).SelectMany(x => x.Tracks).Count();
                     dto.CompositionCount = a.Compositions?.Count() ?? 0;
                     dto.PerformanceCount = a.Compositions?.SelectMany(x => x.Performances).Count() ?? 0;
                     break;
