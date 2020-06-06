@@ -39,6 +39,7 @@ namespace Fastnet.Apollo.Web
             services.AddService<TaskRunner>();
             services.AddService<TaskPublisher>();
             services.AddService<PlayManager>();
+            services.AddService<LibraryMessages>();
             services.AddService<Resampler>();
             if (!so.SuspendScheduling)
             {

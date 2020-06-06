@@ -21,14 +21,15 @@ namespace Fastnet.Apollo.Web
     public class CataloguePath : TaskBase
     {
         private TaskItem taskItem;
-        private readonly PlayManager playManager;
+        //private readonly PlayManager playManager;
+        private readonly LibraryMessages libraryMessages;
         private readonly IndianClassicalInformation indianClassicalInformation;
         public CataloguePath(MusicOptions options, long taskId, string connectionString,
             IndianClassicalInformation ici,
-            BlockingCollection<TaskQueueItem> taskQueue, PlayManager pm) : base(options, taskId, connectionString, taskQueue)
+            BlockingCollection<TaskQueueItem> taskQueue, LibraryMessages lm) : base(options, taskId, connectionString, taskQueue)
         {
             this.indianClassicalInformation = ici;
-            this.playManager = pm;
+            this.libraryMessages = lm;
         }
         protected override async Task RunTask()
         {
@@ -46,34 +47,12 @@ namespace Fastnet.Apollo.Web
                             var cr = item;//.result;
                             if (cr.Status == CatalogueStatus.Success && item.MusicSet != null)
                             {
-                                //if (cr.TaskItem != null && cr.TaskItem.Id > 0)
-                                //{
-                                //    // possibly do not queue resampling tasks
-                                //    if (cr.TaskItem.Type != TaskType.ResampleWork)
-                                //    {
-                                //        QueueTask(cr.TaskItem);
-                                //    }
-                                //}
-                                //switch (cr.MusicSetType)
-                                //{
-                                //    case Type T when T == typeof(PopularMusicAlbumSet) || T == typeof(WesternClassicalAlbumSet):
-                                //        log.Information($"{taskItem} {T.Name} {cr.ArtistName} {cr.ArtistDescr}, {cr.WorkName} {cr.WorkDescr}, {cr.WorkTrackCount} tracks {cr.TrackContent}");
-                                //        break;
-                                //    case Type T when T == typeof(WesternClassicalCompositionSet):
-                                //        //if (cr.Performance.Movements.Count() == 0)
-                                //        if (cr.PerformanceMovementCount == 0)
-                                //        {
-                                //            log.Warning($"{cr.CompositionName} {cr.CompositionDescr}, \"{cr.PerformersCSV}\" {cr.PerformanceDescr} has no movements");
-                                //        }
-                                //        //var work = cr.Performance.Movements.Select(m => m.Work).First();
-                                //        log.Information($"{taskItem} {T.Name} {cr.ArtistName} {cr.ArtistDescr}, {cr.CompositionName} {cr.CompositionDescr}, {cr.PerformanceMovementCount} movements, \"{cr.PerformersCSV}\" {cr.PerformanceDescr} (from {cr.WorkName} {cr.WorkDescr})");
-                                //        break;
-                                //}
                                 log.Information($"{taskItem} {cr.MusicSetType.Name} {cr}");
                                 // send hub message that artist is new/modified
                                 foreach (var id in cr.ArtistIdListForNotification)
                                 {
-                                    await this.playManager.SendArtistNewOrModified(id);
+                                    //await this.playManager.SendArtistNewOrModified(id);
+                                    await this.libraryMessages.SendArtistNewOrModified(id);
                                 }
                             }
                         }

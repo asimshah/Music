@@ -1,277 +1,28 @@
-﻿using Fastnet.Apollo.Web.Controllers;
-using Fastnet.Core;
+﻿using Fastnet.Core;
 using Fastnet.Core.Web;
 using Fastnet.Music.Core;
 using Fastnet.Music.Data;
 using Fastnet.Music.Messages;
+using Microsoft.AspNetCore.SignalR;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using System;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.Linq;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace Fastnet.Apollo.Web
 {
-    public static partial class pm_extensions
-    {
-        public static PlaylistRuntime ToRuntime(this Playlist list, MusicDb db, DeviceRuntime dr)
-        {
-            return new PlaylistRuntime
-            {
-                Id = list.Id,
-                Name = list.Name,
-                Type = list.Type,
-                Items = list.Items
-                    .Select(x => x.ToRuntime(db, dr))
-                    .Where(x => x != null)
-                    .OrderBy(x => x.Sequence).ToList()
-            };
-        }
-        public static PlaylistItemRuntime[] AsMovementsToRuntime(this IEnumerable<Track> trackList, DeviceRuntime dr, int majorSequence)
-        {
-            var result = new List<PlaylistItemRuntime>();
-            var index = 0;
-            foreach (var track in trackList)
-            {
-                var dto = track.ToRuntime(dr, majorSequence);
-                dto.Sequence = ++index;
-                dto.Position = new PlaylistPosition(majorSequence, dto.Sequence);
-                dto.Titles = new string[] { track.Performance.GetParentArtistsName(), track.Performance.GetParentEntityDisplayName(), track.Performance.GetAllPerformersCSV(), track.Title };
-                result.Add(dto);
-            }
-            return result.ToArray();
-        }
-        public static PlaylistItemRuntime ToRuntime(this Track track, DeviceRuntime dr, int majorSequence)
-        {
-            var mf = track.GetBestMusicFile(dr);// getBestMusicFile(track);
-            return new PlaylistItemRuntime
-            {
-                Id = 0,// pli.Id,
-                Type = PlaylistRuntimeItemType.SingleItem,
-                Position = new PlaylistPosition(majorSequence, track.Number),
-                Titles = new string[] { track.Work.Artists.First().Name, track.Performance?.GetParentEntityDisplayName() ?? track.Work.Name, track.Title },
-                Sequence = track.Number,
-                NotPlayableOnCurrentDevice = mf == null,
-                ItemId = track.Id,
-                MusicFileId = mf?.Id ?? 0,
-                AudioProperties = mf?.GetAudioProperties(),
-                SampleRate = mf?.SampleRate ?? 0,
-                TotalTime = mf?.Duration ?? 0.0,
-                FormattedTotalTime = mf?.Duration.FormatDuration(),
-            };
-        }
-        public static PlaylistItemRuntime ToRuntime(this PlaylistItem pli, MusicDb db, DeviceRuntime dr)
-        {
-            PlaylistItemRuntime plir = null;
-            switch (pli.Type)
-            {
-                default:
-                case PlaylistItemType.MusicFile:
-                    var playable = dr.MaxSampleRate == 0 || pli.MusicFile.SampleRate == 0 || pli.MusicFile.SampleRate <= dr.MaxSampleRate;
-                    plir = new PlaylistItemRuntime
-                    {
-                        Id = pli.Id,
-                        Type = PlaylistRuntimeItemType.SingleItem,
-                        Position = new PlaylistPosition(pli.Sequence, 0),
-                        //Titles = new string[] {
-                        //        pli.MusicFile.Track.Performance?.Composition.Artist.Name ?? pli.MusicFile.Track.Work.Artists.First().Name,
-                        //        pli.MusicFile.Track.Performance?.Composition.Name ?? pli.MusicFile.Track.Work.Name,
-                        //        pli.MusicFile.Track.Title
-                        //    },
-                        Titles = new string[] {
-                                pli.MusicFile.Track.Performance?.GetParentArtistsName() ?? pli.MusicFile.Track.Work.Artists.Select(a => a.Name).ToCSV(),
-                                pli.MusicFile.Track.Performance?.GetParentEntityDisplayName() ?? pli.MusicFile.Track.Work.Name,
-                                pli.MusicFile.Track.Title
-                            },
-                        Sequence = pli.Sequence,
-                        NotPlayableOnCurrentDevice = !playable,
-                        ItemId = pli.ItemId,
-                        MusicFileId = pli.MusicFile.Id,
-                        AudioProperties = pli.MusicFile.GetAudioProperties(),
-                        SampleRate = pli.MusicFile.SampleRate ?? 0,
-                        TotalTime = pli.MusicFile.Duration ?? 0.0,
-                        FormattedTotalTime = pli.MusicFile.Duration?.FormatDuration() ?? "00:00",
-                        CoverArtUrl = $"lib/get/work/coverart/{pli.MusicFile.Track.Work.Id}"
-                    };
-                    break;
-                case PlaylistItemType.Track:
-                    var mf = pli.Track.GetBestMusicFile(dr);
-                    plir = new PlaylistItemRuntime
-                    {
-                        Id = pli.Id,
-                        Type = PlaylistRuntimeItemType.SingleItem,
-                        Position = new PlaylistPosition(pli.Sequence, 0),
-                        Titles = new string[] {
-                                pli.Track.Performance?.GetParentArtistsName() ?? pli.Track.Work.Artists.Select(a => a.Name).ToCSV(),
-                                pli.Track.Performance?.GetParentEntityDisplayName() ?? pli.Track.Work.Name,
-                                pli.Track.Title
-                            },
-                        Sequence = pli.Sequence,
-                        NotPlayableOnCurrentDevice = mf == null,
-                        ItemId = pli.ItemId,
-                        MusicFileId = mf?.Id ?? 0,
-                        AudioProperties = mf?.GetAudioProperties(),
-                        SampleRate = mf?.SampleRate ?? 0,
-                        TotalTime = mf?.Duration ?? 0.0,
-                        FormattedTotalTime = mf?.Duration?.FormatDuration() ?? "00:00",
-                        CoverArtUrl = $"lib/get/work/coverart/{pli.Track.Work.Id}"
-                    };
-                    break;
-                case PlaylistItemType.Work:
-                    var work = db.Works.Find(pli.Work.Id);
-                    var tracks = work.Tracks;
-                    plir = new PlaylistItemRuntime
-                    {
-                        Id = pli.Id,
-                        Type = PlaylistRuntimeItemType.MultipleItems,
-                        Position = new PlaylistPosition(pli.Sequence, 0),
-                        //Title = pli.Title,
-                        Titles = new string[] { pli.Title },
-                        Sequence = pli.Sequence,
-                        ItemId = pli.ItemId,
-                        CoverArtUrl = $"lib/get/work/coverart/{pli.Work.Id}",
-                        // ***NB*** the ToArray() at the end of the next line is very important, as 
-                        // otherwise the OrderBy...Select will be deferred and may execute *after* the db has been disposed!!
-                        SubItems = tracks.OrderBy(t => t.Number).Select(t => t.ToRuntime(dr, pli.Sequence)).ToArray()
-                    };
-                    plir.TotalTime = plir.SubItems.Sum(x => x.TotalTime);
-                    plir.FormattedTotalTime = plir.TotalTime.FormatDuration();
-                    break;
-                case PlaylistItemType.Performance:
-                    var performance = db.Performances.Find(pli.Performance.Id);
-                    var movements = performance.Movements;
-                    plir = new PlaylistItemRuntime
-                    {
-                        Id = pli.Id,
-                        Type = PlaylistRuntimeItemType.MultipleItems,
-                        Position = new PlaylistPosition(pli.Sequence, 0),
-                        //Title = pli.Title,
-                        Titles = new string[] { pli.Title },
-                        Sequence = pli.Sequence,
-                        ItemId = pli.ItemId,
-                        CoverArtUrl = $"lib/get/work/coverart/{movements.First().Work.Id}",
-                        //SubItems = movements.OrderBy(t => t.Number).Select(t => t.ToRuntime(pli.Sequence)).ToArray()
-                        SubItems = movements.OrderBy(t => t.Number).AsMovementsToRuntime(dr, pli.Sequence) //**NB* this version of ToRuntime, rewrites the sequence (as movements cannot usse the track number
-                    };
-                    plir.TotalTime = plir.SubItems.Sum(x => x.TotalTime);
-                    plir.FormattedTotalTime = plir.TotalTime.FormatDuration();
-                    //return plir2;
-                    break;
-            }
-            Debug.Assert(plir != null);
-            return plir;
-        }
-    }
-    public partial interface IHubMessage
-    {
-        Task SendDeviceNameChanged(AudioDevice d);
-        Task SendDeviceEnabled(AudioDevice d);
-        Task SendDeviceDisabled(AudioDevice d);
-        Task SendDeviceStatus(DeviceStatusDTO d);
-        Task SendPlaylist(PlaylistUpdateDTO update);
-        Task SendCommand(PlayerCommand command);
-    }
-    public enum PlaylistRuntimeItemType
-    {
-        SingleItem = 1,
-        MultipleItems = 2
-    }
-    public class PlaylistItemRuntime
-    {
-        public long Id { get; set; }
-        public PlaylistRuntimeItemType Type { get; set; }
-        public PlaylistPosition Position { get; set; }
-        //public string Title { get; set; }
-        public IEnumerable<string> Titles { get; set; }
-        public int Sequence { get; set; }
-        public bool NotPlayableOnCurrentDevice { get; set; }
-        public long ItemId { get; set; }
-        public long MusicFileId { get; set; }
-        public string AudioProperties { get; set; }
-        public int SampleRate { get; set; }
-        public double TotalTime { get; set; }
-        public string FormattedTotalTime { get; set; }
-        public string CoverArtUrl { get; set; }
-        //public Track Track { get; set; }
-        //public MusicFile MusicFile { get; set; }
-        //public Work Work { get; set; }
-        public IEnumerable<PlaylistItemRuntime> SubItems { get; set; }
-    }
-    /// <summary>
-    /// run time playlist info - i.e. not dependent on MusicDb instance
-    /// </summary>
-    public class PlaylistRuntime
-    {
-        public long Id { get; set; }
-        public PlaylistType Type { get; set; }
-        public string Name { get; set; }
-        public List<PlaylistItemRuntime> Items { get; set; }
-    }
-    public class PlaylistPosition
-    {
-        public int Major { get; private set; }
-        public int Minor { get; private set; }
-        public PlaylistPosition()
-        {
-            Reset();
-        }
-        public PlaylistPosition(int major, int minor)
-        {
-            Major = major;
-            Minor = minor;
-        }
-        public void Set(PlaylistPosition position)
-        {
-            this.Major = position.Major;
-            this.Minor = position.Minor;
-        }
-        public void Reset()
-        {
-            this.Major = 0;
-            this.Minor = 0;
-        }
-        public bool IsUnset()
-        {
-            return Major == 0 && Minor == 0;
-        }
-        public override string ToString()
-        {
-            return $"({Major}, {Minor})";
-        }
-    }
-    /// <summary>
-    /// run time device info - i.e. not dependent on MusicDb instance
-    /// </summary>
-    public class DeviceRuntime
-    {
-        public DeviceStatus Status { get; set; }
-        public AudioDeviceType Type { get; set; }
-        public string Key { get; set; }
-        public string DisplayName { get; set; }
-        public int MaxSampleRate { get; set; }
-        public string PlayerUrl { get; set; }
-        public int CommandSequenceNumber { get; set; }
-        public PlaylistPosition CurrentPosition { get; private set; }
-        public PlayerCommand MostRecentCommand { get; set; }
-        public PlaylistRuntime Playlist { get; set; }
-        public DeviceRuntime()
-        {
-            CurrentPosition = new PlaylistPosition();
-        }
-        public bool CanPlay(PlaylistItemRuntime pli)
-        {
-            return !pli.NotPlayableOnCurrentDevice;// !(MaxSampleRate > 0 && pli.SampleRate > MaxSampleRate);
-        }
-    }
+
+
     public partial class PlayManager
     {
         public async Task SendDeviceEnabled(Device device)
         {
             try
             {
-                await this.playHub.Clients.All.SendDeviceEnabled(device.ToDTO());
+                await this.messageHub.Clients.All.SendDeviceEnabled(device.ToDTO());
             }
             catch (Exception xe)
             {
@@ -282,7 +33,7 @@ namespace Fastnet.Apollo.Web
         {
             try
             {
-                await this.playHub.Clients.All.SendDeviceDisabled(device.ToDTO());
+                await this.messageHub.Clients.All.SendDeviceDisabled(device.ToDTO());
             }
             catch (Exception xe)
             {
@@ -294,7 +45,7 @@ namespace Fastnet.Apollo.Web
         {
             try
             {
-                await this.playHub.Clients.All.SendDeviceNameChanged(device.ToDTO());
+                await this.messageHub.Clients.All.SendDeviceNameChanged(device.ToDTO());
             }
             catch (Exception xe)
             {
@@ -306,7 +57,7 @@ namespace Fastnet.Apollo.Web
         {
             try
             {
-                await this.playHub.Clients.All.SendPlaylist(dto);
+                await this.messageHub.Clients.All.SendPlaylist(dto);
             }
             catch (Exception xe)
             {
@@ -625,7 +376,7 @@ namespace Fastnet.Apollo.Web
                     {
                         dr.Status = deviceStatus;
                         var dto = deviceStatus.ToDTO(dr);
-                        await this.playHub.Clients.All.SendDeviceStatus(dto);
+                        await this.messageHub.Clients.All.SendDeviceStatus(dto);
                         log.Debug($"{dr.DisplayName}, {deviceStatus.ToString()}");
                     }
                     catch (Exception xe)
@@ -671,7 +422,7 @@ namespace Fastnet.Apollo.Web
                     }
                     else
                     {
-                        await this.playHub.Clients.Group("WebAudio").SendCommand(playerCommand);
+                        await this.messageHub.Clients.Group("WebAudio").SendCommand(playerCommand);
                         //var hm = this.playHub.Clients.Client(dr.ConnectionId);
                         //await hm.SendCommand(playerCommand);
                     }

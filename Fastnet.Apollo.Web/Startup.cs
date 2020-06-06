@@ -130,7 +130,7 @@ namespace Fastnet.Apollo.Web
                 endpoints.MapControllerRoute(
                     name: "default",
                     pattern: "{controller}/{action=Index}/{id?}");
-                endpoints.MapHub<PlayHub>("/playhub");
+                endpoints.MapHub<MessageHub>("/messagehub");
             });
 
             app.UseSpa(spa =>

@@ -13,11 +13,11 @@ namespace Fastnet.Apollo.Web
 {
     // possibly rename this hub as it now handles both player and library messages
     // rename this to MessageHub
-    public class PlayHub : Hub<IHubMessage>
+    public class MessageHub : Hub<IHubMessage>
     {
         private readonly ILogger log;
         private readonly BrowserMonitor browserMonitor;
-        public PlayHub(ILogger<PlayHub> logger, BrowserMonitor bm)
+        public MessageHub(ILogger<MessageHub> logger, BrowserMonitor bm)
         {
             log = logger;
             this.browserMonitor = bm;

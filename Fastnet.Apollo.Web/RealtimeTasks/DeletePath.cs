@@ -15,10 +15,11 @@ namespace Fastnet.Apollo.Web
     public class DeletePath : TaskBase
     {
         private TaskItem taskItem;
-        private readonly PlayManager playManager;
-        public DeletePath(MusicOptions options, long taskId, string connectionString, PlayManager pm) : base(options, taskId, connectionString, null)
+        //rivate readonly PlayManager playManager;
+        private readonly LibraryMessages libraryMessages;
+        public DeletePath(MusicOptions options, long taskId, string connectionString, LibraryMessages lm) : base(options, taskId, connectionString, null)
         {
-            this.playManager = pm;
+            this.libraryMessages = lm;
         }
 
         protected /*override*/ async Task RunTaskOld()
@@ -39,20 +40,7 @@ namespace Fastnet.Apollo.Web
             {
                 await this.ExecuteTaskItemWithRetryAsync(async (db) =>
                 {
-                    //try
-                    //{
-                        await DeleteAsync(db, pd);
-                    //}
-                    //catch (RetryLimitExceededException)
-                    //{
-                    //    await SetTaskFailed();
-                    //}
-                    //catch (Exception xe)
-                    //{
-                    //    log.Error(xe, $"{taskItem}");
-                    //    await SetTaskFailed();
-                    //    throw;
-                    //}
+                    await DeleteAsync(db, pd);
                 });
             }
         }
@@ -105,9 +93,10 @@ namespace Fastnet.Apollo.Web
             taskItem.Status = Music.Core.TaskStatus.Finished;
             taskItem.FinishedAt = DateTimeOffset.Now;
             await db.SaveChangesAsync();
-            foreach(var id in eh.GetDeletedArtistIds())
+            foreach (var id in eh.GetDeletedArtistIds())
             {
-                await this.playManager.SendArtistDeleted(id);
+                //await this.playManager.SendArtistDeleted(id);
+                await this.libraryMessages.SendArtistDeleted(id);
             }
             foreach (var id in eh.GetModifiedArtistIds())
             {
@@ -119,7 +108,8 @@ namespace Fastnet.Apollo.Web
                 }
                 if (shouldSend)
                 {
-                    await this.playManager.SendArtistNewOrModified(id);
+                    //await this.playManager.SendArtistNewOrModified(id);
+                    await this.libraryMessages.SendArtistNewOrModified(id);
                 }
             }
         }

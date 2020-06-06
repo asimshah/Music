@@ -1,12 +1,10 @@
 ﻿using Fastnet.Core;
 using Fastnet.Core.Web;
 using Fastnet.Music.Messages;
-using Microsoft.Extensions.DependencyInjection;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.SignalR;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
-using Microsoft.Extensions.Hosting;
 using System;
 using System.Collections.Generic;
 using System.Threading;
@@ -20,7 +18,7 @@ namespace Fastnet.Apollo.Web
         private readonly IDictionary<string, DeviceRuntime> devices;
         private ServerInformationMulticast sim;
         private KeepAgentsAlive keepAlive;
-        private readonly IHubContext<PlayHub, IHubMessage> playHub;
+        private readonly IHubContext<MessageHub, IHubMessage> messageHub;
         private readonly Messenger messenger;
         private readonly ILoggerFactory lf;
         private readonly List<Task> taskList;
@@ -28,13 +26,13 @@ namespace Fastnet.Apollo.Web
         private readonly MessengerOptions messengerOptions;
         private readonly MusicServerOptions musicServerOptions;
         private readonly IWebHostEnvironment environment;
-        public PlayManager(IHubContext<PlayHub, IHubMessage> playHub, IServiceProvider serviceProvider,
+        public PlayManager(IHubContext<MessageHub, IHubMessage> playHub, IServiceProvider serviceProvider,
             IWebHostEnvironment env,
             IOptions<MusicServerOptions> serverOptions, Messenger messenger, IOptions<MessengerOptions> messengerOptions,
             ILogger<PlayManager> log, ILoggerFactory loggerFactory) : base(log)
         {
             this.messengerOptions = messengerOptions.Value;
-            this.playHub = playHub;
+            this.messageHub = playHub;
             this.serviceProvider = serviceProvider;
             this.musicServerOptions = serverOptions.Value;
             this.environment = env;

@@ -42,7 +42,8 @@ export class MessageService {
       console.log("MessageService: init()");
       let url = this.document.location === null ? "" : this.document.location.href;
       this.hubConnection = new HubConnectionBuilder()
-         .withUrl(`${url}playhub`)
+         //.withUrl(`${url}playhub`)
+         .withUrl(`${url}messagehub`)
          .build();
       this.hubConnection.onclose(async (err) => {
          if (err) {
