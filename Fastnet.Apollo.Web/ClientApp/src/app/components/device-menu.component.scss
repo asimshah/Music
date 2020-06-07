@@ -1,5 +1,6 @@
 @import "../../fastnet/themes/_themes";
 
+
 $device-menu-height: 48px;
 
 :host {
@@ -7,20 +8,30 @@ $device-menu-height: 48px;
 }
 
 .device-menu {
-    height: $device-menu-height;
-    width: 100%;
-    z-index: 999;
-    font-size: 24px;
-    color: theme-colour('surface');
-    background-color: theme-colour('primary', 'dark');
-    display: grid;
-    grid-template-columns: 1fr auto;
-    align-items: center;
+   height: $device-menu-height;
+   width: 100%;
+   z-index: 999;
+   font-size: 24px;
+   color: theme-colour('surface');
+   background-color: theme-colour('primary', 'dark');
+   display: grid;
+   grid-template-columns: 1fr auto;
+   align-items: center;
 
-    .device-name {
-        margin: $theme-gutter;
-    }
+   .device-name {
+      margin: $theme-gutter;
+   }
+
+   .right-button {
+      margin:  $theme-gutter;
+      cursor: pointer;
+
+      &:hover {
+         color: theme-colour('warning');
+      }
+   }
 }
+
 .menu-items {
     background-color: theme-colour('primary', 'dark');
     border: 1px solid theme-colour('surface');

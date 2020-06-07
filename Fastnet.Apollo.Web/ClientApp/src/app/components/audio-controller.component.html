@@ -33,6 +33,13 @@
          <i class="fa fa-volume-up volume-up" (click)="volumeUp()"></i>
       </div>
    </ng-container>
+   <ng-container>
+      <div class="playlist-bar">
+         <button class="icon" title="Save current playlist as ..."><div class="fa fa-file"></div></button>
+         <button class="icon" title="Load playlist from another device"><div class="fa fa-download"></div></button>
+         <button class="icon" title="Load saved playlist"><div class="fa fa-file-text-o"></div></button>
+      </div>
+   </ng-container>
    <!--<web-audio *ngIf="isMobileDevice()"></web-audio>-->
    <web-audio ></web-audio>
 </div>

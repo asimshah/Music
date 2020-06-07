@@ -1,10 +1,12 @@
 <div class="device-menu">
-    <div class="device-name" (click)="onDeviceNameClick($event)">{{currentDevice && currentDevice.displayName}}</div>
-    <popup-panel  >
-        <div class="menu-items">
-            <ng-container *ngFor="let device of devices">
-                <div class="menu-item" (click)="setDevice(device)">{{device.displayName}}</div>
-            </ng-container>
-        </div>
-    </popup-panel>
+   <div class="device-name" (click)="onDeviceNameClick($event)">{{currentDevice && currentDevice.displayName}}</div>
+   <!--<i class="fa fa-ellipsis-h right-button" (click)="onPlaylistManagerRequested()" ></i>-->
+   <popup-panel>
+      <div class="menu-items">
+         <ng-container *ngFor="let device of devices">
+            <div class="menu-item" (click)="setDevice(device)">{{device.displayName}}</div>
+         </ng-container>
+      </div>
+   </popup-panel>
 </div>
+<playlist-manager></playlist-manager>

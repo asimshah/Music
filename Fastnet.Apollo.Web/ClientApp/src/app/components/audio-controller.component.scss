@@ -1,151 +1,182 @@
 @import "../../fastnet/themes/_themes";
+@include theme-buttons();
 
 $player-background-colour: darken(theme-colour('primary', 'dark'), 5%);
-$accent-colour: $high-accent-colour;// #f9ca06;// theme-colour('accent');
+$accent-colour: $high-accent-colour; // #f9ca06;// theme-colour('accent');
 
 @mixin make-clickable() {
-    cursor: pointer;
+   cursor: pointer;
 
-    &:hover {
-        color: theme-colour('accent');
-    }
+   &:hover {
+      color: theme-colour('accent');
+   }
 }
 
 :host {
-    display: block;
+   display: block;
 }
 
 .cover {
-    margin-top: $theme-gutter-narrow;
-    padding: $theme-gutter-narrow;
-    display: grid;
-    grid-template-columns: 1fr;
-    align-items: center;
-    justify-items: center;
-    min-height: 100px;
-    min-width: 100px;
+   margin-top: $theme-gutter-narrow;
+   padding: $theme-gutter-narrow;
+   display: grid;
+   grid-template-columns: 1fr;
+   align-items: center;
+   justify-items: center;
+   min-height: 100px;
+   min-width: 100px;
 
-    img {
-        height: 100px;
-        width: 100px;
-    }
+   img {
+      height: 100px;
+      width: 100px;
+   }
 
-    .title {
-        color: $accent-colour; // theme-colour('accent');
-        text-align: center;
-        font-size: 10px;
+   .title {
+      color: $accent-colour; // theme-colour('accent');
+      text-align: center;
+      font-size: 10px;
 
-        &.track-name {
-            color: inherit;
-            font-size: inherit;
-        }
-    }
+      &.track-name {
+         color: inherit;
+         font-size: inherit;
+      }
+   }
 
-    .audio-properties {
-        color: $accent-colour;// theme-colour('accent');
-        font-size: smaller;
-        font-style: italic;
-    }
+   .audio-properties {
+      color: $accent-colour; // theme-colour('accent');
+      font-size: smaller;
+      font-style: italic;
+   }
 }
+
 .audio-controls {
-    display: grid;
-    grid-template-columns: 1fr auto 1fr;
-    align-items: center;
-    grid-column-gap: $theme-gutter;
-    justify-items: center;
+   display: grid;
+   grid-template-columns: 1fr auto 1fr;
+   align-items: center;
+   grid-column-gap: $theme-gutter;
+   justify-items: center;
 
-    .skip-back, .skip-forward, .toggle-play-pause {
-        @include make-clickable();
-    }
+   .skip-back, .skip-forward, .toggle-play-pause {
+      @include make-clickable();
+   }
 
-    .skip-back {
-        justify-self: right;
-    }
+   .skip-back {
+      justify-self: right;
+   }
 
-    .skip-forward {
-        justify-self: left;
-    }
+   .skip-forward {
+      justify-self: left;
+   }
 
-    .toggle-play-pause {
-        margin-left: $theme-gutter;
-        margin-right: $theme-gutter;
-        font-size: 3em;
-    }
+   .toggle-play-pause {
+      margin-left: $theme-gutter;
+      margin-right: $theme-gutter;
+      font-size: 3em;
+   }
 }
 
 .playing-slider, .volume-slider {
-    font-size: 12px;
-    justify-self: center;
-    width: 100%;
-    /*max-width: 256px;*/
-    display: grid;
-    grid-column-gap: $theme-gutter;
-    align-items: center;
+   font-size: 12px;
+   justify-self: center;
+   width: 100%;
+   /*max-width: 256px;*/
+   display: grid;
+   grid-column-gap: $theme-gutter;
+   align-items: center;
 
-    .groove {
-        &.repositioning-disabled {
-            pointer-events: none;
-        }
+   .groove {
+      &.repositioning-disabled {
+         pointer-events: none;
+      }
 
-        &:not(.repositioning-disabled) {
-            cursor: pointer;
-        }
+      &:not(.repositioning-disabled) {
+         cursor: pointer;
+      }
 
-        height: 2px;
-        border-radius: 2px;
-        background-color: theme-colour('surface');
+      height: 2px;
+      border-radius: 2px;
+      background-color: theme-colour('surface');
 
-        .bead {
-            position: relative;
-            top: -8px;
-        }
+      .bead {
+         position: relative;
+         top: -8px;
+      }
 
-        &:hover:not(.repositioning-disabled) {
-            height: 4px;
-            background-color:theme-colour('accent');
+      &:hover:not(.repositioning-disabled) {
+         height: 4px;
+         background-color: theme-colour('accent');
 
-            .bead {
-                top: -7px;
-            }
-        }
-    }
+         .bead {
+            top: -7px;
+         }
+      }
+   }
 }
+
 .playing-slider {
-    grid-template-columns: 1fr minmax(0, 300px) 1fr;
+   grid-template-columns: 1fr minmax(0, 300px) 1fr;
 
-    > div:first-child {
-        justify-self: end;
-        margin-left: $theme-gutter;
-        margin-right: $theme-gutter;
-    }
+   > div:first-child {
+      justify-self: end;
+      margin-left: $theme-gutter;
+      margin-right: $theme-gutter;
+   }
 
-    > div:last-child {
-        margin-left: $theme-gutter;
-        margin-right: $theme-gutter;
-    }
+   > div:last-child {
+      margin-left: $theme-gutter;
+      margin-right: $theme-gutter;
+   }
 }
+
 .volume-slider {
-    margin-top: $theme-gutter-fine;
-    grid-template-columns: 1fr minmax(0, 200px) 1fr;
+   margin-top: $theme-gutter-fine;
+   grid-template-columns: 1fr minmax(0, 200px) 1fr;
 
-    .volume-down {
-        justify-self: end;
-    }
+   .volume-down {
+      justify-self: end;
+   }
 
-    .volume-down, .volume-up {
-        @include make-clickable();
-        margin-left: $theme-gutter;
-        margin-right: $theme-gutter;
-    }
+   .volume-down, .volume-up {
+      @include make-clickable();
+      margin-left: $theme-gutter;
+      margin-right: $theme-gutter;
+   }
 }
 
 .mobile-device {
-    .playing-slider, .volume-slider {
-        margin-top: $theme-gutter;
-        margin-bottom: $theme-gutter;
-    }
-    .audio-controls {
-        font-size: 30px;
-    }
+   .playing-slider, .volume-slider {
+      margin-top: $theme-gutter;
+      margin-bottom: $theme-gutter;
+   }
+
+   .audio-controls {
+      font-size: 30px;
+   }
 }
 
+.playlist-bar {
+   background-color: darken(theme-colour('primary', 'dark'), 10%);
+   margin-top: $theme-gutter * 2;
+   margin-left: $theme-gutter;
+   margin-right: $theme-gutter;
+   padding-left: $theme-gutter;
+   padding-right: $theme-gutter;
+   display: grid;
+   grid-template-columns: auto auto auto auto 1fr;
+   align-items: center;
+   grid-column-gap: $theme-gutter-narrow;
+   justify-items: center;
+
+   button.icon {
+      height: auto;
+      border: 1px solid theme-colour('background', 'light');
+      border-radius: 2px;
+      margin: $theme-gutter-narrow;
+      padding: $theme-gutter-fine;
+
+      &:hover {
+         color: $high-accent-colour;
+         border-color: $high-accent-colour;
+      }
+   }
+}

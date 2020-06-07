@@ -141,35 +141,24 @@ namespace Fastnet.Apollo.Web
                 do
                 {
                     (pli, position) = GetNextPlaylistItem(dr, reverse);
-                    //if (pli != null)
-                    //{
-                    //    log.Debug($"Next is {pli?.Title} and CanPlay() is {dr.CanPlay(pli)}");
-                    //}
-                    //else
-                    //{
-                    //    log.Debug($"Next is null");
-                    //}
                     if (pli != null && dr.CanPlay(pli) == false)
                     {
                         dr.CurrentPosition.Set(position);
                     }
                 } while (pli != null && dr.CanPlay(pli) == false);
 
-
-                //log.Information($"Next position is {position}, item is {pli?.Title ?? "item is null"}, of type {pli?.Type.ToString() ?? "n/a"}");
                 if (pli != null)
                 {
                     PlayerCommand pc = null;
                     pc = new PlayerCommand
                     {
-                        Command = PlayerCommands.Play, //.ClearThenPlay,
+                        Command = PlayerCommands.Play,
                         Volume = dr.Status.Volume < 0.05f ? 0.3f : dr.Status.Volume,
                         DeviceKey = deviceKey,
                         StreamUrl = $"player/stream/{pli.MusicFileId}"
 
                     };
                     dr.CurrentPosition.Set(position);
-                    //log.Debug($"{dr.DisplayName}, play command for {pli.Title}");
                     return await ExecuteCommand(dr, pc);
                 }
                 else
@@ -226,8 +215,6 @@ namespace Fastnet.Apollo.Web
             if (dr != null)
             {
                 dr.Playlist.Items.Clear();
-                //dr.CurrentPlaylistSequenceNumber = 0;
-                //dr.CurrentPSN = (0, 0);
                 dr.CurrentPosition.Reset();
                 var dto = new PlaylistUpdateDTO
                 {
@@ -417,14 +404,11 @@ namespace Fastnet.Apollo.Web
                         using (var deviceClient = GetPlayerClient(dr))
                         {
                             await deviceClient.Execute(playerCommand);
-                            //afterExecute?.Invoke(dr);
                         }
                     }
                     else
                     {
                         await this.messageHub.Clients.Group("WebAudio").SendCommand(playerCommand);
-                        //var hm = this.playHub.Clients.Client(dr.ConnectionId);
-                        //await hm.SendCommand(playerCommand);
                     }
                     log.Debug($"{dr.DisplayName}: command {playerCommand.Command}, command sequence {playerCommand.CommandSequenceNumber}");
                     return playerCommand.CommandSequenceNumber;

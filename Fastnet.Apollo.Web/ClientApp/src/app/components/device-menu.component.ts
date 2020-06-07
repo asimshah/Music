@@ -8,6 +8,7 @@ import { PopupPanelComponent } from '../../fastnet/controls/popup-panel.componen
 import { ParameterService } from '../shared/parameter.service';
 import { getLocalStorageValue } from '../shared/common.functions';
 import { LocalStorageKeys } from '../shared/common.enums';
+import { PlaylistManagerComponent } from './playlist-manager.component';
 
 @Component({
    selector: 'device-menu',
@@ -16,6 +17,7 @@ import { LocalStorageKeys } from '../shared/common.enums';
 })
 export class DeviceMenuComponent implements OnInit, OnDestroy {
    @ViewChild(PopupPanelComponent, { static: false }) menu: PopupPanelComponent;
+   @ViewChild(PlaylistManagerComponent, { static: false }) plManager: PlaylistManagerComponent;
    devices: AudioDevice[] = [];
    currentDevice: AudioDevice | null = null;
 
@@ -68,6 +70,9 @@ export class DeviceMenuComponent implements OnInit, OnDestroy {
       if (this.devices.length > 1) {
          this.menu.open(e);
       }
+   }
+   onPlaylistManagerRequested() {
+      this.plManager.open();
    }
    async setDevice(d: AudioDevice) {
       this.playerService.setDevice(d);

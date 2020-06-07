@@ -30,6 +30,7 @@ import { MultipleValueEditorComponent } from './catalog/multiple-values-editor/m
 import { MusicfileEditorComponent } from './catalog/musicfile-editor/musicfile-editor.component';
 import { PopularTagEditorComponent } from './catalog/popular-catalog/popular-tag-editor/popular-tag-editor.component';
 import { IndianClassicalCatalogComponent } from './catalog/indian-classical-catalog/indian-classical-catalog.component';
+import { PlaylistManagerComponent } from './components/playlist-manager.component';
 
 export class CustomHammerConfig extends HammerGestureConfig {
     overrides = <any>{
@@ -59,7 +60,8 @@ export class CustomHammerConfig extends HammerGestureConfig {
         WesternClassicalTagEditorComponent,
         PopularCatalogComponent,
         PopularTagEditorComponent,
-        IndianClassicalCatalogComponent
+        IndianClassicalCatalogComponent,
+        PlaylistManagerComponent
     ],
     imports: [
         BrowserModule.withServerTransition({ appId: 'ng-cli-universal' }),
