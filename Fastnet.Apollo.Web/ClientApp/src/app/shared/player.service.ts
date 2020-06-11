@@ -40,7 +40,6 @@ export class PlayerService extends BaseService implements OnDestroy {
             this.init();
          }
       });
-
    }
    async init() {
       console.log("PlayerService: init()");
@@ -48,7 +47,6 @@ export class PlayerService extends BaseService implements OnDestroy {
       await this.start();
       this.log.information("[PlayerService] started");
       this.playerServiceStarted.next(true);
-
    }
    ngOnDestroy() {
       this.stopUpdate();
@@ -200,16 +198,26 @@ export class PlayerService extends BaseService implements OnDestroy {
       if (d != null) {
          this.currentDeviceBeingControlled = d;
          this.setCurrentDeviceKey(this.currentDeviceBeingControlled.key);
-         this.log.debug(`device set to ${this.currentDeviceBeingControlled.displayName}`);
+         this.log.information(`[PlayerService] device set to ${this.currentDeviceBeingControlled.toString()}`);
       } else {
          this.currentDeviceBeingControlled = null;
          this.setCurrentDeviceKey(null);
+         this.log.information(`[PlayerService] device set to null}`);
       }
       await this.triggerUpdates();
    }
    //
+   public async getAllPlaylists() {
+      return this.getAsync<string[]>(`get/all/playlists`);
+   }
+   public async copyPlaylist(from: string, to: string) {
+      await this.getAsync<void>(`copy/playlist/${from}/${to}`);
+      await this.triggerUpdates();
+   }
    public async enableWebAudio() {
-      let device = await this.getAsync<AudioDevice>(`webaudio/start/${this.parameterService.getBrowserKey()}`);
+      let d = await this.getAsync<AudioDevice>(`webaudio/start/${this.parameterService.getBrowserKey()}`);
+      let device = new AudioDevice();
+      device.copyProperties(d);
       await this.messageService.connectWebAudio();
       return device;
    }
@@ -380,11 +388,11 @@ export class PlayerService extends BaseService implements OnDestroy {
    private setCurrentDeviceKey(key: string | null) {
       if (key === null) {
          removeLocalStorageValue(this.storedDeviceKey);
-         this.log.debug(`current device removed`);
+         //this.log.debug(`current device removed`);
       } else {
          setLocalStorageValue(this.storedDeviceKey, key);
          this.currentDeviceKey = key;
-         this.log.debug(`current device is now ${key}`);
+         //this.log.debug(`current device is now ${key}`);
       }
    }
    private async getActiveDevices(): Promise<AudioDevice[]> {

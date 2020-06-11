@@ -22,11 +22,11 @@ namespace Fastnet.Apollo.Web
     {
         private TaskItem taskItem;
         //private readonly PlayManager playManager;
-        private readonly LibraryMessages libraryMessages;
+        private readonly LibraryService libraryMessages;
         private readonly IndianClassicalInformation indianClassicalInformation;
         public CataloguePath(MusicOptions options, long taskId, string connectionString,
             IndianClassicalInformation ici,
-            BlockingCollection<TaskQueueItem> taskQueue, LibraryMessages lm) : base(options, taskId, connectionString, taskQueue)
+            BlockingCollection<TaskQueueItem> taskQueue, LibraryService lm) : base(options, taskId, connectionString, taskQueue)
         {
             this.indianClassicalInformation = ici;
             this.libraryMessages = lm;

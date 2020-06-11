@@ -21,7 +21,6 @@ using System.Reflection;
 
 namespace Fastnet.Apollo.Web
 {
-    // test chnage
     public class Startup
     {
         private IWebHostEnvironment environment;
@@ -32,20 +31,13 @@ namespace Fastnet.Apollo.Web
             this.log = logger;
             this.environment = env;
             var name = Process.GetCurrentProcess().ProcessName;
+            var siteVersion = GetSiteVersion();
             var versions = System.Reflection.Assembly.GetExecutingAssembly().GetVersions();
+            log.Information($"Music {siteVersion} site started ({name}), using versions:");
             foreach (var item in versions.OrderByDescending(x => x.DateTime))
             {
                 log.Information($"{item.Name}, {item.DateTime.ToDefaultWithTime()}, [{item.Version}, {item.PackageVersion}]");
             }
-            //var packageVersion = GetPackageVersion();
-            //var name = Process.GetCurrentProcess().ProcessName;
-            //log.Information($"Music {packageVersion} site started ({name})");
-            //var versions = GetVersions();
-            //log.Information($"using versions:");
-            //foreach (var item in versions.OrderBy(x => x))
-            //{
-            //    log.Information($"   {item}");
-            //}
         }
 
         public IConfiguration Configuration { get; }
@@ -213,38 +205,38 @@ namespace Fastnet.Apollo.Web
             log.Information("OnStopped()");
         }
         // move this to Fastnet.Core
-        private string GetPackageVersion()
+        private string GetSiteVersion()
         {
-            //var assemblyLocation = System.Reflection.Assembly.GetExecutingAssembly().Location;
-            //return System.Diagnostics.FileVersionInfo.GetVersionInfo(assemblyLocation).ProductVersion;
-            return System.Reflection.Assembly.GetExecutingAssembly().GetPackageVersion();
+            var assemblyLocation = System.Reflection.Assembly.GetExecutingAssembly().Location;
+            return System.Diagnostics.FileVersionInfo.GetVersionInfo(assemblyLocation).ProductVersion;
+            //return System.Reflection.Assembly.GetExecutingAssembly().GetPackageVersion();
         }
-        // move this to Fastnet.Core
-        private string GetAssemblyVersion()
-        {
-            //return System.Reflection.Assembly.GetExecutingAssembly().GetName().Version.ToString();
-            return System.Reflection.Assembly.GetExecutingAssembly().GetAssemblyVersion();
-        }
-        private IEnumerable<string> GetVersions()
-        {
-            var list = new List<string>();
-            //foreach(var assemblyName in System.Reflection.Assembly.GetExecutingAssembly().GetReferencedAssemblies())
-            //{
-            //    if (assemblyName.Name.StartsWith("fastnet", System.Globalization.CompareOptions.IgnoreCase))
-            //    {
-            //        list.Add($"{assemblyName.Name}, {assemblyName.Version}");
-            //    }
-            //}
-            foreach (var assemblyName in System.Reflection.Assembly.GetExecutingAssembly().GetReferencedAssemblies())
-            {
-                if (assemblyName.Name.StartsWith("fastnet", System.Globalization.CompareOptions.IgnoreCase))
-                {
-                    var assembly = Assembly.Load(assemblyName);
-                    list.Add($"{assemblyName.Name}, {assembly.GetPackageVersion()}");
-                }
-            }
-            return list;
-        }
+        //// move this to Fastnet.Core
+        //private string GetAssemblyVersion()
+        //{
+        //    //return System.Reflection.Assembly.GetExecutingAssembly().GetName().Version.ToString();
+        //    return System.Reflection.Assembly.GetExecutingAssembly().GetAssemblyVersion();
+        //}
+        //private IEnumerable<string> GetVersions()
+        //{
+        //    var list = new List<string>();
+        //    //foreach(var assemblyName in System.Reflection.Assembly.GetExecutingAssembly().GetReferencedAssemblies())
+        //    //{
+        //    //    if (assemblyName.Name.StartsWith("fastnet", System.Globalization.CompareOptions.IgnoreCase))
+        //    //    {
+        //    //        list.Add($"{assemblyName.Name}, {assemblyName.Version}");
+        //    //    }
+        //    //}
+        //    foreach (var assemblyName in System.Reflection.Assembly.GetExecutingAssembly().GetReferencedAssemblies())
+        //    {
+        //        if (assemblyName.Name.StartsWith("fastnet", System.Globalization.CompareOptions.IgnoreCase))
+        //        {
+        //            var assembly = Assembly.Load(assemblyName);
+        //            list.Add($"{assemblyName.Name}, {assembly.GetPackageVersion()}");
+        //        }
+        //    }
+        //    return list;
+        //}
 
     }
 }

@@ -78,7 +78,7 @@ namespace Fastnet.Apollo.Web
                     switch (item.Type)
                     {
                         case TaskType.DiskPath:
-                            tb = new CataloguePath(options, item.TaskItemId, connectionString, monitoredIndianClassicalInformation.CurrentValue, taskQueue, this.serviceProvider.GetService<LibraryMessages>());
+                            tb = new CataloguePath(options, item.TaskItemId, connectionString, monitoredIndianClassicalInformation.CurrentValue, taskQueue, this.serviceProvider.GetService<LibraryService>());
                             break;
                         case TaskType.Portraits:
                             tb = new UpdatePortraits(options, item.TaskItemId, connectionString);
@@ -89,7 +89,7 @@ namespace Fastnet.Apollo.Web
                             tb = new ExpandTask(options, item.TaskItemId, connectionString, taskQueue);
                             break;
                         case TaskType.DeletedPath:
-                            tb = new DeletePath(options, item.TaskItemId, connectionString, this.serviceProvider.GetService<LibraryMessages>());
+                            tb = new DeletePath(options, item.TaskItemId, connectionString, this.serviceProvider.GetService<LibraryService>());
                             break;
                         // resampling moved to a single polling background service
                         //case TaskType.ResampleWork:

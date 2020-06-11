@@ -4,9 +4,9 @@ using System.ComponentModel.DataAnnotations.Schema;
 
 namespace Fastnet.Music.Data
 {
-    public class Device : IIdentifier
+    public class Device : EntityBase // IIdentifier
     {
-        public long Id { get; set; }
+        public override long Id { get; set; }
         public string KeyName { get; set; }
         public string DisplayName { get; set; }
         public string Name { get; set; }
@@ -34,6 +34,10 @@ namespace Fastnet.Music.Data
             {
                 return !IsDisabled && (DateTimeOffset.Now - LastSeenDateTime) < TimeSpan.FromSeconds(60);
             }
+        }
+        public override string ToString()
+        {
+            return $"{ToIdent()} {DisplayName} (key: {KeyName}) [phys: {MACAddress} on {HostMachine}]";
         }
     }
 

@@ -2,6 +2,14 @@ import { Component, forwardRef, Input, Output, EventEmitter, ChangeDetectorRef, 
 import { NG_VALUE_ACCESSOR } from "@angular/forms";
 
 import { InputControlBase } from "./controlbase.type";
+/*
+ * This controls is OBSOLETE as of 10Jun2020
+ *
+ * use <combo-box [dropdownonly]="true" ></cpmbo-box> instaed!
+ *
+ * */
+
+
 
 @Component({
     selector: 'dropdown-input',

@@ -25,7 +25,7 @@
 
         option {
             background-color: theme-colour('background');
-            color: theme-colour('surface');
+            color: red;// theme-colour('surface');
 
             &:hover {
                 background-color: theme-colour('surface');

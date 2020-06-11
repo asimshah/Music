@@ -7,6 +7,8 @@ import { LoggingService } from './shared/logging.service';
 import { ParameterService } from './shared/parameter.service';
 import { ControlBase, Logger } from '../fastnet/controls/controlbase.type';
 import { SlidingPanelsComponent } from './components/sliding-panels.component';
+import { LocalStorageKeys } from './shared/common.enums';
+import { getLocalStorageValue } from './shared/common.functions';
 
 declare var require: any;
 export const appInfo = {
@@ -39,14 +41,15 @@ export class AppComponent {
         this.screenHeight = innerHeight;
         this.screenWidth = innerWidth;
 
-
-
        ControlBase.deviceSensitivity = true;
        this.ps.ready$.subscribe(async (v) => {
           if (v === true) {
+             let browserStorageKey = `music:${LocalStorageKeys[LocalStorageKeys.browserKey]}`;
+             let browserkey = getLocalStorageValue(browserStorageKey, "");
              this.parameters = this.ps.getParameters();
              this.log.isMobileDevice = this.isMobileDevice();
-             this.log.information(`[AppComponent] apollo version ${appInfo.version.toString()} : client ${this.parameters.clientIPAddress} started (window inner dimensions: ${innerWidth}w x ${innerHeight}h), isMobile = ${this.isMobileDevice()}, isIpad = ${this.isIpad()}`);
+             this.log.information(`[AppComponent] version ${appInfo.version.toString()}, ${this.parameters.clientIPAddress} [key: ${browserkey}], isMobile = ${this.isMobileDevice()}, isIpad = ${this.isIpad()}`);
+             //this.log.trace(`[AppComponent] window inner dimensions: ${innerWidth}w x ${innerHeight}h`);
           }
        });
 

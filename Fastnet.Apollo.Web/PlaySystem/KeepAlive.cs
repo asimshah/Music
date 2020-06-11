@@ -48,7 +48,7 @@ namespace Fastnet.Apollo.Web
                 {
                     if (this.playerUrls != null)
                     {
-                        await pollPlayers();
+                        await PollPlayers();
                     }
                     await Task.Delay(musicServerOptions.KeepAliveInterval);
                     if (cancellationToken.IsCancellationRequested)
@@ -74,7 +74,7 @@ namespace Fastnet.Apollo.Web
                 log.Warning($"did not expect to be here!!!!!");
             }
         }
-        private async Task pollPlayers()
+        private async Task PollPlayers()
         {
             foreach (var url in playerUrls.ToArray())
             {
@@ -86,7 +86,7 @@ namespace Fastnet.Apollo.Web
                 }
                 catch (System.Exception xe)
                 {
-                    log.Debug($"polling {url} failed: {xe.Message}");
+                    log.Error($"polling {url} failed: {xe.Message}");
                     this.onPollingFailed(url);
                 }
             }

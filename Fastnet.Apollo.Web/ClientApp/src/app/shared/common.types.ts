@@ -48,11 +48,12 @@ export class AudioDevice {
    enabled: boolean;
    displayName: string;
    name: string;
-
    capability: AudioCapability;
    hostMachine: string;
    canReposition: boolean;
-
+   public toString(): string {
+      return `${this.displayName} (key: ${this.key}) [on ${this.hostMachine}]`;
+   }
    public copyProperties(d: AudioDevice) {
       this.id = d.id;
       this.key = d.key;

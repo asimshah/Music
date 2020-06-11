@@ -66,7 +66,7 @@ class FSM {
          return await method(this.currentState, ev, args);
       };
       let nextState = await action();
-      this.log.debug(`[FSM] state ${PlayerStates[this.currentState]}, event ${PlayerEvents[ev]}, --> state ${PlayerStates[nextState]}`);
+      //this.log.information(`[FSM] state ${PlayerStates[this.currentState]}, event ${PlayerEvents[ev]}, --> state ${PlayerStates[nextState]}`);
       this.currentState = nextState;
    }
 }

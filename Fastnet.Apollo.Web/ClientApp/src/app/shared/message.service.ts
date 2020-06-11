@@ -94,13 +94,19 @@ export class MessageService {
    private registerMessages() {
 
       this.hubConnection.on("SendDeviceEnabled", (d: AudioDevice) => {
-         this.deviceEnabled.next(d);
+         let device = new AudioDevice();
+         device.copyProperties(d);
+         this.deviceEnabled.next(device);
       });
       this.hubConnection.on("SendDeviceNameChanged", (d: AudioDevice) => {
-         this.deviceNameChanged.next(d);
+         let device = new AudioDevice();
+         device.copyProperties(d);
+         this.deviceNameChanged.next(device);
       });
       this.hubConnection.on("SendDeviceDisabled", (d: AudioDevice) => {
-         this.deviceDisabled.next(d);
+         let device = new AudioDevice();
+         device.copyProperties(d);
+         this.deviceDisabled.next(device);
       });
       this.hubConnection.on("SendDeviceStatus", (ds: DeviceStatus) => {
          this.deviceStatusUpdate.next(ds);

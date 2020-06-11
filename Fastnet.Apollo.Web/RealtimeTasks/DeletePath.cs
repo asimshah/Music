@@ -16,8 +16,8 @@ namespace Fastnet.Apollo.Web
     {
         private TaskItem taskItem;
         //rivate readonly PlayManager playManager;
-        private readonly LibraryMessages libraryMessages;
-        public DeletePath(MusicOptions options, long taskId, string connectionString, LibraryMessages lm) : base(options, taskId, connectionString, null)
+        private readonly LibraryService libraryMessages;
+        public DeletePath(MusicOptions options, long taskId, string connectionString, LibraryService lm) : base(options, taskId, connectionString, null)
         {
             this.libraryMessages = lm;
         }

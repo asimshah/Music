@@ -1,21 +1,25 @@
-﻿<div class="combo-box" [ngClass]="{disabled: disabled}" (click)="stopEvent($event)">
-    <label *ngIf="label && compact === false">
-        <span [innerHTML]="label"></span>
-        <span *ngIf="traceReferences" class="trace-text">{{getReference()}}</span>
-    </label>
-    <div  class="combo-container" [ngClass]="{'is-open': isOpen(), compact: compact }" >
-        <div #textBox class="text-box">
-            <input #focushere type="text" [placeholder]=placeHolderText [ngClass]="{'align-centre': aligncentre}" [value]="inputElementText" (click)="onDownIconClick()" (blur)="onBlur()" (input)="onLocalInput(focushere.value)" spellcheck="false"/>
-            <span class="fa fa-chevron-down down-icon" title="click to open" (click)="onDownIconClick()"></span>
-        </div>
-
-        <div *ngIf="isInError()" class="validation-text">
-            <span class="text-error">{{vr.message}}</span>
-        </div>
-        <div  #droppanel *ngIf="showDropdown" class="dropdown-panel"  >
-            <div class="inner-panel">
-                <div class="drop-item" *ngFor="let item of filteredItems" (click)="onItemClick($event, item)">{{item.name}}</div>
-            </div>
-        </div>
-    </div>
+<div class="combo-box" [ngClass]="{ disabled: disabled}" (click)="stopEvent($event)">
+   <label *ngIf="label && compact === false">
+      <span [innerHTML]="label"></span>
+      <span *ngIf="traceReferences" class="trace-text">{{getReference()}}</span>
+   </label>
+   <div class="combo-container" [ngClass]="{'is-mobile': isMobileDevice(), 'is-open': isOpen(), compact: compact }">
+      <div #textBox class="text-box">
+         <text-input [readonly]="dropdownonly" [border]="false" [(ngModel)]="inputElementText" ></text-input>
+         <span class="fa fa-chevron-down down-icon" title="click to open" (click)="onDownIconClick()"></span>
+      </div>
+      <div *ngIf="isInError()" class="validation-text">
+         <span class="text-error">{{vr.message}}</span>
+      </div>
+      <div #droppanel *ngIf="showDropdown" class="dropdown-panel">
+         <div class="inner-panel">
+            <ng-container *ngIf="itemType === 'listitem'">
+               <div class="drop-item" *ngFor="let item of filteredItems" (click)="onItemClick($event, item)">{{item.name}}</div>
+            </ng-container>
+            <ng-container *ngIf="itemType === 'string'">
+               <div class="drop-item" *ngFor="let item of filteredItems" (click)="onItemClick($event, item)">{{item}}</div>
+            </ng-container>
+         </div>
+      </div>
+   </div>
 </div>

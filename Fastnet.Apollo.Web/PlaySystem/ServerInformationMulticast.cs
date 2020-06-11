@@ -25,13 +25,13 @@ namespace Fastnet.Apollo.Web
         private readonly ILoggerFactory lf;
         private readonly CancellationToken cancellationToken;
         private readonly MusicServerOptions musicServerOptions;
-        private readonly IWebHostEnvironment environment;
-        public ServerInformationMulticast(IWebHostEnvironment env, MessengerOptions messengerOptions, MusicServerOptions serverOptions, Messenger messenger, CancellationToken cancellationToken, ILoggerFactory loggerFactory)
+        //private readonly IWebHostEnvironment environment;
+        public ServerInformationMulticast(/*IWebHostEnvironment env,*/ MessengerOptions messengerOptions, MusicServerOptions serverOptions, Messenger messenger, CancellationToken cancellationToken, ILoggerFactory loggerFactory)
         {
             Debug.Assert(messengerOptions != null);
             Debug.Assert(serverOptions != null);
             Debug.Assert(messenger != null);
-            this.environment = env;
+            //this.environment = env;
             this.messengerOptions = messengerOptions;
             this.musicServerOptions = serverOptions;
             this.lf = loggerFactory;
@@ -84,28 +84,21 @@ namespace Fastnet.Apollo.Web
             Debug.Assert(messengerOptions.LocalCIDR != null);
             try
             {
-                //var list = NetInfo.GetMatchingIPV4Addresses(messengerOptions.LocalCIDR);
-                //if (list.Count() > 1)
-                //{
-                //    log.Warning($"Multiple local ipaddresses: {(string.Join(", ", list.Select(l => l.ToString()).ToArray()))}, cidr is {messengerOptions.LocalCIDR}, config error?");
-                //}
-                //var ipAddress = list.First();
                 var ipAddress = NetInfo.GetLocalIPAddress();
                 si = new MusicServerInformation
                 {
                     MachineName = Environment.MachineName.ToLower(),
                     ProcessId = System.Diagnostics.Process.GetCurrentProcess().Id,
-                    //Url = $"http://{ipAddress.ToString()}:{musicServerOptions.Port}"
                 };
-                if(false || environment.IsDevelopment())
-                {
-                    // in development, I use IISExpress which by default only listens to "localhost"
-                    si.Url = $"http://localhost:{musicServerOptions.Port}";
-                }
-                else
-                {
-                    si.Url = $"http://{ipAddress.ToString()}:{musicServerOptions.Port}";
-                }
+                //if(false || environment.IsDevelopment())
+                //{
+                //    // in development, I use IISExpress which by default only listens to "localhost"
+                //    si.Url = $"http://localhost:{musicServerOptions.Port}";
+                //}
+                //else
+                //{
+                //    si.Url = $"http://{ipAddress.ToString()}:{musicServerOptions.Port}";
+                //}
                 si.Url = $"http://{ipAddress.ToString()}:{musicServerOptions.Port}";
                 log.Information($"music server url is {si.Url}");
             }

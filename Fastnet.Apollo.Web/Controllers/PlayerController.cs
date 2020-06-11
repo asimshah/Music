@@ -27,7 +27,7 @@ namespace Fastnet.Apollo.Web.Controllers
         private readonly ILoggerFactory loggerFactory;
         private readonly MusicServerOptions musicServerOptions;
         //private readonly IHubContext<PlayHub, IHubMessage> playHub;
-        public PlayerController(/*SchedulerService schedulerService,*/ /*Microsoft.Extensions.Hosting.IHostedService hs,*/ MusicDb mdb,
+        public PlayerController(MusicDb mdb,
             IOptions<MusicServerOptions> serverOptions, PlayManager pm,
             ILoggerFactory loggerFactory, ILogger<PlayerController> logger, /*IHostingEnvironment env,*/ IWebHostEnvironment env) : base(logger, env)
         {
@@ -220,6 +220,20 @@ namespace Fastnet.Apollo.Web.Controllers
         {
             var sn =  await playManager.PlayNext(deviceKey);
             return SuccessResult(sn);
+        }
+        [HttpGet("copy/playlist/{fromDeviceKey}/{toDeviceKey}")]
+        public async Task<IActionResult> CopyPlaylist(string fromDeviceKey, string toDeviceKey)
+        {
+            await playManager.CopyPlaylist(fromDeviceKey, toDeviceKey);
+            //await playManager.ClearPlaylist(toDeviceKey);
+            //var playlist = musicDb.Devices.Single(x => x.KeyName == toDeviceKey).Playlist;
+            //await musicDb.FillPlaylistForRuntime(playlist); // adds appropriate entity instqances to playlistItems
+            //foreach(var pli in playlist.Items)
+            //{                
+            //    await playManager.AddPlaylistItem(toDeviceKey, pli);
+            //}
+            await PlayNextItem(toDeviceKey);
+            return SuccessResult();
         }
         [HttpGet("play/previous/{deviceKey}")]
         public async Task<IActionResult> PlayPreviousItem(string deviceKey)
@@ -547,6 +561,19 @@ namespace Fastnet.Apollo.Web.Controllers
             }
             await musicDb.SaveChangesAsync();
             return SuccessResult();
+        }
+        //
+        [HttpGet("get/all/playlists")]
+        public IActionResult GetAllUserPlaylistNames()
+        {
+            //var list = musicDb.Playlists.Where(x => x.Type == PlaylistType.UserCreated);
+            //return SuccessResult(list.Select(x => x.Name));
+            return SuccessResult(new string[] {
+                "alpha",
+                "beta",
+                "gamma",
+                "delta",
+            });
         }
         //
         private async Task<Device> SyncAudioDeviceWithDatabase(AudioDevice audioDevice/*, string hostName, string playerUrl*/)

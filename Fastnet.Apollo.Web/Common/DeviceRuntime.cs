@@ -26,5 +26,9 @@ namespace Fastnet.Apollo.Web
         {
             return !pli.NotPlayableOnCurrentDevice;// !(MaxSampleRate > 0 && pli.SampleRate > MaxSampleRate);
         }
+        public override string ToString()
+        {
+            return $"{DisplayName} (key:{Key}) [{Type}]";
+        }
     }
 }

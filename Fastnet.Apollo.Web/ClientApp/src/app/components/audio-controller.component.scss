@@ -143,16 +143,7 @@ $accent-colour: $high-accent-colour; // #f9ca06;// theme-colour('accent');
    }
 }
 
-.mobile-device {
-   .playing-slider, .volume-slider {
-      margin-top: $theme-gutter;
-      margin-bottom: $theme-gutter;
-   }
 
-   .audio-controls {
-      font-size: 30px;
-   }
-}
 
 .playlist-bar {
    background-color: darken(theme-colour('primary', 'dark'), 10%);
@@ -178,5 +169,51 @@ $accent-colour: $high-accent-colour; // #f9ca06;// theme-colour('accent');
          color: $high-accent-colour;
          border-color: $high-accent-colour;
       }
+   }
+}
+.mobile-device {
+   .playlist-bar {
+      grid-column-gap: $theme-gutter * 2;
+   }
+}
+
+.transfer-playlist-dialog {
+   .main-body {
+      padding: $theme-gutter;
+
+      .device-list {
+         display: grid;
+         margin-top: $theme-gutter;
+         margin-bottom: $theme-gutter;
+      }
+   }
+}
+
+.save-playlist-dialog {
+   .main-body {
+      padding: $theme-gutter;
+   }
+
+   .save-type-selection {
+      border-bottom: 1px solid theme-colour('surface');
+      margin-bottom: $theme-gutter;
+   }
+
+   &.mobile-device {
+      .main-body {
+         enum-input {
+            margin-bottom: $theme-gutter;
+         }
+      }
+   }
+}
+.mobile-device {
+   .playing-slider, .volume-slider {
+      margin-top: $theme-gutter;
+      margin-bottom: $theme-gutter;
+   }
+
+   .audio-controls {
+      font-size: 30px;
    }
 }

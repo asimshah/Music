@@ -48,10 +48,10 @@ export class ParameterService extends BaseService {
       this.parameters = await this.getAsync<Parameters>(`parameters/get/${currentKey}`);
       if (currentKey !== this.parameters.browserKey) {
          setLocalStorageValue(this.savedBrowserStorageKey, this.parameters.browserKey);
-         console.log(`browser key changed from ${currentKey} to ${this.parameters.browserKey}`);
+         this.log.information(`[ParameterService] browser key changed from ${currentKey} to ${this.parameters.browserKey}`);
       }
       //console.log(`Parameters: ${JSON.stringify(this.parameters)}`);
-      this.log.information(`[ParameterService] client started on ip address ${this.parameters.clientIPAddress}`);
+      //this.log.information(`[ParameterService] client started on ip address ${this.parameters.clientIPAddress}`);
       let firstStyle = this.getFirstEnabledStyle();
       let savedMusicStyle = parseInt(getLocalStorageValue(this.savedStyleStorageKey, firstStyle.id.toString())) as MusicStyles;
       let cs = this.getStyle(savedMusicStyle);
@@ -62,7 +62,7 @@ export class ParameterService extends BaseService {
       setLocalStorageValue(this.savedStyleStorageKey, cs.id.toString());
       //await this.updateStyleTotals(cs.id);      
       this.popularSettings = new BehaviorSubject<PopularSettings>(this.getPopularSettings());
-      this.log.information(`[ParameterService] ready, browser (and local audio) key is ${this.getStoredBrowserKey()}`);
+      //this.log.information(`[ParameterService] ready, browser (and local audio) key is ${this.getStoredBrowserKey()}`);
       this.ready$.next(true);
    }
    getParameters() {
