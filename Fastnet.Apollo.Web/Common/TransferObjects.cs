@@ -150,7 +150,7 @@ namespace Fastnet.Apollo.Web
     }
     public class PlaylistItemDTO
     {
-        public long Id { get; set; }
+        //public long Id { get; set; }
         public bool NotPlayableOnCurrentDevice { get; set; }
         public PlaylistRuntimeItemType Type { get; set; }
         public PlaylistPosition Position { get; set; }

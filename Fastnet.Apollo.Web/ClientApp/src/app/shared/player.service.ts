@@ -214,6 +214,13 @@ export class PlayerService extends BaseService implements OnDestroy {
       await this.getAsync<void>(`copy/playlist/${from}/${to}`);
       await this.triggerUpdates();
    }
+   public async saveNewPlaylist(device: AudioDevice, name: string) {
+      return this.getAsync<void>(`savenew/playlist/${device.key}/${name}`);
+   }
+   public async replacePlaylist(device: AudioDevice, name: string) {
+      return this.getAsync<void>(`replace/playlist/${device.key}/${name}`);
+   }
+   //
    public async enableWebAudio() {
       let d = await this.getAsync<AudioDevice>(`webaudio/start/${this.parameterService.getBrowserKey()}`);
       let device = new AudioDevice();
@@ -362,10 +369,8 @@ export class PlayerService extends BaseService implements OnDestroy {
       let list: PlaylistItem[] = [];
       let device = this.currentDeviceBeingControlled;
       if (device) {
-         let result = await this.getAsync<PlaylistItem[]>(`get/device/${device.key}/playlist`);
-
+         let result = await this.getAsync<PlaylistItem[]>(`get/playlist/${device.key}`);
          return new Promise<PlaylistItem[]>((resolve) => {
-
             for (let item of result) {
                let pli = new PlaylistItem();
                pli.copyProperties(item);

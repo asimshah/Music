@@ -250,10 +250,18 @@ export class AudioControllerComponent implements OnInit, OnDestroy {
    async onSavePlaylist() {
       //this.log.trace("[AudioControllerComponent] onSavePlaylist()");
       this.saveModel = new SavePlaylist(this.savePlaylistDialog, this.playerService, this.log);
-      await this.saveModel.open((dr, type, name) => {
+      await this.saveModel.open(async (dr, type, name) => {
          this.saveModel = null;
          if (dr === DialogResult.ok) {
             console.log(`${PlaylistSaveType[type]} using name ${name}`);
+            switch (type) {
+               case PlaylistSaveType.New:
+                  await this.playerService.saveNewPlaylist(this.device, name);
+                  break;
+               case PlaylistSaveType.Replace:
+                  await this.playerService.replacePlaylist(this.device, name);
+                  break;
+            }
          }
       });
    }

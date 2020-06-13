@@ -40,7 +40,8 @@ namespace Fastnet.Apollo.Web
             services.AddService<TaskRunner>();
             services.AddService<TaskPublisher>();
             services.AddService<PlayManager>();
-            services.AddService<LibraryService>();
+            //services.AddSingleton<SingletonLibraryService>();
+            services.AddScoped<LibraryService>();
             services.AddService<Resampler>();
             if (!so.SuspendScheduling)
             {

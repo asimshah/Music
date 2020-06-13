@@ -313,7 +313,7 @@ namespace Fastnet.Apollo.Web
         {
             var dto = new PlaylistItemDTO
             {
-                Id = pli.Id,
+                //Id = pli.Id,
                 Position = pli.Position,
                 Type = pli.Type,
                 NotPlayableOnCurrentDevice = pli.NotPlayableOnCurrentDevice,
@@ -321,7 +321,7 @@ namespace Fastnet.Apollo.Web
                 CoverArtUrl = pli.CoverArtUrl,
                 AudioProperties = pli.AudioProperties,
                 SampleRate = pli.SampleRate,
-                Sequence = pli.Sequence,
+                //Sequence = pli.Sequence,
                 TotalTime = pli.TotalTime,
                 FormattedTotalTime = pli.FormattedTotalTime,
                 IsSubitem = isSubitem,

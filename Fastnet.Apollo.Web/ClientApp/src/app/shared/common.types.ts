@@ -98,7 +98,7 @@ export class DeviceStatus {
    }
 }
 export class PlaylistItem {
-   id: number;
+   //id: number;
    type: PlaylistItemType;
    notPlayableOnCurrentDevice: boolean;
    position: PlaylistPosition;
@@ -114,7 +114,7 @@ export class PlaylistItem {
    isSubitem: boolean;
    subItems: PlaylistItem[];
    public copyProperties(pli: PlaylistItem) {
-      this.id = pli.id;
+      //this.id = pli.id;
       this.type = pli.type;
       this.notPlayableOnCurrentDevice = pli.notPlayableOnCurrentDevice;
       this.position = new PlaylistPosition(pli.position.major, pli.position.minor);// pli.position;

@@ -12,5 +12,9 @@ namespace Fastnet.Apollo.Web
         public PlaylistType Type { get; set; }
         public string Name { get; set; }
         public List<PlaylistItemRuntime> Items { get; set; }
+        public override string ToString()
+        {
+            return $"{Type}, {Name}";
+        }
     }
 }

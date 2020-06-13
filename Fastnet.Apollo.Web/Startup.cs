@@ -5,6 +5,8 @@ using Fastnet.Music.Data;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Mvc.Controllers;
+using Microsoft.AspNetCore.Mvc.Filters;
 using Microsoft.AspNetCore.SpaServices.AngularCli;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
@@ -21,6 +23,29 @@ using System.Reflection;
 
 namespace Fastnet.Apollo.Web
 {
+    public class WebServiceCallTrace : ActionFilterAttribute
+    {
+        private readonly ILogger log;
+        public WebServiceCallTrace(ILogger<WebServiceCallTrace> log)
+        {
+            this.log = log;
+        }
+        //public async Task OnActionExecutionAsync(ActionExecutingContext context, ActionExecutionDelegate next)
+        //{
+        //    var mb = MethodBase.GetCurrentMethod();
+        //    var path = context.HttpContext.Request.Path;
+        //    var resultContext = await next();
+        //}
+        public override void OnActionExecuting(ActionExecutingContext context)
+        {
+            var path = context.HttpContext.Request.Path;
+            var descr = context.ActionDescriptor as ControllerActionDescriptor;
+            // path ==> context.Controller.GetType().Name, context.ActionDescriptor.ActionName
+            log.Information($"{path} ==> {context.Controller.GetType().Name} ==> {descr.ActionName}()");
+            //Debugger.Break();
+            base.OnActionExecuting(context);
+        }
+    }
     public class Startup
     {
         private IWebHostEnvironment environment;
@@ -45,6 +70,7 @@ namespace Fastnet.Apollo.Web
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
+            services.AddScoped<WebServiceCallTrace>();
             services.AddSignalR((x) => x.EnableDetailedErrors = true);
             services.AddSingleton<IHttpContextAccessor, HttpContextAccessor>();
             services.AddOptions();
@@ -89,6 +115,7 @@ namespace Fastnet.Apollo.Web
             // 2. deserializing anonymous types
             // so I revert back to NewtonsoftJson here ....
             services.AddControllersWithViews()
+                .SetCompatibilityVersion(Microsoft.AspNetCore.Mvc.CompatibilityVersion.Version_3_0)
                 .AddNewtonsoftJson();
             // In production, the Angular files will be served from this directory
             services.AddSpaStaticFiles(configuration =>
