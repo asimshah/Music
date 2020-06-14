@@ -6,7 +6,7 @@ using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc.Controllers;
-using Microsoft.AspNetCore.Mvc.Filters;
+
 using Microsoft.AspNetCore.SpaServices.AngularCli;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
@@ -23,29 +23,7 @@ using System.Reflection;
 
 namespace Fastnet.Apollo.Web
 {
-    public class WebServiceCallTrace : ActionFilterAttribute
-    {
-        private readonly ILogger log;
-        public WebServiceCallTrace(ILogger<WebServiceCallTrace> log)
-        {
-            this.log = log;
-        }
-        //public async Task OnActionExecutionAsync(ActionExecutingContext context, ActionExecutionDelegate next)
-        //{
-        //    var mb = MethodBase.GetCurrentMethod();
-        //    var path = context.HttpContext.Request.Path;
-        //    var resultContext = await next();
-        //}
-        public override void OnActionExecuting(ActionExecutingContext context)
-        {
-            var path = context.HttpContext.Request.Path;
-            var descr = context.ActionDescriptor as ControllerActionDescriptor;
-            // path ==> context.Controller.GetType().Name, context.ActionDescriptor.ActionName
-            log.Information($"{path} ==> {context.Controller.GetType().Name} ==> {descr.ActionName}()");
-            //Debugger.Break();
-            base.OnActionExecuting(context);
-        }
-    }
+
     public class Startup
     {
         private IWebHostEnvironment environment;

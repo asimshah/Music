@@ -2,8 +2,11 @@
 using Fastnet.Music.Core;
 using Fastnet.Music.Data;
 using Fastnet.Music.Metatools;
+using Microsoft.AspNetCore.SignalR;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Storage;
+using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Options;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -16,10 +19,12 @@ namespace Fastnet.Apollo.Web
     {
         private TaskItem taskItem;
         //rivate readonly PlayManager playManager;
-        private readonly LibraryService libraryMessages;
-        public DeletePath(MusicOptions options, long taskId, string connectionString, LibraryService lm) : base(options, taskId, connectionString, null)
+        private readonly LibraryService libraryService;
+        public DeletePath(MusicOptions options, long taskId, string connectionString,
+            IOptions<MusicServerOptions> serverOptions, IHubContext<MessageHub, IHubMessage> messageHub, ILoggerFactory loggerFactory) : base(options, taskId, connectionString, null)
         {
-            this.libraryMessages = lm;
+            //this.libraryService = lm;
+            this.libraryService = new LibraryService(serverOptions, messageHub, loggerFactory.CreateLogger<LibraryService>(), new MusicDb(connectionString));// lm;
         }
 
         protected /*override*/ async Task RunTaskOld()
@@ -96,7 +101,7 @@ namespace Fastnet.Apollo.Web
             foreach (var id in eh.GetDeletedArtistIds())
             {
                 //await this.playManager.SendArtistDeleted(id);
-                await this.libraryMessages.SendArtistDeleted(id);
+                await this.libraryService.SendArtistDeleted(id);
             }
             foreach (var id in eh.GetModifiedArtistIds())
             {
@@ -109,7 +114,7 @@ namespace Fastnet.Apollo.Web
                 if (shouldSend)
                 {
                     //await this.playManager.SendArtistNewOrModified(id);
-                    await this.libraryMessages.SendArtistNewOrModified(id);
+                    await this.libraryService.SendArtistNewOrModified(id);
                 }
             }
         }

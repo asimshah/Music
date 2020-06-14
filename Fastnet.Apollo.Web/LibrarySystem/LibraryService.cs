@@ -38,7 +38,7 @@ namespace Fastnet.Apollo.Web
     //{
 
     //}
-    
+
     public partial class LibraryService //: ILibraryService, ILibraryServiceScoped
     {
         private readonly IHubContext<MessageHub, IHubMessage> messageHub;
@@ -86,7 +86,7 @@ namespace Fastnet.Apollo.Web
 
         }
         //
-        public async Task<T> GetEntity<T>(long id) where T : EntityBase
+        public async Task<T> GetEntityAsync<T>(long id) where T : EntityBase
         {
             return await musicDb.Set<T>().FindAsync(id);
         }
@@ -103,11 +103,11 @@ namespace Fastnet.Apollo.Web
             }
             return devices;
         }
-        public async Task<Device> ConfirmDevice(AudioDevice audioDevice)
+        public async Task<Device> ConfirmDeviceAsync(AudioDevice audioDevice)
         {
             //using var musicDb = new MusicDb(connectionString);
             //
-            bool disableOnCreate(string macAddress)
+            bool disableOnCreate()
             {
                 var dn = musicServerOptions.DisplayNames.FirstOrDefault(x => string.Compare(x.MACAddress, audioDevice.MACAddress, true) == 0);
                 return dn?.DisableOnCreate ?? false;
@@ -128,31 +128,30 @@ namespace Fastnet.Apollo.Web
                     return audioDevice.Name;
                 }
             }
-            Device AddNewDeviceToDB()
-            {
-
-                var device = new Device
-                {
-                    KeyName = Guid.NewGuid().ToString().ToLower(),
-                    Name = audioDevice.Name.ToLower(),
-                    Type = audioDevice.Type,
-                    MACAddress = audioDevice.MACAddress,
-                    IsDefaultOnHost = false,
-                    IsDisabled = false,
-                    HostMachine = audioDevice.HostMachine.ToLower(),
-                    DisplayName = GetDisplayName(),
-                    Volume = 0.0F,
-                    MaxSampleRate = audioDevice.Capability?.MaxSampleRate ?? 0,
-                    CanReposition = audioDevice.CanReposition,
-                    Playlist = new Playlist
-                    {
-                        Type = PlaylistType.DeviceList
-                    }
-                };
-                device.IsDisabled = disableOnCreate(device.MACAddress);
-                musicDb.Devices.Add(device);
-                return device;
-            }
+            //Device AddNewDeviceToDB()
+            //{
+            //    var device = new Device
+            //    {
+            //        KeyName = Guid.NewGuid().ToString().ToLower(),
+            //        Name = audioDevice.Name.ToLower(),
+            //        Type = audioDevice.Type,
+            //        MACAddress = audioDevice.MACAddress,
+            //        IsDefaultOnHost = false,
+            //        IsDisabled = false,
+            //        HostMachine = audioDevice.HostMachine.ToLower(),
+            //        DisplayName = GetDisplayName(),
+            //        Volume = 0.0F,
+            //        MaxSampleRate = audioDevice.Capability?.MaxSampleRate ?? 0,
+            //        CanReposition = audioDevice.CanReposition,
+            //        Playlist = new Playlist
+            //        {
+            //            Type = PlaylistType.DeviceList
+            //        }
+            //    };
+            //    device.IsDisabled = disableOnCreate(device.MACAddress);
+            //    musicDb.Devices.Add(device);
+            //    return device;
+            //}
             bool ValidatePlaylist(Device device)
             {
                 var result = true;
@@ -190,7 +189,9 @@ namespace Fastnet.Apollo.Web
                     && x.MACAddress.ToLower() == audioDevice.MACAddress.ToLower());
                 if (device == null)
                 {
-                    device = AddNewDeviceToDB();
+                    //device = AddNewDeviceToDB();
+                    device = await CreateNewDeviceAsync(Guid.NewGuid().ToString(), audioDevice.Type, audioDevice.Name, GetDisplayName(), audioDevice.MACAddress,
+                        audioDevice.HostMachine, audioDevice.Capability, audioDevice.CanReposition, disableOnCreate());
                 }
                 if (device.CanReposition != audioDevice.CanReposition || device.MaxSampleRate != (audioDevice.Capability?.MaxSampleRate ?? 0))
                 {
@@ -201,13 +202,13 @@ namespace Fastnet.Apollo.Web
                 device.PlayerUrl = audioDevice.Url;
                 await musicDb.SaveChangesAsync();
             }
-            else
-            {
-                // all browser devices must have a key already (due to prior web audio registration)
-                device = await musicDb.Devices.SingleOrDefaultAsync(x => x.KeyName == audioDevice.Key);
-                // Note: device.LastSeenDateTime is set during web audio start
-                await musicDb.SaveChangesAsync();
-            }
+            //else
+            //{
+            //    // all browser devices must have a key already (due to prior web audio registration)
+            //    device = await musicDb.Devices.SingleOrDefaultAsync(x => x.KeyName == audioDevice.Key);
+            //    // Note: device.LastSeenDateTime is set during web audio start
+            //    await musicDb.SaveChangesAsync();
+            //}
             if (!ValidatePlaylist(device))
             {
                 await musicDb.SaveChangesAsync();
@@ -215,6 +216,23 @@ namespace Fastnet.Apollo.Web
 
             log.Debug($"Confirming device {device.KeyName}, {device.DisplayName}, {device.HostMachine}, disabled =  {device.IsDisabled} ");
             return device;
+        }
+        public async Task<Device> CreateWebAudioDevice(string deviceKey, string ipAddress)
+        {
+            deviceKey = deviceKey.ToLower();
+            if (ipAddress == "::1")
+            {
+                ipAddress = NetInfo.GetLocalIPAddress().ToString();
+            }
+            var device = await CreateNewDeviceAsync(deviceKey, AudioDeviceType.Browser, $"browser audio on {ipAddress}", "(local audio)",
+                deviceKey, ipAddress, null, true, false);
+            await musicDb.SaveChangesAsync();
+            return device;
+        }
+        public async Task MarkAsSeenAsync(Device device)
+        {
+            device.LastSeenDateTime = DateTimeOffset.Now;
+            await musicDb.SaveChangesAsync();
         }
         public IEnumerable<Device> GetActiveAudioDevices(IEnumerable<string> keys)
         {
@@ -284,6 +302,19 @@ namespace Fastnet.Apollo.Web
                 log.Warning($"{audioDevice.HostMachine}, {audioDevice.DisplayName} not found ({audioDevice.Key})");
             }
             return device;
+        }
+        public async Task ResetAllDevicesAsync()
+        {
+            foreach (var device in musicDb.Devices.ToArray())
+            {
+                if (device.Playlist != null)
+                {
+                    musicDb.Playlists.Remove(device.Playlist);
+                }
+                musicDb.Devices.Remove(device);
+                log.Information($"device {device.KeyName}, type {device.Type.ToString()}, {device.DisplayName} removed");
+            }
+            await musicDb.SaveChangesAsync();
         }
         //
         public async Task ReplacePlaylistItems<T>(Playlist playlist, T entity) where T : EntityBase
@@ -416,20 +447,29 @@ namespace Fastnet.Apollo.Web
             };
             return pli;
         }
+        private async Task<Device> CreateNewDeviceAsync(string deviceKey, AudioDeviceType type, string name, string displayName, string physAddress,
+            string hostMachine, AudioCapability capability, bool canReposition, bool isDisabled)
+        {
+            var device = new Device
+            {
+                KeyName = deviceKey,// Guid.NewGuid().ToString().ToLower(),
+                Name = name.ToLower().Trim(),// audioDevice.Name.ToLower(),
+                Type = type, //audioDevice.Type,
+                MACAddress = physAddress.ToLower().Trim(), //audioDevice.MACAddress,
+                IsDefaultOnHost = false,
+                IsDisabled = isDisabled,
+                HostMachine = hostMachine.ToLower().Trim(),// audioDevice.HostMachine.ToLower(),
+                DisplayName = displayName,// GetDisplayName(),
+                Volume = 0.0F,
+                MaxSampleRate = capability?.MaxSampleRate ?? 0,// audioDevice.Capability?.MaxSampleRate ?? 0,
+                CanReposition = canReposition,// audioDevice.CanReposition,
+                Playlist = new Playlist
+                {
+                    Type = PlaylistType.DeviceList
+                }
+            };
+            await musicDb.Devices.AddAsync(device);
+            return device;
+        }
     }
-    //public class ScopedLibraryService : LibraryService
-    //{
-    //    public ScopedLibraryService(IOptions<MusicServerOptions> serverOptions, IHubContext<MessageHub, IHubMessage> messageHub, ILogger<LibraryService> logger, MusicDb db) : base(serverOptions, messageHub, logger)
-    //    {
-    //        this.musicDb = db;
-    //    }
-    //}
-    //public class SingletonLibraryService : LibraryService
-    //{
-    //    public SingletonLibraryService(IWebHostEnvironment environment, IConfiguration cfg, IOptions<MusicServerOptions> serverOptions, IHubContext<MessageHub, IHubMessage> messageHub, ILogger<LibraryService> logger) : base(serverOptions, messageHub, logger)
-    //    {
-    //        var connectionString = environment.LocaliseConnectionString(cfg.GetConnectionString("MusicDb"));
-    //        this.musicDb = new MusicDb(connectionString);
-    //    }
-    //}
 }

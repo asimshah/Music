@@ -2,9 +2,12 @@
 using Fastnet.Music.Core;
 using Fastnet.Music.Data;
 using Fastnet.Music.Metatools;
+using Microsoft.AspNetCore.SignalR;
 using Microsoft.Data.SqlClient;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Storage;
+using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Options;
 using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
@@ -22,14 +25,14 @@ namespace Fastnet.Apollo.Web
     {
         private TaskItem taskItem;
         //private readonly PlayManager playManager;
-        private readonly LibraryService libraryMessages;
+        private readonly LibraryService libraryService;
         private readonly IndianClassicalInformation indianClassicalInformation;
         public CataloguePath(MusicOptions options, long taskId, string connectionString,
-            IndianClassicalInformation ici,
-            BlockingCollection<TaskQueueItem> taskQueue, LibraryService lm) : base(options, taskId, connectionString, taskQueue)
+            IndianClassicalInformation ici, BlockingCollection<TaskQueueItem> taskQueue,
+            IOptions<MusicServerOptions> serverOptions, IHubContext<MessageHub, IHubMessage> messageHub, ILoggerFactory loggerFactory) : base(options, taskId, connectionString, taskQueue)
         {
             this.indianClassicalInformation = ici;
-            this.libraryMessages = lm;
+            this.libraryService = new LibraryService(serverOptions, messageHub, loggerFactory.CreateLogger<LibraryService>(), new MusicDb(connectionString));// lm;
         }
         protected override async Task RunTask()
         {
@@ -52,7 +55,7 @@ namespace Fastnet.Apollo.Web
                                 foreach (var id in cr.ArtistIdListForNotification)
                                 {
                                     //await this.playManager.SendArtistNewOrModified(id);
-                                    await this.libraryMessages.SendArtistNewOrModified(id);
+                                    await this.libraryService.SendArtistNewOrModified(id);
                                 }
                             }
                         }

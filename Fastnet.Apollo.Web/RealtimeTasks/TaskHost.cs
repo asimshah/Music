@@ -9,6 +9,7 @@ using Fastnet.Music.Data;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Options;
+using Microsoft.AspNetCore.SignalR;
 
 namespace Fastnet.Apollo.Web
 {
@@ -78,7 +79,9 @@ namespace Fastnet.Apollo.Web
                     switch (item.Type)
                     {
                         case TaskType.DiskPath:
-                            tb = new CataloguePath(options, item.TaskItemId, connectionString, monitoredIndianClassicalInformation.CurrentValue, taskQueue, this.serviceProvider.GetService<LibraryService>());
+                            tb = new CataloguePath(options, item.TaskItemId, connectionString, monitoredIndianClassicalInformation.CurrentValue, taskQueue,
+                                this.serviceProvider.GetService<IOptions<MusicServerOptions>>(), this.serviceProvider.GetService<IHubContext<MessageHub, IHubMessage>>(),
+                                this.serviceProvider.GetService<ILoggerFactory>());
                             break;
                         case TaskType.Portraits:
                             tb = new UpdatePortraits(options, item.TaskItemId, connectionString);
@@ -89,12 +92,10 @@ namespace Fastnet.Apollo.Web
                             tb = new ExpandTask(options, item.TaskItemId, connectionString, taskQueue);
                             break;
                         case TaskType.DeletedPath:
-                            tb = new DeletePath(options, item.TaskItemId, connectionString, this.serviceProvider.GetService<LibraryService>());
+                            tb = new DeletePath(options, item.TaskItemId, connectionString,
+                                this.serviceProvider.GetService<IOptions<MusicServerOptions>>(), this.serviceProvider.GetService<IHubContext<MessageHub, IHubMessage>>(),
+                                this.serviceProvider.GetService<ILoggerFactory>());
                             break;
-                        // resampling moved to a single polling background service
-                        //case TaskType.ResampleWork:
-                        //    tb = new ResampleTask(options, item.TaskItemId, connectionString);
-                        //    break;
                     }
                     log.Debug($"host is executing an instance of {tb.GetType().Name}");
                     await tb?.RunAsync();

@@ -8,9 +8,9 @@ namespace Fastnet.Music.Data
     /// <summary>
     /// This is a work or a track that is in a playlist
     /// </summary>
-    public class PlaylistItem : IIdentifier
+    public class PlaylistItem : EntityBase
     {
-        public long Id { get; set; }
+        public override long Id { get; set; }
         public PlaylistItemType Type { get; set; }
         public string Title { get; set; }
         public int Sequence { get; set; }
@@ -26,6 +26,10 @@ namespace Fastnet.Music.Data
         public Performance Performance { get; set; }
         public long PlaylistId { get; set; }
         public virtual Playlist Playlist { get; set; }
+        public override string ToString()
+        {
+            return $"{ToIdent()} {Type}, ({Sequence}) {Title}";
+        }
 
     }
 
