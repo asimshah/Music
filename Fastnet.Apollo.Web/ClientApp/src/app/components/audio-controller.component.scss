@@ -171,6 +171,21 @@ $accent-colour: $high-accent-colour; // #f9ca06;// theme-colour('accent');
       }
    }
 }
+
+.current-playlist {
+   background-color: darken(theme-colour('primary', 'dark'), 10%);
+   margin-left: $theme-gutter;
+   margin-right: $theme-gutter;
+   padding-left: $theme-gutter;
+   padding-right: $theme-gutter;
+   font-style: italic;
+   font-size: smaller;
+   color: #949494;
+   display: grid;
+   grid-template-columns: 1fr auto;
+
+}
+
 .mobile-device {
    .playlist-bar {
       grid-column-gap: $theme-gutter * 2;
@@ -207,6 +222,7 @@ $accent-colour: $high-accent-colour; // #f9ca06;// theme-colour('accent');
       }
    }
 }
+
 .mobile-device {
    .playing-slider, .volume-slider {
       margin-top: $theme-gutter;

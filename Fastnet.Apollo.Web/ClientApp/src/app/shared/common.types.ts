@@ -1,4 +1,4 @@
-import { DeviceState, MusicStyles, PlaylistItemType, PlayerStates, AudioDeviceType, PlayerCommands } from "./common.enums";
+import { DeviceState, MusicStyles, PlaylistItemType, PlayerStates, AudioDeviceType, PlayerCommands, PlaylistType } from "./common.enums";
 import { EncodingType } from "./catalog.types";
 
 export class Style {
@@ -70,6 +70,9 @@ export class PlaylistPosition {
    constructor(public major: number = 0, public minor: number = 0) {
 
    }
+   public toString() {
+      return `(${this.major}-${this.minor})`;
+   }
 }
 export class DeviceStatus {
    key: string;
@@ -95,6 +98,9 @@ export class DeviceStatus {
       this.formattedTotalTime = ds.formattedTotalTime;
       this.formattedRemainingTime = ds.formattedRemainingTime;
       this.commandSequence = ds.commandSequence;
+   }
+   public toString() {
+      return `status ${this.playlistPosition.toString()}, state = ${PlayerStates[this.state]}`;
    }
 }
 export class PlaylistItem {
@@ -139,23 +145,50 @@ export class PlaylistItem {
       }
    }
 }
-export class PlaylistUpdate {
+export class Playlist {
    deviceKey: string;
-   displayName: string;
+   playlistType: PlaylistType;
+   playlistName: string;
    items: PlaylistItem[];
-   public copyProperties(plu: PlaylistUpdate) {
+   formattedTotalTime: string;
+   public copyProperties(pl: Playlist) {
       {
-         this.deviceKey = plu.deviceKey;
-         this.displayName = plu.displayName;
+         this.deviceKey = pl.deviceKey;
+         this.playlistType = pl.playlistType;
+         this.playlistName = pl.playlistName;
+         this.formattedTotalTime = pl.formattedTotalTime;
          this.items = [];
-         plu.items.forEach(x => {
+         pl.items.forEach(x => {
             let pli = new PlaylistItem();
             pli.copyProperties(x);
             this.items.push(pli);
          });
       }
    }
+   public toString() {
+      return `${this.playlistType === PlaylistType.DeviceList ? "(auto playlist)" : this.playlistName} of ${this.items.length} items`;
+   }
 }
+// obsolete!!
+//export class PlaylistUpdate {
+//   deviceKey: string;
+//   playlistType: PlaylistType;
+//   playlistName: string;
+//   items: PlaylistItem[];
+//   public copyProperties(plu: PlaylistUpdate) {
+//      {
+//         this.deviceKey = plu.deviceKey;
+//         this.playlistType = plu.playlistType;
+//         this.playlistName = plu.playlistName;
+//         this.items = [];
+//         plu.items.forEach(x => {
+//            let pli = new PlaylistItem();
+//            pli.copyProperties(x);
+//            this.items.push(pli);
+//         });
+//      }
+//   }
+//}
 export class Highlighter {
    static highlightAttributes = "class='matched-text' style='text-decoration: underline'";
    static highlight(searchText: string, text: string, prefixMode: boolean): string {

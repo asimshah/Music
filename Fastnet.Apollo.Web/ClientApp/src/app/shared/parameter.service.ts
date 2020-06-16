@@ -43,7 +43,7 @@ export class ParameterService extends BaseService {
    //   return `music:${LocalStorageKeys[key]}`;
    //}
    async init() {
-      console.log("ParameterService: init()");
+      //console.log("ParameterService: init()");
       let currentKey = this.getStoredBrowserKey();
       this.parameters = await this.getAsync<Parameters>(`parameters/get/${currentKey}`);
       if (currentKey !== this.parameters.browserKey) {

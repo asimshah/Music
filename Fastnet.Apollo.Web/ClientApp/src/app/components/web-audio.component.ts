@@ -24,7 +24,7 @@ enum PlayerEvents {
 }
 
 const waitForEventInterval = 3000 * 3;
-const deviceStatusUpdateInterval = 3000;
+const deviceStatusUpdateInterval = 1000;
 
 type FSMAction = (state: PlayerStates, ev: PlayerEvents, ...args: any[]) => Promise<PlayerStates> | PlayerStates;
 class FSM {
@@ -44,7 +44,7 @@ class FSM {
       return action;
    }
    public defaultAction(state: PlayerStates, ev: PlayerEvents, ...args: any[]): Promise<PlayerStates> {
-      this.log.information(`[FSM] ${this.name}: default action called with state ${PlayerStates[state]}, event ${PlayerEvents[ev]}`);
+      //this.log.information(`[FSM] ${this.name}: default action called with state ${PlayerStates[state]}, event ${PlayerEvents[ev]}`);
       return new Promise<PlayerStates>(resolve => {
          resolve(state);
       });
@@ -414,7 +414,7 @@ export class WebAudioComponent implements AfterViewInit, OnDestroy {
          try {
             if (this.isUnlocked === false) {
                var state = await this.unlockAudioContextAsync();
-               this.log.information(`[WebAudioComponent] audio context state is ${state}`);
+               //this.log.information(`[WebAudioComponent] audio context state is ${state}`);
             }
             this.audio.play()
                .then(_ => {

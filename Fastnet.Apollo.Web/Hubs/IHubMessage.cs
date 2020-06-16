@@ -13,7 +13,7 @@ namespace Fastnet.Apollo.Web
         Task SendDeviceEnabled(AudioDevice d);
         Task SendDeviceDisabled(AudioDevice d);
         Task SendDeviceStatus(DeviceStatusDTO d);
-        Task SendPlaylist(PlaylistUpdateDTO update);
+        Task SendPlaylist(PlaylistDTO update);
         Task SendCommand(PlayerCommand command);
     }
 }

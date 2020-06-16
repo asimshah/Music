@@ -59,7 +59,7 @@ export abstract class BaseCatalogComponent implements OnInit, OnDestroy, AfterVi
             let a = await this.library.getArtist(this.currentStyle, id);
             this.addArtistToDefaultView(a);
          }
-         console.log(`${artistIdList.length} artist ids loaded`);
+         //console.log(`${artistIdList.length} artist ids loaded`);
       }
    }
    protected async abstract onSearch();

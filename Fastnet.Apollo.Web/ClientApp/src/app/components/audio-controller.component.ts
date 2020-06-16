@@ -1,6 +1,6 @@
 import { Component, OnInit, Input, ViewChild, ElementRef, OnDestroy, ChangeDetectorRef } from '@angular/core';
-import { PlaylistItem, DeviceStatus, AudioDevice, Parameters } from '../shared/common.types';
-import { PlayerStates } from '../shared/common.enums';
+import { PlaylistItem, DeviceStatus, AudioDevice, Parameters, Playlist } from '../shared/common.types';
+import { PlayerStates, PlaylistType } from '../shared/common.enums';
 import { PlayerService } from '../shared/player.service';
 import { Subscription } from 'rxjs';
 import { LoggingService } from '../shared/logging.service';
@@ -157,6 +157,7 @@ class PlaylistTransfer {
 export class AudioControllerComponent implements OnInit, OnDestroy {
    PlayerStates = PlayerStates;
    PlaylistSaveType = PlaylistSaveType;
+   PlaylistType = PlaylistType;
    @ViewChild('playSlider', { static: false }) playSliderRef: ElementRef;
    @ViewChild('volumeSlider', { static: false }) volumeSliderRef: ElementRef;
    @ViewChild('playBead', { static: false }) playBeadRef: ElementRef;
@@ -167,7 +168,8 @@ export class AudioControllerComponent implements OnInit, OnDestroy {
    transferModel: PlaylistTransfer | null = null;
    saveModel: SavePlaylist | null = null;
    //
-   playlistItem: PlaylistItem | null = null;
+   currentItem: PlaylistItem | null = null;
+   currentPlaylist: Playlist | null = null;
    deviceStatus: DeviceStatus | null = null;
    volumeBeadPosition: string = "0px";
    playBeadPosition: string = "0px";
@@ -182,17 +184,17 @@ export class AudioControllerComponent implements OnInit, OnDestroy {
       this.subscriptions.push(this.playerService.deviceStatusUpdate.subscribe((ds) => {
          this.onDeviceStatusUpdate(ds);
       }));
-      this.subscriptions.push(this.playerService.currentDeviceChanged.subscribe(async (d) => {
-         this.device = d;
-         //this.log.information(`AudioControllerComponent: received device change to ${this.device.displayName} [${this.device.key}]`);
-         this.updateUI();
+      this.subscriptions.push(this.playerService.selectedDeviceChanged.subscribe(async (d) => {
+         this.onDeviceChanged(d);
       }));
-      this.subscriptions.push(this.playerService.currentPlaylistChanged.subscribe((pl) => {
-         this.playlist = pl;
-         //this.log.information(`AudioControllerComponent: received play list of ${this.playlist.length} items for [${this.device.key}]`);
-         this.updateUI();
+      //this.subscriptions.push(this.playerService.currentPlaylistChanged.subscribe((pl) => {
+      //   //this.playlist = pl;
+      //   //this.updateUI();
+      //}));
+      this.subscriptions.push(this.playerService.selectedPlaylistChanged.subscribe((pl: Playlist) => {
+         this.onPlaylistChanged(pl);
       }));
-      await this.playerService.triggerUpdates();
+      //await this.playerService.triggerUpdates();
    }
    ngOnDestroy() {
       //this.stopUpdate();
@@ -243,7 +245,7 @@ export class AudioControllerComponent implements OnInit, OnDestroy {
       let playTrack: HTMLElement = this.playSliderRef.nativeElement;
       let trackLength = playTrack.offsetWidth;
       let offset = (ev.clientX - playTrack.offsetLeft) / trackLength;
-      let isForward = (offset * 100.0) > this.getCurrentTime();
+      let isForward = (offset * 100.0) > this.getPercentagePlayed();
       console.log(`click at ${offset}, forward = ${isForward}`);
       await this.playerService.setPosition(offset);
    }
@@ -278,35 +280,66 @@ export class AudioControllerComponent implements OnInit, OnDestroy {
    onLoadSavedPlayList() {
       this.log.trace("[AudioControllerComponent] onLoadSavedPlayList()");
    }
+   getPlaylistName() {
+      if (this.currentPlaylist) {
+         if (this.currentPlaylist.playlistType !== PlaylistType.DeviceList) {
+            return this.currentPlaylist.playlistName; 
+         }
+      }
+      return ("(auto)");
+   }
+   getPlaylistDuration() {
+      if (this.currentPlaylist && this.currentPlaylist.items.length > 1) {
+         return this.currentPlaylist.formattedTotalTime;         
+      }
+      return ("");
+}
    private async setVolume(level: number) {
       await this.playerService.setVolume(level);
    }
-   private getCurrentTime() {
+   private getPercentagePlayed() {
       return this.deviceStatus ? (this.deviceStatus.currentTime / this.deviceStatus.totalTime) * 100.0 : 0.0;
    }
    private getVolumeLevel() {
       return this.deviceStatus ? this.deviceStatus.volume * 100.0 : 0.0;
    }
-   private onDeviceStatusUpdate(ds: DeviceStatus): any {
-      this.deviceStatus = ds;
-      this.updateUI();
-
-   }
-   private updateUI() {
-      if (this.deviceStatus) {
-         this.positionPlaybead();
-         this.positionVolumebead();
-         if (this.playlist.length > 0) {
-            let major = this.deviceStatus.playlistPosition.major;
-            let minor = this.deviceStatus.playlistPosition.minor;
-            if (major !== 0) {
-               this.playlistItem = this.findCurrentPlaylistItem(major, minor);
-            }
-         }
+   private onDeviceStatusUpdate(ds: DeviceStatus) {
+      if (this.device.key === ds.key) {
+         this.deviceStatus = ds;
+         this.updateUI();
       }
    }
+   private onDeviceChanged(d: AudioDevice) {
+      this.device = d;
+      this.deviceStatus = null;
+      this.playlist = [];
+      //this.log.information(`AudioControllerComponent: received device change to ${this.device.displayName} [${this.device.key}]`);
+      this.updateUI();
+   }
+   private onPlaylistChanged(pl: Playlist) {
+      let device = this.playerService.getDevice(pl.deviceKey);
+      let deviceName = device ? device.displayName : "unknown";
+      console.log(`recd: ${pl.toString()} for ${deviceName}`);
+      this.currentPlaylist = pl;
+      this.playlist = pl.items;
+      this.updateUI();
+   }
+   private updateUI() {
+      this.positionPlaybead();
+      this.positionVolumebead();
+      if (this.deviceStatus && this.playlist.length > 0) {
+         let major = this.deviceStatus.playlistPosition.major;
+         let minor = this.deviceStatus.playlistPosition.minor;
+         if (major !== 0) {
+            this.currentItem = this.findCurrentPlaylistItem(major, minor);
+         }
+      } else {
+         this.currentItem = null;
+      }
+
+   }
    findCurrentPlaylistItem(major: number, minor: number): PlaylistItem | null {
-      let playlistItem = this.playlist.find(x => x.position.major === major)!;
+      let playlistItem = this.currentPlaylist.items.find(x => x.position.major === major)!;
       if (!playlistItem) {
          console.error(`major = ${major}, playlistItem not found, playlist length is ${this.playlist.length}, state = ${PlayerStates[this.deviceStatus!.state]}`);
       }
@@ -322,7 +355,7 @@ export class AudioControllerComponent implements OnInit, OnDestroy {
       if (this.playSliderRef) {
          let playTrack: HTMLElement = this.playSliderRef.nativeElement;
          let trackLength = playTrack.offsetWidth;
-         let beadLeft = (trackLength * this.getCurrentTime()) / 100.0;
+         let beadLeft = (trackLength * this.getPercentagePlayed()) / 100.0;
          let bead: HTMLElement = this.playBeadRef.nativeElement;
          this.playBeadPosition = `${beadLeft - (bead.offsetWidth / 2)}px`;
       }

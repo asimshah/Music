@@ -19,6 +19,10 @@ export enum DeviceState {
     Paused,
     Idle
 }
+export enum PlaylistType {
+   DeviceList = 0,
+   UserCreated = 1
+}
 export enum PlaylistItemType {
     SingleItem = 1,
     MultipleItems = 2

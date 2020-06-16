@@ -297,6 +297,8 @@ namespace Fastnet.Apollo.Web
             return new DeviceStatusDTO
             {
                 Key = ds.Key,
+                //PlaylistName = dr.Playlist.Type == PlaylistType.UserCreated ? dr.Playlist.Name : string.Empty,
+                //PlaylistType = dr.Playlist.Type,
                 PlaylistPosition = dr.CurrentPosition,
                 CurrentTime = ct,
                 TotalTime = tt,
@@ -308,6 +310,19 @@ namespace Fastnet.Apollo.Web
                 Volume = ds.Volume,
                 CommandSequence = dr.CommandSequenceNumber
             };
+        }
+        public static PlaylistDTO ToPlaylistDTO(this DeviceRuntime dr)
+        {
+            var dto = new PlaylistDTO
+            {
+                DeviceKey = dr.Key,
+                PlaylistType = dr.Playlist.Type,
+                PlaylistName = dr.Playlist.Name,
+                Items = dr.Playlist.Items.Select(x => x.ToDTO())
+            };
+            dto.TotalTime = dto.Items.Sum(x => x.TotalTime);
+            dto.FormattedTotalTime = dto.TotalTime.FormatDuration();
+            return dto;
         }
         public static PlaylistItemDTO ToDTO(this PlaylistItemRuntime pli, bool isSubitem = false)
         {

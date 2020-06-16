@@ -2,7 +2,7 @@ import { Injectable, Inject } from '@angular/core';
 import { HubConnection, HubConnectionBuilder } from '@aspnet/signalr';
 import { DOCUMENT } from '@angular/common';
 import { Subject, BehaviorSubject } from 'rxjs';
-import { AudioDevice, DeviceStatus, PlaylistItem, PlaylistUpdate, PlayerCommand } from './common.types';
+import { AudioDevice, DeviceStatus, PlaylistItem, PlayerCommand, Playlist } from './common.types';
 import { LoggingService } from './logging.service';
 import { delay } from '../../fastnet/core/common.functions';
 import { ParameterService } from './parameter.service';
@@ -21,7 +21,7 @@ export class MessageService {
    deviceDisabled = new Subject<AudioDevice>();
    deviceNameChanged = new Subject<AudioDevice>();
    deviceStatusUpdate = new Subject<DeviceStatus>();
-   playlistUpdate = new Subject<PlaylistUpdate>();
+   playlistUpdate = new Subject<Playlist>();
    connectedState = new Subject<boolean>();
    playerCommand = new Subject<PlayerCommand>();
    newOrModifiedArtist = new Subject<number>();
@@ -39,7 +39,7 @@ export class MessageService {
       });
    }
    async init() {
-      console.log("MessageService: init()");
+      //console.log("MessageService: init()");
       let url = this.document.location === null ? "" : this.document.location.href;
       this.hubConnection = new HubConnectionBuilder()
          //.withUrl(`${url}playhub`)
@@ -57,7 +57,7 @@ export class MessageService {
       });
       this.registerMessages();
       await this.start();
-      this.log.information("messageService: ready");
+      //this.log.information("messageService: ready");
       this.ready$.next(true);
    }
 
@@ -109,13 +109,17 @@ export class MessageService {
          this.deviceDisabled.next(device);
       });
       this.hubConnection.on("SendDeviceStatus", (ds: DeviceStatus) => {
-         this.deviceStatusUpdate.next(ds);
+         let t = new DeviceStatus();
+         t.copyProperties(ds);
+         this.deviceStatusUpdate.next(t);
       });
-      this.hubConnection.on("SendPlaylist", (update: PlaylistUpdate) => {
-         this.log.debug(`signalr recd: SendPlaylist ${JSON.stringify(update)}`);
-         let plu = new PlaylistUpdate();
-         plu.copyProperties(update);
-         this.playlistUpdate.next(plu);
+      this.hubConnection.on("SendPlaylist", (pl: Playlist) => {
+         //this.log.debug(`signalr recd: SendPlaylist ${JSON.stringify(update)}`);
+         //let plu = new PlaylistUpdate();
+         //plu.copyProperties(update);
+         let t = new Playlist();
+         t.copyProperties(pl);
+         this.playlistUpdate.next(t);
       });
       this.hubConnection.on("SendCommand", (pc: PlayerCommand) => {
          if (pc.deviceKey === this.parameterService.getBrowserKey()) {

@@ -1,12 +1,12 @@
 <div [ngClass]="{'mobile-device': isMobileDevice()}">
    <ng-container *ngIf="deviceStatus">
       <div class="cover">
-         <ng-container *ngIf="playlistItem">
-            <img [src]="playlistItem.coverArtUrl" />
-            <ng-container *ngFor="let title of playlistItem.titles; let first = first; let last = last">
+         <ng-container *ngIf="currentItem">
+            <img [src]="currentItem.coverArtUrl" />
+            <ng-container *ngFor="let title of currentItem.titles; let first = first; let last = last">
                <div class="title" [ngClass]="{'artist-name': first, 'track-name': last}">{{title}}</div>
             </ng-container>
-            <div class="audio-properties">{{playlistItem.audioProperties}}</div>
+            <div class="audio-properties">{{currentItem.audioProperties}}</div>
          </ng-container>
       </div>
       <ng-container *ngIf="deviceStatus">
@@ -39,6 +39,10 @@
          <button class="icon" (click)="onTransferPlaylist()" title="Load playlist from another device"><div class="fa fa-download"></div></button>
          <button class="icon" (click)="onLoadSavedPlayList()" title="Load saved playlist"><div class="fa fa-file-text-o"></div></button>
       </div>
+      <div class="current-playlist">
+         <div class="playlist-name">{{getPlaylistName()}}</div>
+         <div class="playlist-duration">{{getPlaylistDuration()}}</div>
+      </div>
    </ng-container>
    <popup-dialog class="transfer-playlist-dialog" #transferPlaylist [width]="400">
       <div windowcaption>
@@ -66,7 +70,7 @@
          <button (click)="transferModel.onCancel()">Cancel</button>
       </div>
    </popup-dialog>
-   <popup-dialog class="save-playlist-dialog" #savePlaylist [width]="400"  [ngClass]="{'mobile-device': isMobileDevice()}" >
+   <popup-dialog class="save-playlist-dialog" #savePlaylist [width]="400" [ngClass]="{'mobile-device': isMobileDevice()}">
       <div windowcaption>
          <div>Save Playlist</div>
       </div>
@@ -79,7 +83,7 @@
 
                <div class="entry-body">
                   <ng-container *ngIf="saveModel.saveType === PlaylistSaveType.New; else replaceName">
-                     <text-input label="New Playlist name" name="playlistName"  [(ngModel)]="saveModel.newName" (ngModelChange)="saveModel.onNewNameTextChanged()" [validator]="saveModel.validators.item('newplaylist')"  ></text-input>
+                     <text-input label="New Playlist name" name="playlistName" [(ngModel)]="saveModel.newName" (ngModelChange)="saveModel.onNewNameTextChanged()" [validator]="saveModel.validators.item('newplaylist')"></text-input>
                   </ng-container>
                   <ng-template #replaceName>
                      <div>

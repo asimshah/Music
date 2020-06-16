@@ -215,13 +215,31 @@ namespace Fastnet.Apollo.Web
             {
                 dr.Playlist.Items.Clear();
                 dr.CurrentPosition.Reset();
-                var dto = new PlaylistUpdateDTO
-                {
-                    DeviceKey = deviceKey,
-                    DisplayName = dr.DisplayName,
-                    Items = dr.Playlist.Items.Select(x => x.ToDTO())
-                };
-                await SendPlaylist(dto);
+                //var dto = new PlaylistDTO
+                //{
+                //    DeviceKey = deviceKey,
+                //    PlaylistType = dr.Playlist.Type,
+                //    PlaylistName = dr.Playlist.Name,
+                //    //DisplayName = dr.DisplayName,
+                //    Items = dr.Playlist.Items.Select(x => x.ToDTO())
+                //};
+                await SendPlaylist(dr.ToPlaylistDTO());
+            }
+        }
+        public async Task SendInitialPlaylist(string deviceKey)
+        {
+            var dr = GetDeviceRuntime(deviceKey);
+            if (dr != null)
+            {
+                //var dto = new PlaylistDTO
+                //{
+                //    DeviceKey = deviceKey,
+                //    PlaylistType = dr.Playlist.Type,
+                //    PlaylistName = dr.Playlist.Name,
+                //    //DisplayName = dr.DisplayName,
+                //    Items = dr.Playlist.Items.Select(x => x.ToDTO())
+                //};
+                await SendPlaylist(dr.ToPlaylistDTO());
             }
         }
         public async Task BrowserDisconnected(string browserKey)
@@ -252,24 +270,7 @@ namespace Fastnet.Apollo.Web
         }
         public async Task AddPlaylistItem(string deviceKey, PlaylistItem pli)
         {
-            //using (var scope = new ScopedDbContext<MusicDb>(serviceProvider))
-            //{
-            //    var dr = GetDeviceRuntime(deviceKey);
-            //    if (dr != null)
-            //    {
-            //        var item = pli.ToRuntime(scope.Db, dr);
-            //        if (item != null)
-            //        {
-            //            dr.Playlist.Items.Add(pli.ToRuntime(scope.Db, dr));
-            //            var dto = new PlaylistUpdateDTO
-            //            {
-            //                DeviceKey = deviceKey,
-            //                Items = dr.Playlist.Items.Select(x => x.ToDTO())
-            //            };
-            //            await SendPlaylist(dto);
-            //        }
-            //    }
-            //}
+
             var dr = GetDeviceRuntime(deviceKey);
             if (dr != null)
             {
@@ -277,12 +278,14 @@ namespace Fastnet.Apollo.Web
                 if (item != null)
                 {
                     dr.Playlist.Items.Add(item);
-                    var dto = new PlaylistUpdateDTO
-                    {
-                        DeviceKey = deviceKey,
-                        Items = dr.Playlist.Items.Select(x => x.ToDTO())
-                    };
-                    await SendPlaylist(dto);
+                    //var dto = new PlaylistDTO
+                    //{
+                    //    DeviceKey = deviceKey,
+                    //    PlaylistType = dr.Playlist.Type,
+                    //    PlaylistName = dr.Playlist.Name,
+                    //    Items = dr.Playlist.Items.Select(x => x.ToDTO())
+                    //};
+                    await SendPlaylist(dr.ToPlaylistDTO());
                 }
             }
         }
@@ -322,10 +325,15 @@ namespace Fastnet.Apollo.Web
         public void DebugDevicePlaylist(string deviceKey)
         {
             var dr = GetDeviceRuntime(deviceKey);
+            DebugDevicePlaylist(dr);
+        }
+        public void DebugDevicePlaylist(DeviceRuntime dr)
+        {
+            //var dr = GetDeviceRuntime(deviceKey);
             if(dr != null)
             {
                 PlaylistRuntime playlist = dr.Playlist;
-                log.Information(playlist.ToString());
+                log.Information($"{dr} {playlist.ToString()}");
                 foreach(var item in playlist.Items ?? Enumerable.Empty<PlaylistItemRuntime>())
                 {
                     log.Information($"  {item}");
@@ -337,7 +345,7 @@ namespace Fastnet.Apollo.Web
             }
             else
             {
-                log.Error($"device {deviceKey} not found");
+                log.Error($"dr is null");
             }
         }
         private async Task<int> PlayerReset(string deviceKey)
@@ -446,9 +454,10 @@ namespace Fastnet.Apollo.Web
                     try
                     {
                         dr.Status = deviceStatus;
-                        var dto = deviceStatus.ToDTO(dr);
-                        await this.messageHub.Clients.All.SendDeviceStatus(dto);
-                        log.Debug($"{dr.DisplayName}, {deviceStatus.ToString()}");
+                        //var dto = deviceStatus.ToDTO(dr);
+                        //await this.messageHub.Clients.All.SendDeviceStatus(dto);
+                        //log.Debug($"{dr.DisplayName}, {deviceStatus.ToString()}");
+                        await SendDeviceStatus(dr);
                     }
                     catch (Exception xe)
                     {
@@ -573,6 +582,7 @@ namespace Fastnet.Apollo.Web
                         }
                     };
                     dr.Playlist = await ConvertToRuntime(dr, device.Playlist);
+                    DebugDevicePlaylist(dr);
                     if (this.runtimeDevices.TryAdd(dr.Key, dr))
                     {
                         log.Information($"{device} added to run time");

@@ -55,7 +55,7 @@ export class DeviceMenuComponent implements OnInit, OnDestroy {
       //console.log(`current device is ${!this.currentDevice ? "null" : this.currentDevice.displayName}`);
    }
    private onPlayerServiceStarted() {
-      this.subscriptions.push(this.playerService.currentDeviceChanged.subscribe((d) => {
+      this.subscriptions.push(this.playerService.selectedDeviceChanged.subscribe((d) => {
          this.currentDevice = d;
       }));
       this.updateDevices();
@@ -63,7 +63,7 @@ export class DeviceMenuComponent implements OnInit, OnDestroy {
    }
    private updateDevices() {
       this.devices = this.playerService.getAvailableDevices();
-      this.currentDevice = this.playerService.getCurrentDeviceBeingControlled();
+      this.currentDevice = this.playerService.getSelectedDevice();
    }
    onDeviceNameClick(e) {
       this.updateDevices();

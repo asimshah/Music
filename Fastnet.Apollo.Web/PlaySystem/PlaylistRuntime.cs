@@ -14,6 +14,10 @@ namespace Fastnet.Apollo.Web
         public List<PlaylistItemRuntime> Items { get; set; }
         public override string ToString()
         {
+            if(Type == PlaylistType.DeviceList)
+            {
+                return $"(automatic device playlist)";
+            }
             return $"{Type}, {Name}";
         }
     }

@@ -65,6 +65,14 @@ namespace Fastnet.Apollo.Web
             }
             ValidateBrowsers();
         }
+        //public async Task SendInitialPlaylist(string signalRConnectionId)
+        //{
+        //    if (this.browsers.ContainsKey(signalRConnectionId))
+        //    {
+        //        var bd = this.browsers[signalRConnectionId];
+        //        //await this.playManager.SendInitialPlaylist(bd.BrowserKey);
+        //    }
+        //}
         private void ValidateBrowsers()
         {
             var data = this.browsers.Values.GroupBy((bd) => new { ip = bd.IPAddressString, bn = bd.BrowserName }, (x) => x, (k, v) => new { key = k, list = v} );

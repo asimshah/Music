@@ -317,9 +317,34 @@ namespace Fastnet.Apollo.Web
             await musicDb.SaveChangesAsync();
         }
         //
-        public async Task ReplacePlaylistItems<T>(Playlist playlist, T entity) where T : EntityBase
+        /// <summary>
+        /// removes all items from the playlist
+        /// </summary>
+        /// <param name="playlist"></param>
+        /// <returns></returns>
+        public async Task ClearPlaylist(Playlist playlist)
         {
             playlist.Items.Clear();
+            await musicDb.SaveChangesAsync();
+        }
+        public async Task<Playlist> CreateNewPlaylist(PlaylistType type, string name = null)
+        {
+            var pl = CreateNewPlaylistInternal(type, name);
+            await musicDb.SaveChangesAsync();
+            return pl;
+        }
+        public async Task DeletePlaylist(Playlist pl)
+        {
+            if (pl.Type != PlaylistType.DeviceList)
+            {
+                var items = pl.Items.ToArray();
+                musicDb.PlaylistItems.RemoveRange(items);
+                musicDb.Playlists.Remove(pl);
+                await musicDb.SaveChangesAsync();
+            }
+        }
+        public async Task<PlaylistItem> AddPlaylistItem<T>(Playlist playlist, T entity) where T : EntityBase
+        {
             PlaylistItem pli = entity switch
             {
                 MusicFile mf => CreateNewPlaylistItem(mf),
@@ -328,10 +353,27 @@ namespace Fastnet.Apollo.Web
                 Performance p => CreateNewPlaylistItem(p),
                 _ => throw new Exception($"Entity type {entity.GetType().Name} is not playable"),
             };
-            pli.Sequence = 1;
+            pli.Sequence = playlist.Items.Count() + 1;
             playlist.Items.Add(pli);
+            playlist.LastModified = DateTimeOffset.Now;
             await musicDb.SaveChangesAsync();
+            return pli;
         }
+        //public async Task ReplacePlaylistItems<T>(Playlist playlist, T entity) where T : EntityBase
+        //{
+        //    playlist.Items.Clear();
+        //    PlaylistItem pli = entity switch
+        //    {
+        //        MusicFile mf => CreateNewPlaylistItem(mf),
+        //        Track t => CreateNewPlaylistItem(t),
+        //        Work w => CreateNewPlaylistItem(w),
+        //        Performance p => CreateNewPlaylistItem(p),
+        //        _ => throw new Exception($"Entity type {entity.GetType().Name} is not playable"),
+        //    };
+        //    pli.Sequence = 1;
+        //    playlist.Items.Add(pli);
+        //    await musicDb.SaveChangesAsync();
+        //}
         public void CopyPlaylist(string fromDevicekey, string toDevicekey)
         {
             //using var musicDb = new MusicDb(connectionString);
@@ -358,50 +400,22 @@ namespace Fastnet.Apollo.Web
             }
             musicDb.SaveChanges();
         }
+        /// <summary>
+        /// makes the current DeviceList playlist into a UserCreated one and names it
+        /// </summary>
+        /// <param name="deviceKey"></param>
+        /// <param name="name"></param>
+        /// <returns></returns>
+        public async Task<Device> SaveNewPlaylistAsync(string deviceKey, string name)
+        {
+            var device = musicDb.Devices.Single(x => x.KeyName == deviceKey);
+            var playlist = device.Playlist;
+            playlist.Name = name;
+            playlist.Type = PlaylistType.UserCreated;
+            await musicDb.SaveChangesAsync();
+            return device;
+        }
         //
-        //protected async override Task ExecuteAsync(CancellationToken cancellationToken)
-        //{
-        //    this.cancellationToken = cancellationToken;
-        //    try
-        //    {
-        //        await Start();
-        //    }
-        //    catch (AggregateException ae)
-        //    {
-        //        foreach (var xe in ae.InnerExceptions)
-        //        {
-        //            log.Error($"Aggregated exception {xe.GetType().Name}, {xe.Message}");
-        //        }
-        //    }
-        //    catch (Exception xe)
-        //    {
-        //        log.Error(xe);
-        //    }
-        //}
-        //private async Task Start()
-        //{
-        //    log.Information($"started");
-        //    while (!cancellationToken.IsCancellationRequested)
-        //    {
-        //        try
-        //        {
-        //            var ts = DateTime.Today.AddDays(1) - DateTime.Now;
-        //            ts = ts.Add(TimeSpan.FromHours(3));
-        //            log.Debug($"waiting for {ts.TotalMinutes} minutes");
-        //            await Task.Delay(ts, cancellationToken);
-        //            if (!cancellationToken.IsCancellationRequested)
-        //            {
-        //                this.musicDb = new MusicDb(this.connectionString);
-        //                log.Information($"music db data context reset");
-        //            }
-        //        }
-        //        catch (Exception xe)
-        //        {
-        //            log.Error(xe);
-        //        }
-        //    }
-        //    log.Information($"cancellation requested");
-        //}
         private PlaylistItem CreateNewPlaylistItem(MusicFile mf)
         {
             var pli = new PlaylistItem
@@ -463,13 +477,19 @@ namespace Fastnet.Apollo.Web
                 Volume = 0.0F,
                 MaxSampleRate = capability?.MaxSampleRate ?? 0,// audioDevice.Capability?.MaxSampleRate ?? 0,
                 CanReposition = canReposition,// audioDevice.CanReposition,
-                Playlist = new Playlist
-                {
-                    Type = PlaylistType.DeviceList
-                }
+                Playlist = CreateNewPlaylistInternal(PlaylistType.DeviceList)
             };
             await musicDb.Devices.AddAsync(device);
             return device;
+        }
+        private Playlist CreateNewPlaylistInternal(PlaylistType type, string name = null)
+        {
+            return new Playlist
+            {
+                Type = PlaylistType.DeviceList,
+                Name = name ?? string.Empty,
+                LastModified = DateTimeOffset.Now
+            };
         }
     }
 }

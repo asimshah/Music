@@ -91,12 +91,12 @@ namespace Fastnet.Apollo.Web
             }
             return null;
         }
-        public static void AddPlaylistItem(this Playlist pl, PlaylistItem pli)
-        {
-            pli.Sequence = pl.Items.Count() + 1;
-            pli.Playlist = pl;
-            pl.Items.Add(pli);
-        }
+        //public static void AddPlaylistItem(this Playlist pl, PlaylistItem pli)
+        //{
+        //    pli.Sequence = pl.Items.Count() + 1;
+        //    pli.Playlist = pl;
+        //    pl.Items.Add(pli);
+        //}
         public static async Task FillPlaylistItemForRuntime(this MusicDb db, PlaylistItem pli)
         {
             switch (pli.Type)
@@ -115,13 +115,13 @@ namespace Fastnet.Apollo.Web
                     break;
             }
         }
-        public static async Task FillPlaylistForRuntime(this MusicDb db, Playlist pl)
-        {
-            foreach (var pli in pl.Items)
-            {
-                await db.FillPlaylistItemForRuntime(pli);
-            }
-        }
+        //public static async Task FillPlaylistForRuntime(this MusicDb db, Playlist pl)
+        //{
+        //    foreach (var pli in pl.Items)
+        //    {
+        //        await db.FillPlaylistItemForRuntime(pli);
+        //    }
+        //}
     }
 }
 

@@ -1,5 +1,6 @@
 ﻿using Fastnet.Core;
 using Fastnet.Music.Data;
+using Fastnet.Music.Messages;
 using System;
 using System.Threading.Tasks;
 
@@ -42,7 +43,7 @@ namespace Fastnet.Apollo.Web
             }
 
         }
-        public async Task SendPlaylist(PlaylistUpdateDTO dto)
+        public async Task SendPlaylist(PlaylistDTO dto)
         {
             try
             {
@@ -53,6 +54,16 @@ namespace Fastnet.Apollo.Web
                 log.Error(xe);
             }
         }
-
+        public async Task SendDeviceStatus(DeviceRuntime dr)
+        {
+            try
+            {
+                await this.messageHub.Clients.All.SendDeviceStatus(dr.Status.ToDTO(dr));
+            }
+            catch (Exception xe)
+            {
+                log.Error(xe);
+            }
+        }
     }
 }

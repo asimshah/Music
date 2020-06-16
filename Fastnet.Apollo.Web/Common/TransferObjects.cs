@@ -1,5 +1,6 @@
 ﻿using Fastnet.Core;
 using Fastnet.Music.Core;
+using Fastnet.Music.Data;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -169,6 +170,8 @@ namespace Fastnet.Apollo.Web
     public class DeviceStatusDTO
     {
         public string Key { get; set; }
+        public string PlaylistName { get; set; }
+        public PlaylistType PlaylistType { get; set; }
         public PlaylistPosition PlaylistPosition { get; set; }
         public PlayerStates State { get; set; }
         public float Volume { get; set; }
@@ -180,10 +183,13 @@ namespace Fastnet.Apollo.Web
         public string FormattedRemainingTime { get; set; }
         public int CommandSequence { get; set; }
     }
-    public class PlaylistUpdateDTO
+    public class PlaylistDTO
     {
         public string DeviceKey { get; set; }
-        public string DisplayName { get; set; }
+        public PlaylistType PlaylistType { get; set; }
+        public string  PlaylistName { get; set; }
+        public double TotalTime { get; set; }
+        public string FormattedTotalTime { get; set; }
         public IEnumerable<PlaylistItemDTO> Items { get; set; }
     }
     public abstract class StatsDTO

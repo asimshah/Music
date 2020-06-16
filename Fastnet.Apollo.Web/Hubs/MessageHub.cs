@@ -48,11 +48,12 @@ namespace Fastnet.Apollo.Web
             this.browserMonitor.ConnectBrowser(connectionId, key, ipAddress, browserName);
             //return key;
         }
-        public void ConnectWebAudio()
+        public async Task ConnectWebAudio()
         {
             //log.Information($"ConnectWebAudio() called by{this.Context.ConnectionId}");
-            this.Groups.AddToGroupAsync(this.Context.ConnectionId, "WebAudio");
+            await this.Groups.AddToGroupAsync(this.Context.ConnectionId, "WebAudio");
             log.Debug($"connection id {this.Context.ConnectionId} added to WebAudioGroup");
+            //await this.browserMonitor.SendInitialPlaylist(this.Context.ConnectionId);
         }
         protected override void Dispose(bool disposing)
         {
