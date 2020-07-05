@@ -146,6 +146,7 @@ export class PlaylistItem {
    }
 }
 export class Playlist {
+   id: number;
    deviceKey: string;
    playlistType: PlaylistType;
    playlistName: string;
@@ -153,6 +154,7 @@ export class Playlist {
    formattedTotalTime: string;
    public copyProperties(pl: Playlist) {
       {
+         this.id = pl.id;
          this.deviceKey = pl.deviceKey;
          this.playlistType = pl.playlistType;
          this.playlistName = pl.playlistName;

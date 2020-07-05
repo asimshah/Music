@@ -1,6 +1,7 @@
 import { Component, forwardRef, EventEmitter, Output } from "@angular/core";
 import { NG_VALUE_ACCESSOR } from "@angular/forms";
-import { InputControlBase, ControlBase } from "./controlbase.type";
+import { ControlBase } from "./controlbase.type";
+import { InputControlBase } from "./inputcontrolbase";
 
 @Component({
     selector: 'bool-input',

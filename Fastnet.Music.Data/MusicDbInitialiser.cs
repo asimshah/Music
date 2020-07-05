@@ -30,7 +30,7 @@ namespace Fastnet.Music.Data
             var migrations = db.Database.GetAppliedMigrations();
             foreach (var migration in migrations)
             {
-                log.Debug($"\t{migration}");
+                log.Information($"\t{migration}");
             }
             db.UpgradeContent(options);
         }

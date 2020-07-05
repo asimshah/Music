@@ -28,7 +28,7 @@ namespace Fastnet.Music.Metatools
         {
             ArtistIdListForNotification.AddRange(artists.Where(a => a.Type != ArtistType.Various).Select(a => a.Id));
             ArtistDescr = string.Join(string.Empty, artists.Select(x => x.ToIdent())).Replace("][", ",");
-            ArtistNames = artists.Select(x => x.Name).ToCSV();
+            ArtistNames = artists.GetArtistNames();// .Select(x => x.Name).ToCSV();
         }
         protected void SetArtist(Artist artist)
         {

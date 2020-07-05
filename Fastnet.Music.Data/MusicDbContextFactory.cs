@@ -1,8 +1,18 @@
 ﻿//using Microsoft.AspNetCore.Hosting;
 
+using Microsoft.EntityFrameworkCore.Design;
+
 namespace Fastnet.Music.Data
 {
-
+    public class MusicDbContextFactory : IDesignTimeDbContextFactory<MusicDb>
+    {
+        //        "MusicDb": "Data Source=.\\SQLEXPRESS;AttachDbFilename=|DataDirectory|\\Music.mdf;Initial Catalog=Music;Integrated Security=True;MultipleActiveResultSets=True" 
+        public MusicDb CreateDbContext(string[] args)
+        {
+            var connectionsString = @"Data Source=.\\SQLEXPRESS;AttachDbFilename=C:\\devroot\\Music\\Fastnet.Apollo.Web\\Data\Music.mdf;Initial Catalog=Music-dev;Integrated Security=True;MultipleActiveResultSets=True";
+            return new MusicDb(connectionsString);
+        }
+    }
     ///// <summary>
     ///// Use this to create a disposable instance of the MusicDb when DI cannot be used
     ///// </summary>

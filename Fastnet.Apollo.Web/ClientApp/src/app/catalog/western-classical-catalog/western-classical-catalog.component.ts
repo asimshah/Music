@@ -7,11 +7,11 @@ import { PlayerService } from '../../shared/player.service';
 import { LoggingService } from '../../shared/logging.service';
 import { ParameterService } from '../../shared/parameter.service';
 import { DomSanitizer } from '@angular/platform-browser';
-import { MusicStyles } from '../../shared/common.enums';
-import { WesternClassicalTagEditorComponent } from './western-classical-tag-editor/western-classical-tag-editor.component';
-import { CommandPanelResult, SelectedCommand, TargetEntity } from '../command-panel/command-panel.component';
+//import { MusicStyles } from '../../shared/common.enums';
+//import { WesternClassicalTagEditorComponent } from './western-classical-tag-editor/western-classical-tag-editor.component';
+//import { CommandPanelResult, SelectedCommand, TargetEntity } from '../command-panel/command-panel.component';
 import { sortedInsert } from '../../../fastnet/core/common.functions';
-import { MessageService } from '../../shared/message.service';
+//import { MessageService } from '../../shared/message.service';
 
 
 
@@ -41,68 +41,73 @@ class WesternClassicalResults {
 export class WesternClassicalCatalogComponent extends BaseCatalogComponent {
    composers: Artist[] = [];
    searchFoundNothing = false;
-   @ViewChild(WesternClassicalTagEditorComponent, { static: false }) westernClassicalTagEditor: WesternClassicalTagEditorComponent;
-
+   //private guardShowMovementsClosure = false;
    constructor(elementRef: ElementRef, library: LibraryService,
-      messageService: MessageService,
+      //messageService: MessageService,
       ps: ParameterService, sanitizer: DomSanitizer,
       playerService: PlayerService, log: LoggingService) {
-      super(elementRef, library, messageService, ps, sanitizer, playerService, log);
+      super(elementRef, library,  ps, sanitizer, playerService, log);
    }
    async onTapComposition(c: Composition) {
+      // also called by mouse click
       if (c.performances == null) {
          // not yet loaded
          await this.loadPerformances(c);
       }
       c.showPerformances = !c.showPerformances;
    }
-   onTapPerformance(c: Composition, p: Performance) {
+   onTapPerformance(p: Performance) {
       //if (this.isTouchDevice() && p.movements.length > 1) {
       //   this.commandPanel.open(MusicStyles.WesternClassical, c, p, null, async (r) => await this.executeCommand(r));
       //}
       if (this.isTouchDevice()) {
          if (p.movements.length > 1) {
-            this.commandPanel.open(MusicStyles.WesternClassical, c, p, null, async (r) => await this.executeCommand(r));
+            this.commandPanel.open2(p,
+               //c, p, null, null,
+               async (r) => await this.executeCommand(r));
          } else {
-            this.commandPanel.open(MusicStyles.WesternClassical, c, p, p.movements[0], async (r) => await this.executeCommand(r));
+            this.commandPanel.open2(p.movements[0],
+               //c, p, p.movements[0], null,
+               async (r) => await this.executeCommand(r));
          }
       }
    }
    onTapMovement(c: Composition, p: Performance, t: Track) {
-      //this.log.information("onTapTrack()");
-      this.commandPanel.open(MusicStyles.WesternClassical, c, p, t, async (r) => await this.executeCommand(r));
+      this.commandPanel.open2(t, async (r) =>  await this.executeCommand(r));
    }
 
    async onRightClick(e: Event, c: Composition, p: Performance) {
       e.preventDefault();
       if (!this.isTouchDevice()) {
-         this.commandPanel.open(MusicStyles.WesternClassical, c, p, null, async (r) => await this.executeCommand(r));
+         this.commandPanel.open2(p,
+            //c, p, null, null,
+            async (r) => await this.executeCommand(r));
       }
       return false;
    }
-   toggleShowMovements(performance: Performance) {
+   toggleShowMovements(e: Event, performance: Performance) {
       performance.showMovements = !performance.showMovements;
    }
 
 
-   getArtistStats(a: Artist) {
-      let parts: string[] = [];
-      if (a.compositionCount > 0) {
-         if (a.compositionCount > 1) {
-            parts.push(`${a.compositionCount} compositions`);
-         } else {
-            parts.push(`1 composition`);
-         }
-      }
-      if (a.performanceCount > 0) {
-         if (a.performanceCount > 1) {
-            parts.push(`${a.performanceCount} performances`);
-         } else {
-            parts.push(`1 performance`);
-         }
-      }
-      return parts.join(", ");
-   }
+   //getArtistStats(a: Artist) {
+   //   let parts: string[] = [];
+   //   if (a.compositionCount > 0) {
+   //      if (a.compositionCount > 1) {
+   //         parts.push(`${a.compositionCount} compositions`);
+   //      } else {
+   //         parts.push(`1 composition`);
+   //      }
+   //   }
+   //   if (a.performanceCount > 0) {
+   //      if (a.performanceCount > 1) {
+   //         parts.push(`${a.performanceCount} performances`);
+   //      } else {
+   //         parts.push(`1 performance`);
+   //      }
+   //   }
+   //   return parts.join(", ");
+   //}
    getComposerDetails(a: Artist): string {
       let p_part = a.performanceCount === 1 ? `${a.performanceCount} performance` : `${a.performanceCount} performances`;
       let c_part = a.compositionCount === 1 ? `of ${a.compositionCount} composition` : `of ${a.compositionCount} compositions`;
@@ -115,11 +120,11 @@ export class WesternClassicalCatalogComponent extends BaseCatalogComponent {
    //    await this.westernClassicalTagEditor.open(item);
 
    //}
-   protected addArtistToDefaultView(a: Artist) {
-      sortedInsert(this.allArtists, a, (l, r) => {
-         return l.lastname.localeCompare(r.lastname);
-      });
-   }
+   //protected addArtistToDefaultView(a: Artist) {
+   //   sortedInsert(this.allArtists, a, (l, r) => {
+   //      return l.lastname.localeCompare(r.lastname);
+   //   });
+   //}
    protected async onSearch() {
       this.searchFoundNothing = false;
       let r = await this.library.search<WesternClassicalResults>(this.parameterService.getCurrentStyle(), this.searchText);
@@ -152,8 +157,8 @@ export class WesternClassicalCatalogComponent extends BaseCatalogComponent {
                      p.highlightSearch(this.searchText, p.performers, prefixMode);
                   }
                } else {
-                  composition.performances = [];//await this.getPerformanceResults(cr.performances);
-                  let performances: Performance[] = [];
+                  composition.performances = [];
+                  //let performances: Performance[] = [];
                   for (let pr of cr.performances) {
                      let p = await this.library.getPerformance(pr.performance.key, true);
                      p.highlightSearch(this.searchText, p.performers, prefixMode);
@@ -177,14 +182,14 @@ export class WesternClassicalCatalogComponent extends BaseCatalogComponent {
          c.highlightSearch(this.searchText, c.name, prefixMode);
       }
    }
-   private async getPerformanceResults(list: PerformanceResult[]): Promise<Performance[]> {
-      let performances: Performance[] = [];
-      for (let pr of list) {
-         let p = await this.library.getPerformance(pr.performance.key);
-         performances.push(p);
-      }
-      return performances;
-   }
+   //private async getPerformanceResults(list: PerformanceResult[]): Promise<Performance[]> {
+   //   let performances: Performance[] = [];
+   //   for (let pr of list) {
+   //      let p = await this.library.getPerformance(pr.performance.key);
+   //      performances.push(p);
+   //   }
+   //   return performances;
+   //}
    private async getCompositionResults(list: CompositionResult[]): Promise<Composition[]> {
       let compositions: Composition[] = [];
       for (let cr of list) {
@@ -193,43 +198,6 @@ export class WesternClassicalCatalogComponent extends BaseCatalogComponent {
       }
       return compositions;
    }
-   //private async executeCommand(cmd: CommandPanelResult) {
-   //   switch (cmd.selectedCommand) {
-   //      case SelectedCommand.Cancel:
-   //         break;
-   //      case SelectedCommand.Play:
-   //         await this.playMusic(cmd.entity);
-   //         break;
-   //      case SelectedCommand.Queue:
-   //         await this.queueMusic(cmd.entity);
-   //         break;
-   //      case SelectedCommand.TagEditor:
-   //         if (cmd.targetEntity === TargetEntity.Performance) {
-   //            // await this.westernClassicalTagEditor.initialise(cmd.entity as Performance);
-   //            this.westernClassicalTagEditor.open(cmd.entity as Performance, async (changesMade) => {
-   //               if (changesMade) {
-   //                  await this.onSearch();
-   //               }
-   //            });
-   //            //await this.westernClassicalTagEditor.open(cmd.entity as Performance, async (changesMade: boolean) => {
-   //            //    if (changesMade) {
-   //            //        await this.onSearch();
-   //            //    }
-   //            //});
-   //         }
-   //         break;
-   //      case SelectedCommand.Reset:
-   //         switch (cmd.targetEntity) {
-   //            case TargetEntity.Work:
-   //               await this.library.resetWork((cmd.entity as Work).id);
-   //               break;
-   //            case TargetEntity.Performance:
-   //               await this.library.resetPerformance((cmd.entity as Performance).id);
-   //               break;
-   //         }
-   //         break;
-   //   }
-   //}
 
    private addComposer(composer: Artist) {
       sortedInsert(this.composers, composer, (l, r) => {

@@ -95,6 +95,22 @@ namespace Fastnet.Music.Data
         {
             return ArtistIds.SequenceEqual(ids.OrderBy(x => x));
         }
+        public string GetNames()
+        {
+            if(Artists.Count() == 1)
+            {
+                return Artists.First().Name;
+            }
+            else if (Artists.Count() > 2)
+            {
+                var x = string.Join(", ", Artists.Take(Artists.Count() - 1).Select(x => x.Name));
+                return string.Join(" & ", x, Artists.Last().Name);
+            }
+            else
+            {
+                return string.Join(" & ", Artists.Select(x => x.Name));
+            }
+        }
         public override string ToString()
         {
             return $"[{string.Join(", ", ArtistIds)}]";

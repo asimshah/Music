@@ -1,43 +1,18 @@
 ﻿using Fastnet.Core;
-using Fastnet.Core.Web;
 using Fastnet.Music.Core;
 using Fastnet.Music.Data;
 using Fastnet.Music.Messages;
-using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.SignalR;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Threading;
 using System.Threading.Tasks;
 
 namespace Fastnet.Apollo.Web
 {
-    //public interface ILibraryService
-    //{
-    //    Task<Device> ConfirmDevice(AudioDevice audioDevice);
-    //    void CopyPlaylist(string fromDevicekey, string toDevicekey);
-    //    IEnumerable<Device> GetActiveAudioDevices(IEnumerable<string> keys);
-    //    IEnumerable<Device> GetAllDevices();
-    //    IEnumerable<Device> GetAudioDevices(bool all);
-    //    Device GetDevice(AudioDevice audioDevice);
-    //    Device GetDevice(string deviceKey);
-    //    IEnumerable<Device> GetDevices(IEnumerable<AudioDevice> audioDevices);
-    //    IEnumerable<Device> GetDevices(IEnumerable<string> deviceKeys);
-    //    Task<T> GetEntity<T>(long id) where T : EntityBase;
-    //    Task ReplacePlaylistItems<T>(Playlist playlist, T entity) where T : EntityBase;
-    //    Task SendArtistDeleted(long id);
-    //    Task SendArtistNewOrModified(long id);
-    //    Task<Device> UpdateDevice(AudioDevice audioDevice);
-    //}
-    //public interface ILibraryServiceScoped : ILibraryService
-    //{
-
-    //}
 
     public partial class LibraryService //: ILibraryService, ILibraryServiceScoped
     {
@@ -105,7 +80,6 @@ namespace Fastnet.Apollo.Web
         }
         public async Task<Device> ConfirmDeviceAsync(AudioDevice audioDevice)
         {
-            //using var musicDb = new MusicDb(connectionString);
             //
             bool disableOnCreate()
             {
@@ -128,30 +102,6 @@ namespace Fastnet.Apollo.Web
                     return audioDevice.Name;
                 }
             }
-            //Device AddNewDeviceToDB()
-            //{
-            //    var device = new Device
-            //    {
-            //        KeyName = Guid.NewGuid().ToString().ToLower(),
-            //        Name = audioDevice.Name.ToLower(),
-            //        Type = audioDevice.Type,
-            //        MACAddress = audioDevice.MACAddress,
-            //        IsDefaultOnHost = false,
-            //        IsDisabled = false,
-            //        HostMachine = audioDevice.HostMachine.ToLower(),
-            //        DisplayName = GetDisplayName(),
-            //        Volume = 0.0F,
-            //        MaxSampleRate = audioDevice.Capability?.MaxSampleRate ?? 0,
-            //        CanReposition = audioDevice.CanReposition,
-            //        Playlist = new Playlist
-            //        {
-            //            Type = PlaylistType.DeviceList
-            //        }
-            //    };
-            //    device.IsDisabled = disableOnCreate(device.MACAddress);
-            //    musicDb.Devices.Add(device);
-            //    return device;
-            //}
             bool ValidatePlaylist(Device device)
             {
                 var result = true;
@@ -245,10 +195,10 @@ namespace Fastnet.Apollo.Web
             log.Debug($"returning a list of {devices.Count()} active devices");
             return devices;
         }
-        public Device GetDevice(AudioDevice audioDevice)
-        {
-            return GetDevice(audioDevice.Key);
-        }
+        //public Device GetDevice(AudioDevice audioDevice)
+        //{
+        //    return GetDevice(audioDevice.Key);
+        //}
         public Device GetDevice(string deviceKey)
         {
             //using var musicDb = new MusicDb(connectionString);
@@ -316,34 +266,139 @@ namespace Fastnet.Apollo.Web
             }
             await musicDb.SaveChangesAsync();
         }
-        //
-        /// <summary>
-        /// removes all items from the playlist
-        /// </summary>
-        /// <param name="playlist"></param>
-        /// <returns></returns>
-        public async Task ClearPlaylist(Playlist playlist)
+        public async Task<Playlist> FindPlaylist(string name)
         {
-            playlist.Items.Clear();
-            await musicDb.SaveChangesAsync();
+            return await this.musicDb.Playlists.SingleOrDefaultAsync(x => x.Name.ToLower() == name.ToLower());
         }
-        public async Task<Playlist> CreateNewPlaylist(PlaylistType type, string name = null)
+        public async Task<Playlist> CreateUserPlaylist(string name, IEnumerable<PlaylistItem> playlistItems = null)
         {
-            var pl = CreateNewPlaylistInternal(type, name);
-            await musicDb.SaveChangesAsync();
-            return pl;
-        }
-        public async Task DeletePlaylist(Playlist pl)
-        {
-            if (pl.Type != PlaylistType.DeviceList)
+            playlistItems ??= Enumerable.Empty<PlaylistItem>();
+            var playlist = new Playlist
             {
-                var items = pl.Items.ToArray();
-                musicDb.PlaylistItems.RemoveRange(items);
-                musicDb.Playlists.Remove(pl);
+                Type = PlaylistType.UserCreated,
+                Name = name,
+                LastModified = DateTimeOffset.Now,
+            };
+            foreach (var item in playlistItems)
+            {
+                item.Playlist = playlist;
+                playlist.Items.Add(item);
+            }
+            musicDb.Playlists.Add(playlist);
+            await musicDb.SaveChangesAsync();
+            return playlist;
+        }
+        public async Task<Playlist> CreateDevicePlaylistAsync(string deviceKey, IEnumerable<PlaylistItem> playlistItems = null)
+        {
+            playlistItems ??= Enumerable.Empty<PlaylistItem>();
+            var device = this.musicDb.Devices.SingleOrDefault(d => d.KeyName == deviceKey);
+            if(device == null)
+            {
+                throw new Exception($"device {deviceKey} not found");
+            }
+            if (device.Playlist.Type == PlaylistType.DeviceList)
+            {
+                // we can reuse the current playlist
+                device.Playlist.Items.Clear();
+            }
+            else
+            {
+                device.Playlist = new Playlist
+                {
+                    Type = PlaylistType.DeviceList,
+                    Name = string.Empty,
+                    LastModified = DateTimeOffset.Now,
+                };
+                musicDb.Playlists.Add(device.Playlist);
+            }
+            foreach(var item in playlistItems)
+            {
+                item.Playlist = device.Playlist;
+                device.Playlist.Items.Add(item);
+            }
+
+            //var playlistState = musicDb.Entry(device.Playlist).State;
+            //var deviceState = musicDb.Entry(device).State;
+            await musicDb.SaveChangesAsync();
+            return device.Playlist;
+        }
+        public async Task ChangeDevicePlaylist(string deviceKey, Playlist playlist)
+        {
+            var device = this.musicDb.Devices.SingleOrDefault(d => d.KeyName == deviceKey);
+            if (device == null)
+            {
+                throw new Exception($"device {deviceKey} not found");
+            }
+            if (device.Playlist.Id != playlist.Id)
+            {
+                Playlist toBeDeleted = null;
+                if (device.Playlist.Type == PlaylistType.DeviceList)
+                {
+                    toBeDeleted = device.Playlist;
+
+                }
+                // **ATTENTION** 27Jun2020
+                // device.playlist is a required relationship and
+                // for some reason EFCORE will mark device as deleted (or otherwise
+                // throw an error (later) - depending on the configured DeleteBeviour)
+                // when the playlist entity is deleted EVEN THOUGH the property has been
+                // reset to another playlist!!!!
+                // the only way I have found around this is to reset the property and then
+                // save to the database - then the old playlist can be deleted safely!
+                // hence the two successive SaveChanges calls
+                device.Playlist = playlist;
+                await musicDb.SaveChangesAsync();
+                if (toBeDeleted != null)
+                {
+                    DeletePlaylist(toBeDeleted);
+                }
+                var deviceState = musicDb.Entry(device).State;
                 await musicDb.SaveChangesAsync();
             }
         }
-        public async Task<PlaylistItem> AddPlaylistItem<T>(Playlist playlist, T entity) where T : EntityBase
+        //
+        ///// <summary>
+        ///// removes all items from the playlist
+        ///// </summary>
+        ///// <param name="playlist"></param>
+        ///// <returns></returns>
+        //public async Task ClearPlaylist(Playlist playlist)
+        //{
+        //    playlist.Items.Clear();
+        //    await musicDb.SaveChangesAsync();
+        //}
+        //public async Task<Playlist> SetEmptyDevicePlaylist(Device device)
+        //{
+        //    device.Playlist = CreateNewPlaylistInternal(PlaylistType.DeviceList);
+        //    await musicDb.SaveChangesAsync();
+        //    return device.Playlist;
+        //}
+        //public async Task<Playlist> CreateNewPlaylist(PlaylistType type, string name = null)
+        //{
+        //    var pl = CreateNewPlaylistInternal(type, name);
+        //    await musicDb.SaveChangesAsync();
+        //    return pl;
+        //}
+        public async Task DeletePlaylist(long playlistId)
+        {
+            var playlist = await musicDb.Playlists.FindAsync(playlistId);
+            if(playlist.Type != PlaylistType.DeviceList)
+            {
+                DeletePlaylist(playlist);
+                await musicDb.SaveChangesAsync();
+            }
+
+        }
+        public void DeletePlaylist(Playlist pl)
+        {
+            // *NB* DO NOT save to db here as it can lead to a device being deleted! (because the fk is not nullable, I think ... ???
+            var items = pl.Items.ToArray();
+            musicDb.PlaylistItems.RemoveRange(items);
+            musicDb.Playlists.Remove(pl);
+            //await musicDb.SaveChangesAsync();
+            log.Information($"[{pl.ToIdent()}] {pl.Type}{(pl.Type == PlaylistType.UserCreated ? " " + pl.Name : "")} deleted");
+        }
+        public async Task<PlaylistItem> AddPlaylistItemAsync<T>(Playlist playlist, T entity) where T : EntityBase
         {
             PlaylistItem pli = entity switch
             {
@@ -359,62 +414,52 @@ namespace Fastnet.Apollo.Web
             await musicDb.SaveChangesAsync();
             return pli;
         }
-        //public async Task ReplacePlaylistItems<T>(Playlist playlist, T entity) where T : EntityBase
+
+        public IEnumerable<Playlist> GetAllPlaylists()
+        {
+           return musicDb.Playlists;
+        }
+        //public void CopyPlaylist(string fromDevicekey, string toDevicekey)
         //{
-        //    playlist.Items.Clear();
-        //    PlaylistItem pli = entity switch
+        //    //using var musicDb = new MusicDb(connectionString);
+        //    var from = musicDb.Devices.Single(x => x.KeyName == fromDevicekey);
+        //    var to = musicDb.Devices.Single(x => x.KeyName == toDevicekey);
+        //    var toRemove = to.Playlist.Items.ToArray();
+        //    musicDb.PlaylistItems.RemoveRange(toRemove);
+        //    foreach (var item in from.Playlist.Items)
         //    {
-        //        MusicFile mf => CreateNewPlaylistItem(mf),
-        //        Track t => CreateNewPlaylistItem(t),
-        //        Work w => CreateNewPlaylistItem(w),
-        //        Performance p => CreateNewPlaylistItem(p),
-        //        _ => throw new Exception($"Entity type {entity.GetType().Name} is not playable"),
-        //    };
-        //    pli.Sequence = 1;
-        //    playlist.Items.Add(pli);
-        //    await musicDb.SaveChangesAsync();
+        //        var ni = new PlaylistItem
+        //        {
+        //            Playlist = to.Playlist,
+        //            ItemId = item.ItemId,
+        //            //MusicFile = item.MusicFile,
+        //            MusicFileId = item.MusicFileId,
+        //            //Performance = item.Performance,
+        //            Sequence = item.Sequence,
+        //            Title = item.Title,
+        //            //Track = item.Track,
+        //            Type = item.Type,
+        //            //Work = item.Work
+        //        };
+        //        musicDb.PlaylistItems.Add(ni);
+        //    }
+        //    musicDb.SaveChanges();
         //}
-        public void CopyPlaylist(string fromDevicekey, string toDevicekey)
-        {
-            //using var musicDb = new MusicDb(connectionString);
-            var from = musicDb.Devices.Single(x => x.KeyName == fromDevicekey);
-            var to = musicDb.Devices.Single(x => x.KeyName == toDevicekey);
-            var toRemove = to.Playlist.Items.ToArray();
-            musicDb.PlaylistItems.RemoveRange(toRemove);
-            foreach (var item in from.Playlist.Items)
-            {
-                var ni = new PlaylistItem
-                {
-                    Playlist = to.Playlist,
-                    ItemId = item.ItemId,
-                    MusicFile = item.MusicFile,
-                    MusicFileId = item.MusicFileId,
-                    Performance = item.Performance,
-                    Sequence = item.Sequence,
-                    Title = item.Title,
-                    Track = item.Track,
-                    Type = item.Type,
-                    Work = item.Work
-                };
-                musicDb.PlaylistItems.Add(ni);
-            }
-            musicDb.SaveChanges();
-        }
-        /// <summary>
-        /// makes the current DeviceList playlist into a UserCreated one and names it
-        /// </summary>
-        /// <param name="deviceKey"></param>
-        /// <param name="name"></param>
-        /// <returns></returns>
-        public async Task<Device> SaveNewPlaylistAsync(string deviceKey, string name)
-        {
-            var device = musicDb.Devices.Single(x => x.KeyName == deviceKey);
-            var playlist = device.Playlist;
-            playlist.Name = name;
-            playlist.Type = PlaylistType.UserCreated;
-            await musicDb.SaveChangesAsync();
-            return device;
-        }
+        ///// <summary>
+        ///// makes the current DeviceList playlist into a UserCreated one and names it
+        ///// </summary>
+        ///// <param name="deviceKey"></param>
+        ///// <param name="name"></param>
+        ///// <returns></returns>
+        //public async Task<Device> SaveNewPlaylistAsync(string deviceKey, string name)
+        //{
+        //    var device = musicDb.Devices.Single(x => x.KeyName == deviceKey);
+        //    var playlist = device.Playlist;
+        //    playlist.Name = name;
+        //    playlist.Type = PlaylistType.UserCreated;
+        //    await musicDb.SaveChangesAsync();
+        //    return device;
+        //}
         //
         private PlaylistItem CreateNewPlaylistItem(MusicFile mf)
         {
@@ -455,7 +500,7 @@ namespace Fastnet.Apollo.Web
             var pli = new PlaylistItem
             {
                 Type = PlaylistItemType.Performance,
-                Title = performance.GetParentEntityName(),
+                Title = performance.GetParentEntityDisplayName(),
                 ItemId = performance.Id,
                 MusicFileId = 0// mf.Id
             };

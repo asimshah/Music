@@ -54,6 +54,11 @@ namespace Fastnet.Music.Data
                 .Where(x => artistSet.Matches(x.Select(r => r.ArtistId)))
                 .Select(x => new ArtistSetRagaPerformance { Performance = x.Key, Raga = x.First().Raga, ArtistSet = new ArtistSet(x.Select(z => z.Artist)) });
         }
+        public static string GetArtistNames(this IEnumerable<Artist> artists)
+        {
+            var set = new ArtistSet(artists);
+            return set.GetNames();
+        }
     }
     public static partial class Extensions
     {

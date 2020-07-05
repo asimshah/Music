@@ -1,5 +1,5 @@
 <div class="text-input" [ngClass]="{'not-valid': isInError(), 'disabled' : disabled}">
-   <label [for]="controlId">
+   <label *ngIf="label" [for]="controlId">
       <span [innerHTML]="label"></span>
       <span *ngIf="traceReferences" class="trace-text">{{getReference()}}</span>
    </label>

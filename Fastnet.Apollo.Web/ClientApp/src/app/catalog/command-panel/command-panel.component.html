@@ -2,25 +2,24 @@
     <div dialogbody>
         <div class="banner">
             <div class="image-container">
-                <img class="image" [src]="getImageUrl()" />
+                <img *ngIf="getImageUrl()" class="image" [src]="getImageUrl()" />
             </div>
-            <div class="description" [innerHTML]="description"></div>
+            <div class="description">
+               <ng-container  *ngFor="let line of getDescription()">
+                  <div>{{line}}</div>
+               </ng-container>
+            </div>
         </div>
 
         <div class="menu-items">
-            <ng-container *ngIf="isTouchDevice()">
-                <div class="menu-item" (tap)="onPlay()" [ngClass]="{'disabled': !audioDeviceAvailable}">Play</div>
-                <div class="menu-item" (tap)="onQueue()" [ngClass]="{'disabled': !audioDeviceAvailable}">Queue</div>
-            </ng-container>
-            <ng-container *ngIf="!isTouchDevice()">
-               <div class="menu-item" (click)="onResample()">Resample</div>
-            </ng-container>
-            <!--<ng-container *ngIf="!isTouchDevice()">
-                <div *ngIf="isTagEditorAvailable()" class="menu-item" (click)="onTagEditor()">Tag Editor ...</div>
-                <div *ngIf="!isTagEditorAvailable()" class="menu-item  disabled">(increase browser window height for Tag Editor)</div>
-                <div class="menu-item" (click)="onReset()">Reset</div>
-            </ng-container>-->
-            <div class="menu-item" (tap)="onCancel()">Cancel</div>
+           <ng-container *ngIf="isTouchDevice()">
+              <div class="menu-item" (click)="onPlay($event)" [ngClass]="{'disabled': !audioDeviceAvailable}">Play</div>
+              <div class="menu-item" (click)="onQueue($event)" [ngClass]="{'disabled': !audioDeviceAvailable}">Queue</div>
+           </ng-container>
+           <ng-container *ngIf="!isTouchDevice()">
+              <div class="menu-item" (click)="onResample()">Resample</div>
+           </ng-container>
+           <div class="menu-item" (click)="onCancel($event)">Cancel</div>
         </div>
     </div>
 </popup-dialog>

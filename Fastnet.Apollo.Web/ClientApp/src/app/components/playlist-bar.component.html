@@ -1,0 +1,94 @@
+<div>
+   <div class="playlist-bar">
+      <!--<button class="icon" (click)="onPlaylistManager()" title="Playlist Manager ..."><div class="fa fa-pencil-square-o"></div></button>-->
+      <button class="icon" (click)="onSavePlaylist()" title="Save current playlist as ..."><div class="fa fa-floppy-o"></div></button>
+      <button class="icon" (click)="onTransferPlaylist()" title="Copy playlist from another device"><div class="fa fa-arrow-left"></div></button>
+      <button class="icon" (click)="onSelectPlaylist()" title="Select a saved playlist"><div class="fa fa-list-alt"></div></button>
+      <div></div>
+      <button class="icon danger" (click)="onDeletePlaylist()" title="Delete this playlist" [ngClass]="{'disabled': isDevicePlaylist()}"><div class="fa fa-trash"></div></button>
+   </div>
+   <div class="current-playlist">
+      <div class="playlist-name">{{getPlaylistName()}}</div>
+      <div class="playlist-duration">{{getPlaylistDuration()}}</div>
+   </div>
+   <popup-message caption="Apollo"></popup-message>
+   <popup-dialog class="transfer-playlist-dialog" #transferPlaylist [width]="400">
+      <div windowcaption>
+         <div>Copy Playlist</div>
+      </div>
+      <div dialogbody>
+         <div class="main-body">
+            <ng-container *ngIf="transferModel && transferModel.ready">
+               <ng-container *ngIf="transferModel.devices.length === 0; else devicesAvailable">
+                  <div>No other devices are currently available</div>
+               </ng-container>
+               <ng-template #devicesAvailable>
+                  <div>Copy playlist from:</div>
+                  <div class="device-list">
+                     <ng-container *ngFor="let d of transferModel.devices">
+                        <button (click)="transferModel.onDeviceSelected(d)" [ngClass]="{'secondary': d === selectedDevice}">{{d.displayName}}</button>
+                     </ng-container>
+                  </div>
+               </ng-template>
+            </ng-container>
+         </div>
+      </div>
+      <div dialogcommands>
+         <button (click)="onTransferPlaylistClosed(DialogResult.ok)" [ngClass]="{'disabled': !(transferModel && transferModel.isOKEnabled())}">OK</button>
+         <button (click)="onTransferPlaylistClosed(DialogResult.cancel)">Cancel</button>
+      </div>
+   </popup-dialog>
+   <popup-dialog caption="save dialog" class="save-playlist-dialog" #savePlaylist [ngClass]="{'mobile-device': isMobileDevice()}">
+      <div windowcaption>
+         <div>Save Playlist</div>
+      </div>
+      <div dialogbody>
+         <div class="main-body">
+            <ng-container *ngIf="saveModel && saveModel.ready">
+               <div *ngIf="saveModel.existingNames.length > 0" class="save-type-selection">
+                  <enum-input noborder name="saveType" [(ngModel)]="saveModel.saveType" [names]="saveModel.saveTypeNames" [enumType]="PlaylistSaveType"></enum-input>
+               </div>
+               <div class="entry-body">
+                  <ng-container *ngIf="saveModel.saveType === PlaylistSaveType.New; else replaceName">
+                     <text-input label="New Playlist name" name="playlistName" [(ngModel)]="saveModel.newName" [validator]="saveModel.validators.item('newplaylist')"></text-input>
+                  </ng-container>
+                  <ng-template #replaceName>
+                     <div>
+                        <combo-box [smartFilter]="true" label="Playlist name" [(ngModel)]="saveModel.existingName" [items]="saveModel.existingNames"></combo-box>
+                     </div>
+                  </ng-template>
+               </div>
+            </ng-container>
+         </div>
+      </div>
+      <div dialogcommands>
+         <button (click)="onSavePlaylistClosed(DialogResult.ok)" [ngClass]="{'disabled': !(saveModel && saveModel.isSaveEnabled())}">Save</button>
+         <button (click)="onSavePlaylistClosed(DialogResult.cancel)">Cancel</button>
+      </div>
+   </popup-dialog>
+   <popup-dialog class="select-playlist-dialog" #selectPlaylist [ngClass]="{'mobile-device': isMobileDevice()}">
+      <div windowcaption>
+         <div>Select a Playlist</div>
+      </div>
+      <div dialogbody>
+         <ng-container *ngIf="selectModel.ready">
+            <list-view [maxRows]="9" [items]="selectModel.allPlaylists" gridTemplateColumns="1fr 100px 100px" (selectedItemChanged)="selectModel.onSelectedPlaylist($event)" >
+               <ng-template #headerTemplate>
+                  <div class="header">Playlist</div>
+                  <div class="header align-right">Items</div>
+                  <div class="header align-right">Duration</div>
+               </ng-template>
+               <ng-template #itemTemplate let-item>
+                  <div class="item">{{item.playlistName}}</div>
+                  <div class="item align-right">{{item.items.length}}</div>
+                  <div class="item align-right">{{item.formattedTotalTime}}</div>
+               </ng-template>
+            </list-view>
+         </ng-container>
+      </div>
+      <div dialogcommands>
+         <button (click)="onSelectPlaylistClosed(DialogResult.ok)" [ngClass]="{'disabled': !selectModel.isOKEnabled()}" >OK</button>
+         <button (click)="onSelectPlaylistClosed(DialogResult.cancel)">Cancel</button>
+      </div>
+   </popup-dialog>
+</div>

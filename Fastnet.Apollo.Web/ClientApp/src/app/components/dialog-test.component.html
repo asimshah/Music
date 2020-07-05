@@ -1,0 +1,15 @@
+<popup-dialog>
+   <div windowcaption>
+      <div>Dialog Tester</div>
+   </div>
+   <div dialogbody>
+      <div>Hello from dialog test</div>
+      <text-input label="First Name" name="firstName" [(ngModel)]="firstName" [validator]="validators.item('firstName')"></text-input>
+      <text-input label="Last Name" name="lastName" [(ngModel)]="lastName" [validator]="validators.item('lastName')"></text-input>
+      <!--<div>validity = {{getValidityState() | async}}</div>-->
+   </div>
+   <div dialogcommands>
+      <button (click)="onOK()">OK</button>
+      <button (click)="onCancel()">Cancel</button>
+   </div>
+</popup-dialog>

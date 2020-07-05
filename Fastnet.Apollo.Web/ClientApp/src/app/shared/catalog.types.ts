@@ -46,7 +46,7 @@ export class BaseEntity {
    public highlightedName: string;
    public isMatchedBySearch: boolean;
    highlightSearch(searchText: string, text: string, prefixMode: boolean) {
-      this.highlightedName = Highlighter.highlight(searchText, text, prefixMode);
+      //this.highlightedName = Highlighter.highlight(searchText, text, prefixMode);
    }
 }
 export class ArtistSet {
@@ -114,6 +114,7 @@ export class Work extends BaseEntity {
    public type = 'work';
    public artistId: number;
    public name: string;
+   public artistName: string;
    public opusType: OpusType;
    public partNumber: number | null;
    public partName: string;
@@ -128,6 +129,7 @@ export class Work extends BaseEntity {
       this.id = w.id;
       this.artistId = w.artistId;
       this.name = w.name;
+      this.artistName = w.artistName;
       this.highlightedName = w.name;
       this.partNumber = w.partNumber;
       this.partName = w.partName;
@@ -150,6 +152,10 @@ export class Work extends BaseEntity {
 export class Track extends BaseEntity {
    public type = 'track';
    public workId: number;
+   public artistName: string;
+   public albumName: string;
+   public workName: string; // the composition or raga name
+   public coverArtUrl: string;
    public number: number | null;
    public title: string;
    public musicFileCount: number;
@@ -164,6 +170,10 @@ export class Track extends BaseEntity {
       this.number = t.number;
       this.title = t.title;
       this.highlightedName = t.title;
+      this.artistName = t.artistName;
+      this.albumName = t.albumName;
+      this.workName = t.workName;
+      this.coverArtUrl = t.coverArtUrl;
       this.musicFileCount = t.musicFileCount;
       this.numberQuality = t.numberQuality;
       this.titleQuality = t.titleQuality;
@@ -181,6 +191,7 @@ export class Track extends BaseEntity {
 export class MusicFile {
    public type = 'musicfile';
    public id: number;
+   public isGenerated: boolean;
    public encoding: EncodingType;
    public bitRate: number | null;
    public sampleRate: number | null;
@@ -190,6 +201,7 @@ export class MusicFile {
    public isHighLit = false;
    public copyProperties(mf: MusicFile) {
       this.id = mf.id;
+      this.isGenerated = mf.isGenerated;
       this.encoding = mf.encoding;
       this.bitRate = mf.bitRate;
       this.sampleRate = mf.sampleRate;
@@ -248,6 +260,8 @@ export class Performance extends BaseEntity {
    public year: number;
    public albumName: string;
    public albumCoverArt: string;
+   public artistName: string;
+   public workName: string;
    public movementCount: string;
    public formattedDuration: string;
    public movements: Track[];
@@ -258,7 +272,9 @@ export class Performance extends BaseEntity {
       this.highlightedName = p.highlightedName;
       this.year = p.year;
       this.albumName = p.albumName;
+      this.artistName = p.artistName;
       this.albumCoverArt = p.albumCoverArt;
+      this.workName = p.workName;
       this.movementCount = p.movementCount;
       this.formattedDuration = p.formattedDuration;
       //this.movements = p.movements ? p.movements : [];
@@ -274,6 +290,7 @@ export class Performance extends BaseEntity {
 }
 
 export class Movement extends Track {
+   public type = 'movement';
    isHighLit: boolean = false;
    public copyProperties(m: Movement) {
       super.copyProperties(m);
@@ -356,21 +373,24 @@ export class PerformanceTEO {//extends TEOBase<WesternClassicalMusicFileTEO> {
    public movementList: WesternClassicalMusicFileTEO[];
    public movementFilenames: string[];
 }
-export function isWork(item: MusicFile | Work | Track | Composition | Raga | Performance): item is Work {
+export function isWork(item: MusicFile | Work | Track | Movement | Composition | Raga | Performance): item is Work {
    return (item as Work).type === 'work';
 }
-export function isTrack(item: MusicFile | Work | Track | Composition | Raga | Performance): item is Track {
+export function isTrack(item: MusicFile | Work | Track | Movement | Composition | Raga | Performance): item is Track {
    return (item as Track).type === 'track';
 }
-export function isComposition(item: MusicFile | Work | Track | Composition | Raga | Performance): item is Composition {
+export function isMovement(item: MusicFile | Work | Track | Movement | Composition | Raga | Performance): item is Movement {
+   return (item as Movement).type === 'movement';
+}
+export function isComposition(item: MusicFile | Work | Track | Movement | Composition | Raga | Performance): item is Composition {
    return (item as Composition).type === 'composition';
 }
-export function isRaga(item: MusicFile | Work | Track | Composition | Performance): item is Raga {
+export function isRaga(item: MusicFile | Work | Track | Movement | Composition | Raga | Performance): item is Raga {
    return (item as Composition).type === 'raga';
 }
-export function isPerformance(item: MusicFile | Work | Track | Composition | Raga | Performance): item is Performance {
+export function isPerformance(item: MusicFile | Work | Track | Movement | Composition | Raga | Performance): item is Performance {
    return (item as Performance).type === 'performance';
 }
-export function isMusicFile(item: MusicFile | Work | Track | Composition | Raga | Performance): item is MusicFile {
+export function isMusicFile(item: MusicFile | Work | Track | Movement | Composition | Raga | Performance): item is MusicFile {
    return (item as MusicFile).type === 'musicfile';
 }

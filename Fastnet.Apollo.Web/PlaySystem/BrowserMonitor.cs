@@ -56,7 +56,7 @@ namespace Fastnet.Apollo.Web
             {
                 var bd = this.browsers[signalRConnectionId];
                 this.browsers.Remove(signalRConnectionId);
-                await this.playManager.BrowserDisconnected(bd.BrowserKey);
+                await this.playManager.BrowserDisconnectedAsync(bd.BrowserKey);
                 log.Debug($"{signalRConnectionId} removed: browser key {bd.BrowserKey}, ip address {bd.IPAddressString}, brower name {bd.BrowserName}");
             }
             else

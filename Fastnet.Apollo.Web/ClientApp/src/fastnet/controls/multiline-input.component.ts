@@ -1,7 +1,8 @@
-﻿import { NG_VALUE_ACCESSOR } from "@angular/forms";
+import { NG_VALUE_ACCESSOR } from "@angular/forms";
 import { forwardRef, Component, Input } from "@angular/core";
 //import { TextInputControl } from "./text-input.component";
-import { InputControlBase, ControlBase } from "./controlbase.type";
+import { ControlBase } from "./controlbase.type";
+import { InputControlBase } from "./inputcontrolbase";
 
 export enum Resizability {
     HorizontalOnly,

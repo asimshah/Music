@@ -16,14 +16,14 @@ namespace Fastnet.Music.Data
         public int Sequence { get; set; }
         public long ItemId { get; set; }
         public long MusicFileId { get; set; } // pk of a music file, only valid if Type == Track
-        [NotMapped]
-        public Track Track { get; set; }
-        [NotMapped]
-        public MusicFile MusicFile { get; set; }
-        [NotMapped]
-        public Work Work { get; set; }
-        [NotMapped]
-        public Performance Performance { get; set; }
+        //[NotMapped]
+        //public Track Track { get; set; }
+        //[NotMapped]
+        //public MusicFile MusicFile { get; set; }
+        //[NotMapped]
+        //public Work Work { get; set; }
+        //[NotMapped]
+        //public Performance Performance { get; set; }
         public long PlaylistId { get; set; }
         public virtual Playlist Playlist { get; set; }
         public override string ToString()

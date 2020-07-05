@@ -61,7 +61,9 @@ namespace Fastnet.Music.Data
         }
         public string GetArtistNames()
         {
-            return string.Join(", ", Artists.Select(x => x.Name));
+            var set = new ArtistSet(Artists);
+            return set.GetNames();
+            //return string.Join(", ", Artists.Select(x => x.Name));
         }
         public string GetArtistIds()
         {

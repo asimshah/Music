@@ -209,8 +209,14 @@ export class PlayerService extends BaseService implements OnDestroy {
       await this.requestSelectedDeviceStatus();
    }
    //
+   public async getAllPlaylistNames() {
+      return this.getAsync<string[]>(`get/all/playlist/names`);
+   }
    public async getAllPlaylists() {
-      return this.getAsync<string[]>(`get/all/playlists`);
+      return this.getAsync<Playlist[]>(`get/all/playlists`);
+   }
+   public async setPlaylist(devicekey: string, playlistId: number) {
+      await this.getAsync<void>(`select/playlist/${devicekey}/${playlistId}`);
    }
    public async copyPlaylist(from: string, to: string) {
       await this.getAsync<void>(`copy/playlist/${from}/${to}`);
@@ -220,6 +226,9 @@ export class PlayerService extends BaseService implements OnDestroy {
    }
    public async replacePlaylist(device: AudioDevice, name: string) {
       return this.getAsync<void>(`replace/playlist/${device.key}/${name}`);
+   }
+   public async deletePlaylist(playlistId: number) {
+      await this.getAsync(`delete/playlist/${playlistId}`);
    }
    //
    public async enableWebAudio() {
@@ -235,6 +244,7 @@ export class PlayerService extends BaseService implements OnDestroy {
    public async sendWebAudioDeviceStatus(ds: DeviceStatus) {
       return this.postAsync("webaudio/device/status", ds);
    }
+
    //
    private async start() {
       //console.log(`player service start(), timerStarted = ${this.timerStarted}`);
@@ -312,7 +322,7 @@ export class PlayerService extends BaseService implements OnDestroy {
       }
    }
    private onPlaylist(pu: Playlist) {
-      console.log(`recd playlist for ${pu.deviceKey}`);
+      //console.log(`recd playlist for ${pu.deviceKey}`);
       if (pu.deviceKey === this.getDeviceKeyFromStorage()) {
          this.selectedDevicePlaylist = pu;
          this.selectedPlaylistChanged.next(this.selectedDevicePlaylist);
@@ -438,7 +448,7 @@ export class PlayerService extends BaseService implements OnDestroy {
             device.copyProperties(item);
             devices.push(device);
          }
-         this.log.debug(`[PlayerService] getActiveDevices() returned ${list.length} devices`);
+         //this.log.debug(`[PlayerService] getActiveDevices() returned ${list.length} devices`);
          resolve(devices);
       });
    }

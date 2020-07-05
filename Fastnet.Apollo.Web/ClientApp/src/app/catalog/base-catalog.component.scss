@@ -58,6 +58,7 @@ $background-stripe-even: theme-colour('background', 'dark');
         font-size: smaller;
     }
 }
+
 .editable-name {
     /* ie a name followed by an editing icon such as dots (...)*/
     /* i am no longer proposing to allow editing in this way ...*/
@@ -115,14 +116,14 @@ $background-stripe-even: theme-colour('background', 'dark');
    }
 
    .movement, .track {
-      margin-top: $theme-gutter-fine;
+      //margin-top: $theme-gutter-fine;
       display: grid;
       grid-template-columns: auto auto 1fr auto;
       justify-content: end;
       align-items: start;
 
       .command-panel {
-         margin-top: 0.5em;
+         /*margin-top: 0.5em;*/
          font-size: 0.7rem; // 11.2px;
       }
 

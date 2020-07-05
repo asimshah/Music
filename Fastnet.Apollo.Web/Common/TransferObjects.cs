@@ -55,8 +55,10 @@ namespace Fastnet.Apollo.Web
         public string Performers { get; set; }
         public string DisplayName { get; set; }
         public int Year { get; set; }
-        public string AlbumName { get; set; }
+        public string AlbumName { get; set; } // the name of the 'album'
         public string AlbumCoverArt { get; set; }
+        public string ArtistName { get; set; }
+        public string WorkName { get; set; } // used for composition/raga name
         public int MovementCount { get; set; }
         public TrackDTO[] Movements { get; set; }
         public string FormattedDuration { get; set; }
@@ -82,6 +84,7 @@ namespace Fastnet.Apollo.Web
         public IEnumerable<long> ArtistIdList { get; set; }
         public OpusType OpusType { get; set; }
         public string Name { get; set; }
+        public string ArtistName { get; set; }
         public int Year { get; set; }
         public int TrackCount { get; set; }
         public string CoverArtUrl { get; set; }
@@ -93,6 +96,10 @@ namespace Fastnet.Apollo.Web
         public long Id { get; set; }
         public long WorkId { get; set; }
         public long ArtistId { get; set; }
+        public string ArtistName { get; set; }
+        public string AlbumName { get; set; }
+        public string WorkName { get; set; }
+        public string CoverArtUrl { get; set; }
         public int Number { get; set; }
         public string Title { get; set; }
         public string DisplayName { get; set; }
@@ -104,6 +111,7 @@ namespace Fastnet.Apollo.Web
     public class MusicFileDTO
     {
         public long Id { get; set; }
+        public bool IsGenerated { get; set; }
         public EncodingType Encoding { get; set; }
         public int? BitRate { get; set; }
         public int? BitsPerSample { get; set; }
@@ -185,6 +193,7 @@ namespace Fastnet.Apollo.Web
     }
     public class PlaylistDTO
     {
+        public long Id { get; set; } // id of the corresponding Playlist entity
         public string DeviceKey { get; set; }
         public PlaylistType PlaylistType { get; set; }
         public string  PlaylistName { get; set; }

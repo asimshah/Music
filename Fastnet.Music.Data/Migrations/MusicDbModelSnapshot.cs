@@ -16,7 +16,7 @@ namespace Fastnet.Music.Data.Migrations
 #pragma warning disable 612, 618
             modelBuilder
                 .HasDefaultSchema("music")
-                .HasAnnotation("ProductVersion", "3.1.3")
+                .HasAnnotation("ProductVersion", "3.1.5")
                 .HasAnnotation("Relational:MaxIdentifierLength", 128)
                 .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
 
@@ -880,7 +880,7 @@ namespace Fastnet.Music.Data.Migrations
                     b.HasOne("Fastnet.Music.Data.Playlist", "Playlist")
                         .WithMany()
                         .HasForeignKey("PlaylistId")
-                        .OnDelete(DeleteBehavior.Cascade)
+                        .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
                 });
 

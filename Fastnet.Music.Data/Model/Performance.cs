@@ -67,7 +67,8 @@ namespace Fastnet.Music.Data
             }
             else
             {
-                return GetComposition()?.Artist.Name ?? RagaPerformances.Select(x => x.Artist.Name).ToCSV();
+                //return GetComposition()?.Artist.Name ?? RagaPerformances.Select(x => x.Artist.Name).ToCSV();
+                return GetComposition()?.Artist.Name ?? RagaPerformances.Select(x => x.Artist).GetArtistNames();
             }
         }
         public override string ToString()

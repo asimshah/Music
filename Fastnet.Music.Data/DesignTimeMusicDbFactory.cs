@@ -20,7 +20,8 @@ namespace Fastnet.Music.Data
             //var path = @"C:\devroot\Standard2\Music\Fastnet.Music.Web";
             var path = @"C:\devroot\Music\Fastnet.Apollo.Web";
             var databaseFilename = @"Music.mdf";
-            var catalog = @"Music-test-dev";
+            //var catalog = @"Music-test-dev";
+            var catalog = @"Music-dev";
             string dataFolder = Path.Combine(path, "Data");
             //if (!Directory.Exists(dataFolder))
             //{

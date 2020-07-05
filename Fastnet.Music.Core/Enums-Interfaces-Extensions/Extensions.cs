@@ -126,6 +126,7 @@ namespace Fastnet.Music.Core
             }
             return name;
         }
+        // rename this to ToDurationFormat()
         public static string ToDuration(this TimeSpan ts)
         {
             if (ts.Hours > 0)

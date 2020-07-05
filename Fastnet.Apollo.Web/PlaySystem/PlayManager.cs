@@ -18,9 +18,22 @@ using System.Threading.Tasks;
 
 namespace Fastnet.Apollo.Web
 {
+    static class PlayManagerExtensions
+    {
+        public static PlaylistItem Clone(this PlaylistItem item)
+        {
+            return new PlaylistItem
+            {
+                ItemId = item.ItemId,
+                MusicFileId = item.MusicFileId,
+                Sequence = item.Sequence,
+                Title = item.Title,
+                Type = item.Type,
+            };
+        }
+    }
     public partial class PlayManager : HostedService // RealtimeTask
     {
-        //private readonly IDictionary<string, DeviceRuntime> runtimeDevices;
         private readonly ConcurrentDictionary<string, DeviceRuntime> runtimeDevices;
         private ServerInformationMulticast sim;
         private KeepAgentsAlive keepAlive;
@@ -32,8 +45,7 @@ namespace Fastnet.Apollo.Web
         //private readonly IServiceProvider serviceProvider;
         private readonly MessengerOptions messengerOptions;
         private readonly MusicServerOptions musicServerOptions;
-        public PlayManager(IHubContext<MessageHub, IHubMessage> messageHub, /*IServiceProvider serviceProvider,*/
-            //SingletonLibraryService libraryService,
+        public PlayManager(IHubContext<MessageHub, IHubMessage> messageHub,
             IWebHostEnvironment environment, IConfiguration cfg,
             IOptions<MusicServerOptions> serverOptions, Messenger messenger, IOptions<MessengerOptions> messengerOptions,
             ILogger<PlayManager> log, ILoggerFactory loggerFactory) : base(log)
@@ -52,7 +64,7 @@ namespace Fastnet.Apollo.Web
         }
         protected override async Task ExecuteAsync(CancellationToken cancellationToken)
         {
-            messenger.AddMulticastSubscription<DeviceStatus>(async (m) => { await OnDeviceStatus(m); });
+            messenger.AddMulticastSubscription<DeviceStatus>(async (m) => { await OnDeviceStatusAsync(m); });
             this.taskList.Add(Task.Run(() =>
             {
                 this.sim = new ServerInformationMulticast(/*environment,*/ messengerOptions, musicServerOptions, messenger, cancellationToken, lf);
@@ -69,7 +81,7 @@ namespace Fastnet.Apollo.Web
         {
             return this.runtimeDevices.Values.ToArray();
         }
-        public async Task UpdateDeviceRuntime(Device device)
+        public async Task UpdateDeviceRuntimeAsync(Device device)
         {
             var dr = GetDeviceRuntime(device.KeyName);
             if (dr != null)
@@ -104,26 +116,27 @@ namespace Fastnet.Apollo.Web
             }
             log.Debug($"devices runtime contains {this.runtimeDevices.Count()} device");
         }
-        public async Task<int> PlaySequenceNumber(string deviceKey, PlaylistPosition position)
+        public async Task<int> PlaySequenceNumberAsync(string deviceKey, PlaylistPosition position)
         {
             var dr = GetDeviceRuntime(deviceKey);
             if (dr != null)
             {
                 //var pli = GetPlaylistItemAtSequence(dr, sequenceNumber);
-                var pli = GetPlaylistItemAtSequence(dr, position);
-                if (pli != null)
+                //var pli = GetPlaylistItemAtSequence(dr, position);
+                var stpli = dr.GetItemAtPosition(position);
+                if (stpli != null)
                 {
+                    //var stpli = pli as SingleTrackPlaylistItem;
                     var pc = new PlayerCommand
                     {
                         Command = PlayerCommands.Play, //.ClearThenPlay,
                         Volume = dr.Status.Volume < 0.05f ? 0.3f : dr.Status.Volume,
                         DeviceKey = deviceKey,
-                        StreamUrl = $"player/stream/{pli.MusicFileId}"
-
+                        StreamUrl = $"player/stream/{stpli.MusicFileId}"
                     };
                     //dr.CurrentPlaylistSequenceNumber = pli.Sequence;
                     dr.CurrentPosition.Set(position);
-                    return await ExecuteCommand(dr, pc);
+                    return await ExecuteCommandAsync(dr, pc);
                 }
                 else
                 {
@@ -133,22 +146,13 @@ namespace Fastnet.Apollo.Web
             }
             return dr.CommandSequenceNumber;// 0;
         }
-        public async Task<int> PlayNext(string deviceKey, bool reverse = false)
+        public async Task<int> PlayNextAsync(string deviceKey, bool reverse = false)
         {
             var dr = GetDeviceRuntime(deviceKey);
             if (dr != null)
             {
-                (PlaylistItemRuntime pli, PlaylistPosition position) = (null, null);
-                do
-                {
-                    (pli, position) = GetNextPlaylistItem(dr, reverse);
-                    if (pli != null && dr.CanPlay(pli) == false)
-                    {
-                        dr.CurrentPosition.Set(position);
-                    }
-                } while (pli != null && dr.CanPlay(pli) == false);
-
-                if (pli != null)
+                var nextItem = reverse ? dr.GetPreviousItem() : dr.GetNextItem();
+                if (nextItem != null)
                 {
                     PlayerCommand pc = null;
                     pc = new PlayerCommand
@@ -156,21 +160,55 @@ namespace Fastnet.Apollo.Web
                         Command = PlayerCommands.Play,
                         Volume = dr.Status.Volume < 0.05f ? 0.3f : dr.Status.Volume,
                         DeviceKey = deviceKey,
-                        StreamUrl = $"player/stream/{pli.MusicFileId}"
+                        StreamUrl = $"player/stream/{nextItem.MusicFileId}"
 
                     };
-                    dr.CurrentPosition.Set(position);
-                    return await ExecuteCommand(dr, pc);
-                }
-                else
-                {
-                    await PlaylistFinished(deviceKey);
-                    dr.CurrentPosition.Reset();
+                    //dr.CurrentPosition.Set(position);
+                    return await ExecuteCommandAsync(dr, pc);
                 }
             }
             return 0;
         }
-        public async Task<int> TogglePlayPause(string deviceKey)
+        //public async Task<int> PlayNext(string deviceKey, bool reverse = false)
+        //{
+        //    var dr = GetDeviceRuntime(deviceKey);
+        //    if (dr != null)
+        //    {
+
+        //        (ExtendedPlaylistItem pli, PlaylistPosition position) = (null, null);
+        //        do
+        //        {
+        //            (pli, position) = GetNextPlaylistItem(dr, reverse);
+        //            if (pli != null && dr.CanPlay(pli) == false)
+        //            {
+        //                dr.CurrentPosition.Set(position);
+        //            }
+        //        } while (pli != null && dr.CanPlay(pli) == false);
+
+        //        if (pli != null)
+        //        {
+
+        //            PlayerCommand pc = null;
+        //            pc = new PlayerCommand
+        //            {
+        //                Command = PlayerCommands.Play,
+        //                Volume = dr.Status.Volume < 0.05f ? 0.3f : dr.Status.Volume,
+        //                DeviceKey = deviceKey,
+        //                StreamUrl = $"player/stream/{pli.MusicFileId}"
+
+        //            };
+        //            dr.CurrentPosition.Set(position);
+        //            return await ExecuteCommand(dr, pc);
+        //        }
+        //        else
+        //        {
+        //            await PlaylistFinished(deviceKey);
+        //            dr.CurrentPosition.Reset();
+        //        }
+        //    }
+        //    return 0;
+        //}
+        public async Task<int> TogglePlayPauseAsync(string deviceKey)
         {
             var pc = new PlayerCommand
             {
@@ -178,9 +216,9 @@ namespace Fastnet.Apollo.Web
                 DeviceKey = deviceKey,
             };
             pc.JsonParcel = GetDeviceRuntime(deviceKey)?.MostRecentCommand?.JsonParcel;
-            return await ExecuteCommand(deviceKey, pc);
+            return await ExecuteCommandAsync(deviceKey, pc);
         }
-        public async Task<int> SetVolume(string deviceKey, float volume)
+        public async Task<int> SetVolumeAsync(string deviceKey, float volume)
         {
             var pc = new PlayerCommand
             {
@@ -188,9 +226,9 @@ namespace Fastnet.Apollo.Web
                 DeviceKey = deviceKey,
                 Volume = volume
             };
-            return await ExecuteCommand(deviceKey, pc);
+            return await ExecuteCommandAsync(deviceKey, pc);
         }
-        public async Task<int> SetPosition(string deviceKey, float position)
+        public async Task<int> SetPositionAsync(string deviceKey, float position)
         {
             var pc = new PlayerCommand
             {
@@ -198,7 +236,7 @@ namespace Fastnet.Apollo.Web
                 DeviceKey = deviceKey,
                 Position = position
             };
-            return await ExecuteCommand(deviceKey, pc);
+            return await ExecuteCommandAsync(deviceKey, pc);
         }
         public DeviceRuntime GetDeviceRuntime(string key)
         {
@@ -208,13 +246,31 @@ namespace Fastnet.Apollo.Web
             }
             return null;
         }
-        public async Task ClearPlaylist(string deviceKey)
+        //public async Task ClearPlaylist(string deviceKey)
+        //{
+        //    var dr = GetDeviceRuntime(deviceKey);
+        //    if (dr != null)
+        //    {
+        //        //dr.Playlist.Items.Clear();
+        //        //dr.ExtendedPlaylist.ClearItems();
+        //        //dr.CurrentPosition = PlaylistPosition.ZeroPosition;
+        //        //var dto = new PlaylistDTO
+        //        //{
+        //        //    DeviceKey = deviceKey,
+        //        //    PlaylistType = dr.Playlist.Type,
+        //        //    PlaylistName = dr.Playlist.Name,
+        //        //    //DisplayName = dr.DisplayName,
+        //        //    Items = dr.Playlist.Items.Select(x => x.ToDTO())
+        //        //};
+        //        dr.ClearPlaylist();
+        //        await SendPlaylist(dr.ToPlaylistDTO());
+        //    }
+        //}
+        public async Task SendDevicePlaylistAsync(string deviceKey)
         {
             var dr = GetDeviceRuntime(deviceKey);
             if (dr != null)
             {
-                dr.Playlist.Items.Clear();
-                dr.CurrentPosition.Reset();
                 //var dto = new PlaylistDTO
                 //{
                 //    DeviceKey = deviceKey,
@@ -226,23 +282,7 @@ namespace Fastnet.Apollo.Web
                 await SendPlaylist(dr.ToPlaylistDTO());
             }
         }
-        public async Task SendInitialPlaylist(string deviceKey)
-        {
-            var dr = GetDeviceRuntime(deviceKey);
-            if (dr != null)
-            {
-                //var dto = new PlaylistDTO
-                //{
-                //    DeviceKey = deviceKey,
-                //    PlaylistType = dr.Playlist.Type,
-                //    PlaylistName = dr.Playlist.Name,
-                //    //DisplayName = dr.DisplayName,
-                //    Items = dr.Playlist.Items.Select(x => x.ToDTO())
-                //};
-                await SendPlaylist(dr.ToPlaylistDTO());
-            }
-        }
-        public async Task BrowserDisconnected(string browserKey)
+        public async Task BrowserDisconnectedAsync(string browserKey)
         {
             //using (var scope = new ScopedDbContext<MusicDb>(serviceProvider))
             //{
@@ -268,28 +308,58 @@ namespace Fastnet.Apollo.Web
                 log.Warning($"audio for device {browserKey} not running");
             }
         }
-        public async Task AddPlaylistItem(string deviceKey, PlaylistItem pli)
+        public async Task AddPlaylistItemAsync<T>(string deviceKey, T entity) where T : EntityBase
         {
-
             var dr = GetDeviceRuntime(deviceKey);
             if (dr != null)
             {
-                var item = await ConvertToRuntime(dr, pli);
-                if (item != null)
-                {
-                    dr.Playlist.Items.Add(item);
-                    //var dto = new PlaylistDTO
-                    //{
-                    //    DeviceKey = deviceKey,
-                    //    PlaylistType = dr.Playlist.Type,
-                    //    PlaylistName = dr.Playlist.Name,
-                    //    Items = dr.Playlist.Items.Select(x => x.ToDTO())
-                    //};
-                    await SendPlaylist(dr.ToPlaylistDTO());
-                }
+                var playlist = await this.libraryService.GetEntityAsync<Playlist>(dr.ExtendedPlaylist.PlaylistId);
+                var pli = await this.libraryService.AddPlaylistItemAsync(playlist, entity);
+                dr.ExtendedPlaylist.AddItem(pli, libraryService);
+                await SendPlaylist(dr.ToPlaylistDTO());
+            }
+            else
+            {
+                log.Error($"device {deviceKey} not found in runtime");
             }
         }
-        public async Task CopyPlaylist(string fromDeviceKey, string toDeviceKey)
+        //public async Task AddPlaylistItem(string deviceKey, PlaylistItem pli)
+        //{
+        //    var dr = GetDeviceRuntime(deviceKey);
+        //    if (dr != null)
+        //    {
+        //        dr.ExtendedPlaylist.AddItem(pli, libraryService);
+        //        await SendPlaylist(dr.ToPlaylistDTO());
+        //    }
+        //}
+        //public async Task AddPlaylistItems(string deviceKey, IEnumerable<PlaylistItem> items)
+        //{
+        //    var dr = GetDeviceRuntime(deviceKey);
+        //    if (dr != null)
+        //    {
+        //        foreach (var pli in items)
+        //        {
+        //            dr.ExtendedPlaylist.AddItem(pli, libraryService);
+        //        }
+        //        await SendPlaylist(dr.ToPlaylistDTO());
+        //    }
+        //}
+        public async Task DeletePlaylistAsync(long playlistId)
+        {
+            var deviceRuntimes = FindDevicesUsingPlaylist(playlistId);
+            foreach (var dr in deviceRuntimes)
+            {
+                var playlist = await this.libraryService.CreateDevicePlaylistAsync(dr.Key);
+                await SetPlaylistAsync(dr, playlist);
+                //var device = this.libraryService.GetDevice(dr.Key);
+                //var pl = await this.libraryService.SetEmptyDevicePlaylist(device);
+                //await this.playManager.SetPlaylist(dr, device.Playlist);
+                ////await this.playManager.SetRuntimePlaylist(device, dr);
+                //await this.playManager.SendPlaylist(dr.ToPlaylistDTO());
+            }
+            await this.libraryService.DeletePlaylist(playlistId);
+        }
+        public async Task CopyPlaylistAsync(string fromDeviceKey, string toDeviceKey)
         {
             var from = GetDeviceRuntime(fromDeviceKey);
             var to = GetDeviceRuntime(toDeviceKey);
@@ -305,146 +375,228 @@ namespace Fastnet.Apollo.Web
                 }
                 return;
             }
-            this.libraryService.CopyPlaylist(fromDeviceKey, toDeviceKey);
-            await ClearPlaylist(toDeviceKey);
-            //using (var scope = new ScopedDbContext<MusicDb>(serviceProvider))
-            //{
-            //    var playlist = scope.Db.Devices.Single(x => x.KeyName == toDeviceKey).Playlist;
-            //    await scope.Db.FillPlaylistForRuntime(playlist); // adds appropriate entity instqances to playlistItems
-            //    foreach (var pli in playlist.Items)
-            //    {
-            //        await AddPlaylistItem(toDeviceKey, pli);
-            //    }
-            //}
-            var playlist = this.libraryService.GetDevice(toDeviceKey).Playlist;
-            foreach (var pli in playlist.Items)
+            var playlist = await this.libraryService.GetEntityAsync<Playlist>(from.ExtendedPlaylist.PlaylistId);
+            if (playlist.Type == PlaylistType.DeviceList)
             {
-                await AddPlaylistItem(toDeviceKey, pli);
+                var copiedItems = playlist.Items.Select(pl => pl.Clone());
+                playlist = await this.libraryService.CreateDevicePlaylistAsync(toDeviceKey, copiedItems);
+                //this.libraryService.CopyPlaylist(fromDeviceKey, toDeviceKey);
+                //await ClearPlaylist(toDeviceKey);
+                ////var playlist = this.libraryService.GetDevice(toDeviceKey).Playlist;
+                //await AddPlaylistItems(toDeviceKey, playlist.Items);
+            }
+            await SetPlaylistAsync(to, playlist);
+        }
+        public async Task CreateNamedPlaylistFromDeviceAsync(string deviceKey, string name)
+        {
+            var dr = GetDeviceRuntime(deviceKey);
+            if (dr != null)
+            {
+                var playlist = await this.libraryService.GetEntityAsync<Playlist>(dr.ExtendedPlaylist.PlaylistId);
+                var items = playlist.Items.Select(x => x.Clone());
+                playlist = await this.libraryService.CreateUserPlaylist(name, items);
+                await SetPlaylistAsync(dr, playlist);
+            }
+            else
+            {
+                log.Error($"device {deviceKey} not in run time");
+            }
+            return;
+        }
+        public IEnumerable<DeviceRuntime> FindDevicesUsingPlaylist(long playlistId)
+        {
+            //return this.runtimeDevices.Values.Where(x => x.Playlist.Id == playlistId);
+            return this.runtimeDevices.Values.Where(x => x.ExtendedPlaylist.PlaylistId == playlistId);
+        }
+        public async Task SetPlaylistAsync(string deviceKey, long playlistId)
+        {
+            var pl = await this.libraryService.GetEntityAsync<Playlist>(playlistId);
+            await SetPlaylistAsync(deviceKey, pl);
+        }
+        public async Task SetPlaylistAsync(DeviceRuntime dr, Playlist playlist)
+        {
+            await this.libraryService.ChangeDevicePlaylist(dr.Key, playlist);
+            dr.SetPlaylist(ExtendedPlaylist.Create(playlist, libraryService));
+            await SendPlaylist(dr.ToPlaylistDTO());
+        }
+        public async Task SetPlaylistAsync(string deviceKey, string playlistName)
+        {
+            var playlist = await this.libraryService.FindPlaylist(playlistName);
+            if (playlist != null)
+            {
+                var dr = GetDeviceRuntime(deviceKey);
+                if (dr != null)
+                {
+                    //dr.SetPlaylist(ExtendedPlaylist.Create(playlist, libraryService));
+                    await SetPlaylistAsync(dr, playlist);
+                }
+                else
+                {
+                    log.Error($"device {deviceKey} not found in run time");
+                }
+            }
+            else
+            {
+                log.Error($"playlist {playlistName} not found");
             }
         }
+        public async Task SetPlaylistAsync(string deviceKey, Playlist playlist)
+        {
+            var dr = GetDeviceRuntime(deviceKey);
+            if (dr != null)
+            {
+                //dr.SetPlaylist(ExtendedPlaylist.Create(playlist, libraryService));
+                await SetPlaylistAsync(dr, playlist);
+            }
+            else
+            {
+                log.Error($"device {deviceKey} not found in run time");
+
+            }
+        }
+        //public async Task SetRuntimePlaylist(Device device, DeviceRuntime dr = null)
+        //{
+        //    await Task.Delay(0);
+        //    if (dr == null)
+        //    {
+        //        dr = GetDeviceRuntime(device.KeyName);
+        //    }
+        //    if (dr != null)
+        //    {
+        //        //dr.Playlist = await ConvertToRuntime(dr, device.Playlist);
+        //        dr.SetPlaylist(ExtendedPlaylist.Create(device.Playlist, libraryService));
+        //    }
+        //    else
+        //    {
+        //        log.Error($"{device} not found in run time");
+        //    }
+        //}
         public void DebugDevicePlaylist(string deviceKey)
         {
             var dr = GetDeviceRuntime(deviceKey);
-            DebugDevicePlaylist(dr);
+            //DebugDevicePlaylist(dr);
         }
         public void DebugDevicePlaylist(DeviceRuntime dr)
         {
-            //var dr = GetDeviceRuntime(deviceKey);
-            if(dr != null)
+            var epl = dr.ExtendedPlaylist;
+            log.Information($"{epl}");
+            foreach (var item in epl.Items ?? Enumerable.Empty<ExtendedPlaylistItem>())
             {
-                PlaylistRuntime playlist = dr.Playlist;
-                log.Information($"{dr} {playlist.ToString()}");
-                foreach(var item in playlist.Items ?? Enumerable.Empty<PlaylistItemRuntime>())
+                log.Information($"  {item}");
+                if (item is MultiTrackPlaylistItem)
                 {
-                    log.Information($"  {item}");
-                    foreach(var subItem in item.SubItems ?? Enumerable.Empty<PlaylistItemRuntime>())
+                    var mti = item as MultiTrackPlaylistItem;
+                    foreach (var subItem in mti.SubItems ?? Enumerable.Empty<ExtendedPlaylistItem>())
                     {
                         log.Information($"    {subItem}");
                     }
                 }
             }
-            else
-            {
-                log.Error($"dr is null");
-            }
         }
-        private async Task<int> PlayerReset(string deviceKey)
+        private async Task<int> PlayerResetAsync(string deviceKey)
         {
             var pc = new PlayerCommand
             {
                 Command = PlayerCommands.Reset,
                 DeviceKey = deviceKey,
             };
-            return await ExecuteCommand(deviceKey, pc);
+            return await ExecuteCommandAsync(deviceKey, pc);
         }
-        private async Task<int> PlaylistFinished(string deviceKey)
-        {
-            var pc = new PlayerCommand
-            {
-                Command = PlayerCommands.ListFinished,
-                DeviceKey = deviceKey,
-            };
-            return await ExecuteCommand(deviceKey, pc);
-        }
-        private PlaylistItemRuntime GetPlaylistItemAtSequence(DeviceRuntime dr, PlaylistPosition position)
-        {
-            //var pli = dr.Playlist.Items.SingleOrDefault(x => x.Sequence == position.Major);
-            var pli = dr.Playlist.Items.SingleOrDefault(x => x.Position.Major == position.Major);
-            if (pli != null && pli.Type == PlaylistRuntimeItemType.MultipleItems)
-            {
-                if (position.Minor == 0)
-                {
-                    log.Error($"Cannot request a position with Minor == 0 when the playlist item is of type PlaylistRuntimeItemType.MultipleItems");
-                    return null;
-                }
-                else
-                {
-                    //pli = pli.SubItems.SingleOrDefault(x => x.Sequence == position.Minor);
-                    pli = pli.SubItems.SingleOrDefault(x => x.Position.Minor == position.Minor);
-                }
-            }
-            return pli;
-        }
-        private (PlaylistItemRuntime item, PlaylistPosition position) GetNextMinorItem(DeviceRuntime dr, bool reverse)
-        {
-            var sequence = dr.CurrentPosition.Minor + (reverse ? -1 : 1);
-            //var majorPli = dr.Playlist.Items.Single(x => x.Sequence == dr.CurrentPosition.Major);            
-            var majorPli = dr.Playlist.Items.Single(x => x.Position.Major == dr.CurrentPosition.Major);
-            //var nextMinorPli = majorPli.SubItems.SingleOrDefault(x => x.Sequence == sequence);
-            var nextMinorPli = majorPli.SubItems.SingleOrDefault(x => x.Position.Minor == sequence);
-            return (nextMinorPli, new PlaylistPosition(dr.CurrentPosition.Major, sequence));
-        }
-        private (PlaylistItemRuntime item, PlaylistPosition position) GetNextMajorItem(DeviceRuntime dr, bool reverse)
-        {
-            var sequence = dr.CurrentPosition.Major + (reverse ? -1 : 1);
-            //var majorPli = dr.Playlist.Items.SingleOrDefault(x => x.Sequence == sequence);
-            var majorPli = dr.Playlist.Items.SingleOrDefault(x => x.Position.Major == sequence);
-            if (majorPli != null)
-            {
-                if (majorPli.Type == PlaylistRuntimeItemType.MultipleItems)
-                {
-                    // next major item contains minor items
-                    //var nextMinorPli = majorPli.SubItems.Single(x => x.Sequence == 1);
-                    var nextMinorPli = majorPli.SubItems.Single(x => x.Position.Minor == 1);
-                    return (nextMinorPli, new PlaylistPosition(sequence, 1));
-                }
-                else
-                {
-                    return (majorPli, new PlaylistPosition(sequence, 0));
-                }
-            }
-            else
-            {
-                return (null, new PlaylistPosition(sequence, 0));
-            }
-        }
-        private (PlaylistItemRuntime item, PlaylistPosition position) GetNextPlaylistItem(DeviceRuntime dr, bool reverse)
-        {
-            try
-            {
-                if (!dr.CurrentPosition.IsUnset())
-                {
-                    //var majorPli = dr.Playlist.Items.Single(x => x.Sequence == dr.CurrentPosition.Major);
-                    var majorPli = dr.Playlist.Items.Single(x => x.Position.Major == dr.CurrentPosition.Major);
-                    if (majorPli.Type == PlaylistRuntimeItemType.MultipleItems)
-                    {
-                        (var item, var position) = GetNextMinorItem(dr, reverse);
-                        if (item != null)
-                        {
-                            // we have a minor item
-                            return (item, position);
-                        }
-                    }
-                }
-                return GetNextMajorItem(dr, reverse);
-            }
-            catch (Exception xe)
-            {
-                log.Error(xe);
-            }
-            return (null, null);
-        }
-        public async Task OnDeviceStatus(DeviceStatus deviceStatus)
+        //private async Task<int> PlaylistFinished(string deviceKey)
+        //{
+        //    var pc = new PlayerCommand
+        //    {
+        //        Command = PlayerCommands.ListFinished,
+        //        DeviceKey = deviceKey,
+        //    };
+        //    return await ExecuteCommand(deviceKey, pc);
+        //}
+        //private PlaylistItemRuntime GetPlaylistItemAtSequence(DeviceRuntime dr, PlaylistPosition position)
+        //private ExtendedPlaylistItem GetPlaylistItemAtSequence(DeviceRuntime dr, PlaylistPosition position)
+        //{
+        //    //var pli = dr.Playlist.Items.SingleOrDefault(x => x.Sequence == position.Major);
+        //    var pli = dr.ExtendedPlaylist.Items.SingleOrDefault(x => x.Position.Major == position.Major);
+        //    //if (pli != null && pli.Type == PlaylistRuntimeItemType.MultipleItems)
+        //    if (pli != null && pli is MultiTrackPlaylistItem)
+        //    {
+        //        var mtpli = pli as MultiTrackPlaylistItem;
+        //        if (position.Minor == 0)
+        //        {
+        //            log.Error($"Cannot request a position with Minor == 0 when the playlist item is of type PlaylistRuntimeItemType.MultipleItems");
+        //            return null;
+        //        }
+        //        else
+        //        {
+        //            //pli = pli.SubItems.SingleOrDefault(x => x.Sequence == position.Minor);
+        //            pli = mtpli.SubItems.SingleOrDefault(x => x.Position.Minor == position.Minor);
+        //        }
+        //    }
+
+        //    return pli;
+        //}
+        //private (ExtendedPlaylistItem item, PlaylistPosition position) GetNextMinorItem(DeviceRuntime dr, bool reverse)
+        //{
+        //    var sequence = dr.CurrentPosition.Minor + (reverse ? -1 : 1);         
+        //    var majorPli = dr.ExtendedPlaylist.Items.Single(x => x.Position.Major == dr.CurrentPosition.Major);
+        //    ExtendedPlaylistItem nextMinorPli = null;
+        //    if (majorPli is MultiTrackPlaylistItem)
+        //    {
+        //        nextMinorPli = (majorPli as MultiTrackPlaylistItem).SubItems.SingleOrDefault(x => x.Position.Minor == sequence);
+        //    }
+        //    //var nextMinorPli = majorPli.SubItems.SingleOrDefault(x => x.Position.Minor == sequence);
+        //    return (nextMinorPli, new PlaylistPosition(dr.CurrentPosition.Major, sequence));
+        //}
+        //private (PlaylistItemRuntime item, PlaylistPosition position) GetNextMajorItem(DeviceRuntime dr, bool reverse)
+        //private (ExtendedPlaylistItem item, PlaylistPosition position) GetNextMajorItem(DeviceRuntime dr, bool reverse)
+        //{
+        //    var sequence = dr.CurrentPosition.Major + (reverse ? -1 : 1);
+        //    var majorPli = dr.ExtendedPlaylist.Items.SingleOrDefault(x => x.Position.Major == sequence);
+        //    if (majorPli != null)
+        //    {
+        //        //if (majorPli.Type == PlaylistRuntimeItemType.MultipleItems)
+        //        if (majorPli is MultiTrackPlaylistItem)
+        //        {
+        //            var nextMinorPli = (majorPli as MultiTrackPlaylistItem).SubItems.Single(x => x.Position.Minor == 1);
+        //            return (nextMinorPli, new PlaylistPosition(sequence, 1));
+        //        }
+        //        else
+        //        {
+        //            return (majorPli, new PlaylistPosition(sequence, 0));
+        //        }
+        //    }
+        //    else
+        //    {
+        //        return (null, new PlaylistPosition(sequence, 0));
+        //    }
+        //}
+        //private (PlaylistItemRuntime item, PlaylistPosition position) GetNextPlaylistItem(DeviceRuntime dr, bool reverse)
+        //private (ExtendedPlaylistItem item, PlaylistPosition position) GetNextPlaylistItem(DeviceRuntime dr, bool reverse)
+        //{
+        //    try
+        //    {
+        //        if (!dr.CurrentPosition.IsZero())
+        //        {
+        //            var majorPli = dr.ExtendedPlaylist.Items.Single(x => x.Position.Major == dr.CurrentPosition.Major);
+        //            //if (majorPli.Type == PlaylistRuntimeItemType.MultipleItems)
+        //            if (majorPli is MultiTrackPlaylistItem)
+        //            {
+        //                (var item, var position) = GetNextMinorItem(dr, reverse);
+        //                if (item != null)
+        //                {
+        //                    // we have a minor item
+        //                    return (item, position);
+        //                }
+        //            }
+        //        }
+        //        return GetNextMajorItem(dr, reverse);
+        //    }
+        //    catch (Exception xe)
+        //    {
+        //        log.Error(xe);
+        //    }
+        //    return (null, null);
+        //}
+        public async Task OnDeviceStatusAsync(DeviceStatus deviceStatus)
         {
             try
             {
@@ -474,12 +626,12 @@ namespace Fastnet.Apollo.Web
                 log.Error(xe);
             }
         }
-        private async Task<int> ExecuteCommand(string key, PlayerCommand playerCommand/*, Action<DeviceRuntime> afterExecute = null*/)
+        private async Task<int> ExecuteCommandAsync(string key, PlayerCommand playerCommand/*, Action<DeviceRuntime> afterExecute = null*/)
         {
             var dr = GetDeviceRuntime(key);
-            return await ExecuteCommand(dr, playerCommand/*, afterExecute*/);
+            return await ExecuteCommandAsync(dr, playerCommand/*, afterExecute*/);
         }
-        private async Task<int> ExecuteCommand(DeviceRuntime dr, PlayerCommand playerCommand/*, Action<DeviceRuntime> afterExecute = null*/)
+        private async Task<int> ExecuteCommandAsync(DeviceRuntime dr, PlayerCommand playerCommand/*, Action<DeviceRuntime> afterExecute = null*/)
         {
             PlayerClient GetPlayerClient(DeviceRuntime deviceRuntime)
             {
@@ -529,41 +681,6 @@ namespace Fastnet.Apollo.Web
         {
             if (this.keepAlive != null)
             {
-                //using (var scope = new ScopedDbContext<MusicDb>(serviceProvider))
-                //{
-                //    DeviceRuntime dr = null;
-                //    lock (this.runtimeDevices)
-                //    {
-                //        if (GetDeviceRuntime(device.KeyName) == null)
-                //        {
-                //            dr = new DeviceRuntime
-                //            {
-                //                Key = device.KeyName,
-                //                Type = device.Type,
-                //                DisplayName = device.DisplayName,
-                //                MaxSampleRate = device.MaxSampleRate,
-                //                PlayerUrl = device.PlayerUrl,
-                //                CommandSequenceNumber = 0,
-                //                Status = new DeviceStatus
-                //                {
-                //                    Key = device.KeyName,
-                //                    State = PlayerStates.Idle
-                //                }
-                //            };
-                //            dr.Playlist = device.Playlist.ToRuntime(scope.Db, dr);
-                //            this.runtimeDevices.Add(dr.Key, dr);
-                //            log.Information($"{device} added to run time");
-                //        }
-                //        else
-                //        {
-                //            log.Warning($"{device} already present in run time");
-                //        }
-                //    }
-                //    if (dr != null)
-                //    {
-                //        await PlayerReset(dr.Key);
-                //    }
-                //}
                 DeviceRuntime dr = GetDeviceRuntime(device.KeyName);
                 if (dr == null)
                 {
@@ -581,12 +698,14 @@ namespace Fastnet.Apollo.Web
                             State = PlayerStates.Idle
                         }
                     };
-                    dr.Playlist = await ConvertToRuntime(dr, device.Playlist);
-                    DebugDevicePlaylist(dr);
+                    //dr.Playlist = await ConvertToRuntime(dr, device.Playlist);
+                    //await SetRuntimePlaylist(device, dr);
+                    await this.SetPlaylistAsync(dr, device.Playlist);
+                    //DebugDevicePlaylist(dr);
                     if (this.runtimeDevices.TryAdd(dr.Key, dr))
                     {
                         log.Information($"{device} added to run time");
-                        await PlayerReset(dr.Key);
+                        await PlayerResetAsync(dr.Key);
                     }
                     else
                     {
@@ -653,191 +772,171 @@ namespace Fastnet.Apollo.Web
                 await SendDeviceDisabled(device);
             }
         }
-        private async Task<PlaylistItemRuntime> ConvertToRuntime(DeviceRuntime dr, PlaylistItem playlistItem, int index = 0)
-        {
-            async Task<PlaylistItemRuntime> FromPerformance()
-            {
-                var performance = await this.libraryService.GetEntityAsync<Performance>(playlistItem.ItemId);
-                if (performance != null)
-                {
-                    var movements = performance.Movements.OrderBy(m => m.MovementNumber);
-                    //var subItems = await Task.WhenAll(movements.Select(async (t, i) => await ConvertToRuntime(dr, playlistItem, i)));
-                    var subItems = new List<PlaylistItemRuntime>();
-                    var index = 0;
-                    foreach (var movement in movements)
-                    {
-                        var subItem = FromTrack(dr, movement, new PlaylistPosition(playlistItem.Sequence, ++index));
-                        subItems.Add(subItem);
-                    }
-                    var plir = new PlaylistItemRuntime
-                    {
-                        //Id = playlistItem.Id,
-                        Type = PlaylistRuntimeItemType.MultipleItems,
-                        Position = new PlaylistPosition(playlistItem.Sequence, 0),
-                        //Title = pli.Title,
-                        Titles = new string[] { playlistItem.Title },
-                        //Sequence = playlistItem.Sequence,
-                        //ItemId = playlistItem.ItemId,
-                        CoverArtUrl = $"lib/get/work/coverart/{movements.First().Work.Id}",
-                        SubItems = subItems
-                    };
-                    plir.TotalTime = plir.SubItems.Sum(x => x.TotalTime);
-                    plir.FormattedTotalTime = plir.TotalTime.FormatDuration();
-                    return plir; 
-                }
-                else
-                {
-                    log.Warning($"{playlistItem} is not valid");
-                }
-                return null;
-            }
-            async Task<PlaylistItemRuntime> FromWork()
-            {
-                var work = await this.libraryService.GetEntityAsync<Work>(playlistItem.ItemId);
-                if (work != null)
-                {
-                    var tracks = work.Tracks.OrderBy(t => t.Number);
-                    //var subItems = await Task.WhenAll(tracks.Select(async (t, i) => await ConvertToRuntime(dr, playlistItem, i)));
-                    var subItems = new List<PlaylistItemRuntime>();
-                    var index = 0;
-                    foreach (var track in tracks)
-                    {
-                        var subItem = FromTrack(dr, track, new PlaylistPosition(playlistItem.Sequence, ++index));
-                        subItems.Add(subItem);
-                    }
-                    var plir = new PlaylistItemRuntime
-                    {
-                        //Id = playlistItem.Id,
-                        Type = PlaylistRuntimeItemType.MultipleItems,
-                        Position = new PlaylistPosition(playlistItem.Sequence, 0),
-                        //Title = pli.Title,
-                        Titles = new string[] { playlistItem.Title },
-                        //Sequence = playlistItem.Sequence,
-                        //ItemId = playlistItem.ItemId,
-                        CoverArtUrl = $"lib/get/work/coverart/{work.Id}",
-                        SubItems = subItems
-                    };
-                    plir.TotalTime = plir.SubItems.Sum(x => x.TotalTime);
-                    plir.FormattedTotalTime = plir.TotalTime.FormatDuration();
-                    return plir; 
-                }
-                else
-                {
-                    log.Warning($"{playlistItem} is not valid");
-                }
-                return null;
-            }
+        //private async Task<PlaylistItemRuntime> ConvertToRuntime(DeviceRuntime dr, PlaylistItem playlistItem)
+        //{
+        //    async Task<PlaylistItemRuntime> FromPerformance()
+        //    {
+        //        var performance = await this.libraryService.GetEntityAsync<Performance>(playlistItem.ItemId);
+        //        if (performance != null)
+        //        {
+        //            var movements = performance.Movements.OrderBy(m => m.MovementNumber);
+        //            var subItems = new List<PlaylistItemRuntime>();
+        //            var index = 0;
+        //            foreach (var movement in movements)
+        //            {
+        //                var subItem = FromTrack(dr, movement, new PlaylistPosition(playlistItem.Sequence, ++index));
+        //                subItems.Add(subItem);
+        //            }
+        //            var plir = new PlaylistItemRuntime
+        //            {
+        //                Type = PlaylistRuntimeItemType.MultipleItems,
+        //                Position = new PlaylistPosition(playlistItem.Sequence, 0),
+        //                Titles = new string[] { playlistItem.Title },
+                        
+        //                CoverArtUrl = $"lib/get/work/coverart/{movements.First().Work.Id}",
+        //                SubItems = subItems
+        //            };
+        //            plir.TotalTime = plir.SubItems.Sum(x => x.TotalTime);
+        //            plir.FormattedTotalTime = plir.TotalTime.FormatDuration();
+        //            return plir; 
+        //        }
+        //        else
+        //        {
+        //            log.Warning($"{playlistItem} is not valid");
+        //        }
+        //        return null;
+        //    }
+        //    async Task<PlaylistItemRuntime> FromWork()
+        //    {
+        //        var work = await this.libraryService.GetEntityAsync<Work>(playlistItem.ItemId);
+        //        if (work != null)
+        //        {
+        //            var tracks = work.Tracks.OrderBy(t => t.Number);
+        //            var subItems = new List<PlaylistItemRuntime>();
+        //            var index = 0;
+        //            foreach (var track in tracks)
+        //            {
+        //                var subItem = FromTrack(dr, track, new PlaylistPosition(playlistItem.Sequence, ++index));
+        //                subItems.Add(subItem);
+        //            }
+        //            var plir = new PlaylistItemRuntime
+        //            {
+        //                Type = PlaylistRuntimeItemType.MultipleItems,
+        //                Position = new PlaylistPosition(playlistItem.Sequence, 0),
+        //                Titles = new string[] { playlistItem.Title },
+        //                CoverArtUrl = $"lib/get/work/coverart/{work.Id}",
+        //                SubItems = subItems
+        //            };
+        //            plir.TotalTime = plir.SubItems.Sum(x => x.TotalTime);
+        //            plir.FormattedTotalTime = plir.TotalTime.FormatDuration();
+        //            return plir; 
+        //        }
+        //        else
+        //        {
+        //            log.Warning($"{playlistItem} is not valid");
+        //        }
+        //        return null;
+        //    }
+        //    async Task<PlaylistItemRuntime> FromMusicFile()
+        //    {
+        //        var mf = await this.libraryService.GetEntityAsync<MusicFile>(playlistItem.MusicFileId);
+        //        if (mf != null)
+        //        {
+        //            return new PlaylistItemRuntime
+        //            {
+        //                Type = PlaylistRuntimeItemType.SingleItem,
+        //                Position = new PlaylistPosition(playlistItem.Sequence, 0),
+        //                Titles = new string[] {
+        //                        mf.Track.Performance?.GetParentArtistsName() ?? mf.Track.Work.Artists.Select(a => a.Name).ToCSV(),
+        //                        mf.Track.Performance?.GetParentEntityDisplayName() ?? mf.Track.Work.Name,
+        //                        mf.Track.Title
+        //                    },
+        //                NotPlayableOnCurrentDevice = !(dr.MaxSampleRate == 0 || mf.SampleRate == 0 || mf.SampleRate <= dr.MaxSampleRate),
+        //                MusicFileId = mf.Id,
+        //                AudioProperties = mf.GetAudioProperties(),
+        //                SampleRate = mf.SampleRate ?? 0,
+        //                TotalTime = mf.Duration ?? 0.0,
+        //                FormattedTotalTime = mf.Duration?.FormatDuration() ?? "00:00",
+        //                CoverArtUrl = $"lib/get/work/coverart/{mf.Track.Work.Id}"
+        //            };
+        //        }
+        //        else
+        //        {
+        //            log.Warning($"{playlistItem} is not valid");
+        //        }
+        //        return null;
+        //    }
 
-            async Task<PlaylistItemRuntime> FromMusicFile()
-            {
-                var mf = await this.libraryService.GetEntityAsync<MusicFile>(playlistItem.MusicFileId);
-                if (mf != null)
-                {
-                    return new PlaylistItemRuntime
-                    {
-                        //Id = playlistItem.Id,
-                        Type = PlaylistRuntimeItemType.SingleItem,
-                        Position = new PlaylistPosition(playlistItem.Sequence, 0),
-                        Titles = new string[] {
-                                mf.Track.Performance?.GetParentArtistsName() ?? mf.Track.Work.Artists.Select(a => a.Name).ToCSV(),
-                                mf.Track.Performance?.GetParentEntityDisplayName() ?? mf.Track.Work.Name,
-                                mf.Track.Title
-                            },
-                        //Sequence = playlistItem.Sequence,
-                        //NotPlayableOnCurrentDevice = !playable,
-                        NotPlayableOnCurrentDevice = !(dr.MaxSampleRate == 0 || mf.SampleRate == 0 || mf.SampleRate <= dr.MaxSampleRate),
-                        //ItemId = playlistItem.ItemId,
-                        MusicFileId = mf.Id,
-                        AudioProperties = mf.GetAudioProperties(),
-                        SampleRate = mf.SampleRate ?? 0,
-                        TotalTime = mf.Duration ?? 0.0,
-                        FormattedTotalTime = mf.Duration?.FormatDuration() ?? "00:00",
-                        CoverArtUrl = $"lib/get/work/coverart/{mf.Track.Work.Id}"
-                    };
-                }
-                else
-                {
-                    log.Warning($"{playlistItem} is not valid");
-                }
-                return null;
-            }
+        //    return playlistItem.Type switch
+        //    {
+        //        PlaylistItemType.MusicFile => await FromMusicFile(),
+        //        PlaylistItemType.Track => await FromTrack(dr, playlistItem),
+        //        PlaylistItemType.Work => await FromWork(),
+        //        PlaylistItemType.Performance => await FromPerformance(),
+        //        _ => throw new Exception($"Unexpected PlaylistItemType {playlistItem.Type}"),
+        //    };
+        //}
+        //private async Task<PlaylistRuntime> ConvertToRuntime(DeviceRuntime dr, Playlist playlist)
+        //{
+        //    async Task<List<PlaylistItemRuntime>> GetPlaylistItemRuntimes()
+        //    {
+        //        var runtimeItems = new List<PlaylistItemRuntime>();
+        //        //var index = 0;
+        //        foreach (var pli in playlist.Items)
+        //        {
+        //            var runtimeItem = await ConvertToRuntime(dr, pli/*, index++*/);
+        //            if (runtimeItem != null)
+        //            {
+        //                runtimeItems.Add(runtimeItem);
+        //            }
+        //        }
+        //        return runtimeItems;
+        //    }
 
-            return playlistItem.Type switch
-            {
-                PlaylistItemType.MusicFile => await FromMusicFile(),
-                PlaylistItemType.Track => await FromTrack(dr, playlistItem),
-                PlaylistItemType.Work => await FromWork(),
-                PlaylistItemType.Performance => await FromPerformance(),
-                _ => throw new Exception($"Unexpected PlaylistItemType {playlistItem.Type}"),
-            };
-        }
-        private async Task<PlaylistRuntime> ConvertToRuntime(DeviceRuntime dr, Playlist playlist)
-        {
-            async Task<List<PlaylistItemRuntime>> GetPlaylistItemRuntimes(/*DeviceRuntime dr, Playlist list*/)
-            {
-                var runtimeItems = new List<PlaylistItemRuntime>();
-                var index = 0;
-                foreach (var pli in playlist.Items)
-                {
-                    var runtimeItem = await ConvertToRuntime(dr, pli, index++);
-                    if (runtimeItem != null)
-                    {
-                        runtimeItems.Add(runtimeItem);
-                    }
-                }
+        //    // **NB** async within a select with a .WhenAll does not work with efcore dbcontext
+        //    // because it causes multiple tasks on different threads which are not supported for dbcontext
+        //    //var items = await Task.WhenAll(list.Items.Select(async x => await ConvertToRuntime(dr, x)));
 
-                return runtimeItems;
-            }
-            log.Information($"{dr} {(playlist as IIdentifier).ToIdent()}");
-            // **NB** async within a select with a .WhenAll does not work with efcore dbcontext
-            // because it causes multiple tasks on different threads which are not supported for dbcontext
-            //var items = await Task.WhenAll(list.Items.Select(async x => await ConvertToRuntime(dr, x)));
-            List<PlaylistItemRuntime> runtimeItems = await GetPlaylistItemRuntimes(/*dr, list*/);
-            return new PlaylistRuntime
-            {
-                Id = playlist.Id,
-                Name = playlist.Name,
-                Type = playlist.Type,
-                Items = runtimeItems
-                    //.Where(x => x != null)
-                    //.OrderBy(x => x.Sequence).ToList()
-                    .OrderBy(x => x.Position.Major).ToList()
-            };
-        }
-
-        private async Task<PlaylistItemRuntime> FromTrack(DeviceRuntime dr, PlaylistItem playlistItem)
-        {
-            var track = await this.libraryService.GetEntityAsync<Track>(playlistItem.ItemId);
-            return FromTrack(dr, track, new PlaylistPosition(playlistItem.Sequence, 0));
-        }
-        private PlaylistItemRuntime FromTrack(DeviceRuntime dr, Track track, PlaylistPosition position)
-        {
-            var mf = track.GetBestMusicFile(dr);
-            var title = track.Title;
-            if(position.Minor > 0 && title.Contains(':'))
-            {
-                title = title.Split(':').Skip(1).First();
-            }
-            return new PlaylistItemRuntime
-            {
-                //Id = playlistItem.Id,
-                Type = PlaylistRuntimeItemType.SingleItem,
-                Position = position,// new PlaylistPosition(playlistItem.Sequence, index),
-                Titles = new string[] {
-                                track.Performance?.GetParentArtistsName() ?? track.Work.Artists.Select(a => a.Name).ToCSV(),
-                                track.Performance?.GetParentEntityDisplayName() ?? track.Work.Name,
-                                title //track.Title
-                            },
-                //Sequence = playlistItem.Sequence,
-                NotPlayableOnCurrentDevice = mf == null,
-                //ItemId = playlistItem.ItemId,
-                MusicFileId = mf?.Id ?? 0,
-                AudioProperties = mf?.GetAudioProperties(),
-                SampleRate = mf?.SampleRate ?? 0,
-                TotalTime = mf?.Duration ?? 0.0,
-                FormattedTotalTime = mf?.Duration?.FormatDuration() ?? "00:00",
-                CoverArtUrl = $"lib/get/work/coverart/{track.Work.Id}"
-            };
-        }
+        //    List<PlaylistItemRuntime> runtimeItems = await GetPlaylistItemRuntimes();
+        //    return new PlaylistRuntime
+        //    {
+        //        Id = playlist.Id,
+        //        Name = playlist.Name,
+        //        Type = playlist.Type,
+        //        Items = runtimeItems
+        //            .OrderBy(x => x.Position.Major).ToList()
+        //    };
+        //}
+        //private async Task<PlaylistItemRuntime> FromTrack(DeviceRuntime dr, PlaylistItem playlistItem)
+        //{
+        //    var track = await this.libraryService.GetEntityAsync<Track>(playlistItem.ItemId);
+        //    return FromTrack(dr, track, new PlaylistPosition(playlistItem.Sequence, 0));
+        //}
+        //private PlaylistItemRuntime FromTrack(DeviceRuntime dr, Track track, PlaylistPosition position)
+        //{
+        //    var mf = track.GetBestMusicFile(dr);
+        //    var title = track.Title;
+        //    if(position.Minor > 0 && title.Contains(':'))
+        //    {
+        //        title = title.Split(':').Skip(1).First();
+        //    }
+        //    return new PlaylistItemRuntime
+        //    {
+        //        Type = PlaylistRuntimeItemType.SingleItem,
+        //        Position = position,
+        //        Titles = new string[] {
+        //                        track.Performance?.GetParentArtistsName() ?? track.Work.Artists.Select(a => a.Name).ToCSV(),
+        //                        track.Performance?.GetParentEntityDisplayName() ?? track.Work.Name,
+        //                        title 
+        //                    },
+        //        NotPlayableOnCurrentDevice = mf == null,
+        //        MusicFileId = mf?.Id ?? 0,
+        //        AudioProperties = mf?.GetAudioProperties(),
+        //        SampleRate = mf?.SampleRate ?? 0,
+        //        TotalTime = mf?.Duration ?? 0.0,
+        //        FormattedTotalTime = mf?.Duration?.FormatDuration() ?? "00:00",
+        //        CoverArtUrl = $"lib/get/work/coverart/{track.Work.Id}"
+        //    };
+        //}
     }
 }

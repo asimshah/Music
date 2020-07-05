@@ -59,7 +59,7 @@ export class DeviceMenuComponent implements OnInit, OnDestroy {
          this.currentDevice = d;
       }));
       this.updateDevices();
-      console.log(`current device is ${!this.currentDevice ? "null" : this.currentDevice.displayName}`);
+      //console.log(`current device is ${!this.currentDevice ? "null" : this.currentDevice.displayName}`);
    }
    private updateDevices() {
       this.devices = this.playerService.getAvailableDevices();

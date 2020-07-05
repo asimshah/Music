@@ -38,23 +38,23 @@ namespace Fastnet.Apollo.Web
         }
         public async Task Start(string[] playerUrls, Action<string> onPollingFailed )
         {            
-            log.Information($"started");
+            log.Information($"started, interval is {this.musicServerOptions.KeepAliveInterval} ms");
             this.onPollingFailed = onPollingFailed;
             //await Task.Delay(8000);
             SetPlayerUrls(playerUrls);
             if (this.musicServerOptions.KeepAliveInterval > 0)
             {
-                while (true)
+                while (!cancellationToken.IsCancellationRequested)
                 {
                     if (this.playerUrls != null)
                     {
                         await PollPlayers();
                     }
-                    await Task.Delay(musicServerOptions.KeepAliveInterval);
-                    if (cancellationToken.IsCancellationRequested)
-                    {
-                        break;
-                    }
+                    await Task.Delay(musicServerOptions.KeepAliveInterval, cancellationToken);
+                    //if (cancellationToken.IsCancellationRequested)
+                    //{
+                    //    break;
+                    //}
                 }
             }
             else
@@ -76,19 +76,26 @@ namespace Fastnet.Apollo.Web
         }
         private async Task PollPlayers()
         {
-            foreach (var url in playerUrls.ToArray())
+            try
             {
-                try
+                foreach (var url in playerUrls.ToArray())
                 {
-                    var pc = new PlayerClient(url, lf.CreateLogger<PlayerClient>());
-                    await pc.Poll();
-                    log.Trace($"{url} polled");
+                    try
+                    {
+                        var pc = new PlayerClient(url, lf.CreateLogger<PlayerClient>());
+                        await pc.Poll();
+                        log.Trace($"{url} polled");
+                    }
+                    catch (System.Exception xe)
+                    {
+                        log.Error($"polling {url} failed: {xe.Message}");
+                        this.onPollingFailed(url);
+                    }
                 }
-                catch (System.Exception xe)
-                {
-                    log.Error($"polling {url} failed: {xe.Message}");
-                    this.onPollingFailed(url);
-                }
+            }
+            catch (Exception xe)
+            {
+                log.Error(xe);
             }
         }
     }

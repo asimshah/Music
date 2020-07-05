@@ -13,6 +13,6 @@
     <GenerateDocumentationFile>true</GenerateDocumentationFile>
   </PropertyGroup>
   <ItemGroup>
-    <PackageReference Include="Fastnet.Music.Core" Version="2.153.620" />
+    <PackageReference Include="Fastnet.Music.Core" Version="2.179.801" />
   </ItemGroup>
 </Project>

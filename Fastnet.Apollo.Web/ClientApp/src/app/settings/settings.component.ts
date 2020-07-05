@@ -4,15 +4,17 @@ import { EditorResult } from '../shared/catalog.types';
 import { LibraryService } from '../shared/library.service';
 import { PlayerService } from '../shared/player.service';
 import { AudioDevice } from '../shared/common.types';
-import { PopularSettings, ParameterService } from '../shared/parameter.service';
+import { ParameterService } from '../shared/parameter.service';
+import { TabComponent } from '../../fastnet/controls/tab.component';
+import { AudioDeviceType } from '../shared/common.enums';
 
-enum SettingsSelector {
-   Popular,
-   WesternClassical,
-   CatalogMethods,
-   AudioDevices,
-   Colours
-}
+//enum SettingsSelector {
+//   Popular,
+//   WesternClassical,
+//   CatalogMethods,
+//   AudioDevices,
+//   Colours
+//}
 
 @Component({
    selector: 'app-settings',
@@ -20,16 +22,24 @@ enum SettingsSelector {
    styleUrls: ['./settings.component.scss']
 })
 export class SettingsComponent implements OnInit {
-   SettingsSelector = SettingsSelector;
+   AudioDeviceType = AudioDeviceType;
+   //SettingsSelector = SettingsSelector;
    @ViewChild('settingsdialog', { static: false }) popup: PopupDialogComponent;
    version: string = "(unknown)";
-   currentSettings: SettingsSelector = SettingsSelector.Popular;
-   popularSettings: PopularSettings;
+   //currentSettings: SettingsSelector = SettingsSelector.Popular;
+   //popularSettings: PopularSettings;
 
    devices: AudioDevice[] = [];
+   get showGeneratedMusic(): boolean {
+      return this.parameterService.showGeneratedMusic;
+   }
+   set showGeneratedMusic(val: boolean) {
+      this.parameterService.showGeneratedMusic = val;
+      console.log(`showGeneratedMusic = ${this.parameterService.showGeneratedMusic}`);
+   }
    private closeHandler: (r: EditorResult) => void;
    constructor(private parameterService: ParameterService, private ls: LibraryService, private playerService: PlayerService) {
-      this.popularSettings = this.parameterService.getPopularSettings();
+      //this.popularSettings = this.parameterService.getPopularSettings();
    }
 
    ngOnInit() {
@@ -37,7 +47,7 @@ export class SettingsComponent implements OnInit {
       this.version = para.version;
    }
    open(onClose: PopupCloseHandler) {
-      this.currentSettings = SettingsSelector.Popular;
+      //this.currentSettings = SettingsSelector.Popular;
       this.closeHandler = onClose;
       this.popup.open((r: EditorResult) => { this.popupClosed(r) });
    }
@@ -53,25 +63,32 @@ export class SettingsComponent implements OnInit {
    async onStartMusicScanner() {
       await this.ls.startMusicScanner();
    }
-   async onStartCatalogueValidator() {
-      await this.ls.startCatalogueValidator();
-   }
-   async changeSettings(value: SettingsSelector) {
-      this.currentSettings = value;
-      switch (this.currentSettings) {
-         case SettingsSelector.AudioDevices:
-            await this.loadDevices();
-            break;
+   //async onStartCatalogueValidator() {
+   //   await this.ls.startCatalogueValidator();
+   //}
+   //async changeSettings(value: SettingsSelector) {
+   //   this.currentSettings = value;
+   //   switch (this.currentSettings) {
+   //      case SettingsSelector.AudioDevices:
+   //         await this.loadDevices();
+   //         break;
+   //   }
+   //}
+   async onTabChanged(tab: TabComponent) {
+      if (tab && tab.title === "Audio Devices") {
+         if (this.devices.length === 0) {
+            this.devices = await this.playerService.getDevices(true);
+         }
       }
    }
    async onDeviceUpdate(d: AudioDevice) {
       await this.playerService.updateDevice(d);
    }
-   togglePopularShowArtists() {
-      this.popularSettings.showArtists = !this.popularSettings.showArtists;
-      this.parameterService.setPopularSettings(this.popularSettings);
-   }
-   private async loadDevices() {
-      this.devices = await this.playerService.getDevices(true);
-   }
+   //togglePopularShowArtists() {
+   //   this.popularSettings.showArtists = !this.popularSettings.showArtists;
+   //   this.parameterService.setPopularSettings(this.popularSettings);
+   //}
+   //private async loadDevices() {
+   //   this.devices = await this.playerService.getDevices(true);
+   //}
 }

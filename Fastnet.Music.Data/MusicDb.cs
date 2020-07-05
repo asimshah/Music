@@ -18,7 +18,7 @@ using System.Threading.Tasks;
 namespace Fastnet.Music.Data
 {
 #pragma warning disable CS1591 // Missing XML comment for publicly visible type or member
-    
+
     public class RetryStrategy : SqlServerRetryingExecutionStrategy
     {
         public RetryStrategy( ExecutionStrategyDependencies dependencies, int maxRetryCount) : base(dependencies, maxRetryCount)
@@ -59,7 +59,6 @@ namespace Fastnet.Music.Data
         public DbSet<Playlist> Playlists { get; set; }
         public DbSet<PlaylistItem> PlaylistItems { get; set; }
         public DbSet<TaskItem> TaskItems { get; set; }
-
         public MusicDb(string cs)
         {
             this.connectionString = cs;
@@ -249,7 +248,9 @@ namespace Fastnet.Music.Data
                 .HasForeignKey(k => k.WorkId);
 
             modelBuilder.Entity<Device>()
-               .HasOne(x => x.Playlist);
+               .HasOne(x => x.Playlist)
+               .WithMany()
+               .OnDelete(DeleteBehavior.Restrict);
 
             modelBuilder.Entity<PlaylistItem>()
                 .HasOne(x => x.Playlist)

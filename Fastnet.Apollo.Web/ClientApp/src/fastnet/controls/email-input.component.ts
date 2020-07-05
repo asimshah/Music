@@ -1,7 +1,8 @@
 import { NG_VALUE_ACCESSOR } from "@angular/forms";
 import { forwardRef, Component, Input, EventEmitter, Output } from "@angular/core";
 import {  ValidationResult, ValidationContext } from "./controls.types";
-import { ControlBase, InputControlBase } from "./controlbase.type";
+import { ControlBase } from "./controlbase.type";
+import { InputControlBase } from "./inputcontrolbase";
 import { isNullorUndefined, isWhitespaceOrEmpty } from "../core/common.functions";
 
 

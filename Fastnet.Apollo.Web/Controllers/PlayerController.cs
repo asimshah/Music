@@ -26,13 +26,10 @@ namespace Fastnet.Apollo.Web.Controllers
     [ApiController]
     public class PlayerController : BaseController
     {
-        //private readonly MusicDb musicDb;
         private readonly PlayManager playManager;
         private readonly LibraryService libraryService;
-        //private readonly ILoggerFactory loggerFactory;
         private readonly MusicServerOptions musicServerOptions;
-        //private readonly IHubContext<PlayHub, IHubMessage> playHub;
-        public PlayerController(MusicDb mdb,
+        public PlayerController(/*MusicDb mdb,*/
             LibraryService libraryService, /*IHubContext<MessageHub, IHubMessage> messageHub,*/
             IOptions<MusicServerOptions> serverOptions, PlayManager pm,
             /*ILoggerFactory loggerFactory, */ILogger<PlayerController> logger, IWebHostEnvironment env) : base(logger, env)
@@ -74,9 +71,9 @@ namespace Fastnet.Apollo.Web.Controllers
             }
         }
         [HttpGet("send/device/{deviceKey}/playlist")] 
-        public async Task<IActionResult> SendInitialPlaylist(string deviceKey)
+        public async Task<IActionResult> SendDevicePlaylist(string deviceKey)
         {
-            await this.playManager.SendInitialPlaylist(deviceKey);
+            await this.playManager.SendDevicePlaylistAsync(deviceKey);
             return SuccessResult();
         }
         /// <summary>
@@ -145,14 +142,14 @@ namespace Fastnet.Apollo.Web.Controllers
         [HttpGet("play/next/{deviceKey}")]
         public async Task<IActionResult> PlayNextItem(string deviceKey)
         {
-            var sn = await playManager.PlayNext(deviceKey);
+            var sn = await playManager.PlayNextAsync(deviceKey);
             return SuccessResult(sn);
         }
 
         [HttpGet("play/previous/{deviceKey}")]
         public async Task<IActionResult> PlayPreviousItem(string deviceKey)
         {
-            var sn = await playManager.PlayNext(deviceKey, true);
+            var sn = await playManager.PlayNextAsync(deviceKey, true);
             return SuccessResult(sn);
         }
         //[HttpGet("play/sequence/{deviceKey}/{major}/{minor?}")]
@@ -168,7 +165,7 @@ namespace Fastnet.Apollo.Web.Controllers
         {
             var position = new PlaylistPosition(major, minor);
             //var sn = await playManager.PlaySequenceNumber(deviceKey, major);
-            var sn = await playManager.PlaySequenceNumber(deviceKey, position);
+            var sn = await playManager.PlaySequenceNumberAsync(deviceKey, position);
             return SuccessResult(sn);
         }
         [HttpGet("play/file/{deviceKey}/{musicFileId}")]
@@ -283,11 +280,11 @@ namespace Fastnet.Apollo.Web.Controllers
                 {
                     case PlayerStates.Paused:
                     case PlayerStates.Playing:
-                        sn = await playManager.TogglePlayPause(deviceKey);
+                        sn = await playManager.TogglePlayPauseAsync(deviceKey);
                         break;
                     case PlayerStates.Idle:
                     case PlayerStates.SilentIdle:
-                        sn = await playManager.PlayNext(deviceKey);// await PlayNextItem(deviceKey);
+                        sn = await playManager.PlayNextAsync(deviceKey);// await PlayNextItem(deviceKey);
                         break;
                     default:
                         log.Warning($"{dr.DisplayName} TogglePlayPause in state {dr.Status.State}");
@@ -306,25 +303,25 @@ namespace Fastnet.Apollo.Web.Controllers
         public async Task<IActionResult> Reposition(string deviceKey, float position)
         {
             // position is a decimal
-            var sn = await playManager.SetPosition(deviceKey, position);
+            var sn = await playManager.SetPositionAsync(deviceKey, position);
             return SuccessResult(sn);
         }
         [HttpGet("skip/forward/{deviceKey}")]
         public async Task<IActionResult> SkipForward(string deviceKey)
         {
-            var sn = await playManager.PlayNext(deviceKey);// await playManager.TogglePlayPause(deviceKey);
+            var sn = await playManager.PlayNextAsync(deviceKey);// await playManager.TogglePlayPause(deviceKey);
             return SuccessResult(sn);
         }
         [HttpGet("skip/back/{deviceKey}")]
         public async Task<IActionResult> SkipBack(string deviceKey)
         {
-            var sn = await playManager.PlayNext(deviceKey, true);// await playManager.TogglePlayPause(deviceKey);
+            var sn = await playManager.PlayNextAsync(deviceKey, true);// await playManager.TogglePlayPause(deviceKey);
             return SuccessResult(sn);
         }
         [HttpGet("set/volume/{deviceKey}/{level}")]
         public async Task<IActionResult> SetVolume(string deviceKey, float level)
         {
-            var sn = await playManager.SetVolume(deviceKey, level);
+            var sn = await playManager.SetVolumeAsync(deviceKey, level);
             return SuccessResult(sn);
         }
         [HttpGet("stream/{musicFileId}")]
@@ -373,7 +370,7 @@ namespace Fastnet.Apollo.Web.Controllers
         public async Task<IActionResult> WebAudioDeviceStatus()
         {
             var ds = await this.Request.FromBody<DeviceStatus>();
-            await this.playManager.OnDeviceStatus(ds);
+            await this.playManager.OnDeviceStatusAsync(ds);
             return SuccessResult();
         }
         //
@@ -385,44 +382,69 @@ namespace Fastnet.Apollo.Web.Controllers
             return SuccessResult();
         }
         //
-        [HttpGet("get/playlist/{deviceKey}")]
-        public IActionResult GetDevicePlaylist(string deviceKey)
+        //[HttpGet("get/playlist/{deviceKey}")]
+        //public IActionResult GetDevicePlaylist(string deviceKey)
+        //{
+        //    var dr = this.playManager.GetDeviceRuntime(deviceKey);
+        //    if (dr != null)
+        //    {
+        //        if (dr.Playlist != null)
+        //        {
+        //            return SuccessResult(dr.Playlist.Items.Select(x => x.ToDTO()));
+        //        }
+        //        else
+        //        {
+        //            log.Error($"device with key {deviceKey} has no playlist");
+        //            return ErrorResult($"device with key {deviceKey} has no playlist");
+        //        }
+        //    }
+        //    else
+        //    {
+        //        log.Error($"device {deviceKey} not in run time");
+        //        return ErrorResult($"device {deviceKey} not in run time");
+        //    }
+        //}
+        [HttpGet("select/playlist/{deviceKey}/{playlistId}")]
+        public async Task<IActionResult> SelectPlaylist(string deviceKey, long playlistId)
         {
-            var dr = this.playManager.GetDeviceRuntime(deviceKey);
-            if (dr != null)
-            {
-                if (dr.Playlist != null)
-                {
-                    return SuccessResult(dr.Playlist.Items.Select(x => x.ToDTO()));
-                }
-                else
-                {
-                    log.Error($"device with key {deviceKey} has no playlist");
-                    return ErrorResult($"device with key {deviceKey} has no playlist");
-                }
-            }
-            else
-            {
-                log.Error($"device {deviceKey} not in run time");
-                return ErrorResult($"device {deviceKey} not in run time");
-            }
+            await this.playManager.SetPlaylistAsync(deviceKey, playlistId);
+            return SuccessResult();
         }
-        [HttpGet("savenew/playlist/{deviceKey}/{name}")]
+        /// <summary>
+        /// creates a new playlist with the given name containing the items from the current playlist at the device
+        /// the current playlist may be a device list in which case this is discarded
+        /// or a non-device list in which case it is replaced
+        /// </summary>
+        /// <param name="deviceKey"></param>
+        /// <param name="name"></param>
+        /// <returns></returns>
+        [HttpGet("savenew/playlist/{deviceKey}/{name}")]       
         public async Task<IActionResult> SaveNewPlaylist(string deviceKey, string name)
         {
             log.Information($"save new playist {name}  from {deviceKey}");
-            var device = await this.libraryService.SaveNewPlaylistAsync(deviceKey, name);
-            var dr = this.playManager.GetDeviceRuntime(deviceKey);
-            if (dr != null)
-            {
-                dr.Playlist.Name = device.Playlist.Name;
-                dr.Playlist.Type = device.Playlist.Type;
-            }
-            else
-            {
-                log.Error($"device {deviceKey} not in run time");
-                return ErrorResult($"device {deviceKey} not in run time");
-            }
+            await this.playManager.CreateNamedPlaylistFromDeviceAsync(deviceKey, name);
+            //var dr = this.playManager.GetDeviceRuntime(deviceKey);
+            //if (dr != null)
+            //{
+
+            //}
+
+
+            //var device = await this.libraryService.SaveNewPlaylistAsync(deviceKey, name);
+            //var dr = this.playManager.GetDeviceRuntime(deviceKey);
+            //if (dr != null)
+            //{
+            //    //dr.Playlist.Name = device.Playlist.Name;
+            //    //dr.Playlist.Type = device.Playlist.Type;
+            //    dr.ExtendedPlaylist.Name = device.Playlist.Name;
+            //    dr.ExtendedPlaylist.Type = device.Playlist.Type;
+            //    await this.playManager.SendPlaylist(dr.ToPlaylistDTO());
+            //}
+            //else
+            //{
+            //    log.Error($"device {deviceKey} not in run time");
+            //    return ErrorResult($"device {deviceKey} not in run time");
+            //}
             return SuccessResult();
         }
         [HttpGet("replace/playlist/{deviceKey}/{name}")]
@@ -434,27 +456,84 @@ namespace Fastnet.Apollo.Web.Controllers
         [HttpGet("copy/playlist/{fromDeviceKey}/{toDeviceKey}")]
         public async Task<IActionResult> CopyPlaylist(string fromDeviceKey, string toDeviceKey)
         {
-            await playManager.CopyPlaylist(fromDeviceKey, toDeviceKey);
-            await PlayNextItem(toDeviceKey);
+            await playManager.CopyPlaylistAsync(fromDeviceKey, toDeviceKey);
+            //await PlayNextItem(toDeviceKey);
             return SuccessResult();
         }
-        [HttpGet("get/all/playlists")]
-        public IActionResult GetAllUserPlaylistNames()
+        [HttpGet("get/all/playlist/names")]
+        public IActionResult GetAllNonDevicePlaylistNames()
         {
-            //var list = musicDb.Playlists.Where(x => x.Type == PlaylistType.UserCreated);
-            //return SuccessResult(list.Select(x => x.Name));
-            return SuccessResult(new string[] {
-                "alpha",
-                "beta",
-                "gamma",
-                "delta",
-            });
+            var list = this.libraryService.GetAllPlaylists()
+                .Where(pl => pl.Type != PlaylistType.DeviceList);
+            return SuccessResult(list.Select(x => x.Name));
+            //return SuccessResult(new string[] {
+            //    "alpha",
+            //    "beta",
+            //    "gamma",
+            //    "delta",
+            //});
+        }
+        [HttpGet("get/all/playlists")]
+        public IActionResult GetAllNonDevicePlaylists()
+        {
+            //var rnd = new Random();
+            //var count = rnd.Next(4, 15);
+            var all = this.libraryService.GetAllPlaylists()
+                .Where(pl => pl.Type != PlaylistType.DeviceList);
+            var list = all.Select(x => ExtendedPlaylist.Create(x, this.libraryService));
+            return SuccessResult(list.Select(x => x.ToDTO()));
+            //var dto = list.Select(x => x.ToDTO());
+            //var r = Enumerable.Repeat(dto.First(), count);
+            //return SuccessResult(r);
+        }
+        [HttpGet("delete/playlist/{id}")]
+        public async Task<IActionResult> DeletePlaylist(long id)
+        {
+            await this.playManager.DeletePlaylistAsync(id);
+            //// 1. reset any devices that are currently using this playlist (sets that device's playlist to (auto)
+            //// 2. delete the playlist from the system
+            //var deviceRuntimes = this.playManager.FindDevicesUsingPlaylist(id);
+            //foreach(var dr in deviceRuntimes)
+            //{
+            //    var device = this.libraryService.GetDevice(dr.Key);
+            //    var pl = await this.libraryService.SetEmptyDevicePlaylist(device);
+            //    await this.playManager.SetPlaylist(dr, device.Playlist);
+            //    //await this.playManager.SetRuntimePlaylist(device, dr);
+            //    await this.playManager.SendPlaylist(dr.ToPlaylistDTO());
+            //}
+            //await this.libraryService.DeletePlaylist(id);
+            return SuccessResult();
+        }
+        [HttpGet("test")]
+        public IActionResult Test()
+        {
+            var playlists = this.libraryService.GetAllPlaylists();
+            foreach (var pl in playlists)
+            {
+                var epl = ExtendedPlaylist.Create(pl, this.libraryService);
+                Debug.WriteLine(epl);
+                foreach (var item in epl.Items)
+                {
+                    Debug.WriteLine($"-->{item}");
+                    if (item is MultiTrackPlaylistItem)
+                    {
+                        var m_item = item as MultiTrackPlaylistItem;
+                        foreach (var subItem in m_item.SubItems)
+                        {
+                            Debug.WriteLine($"---->{subItem}");
+                        }
+                    }
+                }
+            }
+            return new EmptyResult();
         }
         private async Task QueueEntity<T>(Device device, T entity) where T : EntityBase
         {
-            var pli = await this.libraryService.AddPlaylistItem(device.Playlist, entity);
-            await playManager.AddPlaylistItem(device.KeyName, pli);
-            playManager.DebugDevicePlaylist(device.KeyName);
+            await this.playManager.AddPlaylistItemAsync<T>(device.KeyName, entity);
+            //this.playManager.DebugDevicePlaylist(device.KeyName);
+            //var pli = await this.libraryService.AddPlaylistItem(device.Playlist, entity);
+            //await playManager.AddPlaylistItem(device.KeyName, pli);
+            //playManager.DebugDevicePlaylist(device.KeyName);
         }
         /// <summary>
         /// Always clears any existing playlist and then adds the entity
@@ -465,20 +544,11 @@ namespace Fastnet.Apollo.Web.Controllers
         /// <returns></returns>
         private async Task<int> PlayEntity<T>(Device device, T entity) where T : EntityBase
         {
-            if (device.Playlist.Type == PlaylistType.DeviceList)
-            {
-                await this.libraryService.ClearPlaylist(device.Playlist);
-            }
-            else
-            {
-                // IS A USER CREATED PLAYLIST
-                device.Playlist = await this.libraryService.CreateNewPlaylist(PlaylistType.DeviceList);
-            }
-            var pli = await this.libraryService.AddPlaylistItem(device.Playlist, entity);
-            await playManager.ClearPlaylist(device.KeyName);
-            await playManager.AddPlaylistItem(device.KeyName, pli);
-            playManager.DebugDevicePlaylist(device.KeyName);
-            return await playManager.PlayNext(device.KeyName);
+            var pl = await this.libraryService.CreateDevicePlaylistAsync(device.KeyName);
+            await this.playManager.SetPlaylistAsync(device.KeyName, pl);
+            await this.playManager.AddPlaylistItemAsync<T>(device.KeyName, entity);
+            //this.playManager.DebugDevicePlaylist(device.KeyName);
+            return await playManager.PlayNextAsync(device.KeyName);
         }
         //private async Task LoadDevicePlaylist<T>(Device device, T entity) where T : EntityBase
         //{
@@ -540,7 +610,7 @@ namespace Fastnet.Apollo.Web.Controllers
         /// <returns></returns>
         private async Task SyncDeviceWithPlayManager(Device device)
         {
-            await playManager.UpdateDeviceRuntime(device);
+            await playManager.UpdateDeviceRuntimeAsync(device);
             //playManager.DebugDevicePlaylist(device.KeyName);
         }
 

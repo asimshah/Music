@@ -1,0 +1,74 @@
+<div class="track-list" [ngClass]="{'is-touch-device' : isTouchDevice(), 'is-mobile-device': isMobileDevice()}">
+   <ng-container *ngIf="singlesLayout() === false">
+      <ng-container *ngIf="!isTouchDevice()">
+         <div *ngFor="let track of tracks; let odd = odd">
+            <div class="track layout-as-albums" [ngClass]="{'is-highlit': track.isHighLit, 'odd-row': odd}">
+               <div class="track-number" [ngClass]="{ 'hide-text': showTrackNumber === false, 'is-highlit': track.isHighLit}">{{track.number}}</div>
+               <highlighted-text class="track-title" [searchText]="highlightText" [text]="track.title" [prefixMode]="prefixMode"></highlighted-text>
+               <ng-container [ngTemplateOutlet]="audiofiles" [ngTemplateOutletContext]="{$implicit: track}"></ng-container>
+            </div>
+         </div>
+      </ng-container>
+      <ng-container *ngIf="isTouchDevice()">
+         <div *ngFor="let track of tracks; let odd = odd">
+            <div class="track  layout-as-albums" (click)="onClickTrack($event, track)" [ngClass]="{'is-highlit': track.isHighLit, 'odd-row': odd}">
+               <div class="track-number">{{track.number}}</div>
+               <div class="track-title">{{track.title}}</div>
+               <div class="audio-details">
+                  <span class="duration">{{track.musicFiles[0].formattedDuration}}</span>
+               </div>
+            </div>
+         </div>
+      </ng-container>
+   </ng-container>
+   <ng-container *ngIf="singlesLayout() === true">
+      <ng-container>
+         <div *ngFor="let track of tracks; let odd = odd" (click)="onClickTrack($event, track)">
+            <div class="track layout-as-singles" [ngClass]="{'is-highlit': track.isHighLit, 'odd-row': odd}">
+               <div class="image-container">
+                  <img class="image small" *ngIf="track.coverArtUrl" [src]="track.coverArtUrl" />
+               </div>
+               <div>
+                  <div class="track-title">
+                     <highlighted-text [searchText]="highlightText" [text]="track.title" [prefixMode]="prefixMode"></highlighted-text>
+                  </div>
+                  <div class="track-origin">
+                     <div>
+                        <highlighted-text [searchText]="highlightText" [text]="track.workName" [prefixMode]="prefixMode"></highlighted-text>
+                     </div>
+                     <div>
+                        <span>by {{track.artistName}}</span>
+                     </div>
+                  </div>
+               </div>
+               <ng-container [ngTemplateOutlet]="audiofiles" [ngTemplateOutletContext]="{$implicit: track}"></ng-container>
+            </div>
+         </div>
+      </ng-container>
+   </ng-container>
+   <ng-template #audiofiles let-track>
+      <div class="audio-files">
+         <ng-container *ngFor="let file of track.musicFiles">
+            <ng-container *ngIf="canShowMusicFile(file)">
+               <div class="audio-details" [ngClass]="{'is-highlit': track.musicFiles[0].isHighLit}">
+                  <span *ngIf="!isTouchDevice()" class="audio-properties">({{file.audioProperties}})</span>
+                  <span class="duration">{{file.formattedDuration}}</span>
+               </div>
+               <div *ngIf="canShowGeneratedMusic()" class="command-panel" (mouseenter)="onTrackMouse(track, file, true)" (mouseleave)="onTrackMouse(track, track.musicFiles[0], false)">
+                  <i title="play this version now" class="fa fa-play" (click)="onPlayMusicFile(file)"></i>
+                  <i title="add this version to play list" class="fa fa-plus-square" (click)="onQueueMusicFile(file)"></i>
+               </div>
+            </ng-container>
+         </ng-container>
+      </div>
+      <ng-container *ngIf="!isTouchDevice()">
+         <div *ngIf="!canShowGeneratedMusic()" class="command-panel" (mouseenter)="onTrackMouse(track, file, true)" (mouseleave)="onTrackMouse(track, file, false)">
+            <i title="play now" class="fa fa-play" (click)="onPlayTrack(track)"></i>
+            <i title="add to play list" class="fa fa-plus-square" (click)="onQueueTrack(track)"></i>
+         </div>
+      </ng-container>
+      <div *ngIf="canShowGeneratedMusic() || isTouchDevice()"></div>
+   </ng-template>
+   <command-panel></command-panel>
+   <popup-message></popup-message>
+</div>

@@ -66,11 +66,12 @@ export class DevicePlaylistComponent implements OnInit, OnDestroy {
    }
    getFullTitle(item: PlaylistItem) {
       let text = `<div>${item.titles[0]}</div><div>${item.titles[1]}</div><div>${item.titles[2]}</div>`;
+      return text;
    }
    isPlayingIconVisible(item: PlaylistItem) {
       let r = false;
       if (this.deviceStatus) {
-         if (item.isSubitem) {
+         if (item.position.minor > 0) {
             if (item.position.major === this.deviceStatus.playlistPosition.major
                && item.position.minor === this.deviceStatus.playlistPosition.minor) {
                r = true;

@@ -4,9 +4,17 @@ import { DialogResult } from '../core/core.types';
 
 
 
-/** Sets options for a <popup-message> (PopupMessageComponent) */
+/** Sets options for a <popup-message>
+ * all properties are optional
+ * caption - sets the caption
+ * okLabel - sets the OK button label
+ * cancelLabel - sets the Cancel utton label
+ * allowCancel - if true, shows the Cancel button (default for this is false)
+ * warning - sets warning chrome
+ * error - sets error chrome
+ * width - sets the width of the dialog, default is 370px
+ * */
 export class PopupMessageOptions {
-    /** optional caption = default is "System Message" */
     caption?: string;
     okLabel?: string;
     cancelLabel?: string;
@@ -16,9 +24,18 @@ export class PopupMessageOptions {
     width?: number; // always px
 }
 
-/** Called when PopupMessageComponent closes. Use when opening a PopupMessageComponent. */
+/** 
+ * Handler called on closure of a PopupMessageComponent (<popup-message>)
+ * called with a DialogResult
+ * */
 export type PopupMessageCloseHandler = (r: DialogResult) => void;
-
+/**
+ * Popup Message that return a DialogResult
+ * [width] - width of dialog, default 370px
+ * [caption] - dialog caption - default "System Message"
+ * [warning] - if true, shows warning chrome, default is false
+ * [error] - if true, shows the error chromw, default is false
+ * */
 @Component({
     selector: 'popup-message',
     templateUrl: './popup-message.component.html',
@@ -41,11 +58,6 @@ export class PopupMessageComponent implements OnInit {
 
     }
     ngOnInit(): void {
-        //if (typeof this.messages === "string") {
-        //    this.isSingleMessage = true;
-        //} else {
-        //    this.isSingleMessage = false;
-        //}
     }
     /**
      * Opens a <popup-message> custom component
@@ -54,7 +66,7 @@ export class PopupMessageComponent implements OnInit {
      * @param options sets options such captions, buttons labels, cancel allowed, etc
      */
     open(messages: string | string[], onClose: PopupMessageCloseHandler, options?: PopupMessageOptions) {
-        console.log("open");
+        //console.log("open");
         this.messages = messages;
         if (typeof this.messages === "string") {
             this.isSingleMessage = true;

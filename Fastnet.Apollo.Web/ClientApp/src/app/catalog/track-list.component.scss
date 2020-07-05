@@ -1,0 +1,110 @@
+@import "../../fastnet/themes/_themes";
+@include theme-buttons();
+
+.odd-row {
+   background-color: theme-colour('background', 'dark');
+}
+.is-highlit {
+   color: theme-colour('accent');
+}
+.image-container {
+   text-align: center;
+
+   .image {
+      width: 100px;
+      object-fit: contain;
+
+      &.small {
+         @include set-image(64px);
+      }
+   }
+
+   .name {
+      font-size: smaller;
+   }
+}
+.track-number, .track-title {
+   font-size: 0.8rem;
+}
+.track-origin {
+   font-size: 0.8rem;
+   font-style: italic;
+   color: $high-accent-colour; 
+}
+.duration {
+   color: $high-accent-colour;
+   font-size: 0.6rem;
+   font-style: italic;
+   margin-top: 3px;
+}
+
+.audio-details {
+   margin-right: $theme-gutter-narrow;
+   display: grid;
+   grid-template-columns: 1fr auto;
+   grid-column-gap: $theme-gutter-narrow;
+   justify-items: right;
+
+   .audio-properties {
+      font-size: 0.6rem;
+      font-style: italic;
+      margin-top: 3px;
+      color: theme-colour('background', 'light');
+   }
+}
+.command-panel {
+   color: $high-accent-colour;
+   font-size: 0.875rem;
+   margin-right: 0.25em;
+   display: grid;
+   grid-template-columns: auto auto;
+   grid-column-gap: $theme-gutter-narrow;
+   align-items: start;
+
+
+   i {
+      cursor: pointer;
+
+      &:hover {
+         color: theme-colour('accent');
+      }
+
+      &:first-child {
+         margin-right: 3px;
+      }
+   }
+}
+
+.audio-files {
+   display: grid;
+   grid-template-columns: auto auto;
+   align-items: start;
+   justify-content: end;
+
+   .command-panel {
+      margin-top: 0.25em;
+      font-size: 0.7rem;
+   }
+}
+
+.layout-as-albums {
+   display: grid;
+   grid-template-columns: 16px 1fr auto auto;
+   grid-column-gap: $theme-gutter-narrow;
+   align-items: baseline;
+   padding-top: $theme-gutter-narrow;
+   padding-bottom: $theme-gutter-narrow;
+}
+.is-mobile-device {
+   .layout-as-albums {
+      grid-template-columns: 16px 1fr auto;
+      padding-top: $theme-gutter;
+      padding-bottom: $theme-gutter;
+   }
+}
+.layout-as-singles {
+   display: grid;
+   grid-template-columns: auto 1fr auto auto;
+   grid-column-gap: $theme-gutter-fine;
+   align-items: start;
+}

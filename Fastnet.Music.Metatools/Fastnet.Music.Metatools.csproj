@@ -18,7 +18,7 @@
     <NoWarn>1701;1702;CS1591</NoWarn>
   </PropertyGroup>
   <ItemGroup>
-    <PackageReference Include="Fastnet.Music.Data" Version="2.167.691" />
+    <PackageReference Include="Fastnet.Music.Data" Version="2.185.1028" />
     <PackageReference Include="Fastnet.Music.MediaTools" Version="2.151.1272" />
     <PackageReference Include="Fastnet.Music.Taglib" Version="2.151.1274" />
     <PackageReference Include="FlacLibSharp" Version="3.2.0" />

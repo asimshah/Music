@@ -1,16 +1,16 @@
 import { LibraryService } from "../shared/library.service";
-import { Highlighter, Style } from "../shared/common.types";
+import { Style } from "../shared/common.types";
 import { ViewChild, ElementRef, HostBinding, OnInit, AfterViewInit, OnDestroy } from "@angular/core";
 import { PopupMessageComponent } from "../../fastnet/controls/popup-message.component";
-import { Artist, Work, MusicFile, Track, Performance, Composition, isMusicFile, isTrack, isWork, isPerformance, Movement, ArtistType } from "../shared/catalog.types";
+import { Artist, Work, MusicFile, Track, Performance, Composition, isMusicFile, isTrack, isWork, isPerformance, Movement } from "../shared/catalog.types";
 import { PlayerService } from "../shared/player.service";
 import { LoggingService } from "../shared/logging.service";
 import { ParameterService } from "../shared/parameter.service";
-import { CommandPanelComponent, CommandPanelResult, SelectedCommand, TargetEntity } from "./command-panel/command-panel.component";
+import { CommandPanelComponent, CommandPanelResult, SelectedCommand } from "./command-panel/command-panel.component";
 import { DomSanitizer } from "@angular/platform-browser";
 import { DialogResult } from "../../fastnet/core/core.types";
-import { sortedInsert } from "../../fastnet/core/common.functions";
-import { MessageService } from "../shared/message.service";
+//import { sortedInsert } from "../../fastnet/core/common.functions";
+//import { MessageService } from "../shared/message.service";
 import { Subscription } from "rxjs";
 
 export enum CatalogView {
@@ -28,12 +28,10 @@ export abstract class BaseCatalogComponent implements OnInit, OnDestroy, AfterVi
    @HostBinding("class.is-edge") isEdge = false;
    @ViewChild(CommandPanelComponent, { static: false }) commandPanel: CommandPanelComponent;
    @ViewChild(PopupMessageComponent, { static: false }) popupMessage: PopupMessageComponent;
-
-   protected allArtists: Artist[] = [];
    protected currentStyle: Style;
    private subscriptions: Subscription[] = [];
    constructor(private elementRef: ElementRef, protected readonly library: LibraryService,
-      private messageService: MessageService,
+      //private messageService: MessageService,
       protected parameterService: ParameterService, private sanitizer: DomSanitizer,
       private readonly playerService: PlayerService, protected log: LoggingService) {
    }
@@ -47,23 +45,14 @@ export abstract class BaseCatalogComponent implements OnInit, OnDestroy, AfterVi
       if (this.getBrowser() === "edge") {
          this.isEdge = true;
       }
-      this.subscriptions.push(this.messageService.newOrModifiedArtist.subscribe(async (id) => await this.onNewOrModifiedArtist(id)));
-      this.subscriptions.push(this.messageService.deletedArtist.subscribe((id) => this.onDeletedArtist(id)));
    }
    async ngAfterViewInit() {
       if (this.guard === false) {
          this.guard = true;
          this.currentStyle = this.parameterService.getCurrentStyle();
-         let artistIdList = await this.library.getAllArtists(this.currentStyle);
-         for (let id of artistIdList) {
-            let a = await this.library.getArtist(this.currentStyle, id);
-            this.addArtistToDefaultView(a);
-         }
-         //console.log(`${artistIdList.length} artist ids loaded`);
       }
    }
    protected async abstract onSearch();
-   protected abstract addArtistToDefaultView(a: Artist);
    public async setSearch(text: string) {
       this.searchText = text;
       this.catalogView = CatalogView.SearchResults;
@@ -158,6 +147,12 @@ export abstract class BaseCatalogComponent implements OnInit, OnDestroy, AfterVi
    }
    onPerformanceMouse(p: Performance, val: boolean) {
       p.isHighLit = val;
+    }
+   canShowMusicFile(mf: MusicFile) {
+      return (mf.isGenerated === false || this.canShowGeneratedMusic());
+   }
+   canShowGeneratedMusic() {
+      return this.parameterService.showGeneratedMusic;
    }
    protected getBrowser() {
       return this.parameterService.getBrowser();
@@ -172,48 +167,40 @@ export abstract class BaseCatalogComponent implements OnInit, OnDestroy, AfterVi
          case SelectedCommand.Queue:
             await this.queueMusic(cmd.entity);
             break;
-         case SelectedCommand.TagEditor:
-            //if (cmd.targetEntity === TargetEntity.Performance) {
-            //   // await this.westernClassicalTagEditor.initialise(cmd.entity as Performance);
-            //   this.westernClassicalTagEditor.open(cmd.entity as Performance, async (changesMade) => {
-            //      if (changesMade) {
-            //         await this.onSearch();
-            //      }
-            //   });
+         //case SelectedCommand.TagEditor:
+         //   //if (cmd.targetEntity === TargetEntity.Performance) {
+         //   //   // await this.westernClassicalTagEditor.initialise(cmd.entity as Performance);
+         //   //   this.westernClassicalTagEditor.open(cmd.entity as Performance, async (changesMade) => {
+         //   //      if (changesMade) {
+         //   //         await this.onSearch();
+         //   //      }
+         //   //   });
+         //   //}
+         //   break;
+         case SelectedCommand.Reset:
+            //switch (cmd.targetEntity) {
+            //   case TargetEntity.Work:
+            //      await this.library.resetWork((cmd.entity as Work).id);
+            //      break;
+            //   case TargetEntity.Performance:
+            //      await this.library.resetPerformance((cmd.entity as Performance).id);
+            //      break;
+            //}
+         case SelectedCommand.Resample:
+            if (isWork(cmd.entity)) {
+               await this.library.resampleWork((cmd.entity).id);
+            } else if (isPerformance(cmd.entity)) {
+               await this.library.resamplePerformance((cmd.entity as Performance).id);
+            }
+            //switch (cmd.targetEntity) {
+            //   case TargetEntity.Work:
+            //      await this.library.resampleWork((cmd.entity as Work).id);
+            //      break;
+            //   case TargetEntity.Performance:
+            //      await this.library.resamplePerformance((cmd.entity as Performance).id);
+            //      break;
             //}
             break;
-         case SelectedCommand.Reset:
-            switch (cmd.targetEntity) {
-               case TargetEntity.Work:
-                  await this.library.resetWork((cmd.entity as Work).id);
-                  break;
-               case TargetEntity.Performance:
-                  await this.library.resetPerformance((cmd.entity as Performance).id);
-                  break;
-            }
-         case SelectedCommand.Resample:
-            switch (cmd.targetEntity) {
-               case TargetEntity.Work:
-                  await this.library.resampleWork((cmd.entity as Work).id);
-                  break;
-               case TargetEntity.Performance:
-                  await this.library.resamplePerformance((cmd.entity as Performance).id);
-                  break;
-            }
-            break;
-      }
-   }
-   private async onNewOrModifiedArtist(id: number) {
-      let a = await this.library.getArtist(this.currentStyle, id);
-      if (a.artistType !== ArtistType.Various && a.styles.findIndex((x) => this.parameterService.getCurrentStyle().id === x) > -1) {
-         let index = this.allArtists.findIndex((v, i, obj) => {
-            return v.id === id;
-         });
-         if (index === -1) {
-            this.addArtistToDefaultView(a);
-         } else {
-            this.allArtists[index] = a;
-         }
       }
    }
    private checkDeviceAvailable() {
@@ -229,13 +216,5 @@ export abstract class BaseCatalogComponent implements OnInit, OnDestroy, AfterVi
       }
       return deviceAvailable;
    }
-   private onDeletedArtist(id: number) {
-      console.log(`onDeletedArtist() called with artist id ${id}`);
-      let index = this.allArtists.findIndex((v, i) => {
-         return v.id === id;// ? i : -1;
-      });
-      if (index != -1) {
-         this.allArtists.splice(index, 1);
-      }
-   }
+
 }

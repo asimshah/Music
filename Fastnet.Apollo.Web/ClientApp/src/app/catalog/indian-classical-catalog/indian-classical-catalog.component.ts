@@ -35,10 +35,10 @@ export class IndianClassicalCatalogComponent extends BaseCatalogComponent {
    searchFoundNothing = false;
    artistSets: ArtistSet[] = [];
    constructor(elementRef: ElementRef, library: LibraryService,
-      messageService: MessageService,
+      //messageService: MessageService,
       ps: ParameterService, sanitizer: DomSanitizer,
       playerService: PlayerService, log: LoggingService) {
-      super(elementRef, library, messageService, ps, sanitizer, playerService, log);
+      super(elementRef, library, ps, sanitizer, playerService, log);
    }
    getArtistStats(a: Artist) {
       let parts: string[] = [];
@@ -76,26 +76,34 @@ export class IndianClassicalCatalogComponent extends BaseCatalogComponent {
    toggleShowMovements(performance: Performance) {
       performance.showMovements = !performance.showMovements;
    }
-   onTapMovement(r: Raga, p: Performance, t: Track) {
-      //this.log.information("onTapTrack()");
-      this.commandPanel.open(MusicStyles.IndianClassical, r, p, t, async (r) => await this.executeCommand(r));
-   }
+   //onTapMovement(r: Raga, p: Performance, t: Track) {
+   //   //this.log.information("onTapTrack()");
+   //   this.commandPanel.open2(t,
+   //      //r, p, t, null,
+   //      async (r) => await this.executeCommand(r));
+   //}
    onTapPerformance(r: Raga, p: Performance) {
       //if (this.isTouchDevice() && p.movements.length > 1) {
       //   this.commandPanel.open(MusicStyles.IndianClassical, r, p, null, async (r) => await this.executeCommand(r));
       //}
       if (this.isTouchDevice()) {
          if (p.movements.length > 1) {
-            this.commandPanel.open(MusicStyles.IndianClassical, r, p, null, async (r) => await this.executeCommand(r));
+            this.commandPanel.open2(p,
+               //r, p, null, null,
+               async (r) => await this.executeCommand(r));
          } else {
-            this.commandPanel.open(MusicStyles.IndianClassical, r, p, p.movements[0], async (r) => await this.executeCommand(r));
+            this.commandPanel.open2(p.movements[0],
+               //r, p, p.movements[0], null,
+               async (r) => await this.executeCommand(r));
          }
       }
    }
    async onRightClick(e: Event, r:Raga, p: Performance) {
       e.preventDefault();
       if (!this.isTouchDevice()) {
-         this.commandPanel.open(MusicStyles.IndianClassical, r, p, null, async (r) => await this.executeCommand(r));
+         this.commandPanel.open2(p,
+            //r, p, null, null,
+            async (r) => await this.executeCommand(r));
       }
       return false;
    }
@@ -111,11 +119,11 @@ export class IndianClassicalCatalogComponent extends BaseCatalogComponent {
          this.searchFoundNothing = true;
       }
    }
-   protected addArtistToDefaultView(a: Artist) {
-      sortedInsert(this.allArtists, a, (l, r) => {
-         return l.name.localeCompare(r.name);
-      });
-   }
+   //protected addArtistToDefaultView(a: Artist) {
+   //   sortedInsert(this.allArtists, a, (l, r) => {
+   //      return l.name.localeCompare(r.name);
+   //   });
+   //}
 
    private async processSearchResults(r: IndianClassicalResults, prefixMode: boolean) {
       //let text = JSON.stringify(r, null, 2);

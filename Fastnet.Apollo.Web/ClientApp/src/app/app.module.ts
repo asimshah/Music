@@ -31,12 +31,17 @@ import { MusicfileEditorComponent } from './catalog/musicfile-editor/musicfile-e
 import { PopularTagEditorComponent } from './catalog/popular-catalog/popular-tag-editor/popular-tag-editor.component';
 import { IndianClassicalCatalogComponent } from './catalog/indian-classical-catalog/indian-classical-catalog.component';
 import { PlaylistManagerComponent } from './components/playlist-manager.component';
+import { PlaylistBarComponent } from './components/playlist-bar.component';
+import { DialogTestComponent } from './components/dialog-test.component';
+import { TrackListComponent } from './catalog/track-list.component';
+import { ArtistsViewComponent } from './catalog/artists-view.component';
 
 export class CustomHammerConfig extends HammerGestureConfig {
-    overrides = <any>{
-        'pinch': { enable: false },
-        'rotate': { enable: false }
-    }
+   overrides = <any>{
+      'pinch': { enable: false },
+      'rotate': { enable: false }
+   };
+   options = { domEvents: true}
 }
 
 @NgModule({
@@ -61,7 +66,11 @@ export class CustomHammerConfig extends HammerGestureConfig {
         PopularCatalogComponent,
         PopularTagEditorComponent,
         IndianClassicalCatalogComponent,
-        PlaylistManagerComponent
+        PlaylistManagerComponent,
+        PlaylistBarComponent,
+        DialogTestComponent,
+        TrackListComponent,
+        ArtistsViewComponent
     ],
     imports: [
         BrowserModule.withServerTransition({ appId: 'ng-cli-universal' }),

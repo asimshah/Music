@@ -22,6 +22,7 @@ using System.Threading.Tasks;
 
 namespace Fastnet.Apollo.Web.Controllers
 {
+    [ServiceFilter(typeof(WebServiceCallTrace))]
     [Route("lib")]
     [ApiController]
     public class LibraryController : BaseController
@@ -53,21 +54,21 @@ namespace Fastnet.Apollo.Web.Controllers
             this.taskRunner = tr;
         }
         [HttpGet("parameters/get/{key?}")]
-        public IActionResult GetParameters(string key = null)
+        public IActionResult GetParameters()
         {
-            Debug.Assert(key != "undefined");
+            //Debug.Assert(key != "undefined");
             var clientIPAddress = this.Request.HttpContext.GetRemoteIPAddress();
             if (clientIPAddress == "::1")
             {
                 clientIPAddress = NetInfo.GetLocalIPAddress().ToString();
             }
-            if (string.IsNullOrWhiteSpace(key))
-            {
-                key = GetBrowserKey(clientIPAddress);
-                //key = Guid.NewGuid().ToString().ToLower();
-                //log.Information($"new browser key {key} allocated");
-            }
-
+            //if (string.IsNullOrWhiteSpace(key))
+            //{
+                
+            //    //key = Guid.NewGuid().ToString().ToLower();
+            //    //log.Information($"new browser key {key} allocated");
+            //}
+            var key = GetBrowserKey(clientIPAddress);
             var styles = this.musicOptions.Styles.Select(s => new StyleDTO
             {
                 Id = s.Style,
@@ -94,6 +95,17 @@ namespace Fastnet.Apollo.Web.Controllers
         private string GetBrowserKey(string clientIPAddress)
         {
             var key = string.Empty;
+            IEnumerable<Device> devices = musicDb.Devices.Where(d => d.Type == AudioDeviceType.Browser && d.HostMachine == clientIPAddress);
+            if(devices.Count() > 1)
+            {
+                var toRemove = devices.OrderByDescending(x => x.LastSeenDateTime).Skip(1).ToArray();
+                foreach(var d in toRemove)
+                {
+                    log.Information($"device {d.Id}, key {d.KeyName}, {d.HostMachine} {d.DisplayName} is a duplicate - removed");
+                }
+                musicDb.Devices.RemoveRange(toRemove);
+                musicDb.SaveChanges();
+            }
             var device = musicDb.Devices.SingleOrDefault(d => d.Type == AudioDeviceType.Browser && d.HostMachine == clientIPAddress);
             if(device == null)
             {
@@ -779,277 +791,8 @@ namespace Fastnet.Apollo.Web.Controllers
             }
             return new EmptyResult();
         }
-        //[HttpGet("test")]
-        //public IActionResult Test()
-        //{
-        //    musicDb.Test1();
-        //    return new EmptyResult();
-        //}
 
-        //[HttpGet("resample")]
-        //public async Task TestResample()
-        //{
-        //    //D:\temp\source
-        //    //D:\temp\dest
-        //    var sources = Directory.EnumerateFiles(@"D:\temp\source", "*.flac");
-        //    var source = sources.First();
-        //    var destination = Path.Combine(@"D:\temp\dest", Path.GetFileNameWithoutExtension(source) + ".mp3");
-        //    var resampler = new FlacResampler();
-        //    await resampler.Resample(source, destination);
-        //}
-        //[HttpGet("test/{n}")]
-        //public IActionResult Test(int n)
-        //{
-        //    var folder = $@"D:\Music\flac\Western\Classical\Johannes Brahms\Complete Works\CD{n.ToString("00")}";
-        //    var l1 = new List<string>();
-        //    var sw1 = new Stopwatch();
-        //    sw1.Start();
-        //    foreach (var file in System.IO.Directory.EnumerateFiles(folder, "*.flac"))
-        //    {
-        //        //Debug.WriteLine($"{file}");
 
-        //        using (var flacFile = new FlacLibSharp.FlacFile(file))
-        //        {
-        //            var vorbisComment = flacFile.VorbisComment;
-        //            if (vorbisComment != null)
-        //            {
-        //                foreach (var tag in vorbisComment)
-        //                {
-        //                    var values = string.Join("|", tag.Value.Select(x => x.Trim()).ToArray());
-        //                    l1.Add(tag.Key);
-        //                }
-        //            }
-        //        }
-        //    }
-        //    sw1.Stop();
-        //    Debug.WriteLine($"{l1.Count()} read in {sw1.ElapsedMilliseconds} ms");
-        //    var l2 = new List<string>();
-        //    var sw2 = new Stopwatch();
-        //    sw2.Start();
-        //    foreach (var file in System.IO.Directory.EnumerateFiles(folder, "*.flac"))
-        //    {
-        //        //Debug.WriteLine($"{file}");
-
-        //        var t = new Music.MediaTools.FlacTools(file);
-        //        var vorbisComment = t.GetVorbisCommenTs();
-        //        if (vorbisComment != null)
-        //        {
-        //            foreach (var kvp in vorbisComment.comments)
-        //            {
-        //                l2.Add(kvp.Key);
-        //            }
-        //        }
-        //    }
-        //    sw2.Stop();
-        //    Debug.WriteLine($"{l2.Count()} read in {sw2.ElapsedMilliseconds} ms");
-        //    return new EmptyResult();
-        //}
-        //[HttpGet("metatest/{n}")]
-        //public async Task<IActionResult> MetaTest(int n)
-        //{
-        //    switch (n)
-        //    {
-        //        case 1:
-        //            await CataloguePopular();
-        //            break;
-        //        case 2:
-        //            await CatalogueWesternClassical(/*@"Pyotr Il'yich Tchaikovsky"*/);
-        //            break;
-        //        case 3:
-        //            GetPopularArtists();
-        //            break;
-        //        case 4:
-        //            GetSelectedPopularArtists();
-        //            break;
-        //        case 5:
-        //            GetSelectedWesternClassicalArtists();
-        //            break;
-        //        case 6:
-        //            await CatalogueJoanBaez();
-        //            break;
-        //        case 7:
-        //            await AddPortraitsTask(MusicStyles.Popular);
-        //            break;
-        //        case 8:
-        //            Catalogue();
-        //            break;
-        //        case 9:
-        //            await CatalogueFolder(MusicStyles.WesternClassical, @"D:\Music\flac\Western\Classical\Wolfgang Amadeus Mozart\Concerto for Flute and Harp");
-        //            break;
-        //        case 10:
-        //            await TestPopularAlbumTEO();
-        //            break;
-        //        case 11:
-        //            await TestWesternClassicalAlbumTEO();
-        //            break;
-        //    }
-
-        //    return new EmptyResult();
-        //}
-        //private async Task TestPopularAlbumTEO()
-        //{
-        //    var work = await musicDb.Works.FirstAsync(w => w.StyleId == MusicStyles.Popular);
-        //    if(work != null)
-        //    {
-        //        var teo = await work.ToPopularAlbumTEO(musicOptions);
-
-        //    }
-        //}
-        //private async Task TestWesternClassicalAlbumTEO()
-        //{
-        //    var work = await musicDb.Works.FirstAsync(w => w.StyleId == MusicStyles.WesternClassical);
-        //    if (work != null)
-        //    {
-        //        var teo = await work.ToWesternClassicalAlbumTEO(musicOptions);
-        //        await teo.SaveMusicTags();
-        //        var text = await teo.TestTags();
-        //        var teo2 = text.ToInstance<WesternClassicalAlbumTEO>();
-        //    }
-        //}
-        //private async Task CatalogueJoanBaez(string artistName)
-        //{
-        //    await taskPublisher.AddTask(MusicStyles.Popular, "Joan Baez",   true);
-        //}
-        //private async Task  CatalogueFolder(MusicStyles style, string path)
-        //{
-        //    //D:\Music\flac\Western\Classical\Wolfgang Amadeus Mozart\Concerto for Flute and Harp
-        //    await taskPublisher.AddTask(style, TaskType.DiskPath, path, true);
-        //}
-        //private async Task AddPortraitsTask(MusicStyles style)
-        //{
-        //    await taskPublisher.AddPortraitsTask(style);
-        //}
-        //private async Task CatalogueJoanBaez()
-        //{
-        //    await taskPublisher.AddTask(MusicStyles.Popular, "Joan Baez", force: true);
-        //}
-        //private void Catalogue()
-        //{
-        //    void ListFiles(OpusFolder folder)
-        //    {
-        //        var files = folder.GetFilesOnDisk();
-        //        var partCount = files.Where(x => x.part != null).Select(x => x.part.Number).Distinct().Count();
-        //        log.Information($"{(folder.IsCollection ? "Collection" : folder.ArtistName)}, {folder.OpusName}, {folder.Source}, {files.Count()} files in {partCount} parts {(folder.IsGenerated ? ", (generated)" : "")}");
-        //    }
-        //    var names = new string[]
-        //    {
-        //        @"D:\Music\flac\Western\Popular\Bruce Springsteen",
-        //        @"D:\Music\flac\Western\Popular\Elton John",
-        //        @"D:\Music\flac\Western\Popular\Bruce Springsteen\Born In The USA",
-        //        @"D:\Music\flac\Western\Popular\Bruce Springsteen\The River",
-        //        @"D:\Music\flac\Western\Popular\Collections",
-        //        @"D:\Music\flac\Western\Opera\Collections\The Essential Maria Callas",
-        //        @"D:\Music\flac\Western\Classical"
-        //    };
-        //    foreach (var name in names)
-        //    {                
-        //        var pd = MusicMetaDataMethods.GetPathData(musicOptions, name);
-        //        if(pd?.OpusPath != null)
-        //        {
-        //            // single opus folder
-        //            var folder = new OpusFolder(musicOptions, pd);
-        //            ListFiles(folder);
-        //        }
-        //        else if (pd?.OpusPath == null && (pd?.IsCollections ?? false))
-        //        {
-        //            var cf = new CollectionsFolder(musicOptions, pd.MusicStyle);
-        //            foreach (var folder in cf.GetOpusFolders())
-        //            {
-        //                ListFiles(folder);
-        //            }
-        //        }
-        //        else if (pd?.OpusPath == null && pd?.ArtistPath != null)
-        //        {
-        //            // artist folder
-        //            var af = new ArtistFolder(musicOptions, pd.MusicStyle, pd.ArtistPath);
-        //            foreach (var folder in af.GetOpusFolders(name))
-        //            {
-        //                ListFiles(folder);
-        //            }
-        //        }
-        //        else if(pd != null)
-        //        {
-        //            //style folder
-        //            foreach(var af in pd.MusicStyle.GetArtistFolders(musicOptions))
-        //            {
-        //                foreach (var folder in af.GetOpusFolders(name))
-        //                {
-        //                    ListFiles(folder);
-        //                }
-        //            }
-        //            foreach(var folder in pd.MusicStyle.GetCollectionsFolder(musicOptions).GetOpusFolders(name))
-        //            {
-        //                ListFiles(folder);
-        //            }
-        //        }
-        //    }
-
-        //}
-        //private void GetSelectedWesternClassicalArtists()
-        //{
-        //    var names = new string[]
-        //        {
-        //            //@"Franz Schubert",
-        //            //@"Gabriel Faure",
-        //            //@"Johann Sebastian Bach",
-        //            //@"Antonio Vivaldi",
-        //            //@"Johann Strauss II",
-        //            @"Pyotr Il'yich Tchaikovsky"
-        //        };
-        //    GetSelectedArtists(MusicStyles.WesternClassical, names);
-        //}
-        //private void GetSelectedPopularArtists()
-        //{
-        //    var names = new string[]
-        //        {
-        //            @"Bill Withers",
-        //            @"Buddy Guy",
-        //            @"David Bowie",
-        //            @"Blood Sweat & Tears"
-        //        };
-        //    GetSelectedArtists(MusicStyles.Popular, names);
-        //}
-        //private void GetSelectedArtists(MusicStyles musicStyle, IEnumerable<string> names)
-        //{
-        //    foreach (var name in names)
-        //    {
-        //        var af = new ArtistFolder(musicOptions, musicStyle, name);
-        //        var opusFolders = af.GetOpusFolders();
-        //        if (musicStyle == MusicStyles.Popular)
-        //        {
-        //            log.Information($"{af} has {opusFolders.Count()} album folders (of which {opusFolders.Where(f => f.ForSinglesOnly).Count()} are for singles only");
-        //        }
-        //        else
-        //        {
-        //            log.Information($"{af} has {opusFolders.Count()} album folders");
-        //        }
-        //        foreach (var wf in opusFolders)
-        //        {
-        //            var files = wf.GetFilesOnDisk();
-        //            if (files.Count() > 0)
-        //            {
-        //                log.Information($"   {wf}, {files.Count()} music files");
-        //            }
-        //        }
-        //    }
-        //}
-        //private void GetPopularArtists()
-        //{
-        //    var list = MusicStyles.Popular.GetArtistFolders(musicOptions);
-        //    foreach(var item in list)
-        //    {
-        //        var opusFolders = item.GetOpusFolders();
-        //        log.Information($"{item} has {opusFolders.Count()} album folders (of which {opusFolders.Where(f => f.ForSinglesOnly).Count()} are for singles only");
-        //    }
-        //}
-        //private async Task CataloguePopular()
-        //{
-        //    await taskPublisher.AddTask(MusicStyles.Popular);
-        //}
-        //private async Task CatalogueWesternClassical(/*string name*/)
-        //{
-        //    await taskPublisher.AddTask(MusicStyles.WesternClassical/*, name*/);
-        //}
         private IActionResult GetImageResult(Image image)
         {
             var ms = new MemoryStream(image.Data);

@@ -16,7 +16,6 @@ using System.Threading.Tasks;
 
 namespace Fastnet.Apollo.Web
 {
-
     public static partial class TransferExtensions
     {
         private static readonly ILogger log = ApplicationLoggerFactory.CreateLogger("Fastnet.Apollo.Web.TransferExtensions");
@@ -139,20 +138,65 @@ namespace Fastnet.Apollo.Web
         //}
         public static PerformanceDTO ToDTO(this Performance p, string parentName/*, bool full = false*/)
         {
+            var work = p.Movements.Select(x => x.Work).Distinct().Single();
+            var names = p.GetNames();
             return new PerformanceDTO
             {
                 Id = p.Id,
                 Performers = p.GetAllPerformersCSV(),
                 Year = p.Year,
-                AlbumName = p.Movements.First().Work.Name,
-                DisplayName = p.Movements.First().Work.Name,
-                AlbumCoverArt = $"lib/get/work/coverart/{p.Movements.First().Work.Id}",
                 MovementCount = p.Movements.Count,
                 Movements = p.Movements.ToDTO(parentName),
                 FormattedDuration = p.Movements
-                    .Sum(x => x.MusicFiles.OrderByDescending(mf => mf.Rank()).First().Duration)
-                    .FormatDuration()
+                            .Sum(x => x.MusicFiles.OrderByDescending(mf => mf.Rank()).First().Duration)
+                            .FormatDuration(),
+                AlbumName = names.albumName,
+                DisplayName = names.albumName,
+                ArtistName = names.artistNames,
+                WorkName = names.workName,
+                AlbumCoverArt = $"lib/get/work/coverart/{work.Id}",
             };
+            //switch (p.StyleId)
+            //{
+            //    case MusicStyles.WesternClassical:
+            //        return new PerformanceDTO
+            //        {
+            //            Id = p.Id,
+            //            Performers = p.GetAllPerformersCSV(),
+            //            Year = p.Year,
+            //            AlbumName = p.Movements.First().Work.Name,
+            //            DisplayName = p.Movements.First().Work.Name,
+            //            AlbumCoverArt = $"lib/get/work/coverart/{p.Movements.First().Work.Id}",
+            //            ArtistName = p.Composition.Artist.Name,
+            //            WorkName = p.Composition.Name,
+            //            MovementCount = p.Movements.Count,
+            //            Movements = p.Movements.ToDTO(parentName),
+            //            FormattedDuration = p.Movements
+            //                .Sum(x => x.MusicFiles.OrderByDescending(mf => mf.Rank()).First().Duration)
+            //                .FormatDuration()
+            //        };
+            //    case MusicStyles.IndianClassical:
+            //        var raga = p.RagaPerformances.Select(x => x.Raga).Distinct().Single();
+            //        var work = p.Movements.Select(x => x.Work).Distinct().Single();
+            //        return new PerformanceDTO
+            //        {
+            //            Id = p.Id,
+            //            Performers = p.GetAllPerformersCSV(),
+            //            Year = p.Year,
+            //            AlbumName = work.Name, // p.Movements.First().Work.Name,
+            //            DisplayName = work.Name, // p.Movements.First().Work.Name,
+            //            AlbumCoverArt = $"lib/get/work/coverart/{work.Id}",
+            //            ArtistName = work.GetArtistNames(),
+            //            WorkName = raga.Name,
+            //            MovementCount = p.Movements.Count,
+            //            Movements = p.Movements.ToDTO(parentName),
+            //            FormattedDuration = p.Movements
+            //                .Sum(x => x.MusicFiles.OrderByDescending(mf => mf.Rank()).First().Duration)
+            //                .FormatDuration()
+            //        };
+            //}
+            //throw new Exception($"style {p.StyleId} does not use performances");
+
         }
         public static WorkDTO ToDTO(this Work w, bool full = false)
         {
@@ -163,6 +207,7 @@ namespace Fastnet.Apollo.Web
                 {
                     Id = w.Id,
                     ArtistIdList =  w.Artists.Select(x => x.Id),
+                    ArtistName = w.GetArtistNames(),//  w.Artists.Select(x => x.Name).ToCSV(),
                     OpusType = w.Type,
                     Name = w.Name,
                     Year = w.Year,
@@ -181,6 +226,7 @@ namespace Fastnet.Apollo.Web
                     ArtistIdList = w.Artists.Select(x => x.Id),
                     OpusType = w.Type,
                     Name = w.Name,
+                    ArtistName = w.GetArtistNames(), // w.Artists.Select(x => x.Name).ToCSV(),
                     Year = w.Year,
                     CoverArtUrl = $"lib/get/work/coverart/{w.Id}",
                     TrackCount = w.Tracks.Count(),
@@ -224,17 +270,32 @@ namespace Fastnet.Apollo.Web
         public static TrackDTO[] ToDTO(this IEnumerable<Track> movements, string parentName)
         {
             // Note: this version is only for movements
+            var performance = movements.Select(x => x.Performance).Distinct().Single();
+            //var workName = performance.StyleId == MusicStyles.WesternClassical ?
+            //    performance.Composition.Name :
+            //    performance.RagaPerformances.Select(x => x.Raga).Distinct().Single().Name;
+            var names = performance.GetNames();
+            var titlePrefixes = movements.Select(m => m.Title.Split(":").First()).Select(x => x.Trim()).Distinct();
             var list = new List<TrackDTO>();
             foreach (var movement in movements.OrderBy((t) => t.Number))
             {
                 var dto = movement.ToDTO();
+                dto.WorkName = names.workName;
                 if (dto.Title.Contains(":"))
                 {
                     var parts = dto.Title.Split(":");
-                    if (parts[0].IsEqualIgnoreAccentsAndCase(parentName))
+                    if (titlePrefixes.Count() == 1)
                     {
                         dto.Title = string.Join(":", parts.Skip(1));
                     }
+                    else /*if (dto.Title.Contains(":"))*/
+                    {
+                        //var parts = dto.Title.Split(":");
+                        if (parts[0].IsEqualIgnoreAccentsAndCase(parentName))
+                        {
+                            dto.Title = string.Join(":", parts.Skip(1));
+                        }
+                    } 
                 }
                 list.Add(dto);
                 dto.Number = movement.MovementNumber;// list.Count();
@@ -250,6 +311,9 @@ namespace Fastnet.Apollo.Web
                 Number = t.Number,
                 Title = t.Title,
                 DisplayName = t.Title,
+                ArtistName = t.Work.GetArtistNames(), // t.Work.Artists.Select(x => x.Name).ToCSV(),
+                AlbumName = t.Work.Name,
+                CoverArtUrl = $"lib/get/work/coverart/{t.Work.Id}",
                 MusicFileCount = t.MusicFiles.Count(),
                 NumberQuality = t.NumberParsingStage.ToMetadataQuality(),
                 TitleQuality = t.ParsingStage.ToMetadataQuality(),
@@ -261,6 +325,7 @@ namespace Fastnet.Apollo.Web
             var t_m = new MusicFileDTO
             {
                 Id = mf.Id,
+                IsGenerated = mf.IsGenerated,
                 Encoding = mf.Encoding,
                 Duration = mf.Duration,
                 IsFaulty = mf.IsFaulty,
@@ -311,39 +376,106 @@ namespace Fastnet.Apollo.Web
                 CommandSequence = dr.CommandSequenceNumber
             };
         }
-        public static PlaylistDTO ToPlaylistDTO(this DeviceRuntime dr)
+        /// <summary>
+        /// </summary>
+        /// <param name="playlist"></param>
+        /// <returns></returns>
+        public static PlaylistDTO ToDTO(this ExtendedPlaylist playlist)
         {
             var dto = new PlaylistDTO
             {
-                DeviceKey = dr.Key,
-                PlaylistType = dr.Playlist.Type,
-                PlaylistName = dr.Playlist.Name,
-                Items = dr.Playlist.Items.Select(x => x.ToDTO())
+                Id = playlist.PlaylistId,
+                DeviceKey = playlist.DeviceKey,// null, 
+                PlaylistType = playlist.Type,
+                PlaylistName = playlist.Name,
+                Items = playlist.Items.Select(x => x.ToDTO()),
+                TotalTime = playlist.Duration.TotalMilliseconds,
+                FormattedTotalTime = playlist.Duration.ToDuration()
             };
-            dto.TotalTime = dto.Items.Sum(x => x.TotalTime);
-            dto.FormattedTotalTime = dto.TotalTime.FormatDuration();
             return dto;
         }
-        public static PlaylistItemDTO ToDTO(this PlaylistItemRuntime pli, bool isSubitem = false)
+        /// <summary>
+        /// this takes complete runtime inform ation from DeviceRuntime and creates a complete PlaylistDTO
+        /// which includes the devicekey for the device where this playlist is running
+        /// and PlaylistItems (and subitems) from PlaylistRunTime items in the DeviceRuntime
+        /// cf. with PlaylistDTO ToDTO(this Playlist playlist)
+        /// </summary>
+        /// <param name="dr"></param>
+        /// <returns></returns>
+        public static PlaylistDTO ToPlaylistDTO(this DeviceRuntime dr)
         {
-            var dto = new PlaylistItemDTO
+            //var dto = new PlaylistDTO
+            //{
+            //    Id = dr.Playlist.Id,
+            //    DeviceKey = dr.Key,
+            //    PlaylistType = dr.Playlist.Type,
+            //    PlaylistName = dr.Playlist.Name,
+            //    Items = dr.Playlist.Items.Select(x => x.ToDTO())
+            //};
+            //dto.TotalTime = dto.Items.Sum(x => x.TotalTime);
+            //dto.FormattedTotalTime = dto.TotalTime.FormatDuration();
+            var dto = dr.ExtendedPlaylist.ToDTO();
+            return dto;
+        }
+        public static PlaylistItemDTO ToDTO(this ExtendedPlaylistItem pli)
+        {
+            PlaylistItemDTO getBaseDTO(ExtendedPlaylistItem pli)
             {
-                //Id = pli.Id,
-                Position = pli.Position,
-                Type = pli.Type,
-                NotPlayableOnCurrentDevice = pli.NotPlayableOnCurrentDevice,
-                Titles = pli.Titles,
-                CoverArtUrl = pli.CoverArtUrl,
-                AudioProperties = pli.AudioProperties,
-                SampleRate = pli.SampleRate,
-                //Sequence = pli.Sequence,
-                TotalTime = pli.TotalTime,
-                FormattedTotalTime = pli.FormattedTotalTime,
-                IsSubitem = isSubitem,
-                SubItems = pli.SubItems?.Select(x => x.ToDTO(true))
+                return new PlaylistItemDTO
+                {
+                    Position = pli.Position,
+                    Titles = pli.Titles,
+                    CoverArtUrl = pli.CoverArtUrl,
+                    TotalTime = pli.Duration.TotalMilliseconds,
+                    FormattedTotalTime = pli.Duration.ToDuration()
+                };
+            }
+            PlaylistItemDTO getMultiTrackDTO(MultiTrackPlaylistItem mti)
+            {
+                var dto = getBaseDTO(mti);
+                dto.Type = PlaylistRuntimeItemType.MultipleItems;
+                dto.SubItems = mti.SubItems.Select(x => getSingleTrackDTO(x));
+                return dto;
+            }
+            PlaylistItemDTO getSingleTrackDTO(SingleTrackPlaylistItem sti)
+            {
+                var dto = getBaseDTO(sti);
+                dto.Type = PlaylistRuntimeItemType.SingleItem;
+                dto.AudioProperties = sti.AudioProperties;
+                dto.SampleRate = sti.SampleRate;
+                dto.NotPlayableOnCurrentDevice = sti.NotPlayableOnCurrentDevice;
+                return dto;
+            }
+            var dto = pli switch
+            {
+                //MultiTrackPlaylistItem mti => new PlaylistItemDTO { Type = PlaylistRuntimeItemType.MultipleItems, Position = mti.Position, Titles = mti.Titles, CoverArtUrl = mti.CoverArtUrl, TotalTime = mti.Duration.TotalMilliseconds, FormattedTotalTime = mti.Duration.ToDuration() },
+                //SingleTrackPlaylistItem sti => new PlaylistItemDTO { Type = PlaylistRuntimeItemType.SingleItem, Position = sti.Position, Titles = sti.Titles, CoverArtUrl = sti.CoverArtUrl, TotalTime = sti.Duration.TotalMilliseconds, FormattedTotalTime = sti.Duration.ToDuration(), AudioProperties = sti.AudioProperties, SampleRate = sti.SampleRate, NotPlayableOnCurrentDevice = sti.NotPlayableOnCurrentDevice },
+                MultiTrackPlaylistItem mti => getMultiTrackDTO(mti),
+                SingleTrackPlaylistItem sti => getSingleTrackDTO(sti),
+                _ => throw new Exception()
             };
             return dto;
         }
+        //public static PlaylistItemDTO ToDTO(this PlaylistItemRuntime pli, bool isSubitem = false)
+        //{
+        //    var dto = new PlaylistItemDTO
+        //    {
+        //        //Id = pli.Id,
+        //        Position = pli.Position,
+        //        Type = pli.Type,
+        //        NotPlayableOnCurrentDevice = pli.NotPlayableOnCurrentDevice,
+        //        Titles = pli.Titles,
+        //        CoverArtUrl = pli.CoverArtUrl,
+        //        AudioProperties = pli.AudioProperties,
+        //        SampleRate = pli.SampleRate,
+        //        //Sequence = pli.Sequence,
+        //        TotalTime = pli.TotalTime,
+        //        FormattedTotalTime = pli.FormattedTotalTime,
+        //        IsSubitem = isSubitem,
+        //        SubItems = pli.SubItems?.Select(x => x.ToDTO(true))
+        //    };
+        //    return dto;
+        //}
         public static IOpusDetails ToDetails(this Performance performance)
         {
             return new PerformanceDetails

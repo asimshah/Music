@@ -222,7 +222,7 @@ export class WebAudioComponent implements AfterViewInit, OnDestroy {
       this.device = await this.ps.enableWebAudio();
       this.stateMachine = new FSM(this.device.displayName, this.log);
       this.initialiseFSM();
-      this.log.debug("[WebAudioComponent] webaudio enabled");
+      //this.log.debug("[WebAudioComponent] webaudio enabled");
       this.startDeviceStatusUpdate();
    }
    private startDeviceStatusUpdate() {
@@ -348,7 +348,7 @@ export class WebAudioComponent implements AfterViewInit, OnDestroy {
       }, waitForEventInterval);
    }
    onPlayEnded() {
-      this.log.information(`[WebAudioComponent] play ended event`);
+      //this.log.information(`[WebAudioComponent] play ended event`);
       this.onEvent(PlayerEvents.PlayCompleted);
    }
 
@@ -450,7 +450,7 @@ export class WebAudioComponent implements AfterViewInit, OnDestroy {
    }
    private setVolume(level: number) {
       this.audio.volume = level;
-      this.log.information(`[WebAudioComponent] setVolume(), requested ${level}, result ${this.audio.volume}`);
+      //this.log.information(`[WebAudioComponent] setVolume(), requested ${level}, result ${this.audio.volume}`);
    }
    private stopPlaying() {
       this.audio.pause();

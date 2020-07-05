@@ -63,6 +63,34 @@ namespace Fastnet.Apollo.Web
     }
     public static partial class Extensions
     {
+        public static (string artistNames, string workName, string albumName) GetNames(this Performance p)
+        {
+            switch (p.StyleId)
+            {
+                case MusicStyles.WesternClassical:
+                    return (p.Composition.Artist.Name, p.Composition.Name, p.Movements.First().Work.Name);
+                case MusicStyles.IndianClassical:
+                    //var raga = p.RagaPerformances.Select(x => x.Raga).Distinct().Single();
+                    var artists = p.RagaPerformances.Select(x => x.Artist);
+                    var work = p.Movements.Select(x => x.Work).Distinct().Single();
+                    return (artists.GetArtistNames(), p.GetRaga().DisplayName, work.Name);
+            }
+            throw new Exception($"style {p.StyleId} does not use performances");
+        }
+        //public static string GetArtistNames(this IEnumerable<Artist> artists)
+        //{
+        //    var set = new ArtistSet(artists);
+        //    return set.GetNames();
+        //    //if(work.Artists.Count() > 2)
+        //    //{
+        //    //    var x = string.Join(", ", work.Artists.Take(work.Artists.Count() - 1).Select(x => x.Name));
+        //    //    return string.Join(" & ", x, work.Artists.Last().Name);
+        //    //}
+        //    //else
+        //    //{
+        //    //    return string.Join(" & ", work.Artists.Select(x => x.Name));
+        //    //}
+        //}
         public static MusicFile GetBestMusicFile(this Track t, DeviceRuntime dr)
         {
             //TODO:: a more complicated algorithm may be required browsers
@@ -97,24 +125,24 @@ namespace Fastnet.Apollo.Web
         //    pli.Playlist = pl;
         //    pl.Items.Add(pli);
         //}
-        public static async Task FillPlaylistItemForRuntime(this MusicDb db, PlaylistItem pli)
-        {
-            switch (pli.Type)
-            {
-                case PlaylistItemType.MusicFile:
-                    pli.MusicFile = await db.MusicFiles.FindAsync(pli.MusicFileId);
-                    break;
-                case PlaylistItemType.Track:
-                    pli.Track = await db.Tracks.FindAsync(pli.ItemId);
-                    break;
-                case PlaylistItemType.Work:
-                    pli.Work = await db.Works.FindAsync(pli.ItemId);
-                    break;
-                case PlaylistItemType.Performance:
-                    pli.Performance = await db.Performances.FindAsync(pli.ItemId);
-                    break;
-            }
-        }
+        //public static async Task FillPlaylistItemForRuntime(this MusicDb db, PlaylistItem pli)
+        //{
+        //    switch (pli.Type)
+        //    {
+        //        case PlaylistItemType.MusicFile:
+        //            pli.MusicFile = await db.MusicFiles.FindAsync(pli.MusicFileId);
+        //            break;
+        //        case PlaylistItemType.Track:
+        //            pli.Track = await db.Tracks.FindAsync(pli.ItemId);
+        //            break;
+        //        case PlaylistItemType.Work:
+        //            pli.Work = await db.Works.FindAsync(pli.ItemId);
+        //            break;
+        //        case PlaylistItemType.Performance:
+        //            pli.Performance = await db.Performances.FindAsync(pli.ItemId);
+        //            break;
+        //    }
+        //}
         //public static async Task FillPlaylistForRuntime(this MusicDb db, Playlist pl)
         //{
         //    foreach (var pli in pl.Items)

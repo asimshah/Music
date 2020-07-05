@@ -1,6 +1,8 @@
 import { Component, Input, forwardRef, ViewEncapsulation, AfterViewInit, OnInit } from "@angular/core";
 import { NG_VALUE_ACCESSOR } from "@angular/forms";
-import { ControlBase, InputControlBase,  EnumControlBase } from "./controlbase.type";
+import { ControlBase } from "./controlbase.type";
+import { EnumControlBase } from "./enumcontrolbase";
+import { InputControlBase } from "./inputcontrolbase";
 import { toEnumValues } from "../core/common.functions";
 import { EnumValue } from "../core/core.types";
 

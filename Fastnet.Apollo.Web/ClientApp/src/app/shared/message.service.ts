@@ -123,16 +123,16 @@ export class MessageService {
       });
       this.hubConnection.on("SendCommand", (pc: PlayerCommand) => {
          if (pc.deviceKey === this.parameterService.getBrowserKey()) {
-            this.log.debug(`signalr recd: SendCommand ${JSON.stringify(pc)}`);
+            //this.log.debug(`signalr recd: SendCommand ${JSON.stringify(pc)}`);
             this.playerCommand.next(pc);
          }
       });
       this.hubConnection.on("SendArtistNewOrModified", (artistId: number) => {
-         console.log(`recd SendArtistNewOrModified for ${artistId}`);
+         //console.log(`recd SendArtistNewOrModified for ${artistId}`);
          this.newOrModifiedArtist.next(artistId);
       });
       this.hubConnection.on("SendArtistDeleted", (artistId: number) => {
-         console.log(`recd SendArtistDeleted for ${artistId}`);
+         //console.log(`recd SendArtistDeleted for ${artistId}`);
          this.deletedArtist.next(artistId);
       });
    }

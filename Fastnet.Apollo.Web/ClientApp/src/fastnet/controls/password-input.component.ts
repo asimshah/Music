@@ -1,6 +1,7 @@
 import { NG_VALUE_ACCESSOR } from "@angular/forms";
 import { Component, forwardRef, EventEmitter, Output } from "@angular/core";
-import { ControlBase, InputControlBase } from "./controlbase.type";
+import { ControlBase } from "./controlbase.type";
+import { InputControlBase } from "./inputcontrolbase";
 
 @Component({
     selector: 'password-input',

@@ -1,173 +1,53 @@
 <div class="component-container" (swipeleft)="onSwipeLeft()" (swiperight)="onSwipeRight()">
   <div *ngIf="catalogView === CatalogView.DefaultView">
-    <div class="artists-panel">
-      <ng-container *ngFor="let artist of allArtists">
-        <div class="artist-descr" (click)="onArtistClick(artist)">
-          <div class="artist-image">
-            <img *ngIf="artist.imageUrl" [src]="artist.imageUrl" />
-          </div>
-          <div class="artist-name">{{artist.name}}</div>
-          <div class="artist-stats">{{getArtistStats(artist)}}</div>
-        </div>
-      </ng-container>
-    </div>
+     <artists-view (artistSelected)="onArtistClick($event)"></artists-view>
   </div>
   <div *ngIf="catalogView === CatalogView.SearchResults">
     <div class="albums" *ngIf="matchedWorks.length > 0">
-       <div class="album" *ngFor="let album of matchedWorks" >
+       <div class="album" *ngFor="let album of matchedWorks">
           <div class="name-row">
              <div class="image-container">
                 <img class="image" *ngIf="album.coverArtUrl" [src]="album.coverArtUrl" (click)="toggleAlbumTracks(album)" />
-                <ng-container *ngIf="!albumEditDisabled">
-                   <ng-container *ngIf="album.showTracks">
-                      <i class="fa fa-toggle-on toggle-edit-mode" [ngClass]="{'fa-rotate-180': !album.editMode}" (click)="toggleWorkEditMode(album)"></i>
-                   </ng-container>
-                </ng-container>
              </div>
-             <div class="album-identifier">
+             <div class="album-identifier" (contextmenu)="onRightClick($event, album)">
                 <ng-container *ngIf="!isTouchDevice()">
-                   <div class="album-name" [ngClass]="{'is-highlit': album.isHighLit}" (contextmenu)="onRightClick($event, album)">
+                   <div class="album-name" [ngClass]="{'is-highlit': album.isHighLit}" >
                       <div>
                          <highlighted-text [searchText]="searchText" [text]="album.name" [prefixMode]="prefixMode"></highlighted-text>
                       </div>
                       <div class="duration">{{album.formattedDuration}}</div>
                       <div class="command-panel" (mouseenter)="onAlbumMouse(album, true)" (mouseleave)="onAlbumMouse(album, false)">
-                         <!--<i *ngIf="album.editMode" title="edit metadata" class="fa fa-ellipsis-h edit-work" (click)="onEditAlbum(getArtist(album), album)"></i>-->
-                         <div *ngIf="!album.editMode">
-                            <i title="play album now" class="fa fa-play" (click)="onPlayAlbum(getArtist(album), album)"></i>
-                            <i title="add album to play list" class="fa fa-plus-square" (click)="onQueueAlbum(getArtist(album), album)"></i>
+                         <div >
+                            <i title="play album now" class="fa fa-play" (click)="onPlayAlbum(album)"></i>
+                            <i title="add album to play list" class="fa fa-plus-square" (click)="onQueueAlbum(album)"></i>
                          </div>
                       </div>
                    </div>
-                   <div class="editable-name">
-                      <highlighted-text [searchText]="searchText" [text]="getArtist(album).name" [prefixMode]="prefixMode"></highlighted-text>
+                   <div class="artist-name">
+                      <highlighted-text [searchText]="searchText" [text]="album.artistName" [prefixMode]="prefixMode"></highlighted-text>
                    </div>
                 </ng-container>
                 <ng-container *ngIf="isTouchDevice()">
-                   <div class="album-name is-touch-device" [ngClass]="{'is-highlit': album.isHighLit}" (tap)="onTapAlbum(album)">
-                      <div>
-                         <highlighted-text [searchText]="searchText" [text]="album.name" [prefixMode]="prefixMode"></highlighted-text>
+                   <div (tap)="onTapAlbum(album)">
+                      <div class="album-name is-touch-device" [ngClass]="{'is-highlit': album.isHighLit}">
+                         <div>
+                            <highlighted-text [searchText]="searchText" [text]="album.name" [prefixMode]="prefixMode"></highlighted-text>
+                         </div>
+                         <div class="duration">{{album.formattedDuration}}</div>
                       </div>
-                      <div class="duration">{{album.formattedDuration}}</div>
-                   </div>
-                   <div class="editable-name">
-                      <highlighted-text [searchText]="searchText" [text]="getArtist(album).name" [prefixMode]="prefixMode"></highlighted-text>
+                      <div class="artist-name">
+                         <highlighted-text [searchText]="searchText" [text]="album.artistName" [prefixMode]="prefixMode"></highlighted-text>
+                      </div>
                    </div>
                 </ng-container>
 
              </div>
           </div>
-          <div class="tracks striped-rows" *ngIf="album.showTracks">
-             <ng-container *ngIf="!isTouchDevice()">
-                <div *ngFor="let track of album.tracks">
-                   <div class="track layout-as-albums" [ngClass]="{'is-highlit': track.isHighLit}">
-                      <div class="command-panel" (mouseenter)="onTrackMouse(track, file, true)" (mouseleave)="onTrackMouse(track, file, false)">
-                         <i title="play now" class="fa fa-play" (click)="onPlayTrack(track)"></i>
-                         <i title="add to play list" class="fa fa-plus-square" (click)="onQueueTrack(track)"></i>
-                      </div>
-                      <div class="track-number" [ngClass]="{ 'hide-text': album.opusType === OpusType.Singles || album.opusType === OpusType.Collection, 'is-highlit': track.isHighLit}">{{track.number}}</div>
-                      <!--<div class="track-title" [ngClass]="{ 'is-highlit': track.isHighLit}">{{track.title}}</div>-->
-                      <highlighted-text class="track-title" [searchText]="searchText" [text]="track.title" [prefixMode]="prefixMode"></highlighted-text>
-                      <!--<ng-container *ngIf="isTouchDevice()">
-      <div class="track-number  is-touch-device" [ngClass]="{'hide-text': album.opusType === OpusType.Singles || album.opusType === OpusType.Collection, 'is-highlit': track.isHighLit}">{{track.number}}</div>
-      <div class="track-title  is-touch-device" (tap)="onTapTrack(track)">{{track.title}}</div>
-   </ng-container>-->
-                      <div class="audio-files">
-                         <ng-container *ngFor="let file of track.musicFiles">
-                            <div class="audio-details" [ngClass]="{'is-highlit': track.musicFiles[0].isHighLit}">
-                               <span class="audio-properties">({{file.audioProperties}})</span>
-                               <span class="duration">{{file.formattedDuration}}</span>
-                            </div>
-                            <div class="command-panel" (mouseenter)="onTrackMouse(track, file, true)" (mouseleave)="onTrackMouse(track, track.musicFiles[0], false)">
-                               <i title="play this version now" class="fa fa-play" (click)="onPlayMusicFile(file)"></i>
-                               <i title="add this version to play list" class="fa fa-plus-square" (click)="onQueueMusicFile(file)"></i>
-                            </div>
-                         </ng-container>
-                      </div>
-                   </div>
-                </div>
-             </ng-container>
-             <ng-container *ngIf="isTouchDevice()">
-                <div *ngFor="let track of album.tracks">
-                   <div class="track" (tap)="onTapTrack(album, track)" [ngClass]="{'is-highlit': track.isHighLit}">
-                      <div><!-- dummy to maintain grid layout--></div>
-                      <div class="track-number is-touch-device">{{track.number}}</div>
-                      <div class="track-title  is-touch-device">{{track.title}}</div>
-                      <div class="audio-details">
-                         <span class="duration">{{track.musicFiles[0].formattedDuration}}</span>
-                      </div>
-                      <div><!-- dummy to maintain grid layout--></div>
-                   </div>
-                </div>
-             </ng-container>
-          </div>
-
+          <track-list *ngIf="album.showTracks" [tracks]="album.tracks" [highlightText]="searchText" [prefixMode]="prefixMode"></track-list>
        </div>
     </div>
     <div class="tracks" *ngIf="matchedTracks.length > 0">
-      <ng-container *ngIf="!isTouchDevice()">
-        <div class="track layout-as-singles" *ngFor="let track of matchedTracks" [ngClass]="{'is-highlit': track.isHighLit}">
-          <div class="image-container">
-            <img class="image small" *ngIf="track.work.coverArtUrl" [src]="track.work.coverArtUrl" />
-          </div>
-          <div>
-            <div class="track-title">
-              <highlighted-text [searchText]="searchText" [text]="track.title" [prefixMode]="prefixMode"></highlighted-text>
-            </div>
-            <div class="track-origin">
-              <div>
-                <!--<span [innerHTML]="'from  ' + track.work.highlightedName"></span>-->
-                <highlighted-text [searchText]="searchText" [text]="track.work.name" [prefixMode]="prefixMode"></highlighted-text>
-              </div>
-              <div class="editable-name">
-                <span>by {{getArtist(track.work).name}}</span>
-                <!--<i *ngIf="allowEditArtists" title="edit metadata" class="fa fa-ellipsis-h edit-icon edit-artist" (click)="onEditArtist(getArtist(track.work))"></i>-->
-              </div>
-            </div>
-          </div>
-          <div class="audio-files">
-            <ng-container *ngFor="let file of track.musicFiles">
-              <div class="audio-details" [ngClass]="{'is-highlit': file.isHighLit}">
-                <span class="audio-properties">({{file.audioProperties}})</span>
-                <span class="duration">{{file.formattedDuration}}</span>
-              </div>
-              <div class="command-panel" (mouseenter)="onTrackMouse(track, file, true)" (mouseleave)="onTrackMouse(track, file, false)">
-                <i title="play now" class="fa fa-play" (click)="onPlayMusicFile(file)"></i>
-                <i title="add to play list" class="fa fa-plus-square" (click)="onQueueMusicFile(file)"></i>
-              </div>
-            </ng-container>
-          </div>
-        </div>
-      </ng-container>
-      <ng-container *ngIf="isTouchDevice()">
-        <div class="track layout-as-singles" *ngFor="let track of matchedTracks" (tap)="onTapTrack(track)">
-          <div class="image-container">
-            <img class="image small" *ngIf="track.work.coverArtUrl" [src]="track.work.coverArtUrl" />
-          </div>
-          <div>
-            <div class="track-title">
-              <highlighted-text [searchText]="searchText" [text]="track.title" [prefixMode]="prefixMode"></highlighted-text>
-            </div>
-            <div class="track-origin">
-              <div>
-                <!--<span [innerHTML]="'from  ' + track.work.highlightedName"></span>-->
-                <highlighted-text [searchText]="searchText" [text]="track.work.name" [prefixMode]="prefixMode"></highlighted-text>
-              </div>
-              <div class="editable-name">
-                <span>by {{getArtist(track.work).name}}</span>
-                <!--<i *ngIf="allowEditArtists" title="edit metadata" class="fa fa-ellipsis-h edit-icon edit-artist" (click)="onEditArtist(getArtist(track.work))"></i>-->
-              </div>
-            </div>
-          </div>
-          <div class="audio-files">
-            <ng-container *ngFor="let file of track.musicFiles">
-              <div class="audio-details">
-                <span class="duration">{{file.formattedDuration}}</span>
-              </div>
-            </ng-container>
-          </div>
-        </div>
-      </ng-container>
+       <track-list  [tracks]="matchedTracks" [layoutAsSingles]="true" [highlightText]="searchText" [prefixMode]="prefixMode"></track-list>
     </div>
     <div *ngIf="searchFoundNothing === true">
       <div>Search found nothing</div>
@@ -176,4 +56,4 @@
   </div>
   <popup-message></popup-message>
 </div>
-<popular-tag-editor></popular-tag-editor>
+<!--<popular-tag-editor></popular-tag-editor>-->

@@ -4,6 +4,7 @@
     <ng-container *ngIf="isMobileDevice() === false">
       <div class="two-column">
         <div class="catalogue-panel">
+           <!--<button (click)="onTestDialogClick()">Test</button>-->
           <menu-panel></menu-panel>
           <router-outlet></router-outlet>
         </div>
@@ -39,3 +40,4 @@
     </ng-container>
   </div>
 </div>
+<dialog-test></dialog-test>

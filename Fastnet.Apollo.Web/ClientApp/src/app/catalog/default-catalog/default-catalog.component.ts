@@ -6,7 +6,7 @@ import { PlayerService } from '../../shared/player.service';
 import { LoggingService } from '../../shared/logging.service';
 import { ParameterService } from '../../shared/parameter.service';
 import { DomSanitizer } from '@angular/platform-browser';
-import { MessageService } from '../../shared/message.service';
+//import { MessageService } from '../../shared/message.service';
 
 @Component({
     selector: 'app-default-catalog',
@@ -16,18 +16,18 @@ import { MessageService } from '../../shared/message.service';
 export class DefaultCatalogComponent extends BaseCatalogComponent implements OnInit {
 
     constructor(elementRef: ElementRef, library: LibraryService,
-        messageService: MessageService,
+        //messageService: MessageService,
         playerService: PlayerService, ps: ParameterService,
         sanitizer: DomSanitizer, log: LoggingService) {
-        super(elementRef, library, messageService, ps, sanitizer, playerService, log);
+        super(elementRef, library,  ps, sanitizer, playerService, log);
         //console.log(`constructor()`);
     }
 
     //async ngOnInit() {
     //}
-    protected addArtistToDefaultView() {
+    //protected addArtistToDefaultView() {
 
-    }
+    //}
     protected onSearch() {
 
     }

@@ -14,22 +14,17 @@ import { Severity } from '../../fastnet/core/core.types';
    styleUrls: ['./sliding-panels.component.scss']//,
 })
 export class SlidingPanelsComponent implements AfterContentInit {
-   private logger: Logger;
-   private previousPanelNumber: number = -1;
    @ViewChild('sliderparent', { static: false }) parent: ElementRef;
    @ContentChildren(SlidingPanelComponent) inputPanels: QueryList<SlidingPanelComponent>;
    public panels: SlidingPanelComponent[] = [];
    @Input() activePanelNumber: number = 0;
    constructor() {
-      this.logger = new Logger();
+      //this.logger = new Logger();
    }
    public ngAfterContentInit(): void {
-      //this.inputPanels.forEach(panel => {
-      //   console.log(panel.template);
-      //});
       let temp = this.inputPanels.toArray();
       setTimeout(() => {
-         this.panels = temp;// this.inputPanels.toArray();
+         this.panels = temp;
          this.panels.forEach((p, i) => {
             p.ident = `child ${i}`;
          });
@@ -40,10 +35,9 @@ export class SlidingPanelsComponent implements AfterContentInit {
 
    changePanel(backward = false): number {
       let step = backward ? -1 : 1;
-      this.previousPanelNumber = this.activePanelNumber;
       this.activePanelNumber = this.getNextPanel(step);
       this.setChildStates(backward);
-      this.log(Severity.information, `previous ${this.previousPanelNumber} active ${this.activePanelNumber}`);
+      //this.log(Severity.information, `previous ${this.previousPanelNumber} active ${this.activePanelNumber}`);
       return this.activePanelNumber;
    }
    setChildStates(backward = false) {
@@ -84,7 +78,7 @@ export class SlidingPanelsComponent implements AfterContentInit {
          return this.panels.length - 1;
       }
    }
-   private log(s: Severity, t: string) {
-      this.logger.logMessage(s, t);
-   }
+   //private log(s: Severity, t: string) {
+   //   this.logger.logMessage(s, t);
+   //}
 }

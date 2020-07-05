@@ -1,6 +1,6 @@
 
 export enum LocalStorageKeys {
-    browserKey, // identifies this browser to the system, i.e, to the extend that localStorage can..
+    //browserKey, // identifies this browser to the system, i.e, to the extend that localStorage can..
     currentStyle,
     popularSettings,
     currentDevice, // i.e. for the audio controller, device-menu and device playlist components
