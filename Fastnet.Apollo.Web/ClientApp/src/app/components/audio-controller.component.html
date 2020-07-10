@@ -3,9 +3,12 @@
       <div class="cover">
          <ng-container *ngIf="currentItem">
             <img [src]="currentItem.coverArtUrl" />
-            <ng-container *ngFor="let title of currentItem.titles; let first = first; let last = last">
-               <div class="title" [ngClass]="{'artist-name': first, 'track-name': last}">{{title}}</div>
-            </ng-container>
+            <div class="title artist-name">{{currentItem.artistName}}</div>
+            <div class="title">{{currentItem.collectionName}}</div>
+            <div class="title track-name">{{currentItem.title}}</div>
+            <!--<ng-container *ngFor="let title of currentItem.titles; let first = first; let last = last">
+      <div class="title" [ngClass]="{'artist-name': first, 'track-name': last}">{{title}}</div>
+   </ng-container>-->
             <div class="audio-properties">{{currentItem.audioProperties}}</div>
          </ng-container>
       </div>

@@ -15,59 +15,47 @@ namespace Fastnet.Apollo.Web
     /// </summary>
     public class DeviceRuntime
     {
+        #region Private Fields
+
         private static ILogger log = ApplicationLoggerFactory.CreateLogger<DeviceRuntime>();
+
+        #endregion Private Fields
+
+        #region Public Properties
+
+        public int CommandSequenceNumber { get; set; }
+        public PlaylistPosition CurrentPosition { get; set; }
+        public string DisplayName { get; set; }
+        public ExtendedPlaylist ExtendedPlaylist { get; private set; }
+        public string Key { get; set; }
+        public int MaxSampleRate { get; set; }
+        public PlayerCommand MostRecentCommand { get; set; }
+        public string PlayerUrl { get; set; }
         public DeviceStatus Status { get; set; }
         public AudioDeviceType Type { get; set; }
-        public string Key { get; set; }
-        public string DisplayName { get; set; }
-        public int MaxSampleRate { get; set; }
-        public string PlayerUrl { get; set; }
-        public int CommandSequenceNumber { get; set; }
-        public PlaylistPosition CurrentPosition { get; private set; }
-        public PlayerCommand MostRecentCommand { get; set; }
-        //public PlaylistRuntime Playlist { get; set; }
-        public ExtendedPlaylist ExtendedPlaylist { get; private set; }
+
+        #endregion Public Properties
+
+        #region Public Constructors
+
         public DeviceRuntime()
         {
             CurrentPosition = new PlaylistPosition();
         }
+
+        #endregion Public Constructors
+
+        #region Public Methods
+
         public void ClearPlaylist()
         {
             ExtendedPlaylist.ClearItems();
             CurrentPosition = PlaylistPosition.ZeroPosition;
         }
-        public void SetPlaylist(ExtendedPlaylist epl)
-        {
-            // do I need to ensure that the DeviceStatus is in a safe state???
-            if(this.ExtendedPlaylist != null)
-            {
-                DetachPlaylist();
-            }
-            epl.DeviceKey = this.Key;
-            foreach(var item in epl.Items)
-            {
-                AddRuntimeInformation(item);
-            }
-            this.ExtendedPlaylist = epl;
-            this.CurrentPosition = PlaylistPosition.ZeroPosition;
-            this.ExtendedPlaylist.AttachItemsChangedHandler(PlaylistItems_CollectionChanged);
-        }
-        //public bool CanPlay(ExtendedPlaylistItem pli)
-        //{
-        //    if(pli is SingleTrackPlaylistItem)
-        //    {
-        //        return !(pli as SingleTrackPlaylistItem).NotPlayableOnCurrentDevice;
-        //    }
-        //    return false;
-        //}
-        //public bool CanPlay(PlaylistItemRuntime pli)
-        //{
-        //    return !pli.NotPlayableOnCurrentDevice;// !(MaxSampleRate > 0 && pli.SampleRate > MaxSampleRate);
-        //}
         public SingleTrackPlaylistItem GetItemAtPosition(PlaylistPosition position)
         {
             var item = FindPlaylistItem(position);
-            if(item is MultiTrackPlaylistItem)
+            if (item is MultiTrackPlaylistItem)
             {
                 item = FindPlaylistItem(position.GetNextMinor());
             }
@@ -75,6 +63,54 @@ namespace Fastnet.Apollo.Web
             log.Information($"current position changed from {CurrentPosition} to {newPosition}, next item is {item.ToString() ?? ""}");
             CurrentPosition = newPosition;
             var stpli = item as SingleTrackPlaylistItem;
+            if (stpli.NotPlayableOnCurrentDevice)
+            {
+                log.Information($"{stpli} is not playable on {DisplayName} [{Key}]");
+                return GetNextItem();
+            }
+            return stpli;
+        }
+        public SingleTrackPlaylistItem GetNextItem()
+        {
+            ExtendedPlaylistItem result = null;
+            if (CurrentPosition.IsZero())
+            {
+                result = ExtendedPlaylist.Items.First();
+            }
+            else
+            {
+                var currentMajorItem = FindPlaylistItem(CurrentPosition.Major, 0);
+                switch (currentMajorItem)
+                {
+                    case SingleTrackPlaylistItem sti:
+                        // current major is single track, so next will be next major
+                        result = FindPlaylistItem(CurrentPosition.GetNextMajor());
+                        break;
+                    case MultiTrackPlaylistItem mti:
+                        // current major is multi track, so next will be either the next minor or the next major
+                        result = FindPlaylistItem(CurrentPosition.GetNextMinor());
+                        if (result == null)
+                        {
+                            result = FindPlaylistItem(CurrentPosition.GetNextMajor());
+                        }
+                        break;
+                }
+            }
+            if (result != null)
+            {
+                if (result is MultiTrackPlaylistItem)
+                {
+                    result = FindFirstSubItem(result.Position.Major);
+                }
+            }
+            var newPosition = result?.Position ?? PlaylistPosition.ZeroPosition;
+            log.Information($"current position changed from {CurrentPosition} to {newPosition}, next item is {result?.ToString() ?? ""}");
+            CurrentPosition = newPosition;
+            if (CurrentPosition.Major == 0 && CurrentPosition.Major == 0)
+            {
+                return null;
+            }
+            var stpli = result as SingleTrackPlaylistItem;
             if (stpli.NotPlayableOnCurrentDevice)
             {
                 log.Information($"{stpli} is not playable on {DisplayName} [{Key}]");
@@ -131,53 +167,78 @@ namespace Fastnet.Apollo.Web
             }
             return stpli;
         }
-        public SingleTrackPlaylistItem GetNextItem()
+        public void SetPlaylist(ExtendedPlaylist epl)
         {
-            ExtendedPlaylistItem result = null; 
-            if (CurrentPosition.IsZero())
+            var resettingExistingPlaylist = false;
+            var savedPosition = PlaylistPosition.ZeroPosition;
+            long? currentPlaylistItemId = null;
+            if (this.ExtendedPlaylist != null)
             {
-                result = ExtendedPlaylist.Items.First();
-            }
-            else
-            {
-                var currentMajorItem = FindPlaylistItem(CurrentPosition.Major, 0);
-                switch(currentMajorItem)
+                resettingExistingPlaylist = this.ExtendedPlaylist.PlaylistId == epl.PlaylistId;
+                if(resettingExistingPlaylist)
                 {
-                    case SingleTrackPlaylistItem sti:
-                        // current major is single track, so next will be next major
-                        result = FindPlaylistItem(CurrentPosition.GetNextMajor());
-                        break;
-                    case MultiTrackPlaylistItem mti:
-                        // current major is multi track, so next will be either the next minor or the next major
-                        result = FindPlaylistItem(CurrentPosition.GetNextMinor());
-                        if(result == null)
-                        {
-                            result = FindPlaylistItem(CurrentPosition.GetNextMajor());
-                        }
-                        break;
+                    if(this.CurrentPosition.IsZero() == false)
+                    {
+                        savedPosition = this.CurrentPosition.Clone();
+                        var currentItem = this.ExtendedPlaylist.Items.Skip(savedPosition.Major - 1).First();
+                        currentPlaylistItemId = currentItem.PlaylistItemId;
+                    }
                 }
+                DetachPlaylist();
             }
-            if (result != null)
+            epl.DeviceKey = this.Key;
+            foreach(var item in epl.Items)
             {
-                if (result is MultiTrackPlaylistItem)
-                {
-                    result = FindFirstSubItem(result.Position.Major);
-                }                
+                AddRuntimeInformation(item);
             }
-            var newPosition = result?.Position ?? PlaylistPosition.ZeroPosition;
-            log.Information($"current position changed from {CurrentPosition} to {newPosition}, next item is {result?.ToString() ?? ""}");
-            CurrentPosition = newPosition;
-            if(CurrentPosition.Major == 0 && CurrentPosition.Major == 0)
+            this.ExtendedPlaylist = epl;
+            if(resettingExistingPlaylist && currentPlaylistItemId.HasValue)
             {
-                return null;
+                var matchingItem = this.ExtendedPlaylist.Items.SingleOrDefault((x) => x.PlaylistItemId == currentPlaylistItemId.Value);
+                var index = this.ExtendedPlaylist.Items.IndexOf(matchingItem);
+                savedPosition.SetMajor(index + 1);
             }
-            var stpli = result as SingleTrackPlaylistItem;
-            if(stpli.NotPlayableOnCurrentDevice)
+            if(resettingExistingPlaylist)
             {
-                log.Information($"{stpli} is not playable on {DisplayName} [{Key}]");
-                return GetNextItem();
+                log.Information($"{this}, setting current position from {CurrentPosition} to {savedPosition}");
             }
-            return stpli;
+            this.CurrentPosition = savedPosition.Clone();// PlaylistPosition.ZeroPosition;
+            this.ExtendedPlaylist.AttachItemsChangedHandler(PlaylistItems_CollectionChanged);
+        }
+        public override string ToString()
+        {
+            return $"{DisplayName} (key:{Key}) [{Type}]";
+        }
+
+        #endregion Public Methods
+
+        #region Private Methods
+
+        private void AddRuntimeInformation(ExtendedPlaylistItem extendedPlaylistItem)
+        {
+            switch (extendedPlaylistItem)
+            {
+                case PlaylistMusicFileItem mfi:
+                    mfi.NotPlayableOnCurrentDevice = !(MaxSampleRate == 0 || mfi.SampleRate == 0 || mfi.SampleRate <= MaxSampleRate);
+                    break;
+                case PlaylistTrackItem ti:
+                    ti.SelectMusicFile(this);
+                    break;
+                case MultiTrackPlaylistItem mti:
+                    foreach (var si in mti.SubItems)
+                    {
+                        AddRuntimeInformation(si);
+                    }
+                    break;
+            }
+        }
+        private void DetachPlaylist()
+        {
+            if (this.ExtendedPlaylist != null)
+            {
+                this.ExtendedPlaylist.DeviceKey = null;
+                this.ExtendedPlaylist.DetachItemsChangedHandler(PlaylistItems_CollectionChanged);
+            }
         }
         private ExtendedPlaylistItem FindFirstSubItem(int major)
         {
@@ -213,17 +274,9 @@ namespace Fastnet.Apollo.Web
             }
             return result;
         }
-        public override string ToString()
+        private void OnPlaylistItemAdded(ExtendedPlaylistItem extendedPlaylistItem)
         {
-            return $"{DisplayName} (key:{Key}) [{Type}]";
-        }
-        private void DetachPlaylist()
-        {
-            if(this.ExtendedPlaylist != null)
-            {
-                this.ExtendedPlaylist.DeviceKey = null;
-                this.ExtendedPlaylist.DetachItemsChangedHandler(PlaylistItems_CollectionChanged);
-            }
+            AddRuntimeInformation(extendedPlaylistItem);
         }
         private void PlaylistItems_CollectionChanged(object sender, NotifyCollectionChangedEventArgs e)
         {
@@ -246,27 +299,7 @@ namespace Fastnet.Apollo.Web
                     break;
             }
         }
-        private void OnPlaylistItemAdded(ExtendedPlaylistItem extendedPlaylistItem)
-        {
-            AddRuntimeInformation(extendedPlaylistItem);
-        }
-        private void AddRuntimeInformation(ExtendedPlaylistItem extendedPlaylistItem)
-        {
-            switch(extendedPlaylistItem)
-            {
-                case PlaylistMusicFileItem mfi:
-                    mfi.NotPlayableOnCurrentDevice = !(MaxSampleRate == 0 || mfi.SampleRate == 0 || mfi.SampleRate <= MaxSampleRate);
-                    break;
-                case PlaylistTrackItem ti:
-                    ti.SelectMusicFile(this);
-                    break;
-                case MultiTrackPlaylistItem mti:
-                    foreach (var si in mti.SubItems)
-                    {
-                        AddRuntimeInformation(si);
-                    }
-                    break;
-            }
-        }
+
+        #endregion Private Methods
     }
 }

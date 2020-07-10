@@ -4,10 +4,18 @@ namespace Fastnet.Apollo.Web
 {
     public class PlaylistPosition
     {
+        #region Public Properties
 
+        public static PlaylistPosition ZeroPosition => new PlaylistPosition(0, 0);
+        [JsonProperty]
         public int Major { get; private set; } = 0;
-
+        [JsonProperty]
         public int Minor { get; private set; } = 0;
+
+        #endregion Public Properties
+
+        #region Public Constructors
+
         public PlaylistPosition()
         {
             //Reset();
@@ -17,19 +25,13 @@ namespace Fastnet.Apollo.Web
             Major = major;
             Minor = minor;
         }
-        public void Set(PlaylistPosition position)
+
+        #endregion Public Constructors
+
+        #region Public Methods
+        public PlaylistPosition Clone()
         {
-            //this.Major = position.Major;
-            //this.Minor = position.Minor;
-        }
-        //public void Reset()
-        //{
-        //    this.Major = 0;
-        //    this.Minor = 0;
-        //}
-        public bool IsZero()
-        {
-            return Major == 0 && Minor == 0;
+            return new PlaylistPosition(Major, Minor);
         }
         public PlaylistPosition GetNextMajor()
         {
@@ -47,10 +49,19 @@ namespace Fastnet.Apollo.Web
         {
             return new PlaylistPosition(Major, Minor - 1);
         }
-        public static PlaylistPosition ZeroPosition => new PlaylistPosition(0, 0);
+        public bool IsZero()
+        {
+            return Major == 0 && Minor == 0;
+        }
+        public void SetMajor(int number)
+        {
+            this.Major = number;
+        }
         public override string ToString()
         {
             return $"({Major}, {Minor})";
         }
+
+        #endregion Public Methods
     }
 }

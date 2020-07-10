@@ -12,8 +12,8 @@ namespace RagaGenerator
 {
     public class CarnaticGenerator
     {
-        private readonly string source;
         private readonly string destination;
+        private readonly string source;
         public CarnaticGenerator(string source, string destination)
         {
             if (string.IsNullOrEmpty(source))

@@ -538,13 +538,6 @@ namespace Fastnet.Apollo.Web.Controllers
             //await playManager.AddPlaylistItem(device.KeyName, pli);
             //playManager.DebugDevicePlaylist(device.KeyName);
         }
-        /// <summary>
-        /// Always clears any existing playlist and then adds the entity
-        /// </summary>
-        /// <typeparam name="T"></typeparam>
-        /// <param name="device"></param>
-        /// <param name="entity"></param>
-        /// <returns></returns>
         private async Task<int> PlayEntity<T>(Device device, T entity) where T : EntityBase
         {
             var pl = await this.libraryService.CreateDevicePlaylistAsync(device.KeyName);
@@ -553,70 +546,10 @@ namespace Fastnet.Apollo.Web.Controllers
             //this.playManager.DebugDevicePlaylist(device.KeyName);
             return await playManager.PlayNextAsync(device.KeyName);
         }
-        //private async Task LoadDevicePlaylist<T>(Device device, T entity) where T : EntityBase
-        //{
-        //    var playlist = device.Playlist;
-        //    await this.libraryService.ReplacePlaylistItems<T>(playlist, entity);
-        //    await playManager.AddPlaylistItem(device.KeyName, playlist.Items.First());
-        //}
-        //private PlaylistItem CreateNewPlaylistItem(MusicFile mf)
-        //{
-        //    var pli = new PlaylistItem
-        //    {
-        //        Type = PlaylistItemType.MusicFile,
-        //        Title = mf.Track.Title,
-        //        ItemId = mf.Track.Id,
-        //        MusicFileId = mf.Id
-        //    };
-        //    return pli;
-        //}
-        //private PlaylistItem CreateNewPlaylistItem(Track track)
-        //{
-        //    var pli = new PlaylistItem
-        //    {
-        //        Type = PlaylistItemType.Track,
-        //        Title = track.Title,
-        //        ItemId = track.Id,
-        //        MusicFileId = 0
-        //    };
-        //    return pli;
-        //}
-        //private PlaylistItem CreateNewPlaylistItem(Work work)
-        //{
-        //    var pli = new PlaylistItem
-        //    {
-        //        Type = PlaylistItemType.Work,
-        //        Title = work.Name,// mf.Track.Title,
-        //        ItemId = work.Id,
-        //        MusicFileId = 0// mf.Id
-        //    };
-        //    return pli;
-        //}
-        //private PlaylistItem CreateNewPlaylistItem(Performance performance)
-        //{
-        //    //var title = performance.Composition?.Name ?? performance.RagaPerformances.Select(x => x.Raga).Single().Name;
-        //    var pli = new PlaylistItem
-        //    {
-        //        Type = PlaylistItemType.Performance,
-        //        Title = performance.GetParentEntityName(),
-        //        ItemId = performance.Id,
-        //        MusicFileId = 0// mf.Id
-        //    };
-        //    return pli;
-        //}
-        /// <summary>
-        /// called from ConfirmDevice() (.. from an agent) or a user edit of the device
-        /// fills out runtime playlist info and syncs with the play manager
-        /// q1? shoudl playlist be created/validated here??
-        /// </summary>
-        /// <param name="device"></param>
-        /// <returns></returns>
         private async Task SyncDeviceWithPlayManager(Device device)
         {
             await playManager.UpdateDeviceRuntimeAsync(device);
             //playManager.DebugDevicePlaylist(device.KeyName);
         }
-
     }
-
 }

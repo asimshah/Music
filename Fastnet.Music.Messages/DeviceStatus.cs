@@ -6,7 +6,28 @@ using System.Diagnostics;
 
 namespace Fastnet.Music.Messages
 {
-#pragma warning disable CS1591 // Missing XML comment for publicly visible type or member
+    public class DeviceStatus : MessageBase
+    {
+        [JsonConverter(typeof(TimeSpanToSeconds))]
+        public TimeSpan CurrentTime { get; set; }
+
+        public string Key { get; set; }
+        public PlayerStates State { get; set; }
+
+        [JsonConverter(typeof(TimeSpanToSeconds))]
+        public TimeSpan TotalTime { get; set; }
+
+        /// <summary>
+        /// range is 0.0% to 100%
+        /// </summary>
+        public float Volume { get; set; } // 0.0% to 100.0%
+
+        public override string ToString()
+        {
+            return $"{Key}: {State}, current {CurrentTime.TotalSeconds}, total {TotalTime.TotalSeconds}, vol {Volume}";
+        }
+    }
+
     public class TimeSpanToSeconds : JsonConverter
     {
         public override bool CanConvert(Type objectType)
@@ -28,6 +49,7 @@ namespace Fastnet.Music.Messages
                         seconds = 0L;
                         Debug.WriteLine($"TimeSpanToSeconds, ReadJson, unknown type {val.GetType().Name}");
                         break;
+
                     case string s:
                         seconds = 0L;
                         if (!Int64.TryParse(s, out seconds))
@@ -35,15 +57,19 @@ namespace Fastnet.Music.Messages
                             Debug.WriteLine($"TimeSpanToSeconds, ReadJson, string {val.ToString()} not convertible to long");
                         }
                         break;
+
                     case int i:
                         seconds = (long)i;
                         break;
+
                     case long l:
                         seconds = l;
                         break;
+
                     case float f:
                         seconds = (long)Math.Round(f);
                         break;
+
                     case double d:
                         seconds = (long)Math.Round(d);
                         break;
@@ -60,22 +86,4 @@ namespace Fastnet.Music.Messages
             writer.WriteValue(ts.TotalSeconds);
         }
     }
-    public class DeviceStatus : MessageBase
-    {
-        public string Key { get; set; }
-        public PlayerStates State { get; set; }
-        [JsonConverter(typeof(TimeSpanToSeconds))]
-        public TimeSpan CurrentTime { get; set; }
-        [JsonConverter(typeof(TimeSpanToSeconds))]
-        public TimeSpan TotalTime { get; set; }
-        /// <summary>
-        /// range is 0.0% to 100%
-        /// </summary>
-        public float Volume { get; set; } // 0.0% to 100.0%
-        public override string ToString()
-        {
-            return $"{Key}: {State}, current {CurrentTime.TotalSeconds}, total {TotalTime.TotalSeconds}, vol {Volume}";
-        }
-    }
-#pragma warning restore CS1591 // Missing XML comment for publicly visible type or member
 }
