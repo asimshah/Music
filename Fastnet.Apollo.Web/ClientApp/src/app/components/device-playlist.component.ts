@@ -61,13 +61,13 @@ export class DevicePlaylistComponent implements OnInit, OnDestroy {
       return !item.notPlayableOnCurrentDevice;
       //return this.device && (this.device.capability.maxSampleRate === 0 || item.sampleRate <= this.device.capability.maxSampleRate);
    }
-   getTitle(item: PlaylistItem) {
-      return item.titles[item.titles.length - 1];
-   }
-   getFullTitle(item: PlaylistItem) {
-      let text = `<div>${item.titles[0]}</div><div>${item.titles[1]}</div><div>${item.titles[2]}</div>`;
-      return text;
-   }
+   //getTitle(item: PlaylistItem) {
+   //   return item.titles[item.titles.length - 1];
+   //}
+   //getFullTitle(item: PlaylistItem) {
+   //   let text = `<div>${item.titles[0]}</div><div>${item.titles[1]}</div><div>${item.titles[2]}</div>`;
+   //   return text;
+   //}
    isPlayingIconVisible(item: PlaylistItem) {
       let r = false;
       if (this.deviceStatus) {

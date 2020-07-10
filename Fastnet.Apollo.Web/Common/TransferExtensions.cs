@@ -423,8 +423,13 @@ namespace Fastnet.Apollo.Web
             {
                 return new PlaylistItemDTO
                 {
+                    Id = pli.PlaylistItemId,
                     Position = pli.Position,
-                    Titles = pli.Titles,
+                    //Titles = pli.Titles,
+                    ArtistName = pli.ArtistName,
+                    CollectionName = pli.CollectionName,
+
+                    MusicStyle = pli.MusicStyle,
                     CoverArtUrl = pli.CoverArtUrl,
                     TotalTime = pli.Duration.TotalMilliseconds,
                     FormattedTotalTime = pli.Duration.ToDuration()
@@ -441,6 +446,7 @@ namespace Fastnet.Apollo.Web
             {
                 var dto = getBaseDTO(sti);
                 dto.Type = PlaylistRuntimeItemType.SingleItem;
+                dto.Title = sti.Title;
                 dto.AudioProperties = sti.AudioProperties;
                 dto.SampleRate = sti.SampleRate;
                 dto.NotPlayableOnCurrentDevice = sti.NotPlayableOnCurrentDevice;

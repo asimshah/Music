@@ -1,4 +1,4 @@
-﻿import { AfterViewInit, OnChanges, SimpleChanges } from "@angular/core";
+import { AfterViewInit, OnChanges, SimpleChanges, ElementRef } from "@angular/core";
 import { ValidationContext } from './controls.types';
 import { ControlBase } from "./controlbase.type";
 /** Use this as a base for any control based on the HTML <input> element
@@ -6,6 +6,10 @@ import { ControlBase } from "./controlbase.type";
  * and (2) lostfocus event will cause validation with ValidationContext.LostFocus
  */
 export class InputControlBase extends ControlBase implements OnChanges, AfterViewInit {
+   constructor(protected elem: ElementRef) {
+      super();
+      this.elem.nativeElement.fastnetComponent = this;
+   }
     onBlur() {
         super.onBlur();
         this.validate(ValidationContext.LostFocus);

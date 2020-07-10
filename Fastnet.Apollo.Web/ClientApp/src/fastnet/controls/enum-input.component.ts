@@ -1,4 +1,4 @@
-import { Component, Input, forwardRef, ViewEncapsulation, AfterViewInit, OnInit } from "@angular/core";
+import { Component, Input, forwardRef, ViewEncapsulation, AfterViewInit, OnInit, ElementRef } from "@angular/core";
 import { NG_VALUE_ACCESSOR } from "@angular/forms";
 import { ControlBase } from "./controlbase.type";
 import { EnumControlBase } from "./enumcontrolbase";
@@ -39,7 +39,7 @@ export class EnumInputControl extends EnumControlBase<number> implements OnInit 
     private static index: number = 0;
    groupName: string = "";
    @Input() noborder;
-    constructor() {
+   constructor() {
         super();
         this.setReference("enum");
     }

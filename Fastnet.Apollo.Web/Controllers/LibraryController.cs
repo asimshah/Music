@@ -791,8 +791,6 @@ namespace Fastnet.Apollo.Web.Controllers
             }
             return new EmptyResult();
         }
-
-
         private IActionResult GetImageResult(Image image)
         {
             var ms = new MemoryStream(image.Data);

@@ -27,6 +27,7 @@ import { TooltipDirective } from './tooltip.directive';
 import { TooltipContentComponent } from './tooltip-content.component';
 import { TabComponent } from './tab.component';
 import { TabsComponent } from './tabs.component';
+import { ExpandingPanelsComponent } from './expanding-panels.component';
 
 @NgModule({
    imports: [
@@ -63,7 +64,8 @@ import { TabsComponent } from './tabs.component';
       TooltipDirective,
       TooltipContentComponent,
       TabComponent,
-      TabsComponent
+      TabsComponent,
+      ExpandingPanelsComponent
    ],
    declarations: [
       TextInputControl,
@@ -95,7 +97,8 @@ import { TabsComponent } from './tabs.component';
       TooltipDirective,
       TooltipContentComponent,
       TabComponent,
-      TabsComponent
+      TabsComponent,
+      ExpandingPanelsComponent
    ],
    providers: [
 

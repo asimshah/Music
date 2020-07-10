@@ -86,10 +86,10 @@ export abstract class BaseCatalogComponent implements OnInit, OnDestroy, AfterVi
    toggleShowWorks(c: Artist) {
       c.showWorks = !c.showWorks;
    }
-   onMovementMouse(m: Movement, f: MusicFile, val: boolean) {
-      m.isHighLit = val;
-      f.isHighLit = val;
-   }
+   //onMovementMouse(m: Movement, f: MusicFile, val: boolean) {
+   //   m.isHighLit = val;
+   //   f.isHighLit = val;
+   //}
    getPerformanceSource(p: Performance): string {
       let text: string[] = [];
       text.push(`"${p.albumName}"`);
@@ -101,50 +101,74 @@ export abstract class BaseCatalogComponent implements OnInit, OnDestroy, AfterVi
       }
       return text.join(", ");
    }
-   async playMusic(entity: MusicFile | Track | Movement | Work | Performance) {
+   async playMusic(entity: /*MusicFile | Track | Movement |*/ Work | Performance) {
       if (this.checkDeviceAvailable()) {
-         if (isMusicFile(entity)) {
-            await this.playerService.playFile(entity as MusicFile);
-         } else if (isTrack(entity)) { // will also match Movement
-            await this.playerService.playTrack(entity as Track);
-         } else if (isWork(entity)) {
-            await this.playerService.playWork(entity as Work);
+         //if (isMusicFile(entity)) {
+         //   await this.playerService.playFile(entity as MusicFile);
+         //} else if (isTrack(entity)) { // will also match Movement
+         //   await this.playerService.playTrack(entity as Track);
+         //} else
+         //if (isWork(entity)) {
+         //   await this.playerService.playWork(entity as Work);
+         //} else if (isPerformance(entity)) {
+         //   await this.playerService.playPerformance(entity as Performance);
+         //}
+
+         if (isWork(entity)) {
+            if (entity.tracks.length === 1) {
+               await this.playerService.playTrack(entity.tracks[0]);
+            } else {
+               await this.playerService.playWork(entity);
+            }
          } else if (isPerformance(entity)) {
-            await this.playerService.playPerformance(entity as Performance);
+            if (entity.movements.length === 1) {
+               await this.playerService.playTrack(entity.movements[0]);
+            } else {
+               await this.playerService.playPerformance(entity);
+            }
          }
       }
    }
-   async queueMusic(entity: MusicFile | Track | Work | Performance) {
+   async queueMusic(entity:/* MusicFile | Track |*/ Work | Performance) {
       if (this.checkDeviceAvailable()) {
-         if (isMusicFile(entity)) {
-            await this.playerService.queueFile(entity as MusicFile);
-         } else if (isTrack(entity)) {
-            await this.playerService.queueTrack(entity as Track);
-         } else if (isWork(entity)) {
-            await this.playerService.queueWork(entity as Work);
+         //if (isMusicFile(entity)) {
+         //   await this.playerService.queueFile(entity as MusicFile);
+         //} else if (isTrack(entity)) {
+         //   await this.playerService.queueTrack(entity as Track);
+         //} else
+         if (isWork(entity)) {
+            if (entity.tracks.length === 1) {
+               await this.playerService.queueTrack(entity.tracks[0]);
+            } else {
+               await this.playerService.queueWork(entity);
+            }
          } else if (isPerformance(entity)) {
-            await this.playerService.queuePerformance(entity as Performance);
+            if (entity.movements.length === 1) {
+               await this.playerService.queueTrack(entity.movements[0]);
+            } else {
+               await this.playerService.queuePerformance(entity);
+            }
          }
       }
    }
-   async onPlayMusicFile(musicFile: MusicFile) {
-      await this.playMusic(musicFile);
-   }
-   async onQueueMusicFile(musicFile: MusicFile) {
-      await this.queueMusic(musicFile);
-   }
+   //async onPlayMusicFile(musicFile: MusicFile) {
+   //   await this.playMusic(musicFile);
+   //}
+   //async onQueueMusicFile(musicFile: MusicFile) {
+   //   await this.queueMusic(musicFile);
+   //}
    async onPlayPerformance(performance: Performance) {
       await this.playMusic(performance);
    }
    async onQueuePerformance(performance: Performance) {
       await this.queueMusic(performance);
    }
-   async onPlayMovement(movement: Movement) {
-      await this.playMusic(movement);
-   }
-   async onQueueMovement(movement: Movement) {
-      await this.queueMusic(movement);
-   }
+   //async onPlayMovement(movement: Movement) {
+   //   await this.playMusic(movement);
+   //}
+   //async onQueueMovement(movement: Movement) {
+   //   await this.queueMusic(movement);
+   //}
    onPerformanceMouse(p: Performance, val: boolean) {
       p.isHighLit = val;
     }
@@ -162,10 +186,10 @@ export abstract class BaseCatalogComponent implements OnInit, OnDestroy, AfterVi
          case SelectedCommand.Cancel:
             break;
          case SelectedCommand.Play:
-            await this.playMusic(cmd.entity);
+            await this.playMusic(<Work | Performance>cmd.entity);
             break;
          case SelectedCommand.Queue:
-            await this.queueMusic(cmd.entity);
+            await this.queueMusic(<Work | Performance>cmd.entity);
             break;
          //case SelectedCommand.TagEditor:
          //   //if (cmd.targetEntity === TargetEntity.Performance) {

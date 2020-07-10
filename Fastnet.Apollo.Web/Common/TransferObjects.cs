@@ -159,13 +159,17 @@ namespace Fastnet.Apollo.Web
     }
     public class PlaylistItemDTO
     {
-        //public long Id { get; set; }
+        public long Id { get; set; }
         public bool NotPlayableOnCurrentDevice { get; set; }
         public PlaylistRuntimeItemType Type { get; set; }
+        public MusicStyles MusicStyle { get; set; }
         public PlaylistPosition Position { get; set; }
-        public int Sequence { get; set; }
+        //public int Sequence { get; set; }
         //public string Title { get; set; }
-        public IEnumerable<string> Titles { get; set; }
+        public string ArtistName { get; set; }
+        public string CollectionName { get; set; }
+        public string Title { get; set; }
+        //public IEnumerable<string> Titles { get; set; }
         public string AudioProperties { get; set; }
         public int SampleRate { get; set; }
         public string CoverArtUrl { get; set; }

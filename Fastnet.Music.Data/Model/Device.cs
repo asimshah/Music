@@ -23,7 +23,7 @@ namespace Fastnet.Music.Data
         public int MaxSampleRate { get; set; }
         public DateTimeOffset LastSeenDateTime { get; set; }
         public float Volume { get; set; } // range 0.0% to 100.0% 
-        public long PlaylistId { get; set; }
+        public long? PlaylistId { get; set; }
         public virtual Playlist Playlist { get; set; }
         [NotMapped]
         public string ConnectionId { get; set; }

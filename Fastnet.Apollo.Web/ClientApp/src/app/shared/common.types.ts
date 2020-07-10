@@ -1,5 +1,6 @@
 import { DeviceState, MusicStyles, PlaylistItemType, PlayerStates, AudioDeviceType, PlayerCommands, PlaylistType } from "./common.enums";
 import { EncodingType } from "./catalog.types";
+import TimeSpan from "../../fastnet/core/timespan.types";
 
 export class Style {
    id: MusicStyles;
@@ -104,32 +105,40 @@ export class DeviceStatus {
    }
 }
 export class PlaylistItem {
-   //id: number;
+   id: number;
+   musicStyle: MusicStyles;
    type: PlaylistItemType;
    notPlayableOnCurrentDevice: boolean;
    position: PlaylistPosition;
-   sequence: number;
-   //title: string;
-   titles: string[];
+   //sequence: number;
+   artistName: string;
+   collectionName: string;
+   title: string;
+   //titles: string[];
    audioProperties: string;
    sampleRate: number;
    coverArtUrl: string;
    totalTime: number;
+   duration: TimeSpan;
    formattedTotalTime: string;
    isOpen: boolean;
    isSubitem: boolean;
    subItems: PlaylistItem[];
    public copyProperties(pli: PlaylistItem) {
-      //this.id = pli.id;
+      this.id = pli.id;
+      this.musicStyle = pli.musicStyle,
       this.type = pli.type;
       this.notPlayableOnCurrentDevice = pli.notPlayableOnCurrentDevice;
       this.position = new PlaylistPosition(pli.position.major, pli.position.minor);// pli.position;
-      //this.title = pli.title;
-      this.titles = pli.titles;
+      this.title = pli.title;
+      this.artistName = pli.artistName,
+      this.collectionName = pli.collectionName,
+      //this.titles = pli.titles;
       this.coverArtUrl = pli.coverArtUrl;
       this.audioProperties = pli.audioProperties;
       this.sampleRate = pli.sampleRate;
-      this.sequence = pli.sequence;
+      //this.sequence = pli.sequence;
+      this.duration = TimeSpan.fromMilliSeconds(pli.totalTime);
       this.totalTime = pli.totalTime;
       this.formattedTotalTime = pli.formattedTotalTime;
       this.isOpen = false;
@@ -151,6 +160,8 @@ export class Playlist {
    playlistType: PlaylistType;
    playlistName: string;
    items: PlaylistItem[];
+   totalTime: number;
+   duration: TimeSpan;
    formattedTotalTime: string;
    public copyProperties(pl: Playlist) {
       {
@@ -158,6 +169,8 @@ export class Playlist {
          this.deviceKey = pl.deviceKey;
          this.playlistType = pl.playlistType;
          this.playlistName = pl.playlistName;
+         this.duration = TimeSpan.fromMilliSeconds(pl.totalTime);
+         this.totalTime = pl.totalTime;
          this.formattedTotalTime = pl.formattedTotalTime;
          this.items = [];
          pl.items.forEach(x => {

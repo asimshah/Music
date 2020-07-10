@@ -1,6 +1,6 @@
 <div>
    <div class="playlist-bar">
-      <!--<button class="icon" (click)="onPlaylistManager()" title="Playlist Manager ..."><div class="fa fa-pencil-square-o"></div></button>-->
+      <button class="icon" (click)="onPlaylistManager()" title="Playlist Manager ..."><div class="fa fa-pencil-square-o"></div></button>
       <button class="icon" (click)="onSavePlaylist()" title="Save current playlist as ..."><div class="fa fa-floppy-o"></div></button>
       <button class="icon" (click)="onTransferPlaylist()" title="Copy playlist from another device"><div class="fa fa-arrow-left"></div></button>
       <button class="icon" (click)="onSelectPlaylist()" title="Select a saved playlist"><div class="fa fa-list-alt"></div></button>
@@ -11,6 +11,7 @@
       <div class="playlist-name">{{getPlaylistName()}}</div>
       <div class="playlist-duration">{{getPlaylistDuration()}}</div>
    </div>
+   <playlist-manager ></playlist-manager>
    <popup-message caption="Apollo"></popup-message>
    <popup-dialog class="transfer-playlist-dialog" #transferPlaylist [width]="400">
       <div windowcaption>

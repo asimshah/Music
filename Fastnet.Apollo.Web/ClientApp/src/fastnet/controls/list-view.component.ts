@@ -1,6 +1,10 @@
-import { Component, OnInit, TemplateRef, ContentChild, Input, ViewEncapsulation, EmbeddedViewRef, AfterViewInit, AfterContentChecked, AfterViewChecked, AfterContentInit, ViewChild, ViewContainerRef, ElementRef, Output, EventEmitter, Renderer2 } from '@angular/core';
+import { Component, OnInit, TemplateRef, ContentChild, Input, ViewEncapsulation, EmbeddedViewRef, AfterViewInit, AfterContentChecked, AfterViewChecked, AfterContentInit, ViewChild, ViewContainerRef, ElementRef, Output, EventEmitter, Renderer2, ViewChildren, QueryList } from '@angular/core';
 import { ControlBase } from './controlbase.type';
 
+export class ListViewItemMoved {
+   from: number;
+   to: number;
+}
 /**
  * display an array of items in a user designed manner from which a single item can be selected
  * the header for the list is shown using <ng-template #headerTemplate>
@@ -17,27 +21,43 @@ import { ControlBase } from './controlbase.type';
    templateUrl: './list-view.component.html',
    styleUrls: ['./list-view.component.scss']
 })
-export class ListViewComponent extends ControlBase implements AfterViewChecked {
+export class ListViewComponent extends ControlBase implements AfterViewInit, AfterViewChecked {
    @ContentChild('headerTemplate', { static: false, read: TemplateRef }) headerTemplate: TemplateRef<any>; // used by [ngTemplateOutlet]
    @ContentChild('itemTemplate', { static: false, read: TemplateRef }) itemTemplate: TemplateRef<any>; // used by [ngTemplateOutlet]
    @ViewChild('bodycontainer', { static: false }) bodyContainer: ElementRef;
    @ViewChild('headercontainer', { static: false }) headerContainer: ElementRef;
+   //@ViewChildren('itemContainer', { read: ElementRef }) itemRefList: QueryList<ElementRef>;
    @Input() items: Array<any> = [];
    @Input() gridTemplateColumns: string = '1fr';
    @Input() maxRows;
+   @Input() userResequenceAble = false;
    @Output() selectedItemChanged = new EventEmitter<any>();
+   @Output() itemMoved = new EventEmitter<ListViewItemMoved>();
+   //private currentItems: Element[] = [];
+   private isDragging = false;
+   private indexOnDragStart = -1;
+   private currentDropTarget: HTMLElement = null;
+   private currentDropLocation: HTMLElement = null;
    selectedItem: any;
 
    constructor(private renderer: Renderer2) { super(); }
-
+   canDragRows() {
+      return this.userResequenceAble;
+   }
+   ngAfterViewInit() {
+      if (!this.headerTemplate) {
+         this.renderer.setStyle(this.headerContainer.nativeElement, "display", `none`);
+      }
+   }
    getGridTemplateColumns() {
       return this.gridTemplateColumns;
    }
    onListItemClick(item: any) {
-      this.selectedItem = item;
-      this.selectedItemChanged.next(item);
+      if (this.isDragging === false) {
+         this.selectedItem = item;
+         this.selectedItemChanged.next(item);
+      }
    }
-
    ngAfterViewChecked() {
       if (this.maxRows) {
          if (this.maxRows < this.items.length) {
@@ -54,6 +74,79 @@ export class ListViewComponent extends ControlBase implements AfterViewChecked {
             this.renderer.removeStyle(this.bodyContainer.nativeElement, "height");
             this.renderer.removeStyle(this.headerContainer.nativeElement, "padding-right");
          }
+      }
+   }
+   onDrop(e: DragEvent, index: number) {
+      let args = new ListViewItemMoved();
+      args.from = this.indexOnDragStart;
+      args.to = index;
+      this.itemMoved.next(args);
+   }
+   onDragStart(e: DragEvent, index: number) {
+      e.stopPropagation()
+      e.dataTransfer.effectAllowed = "move";
+      this.indexOnDragStart = index;
+      this.isDragging = true;
+   }
+   onDragEnd(e: DragEvent, index: number) {
+      this.clearDropTarget();
+      this.indexOnDragStart = -1;
+      this.isDragging = false;
+   }
+   onDragOver(e: DragEvent, index: number) {
+      e.preventDefault();
+   }
+   onDragEnter(e: DragEvent, index: number) {
+      e.preventDefault();
+      let target = <HTMLElement>e.currentTarget;
+      let isLocation = target.classList.contains("list-view-item") ? false : true;
+      if (this.isValidTarget(index)) {
+         if (isLocation) {
+            this.setDropLocationHigh(target);
+         } else {
+            this.setDropTarget(target);
+         }
+      } else {
+         if (isLocation) {
+            this.clearDropLocationHigh();
+         } else {
+            this.clearDropTarget();
+         }
+      }
+   }
+   onDragLeave(e: DragEvent, index: number) {
+      e.preventDefault();
+   }
+   private isValidTarget(index: number) {
+      let result = index < this.indexOnDragStart || index > (this.indexOnDragStart + 1);
+      return result;
+   }
+   private clearDropTarget() {
+      if (this.currentDropTarget !== null) {
+         this.currentDropTarget.classList.remove("drop-target");
+      }
+   }
+   private clearDropLocationHigh() {
+      if (this.currentDropLocation !== null) {
+         this.currentDropLocation.classList.remove("highlight");
+      }
+   }
+   private setDropTarget(element: HTMLElement) {
+      if (element.classList.contains("list-view-item")) {
+         this.clearDropTarget();
+         this.currentDropTarget = element;
+         this.currentDropTarget.classList.add("drop-target");
+      } else {
+         console.error(`target div has to be a list view item!`);
+      }
+   }
+   private setDropLocationHigh(element: HTMLElement) {
+      if (element.classList.contains("drop-location")) {
+         this.clearDropLocationHigh();
+         this.currentDropLocation = element;
+         this.currentDropLocation.classList.add("highlight");
+      } else {
+         console.error(`location div has to be a drop-location!`);
       }
    }
 }

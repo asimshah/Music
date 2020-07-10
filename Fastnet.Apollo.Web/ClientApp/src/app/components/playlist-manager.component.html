@@ -1,10 +1,62 @@
-<popup-dialog caption="Playlist Manager">
-   <div dialogbody>
-      <div>not used (yet?)... </div>
-      <div>not used (yet?)... </div>
-      <div>not used (yet?)... </div>
+<popup-dialog caption="Playlist Manager" width="80%">
+   <div class="main-panel" dialogbody>
+      <expanding-panels>
+         <ng-template #leftPanelTemplate>
+            <div class="left-pane">
+               <div class="header">Playlists</div>
+               <list-view [items]="playlists" [maxRows]="9" gridTemplateColumns="1fr" (selectedItemChanged)="onSelectedPlaylist($event)">
+                  <ng-template #itemTemplate let-pl>
+                     <div class="pl-name">{{pl.playlistName}}</div>
+                     <div class="pl-details">
+                        <div>{{pl.items.length}} items</div>
+                        <div><span>{{getPlaylistDuration(pl)}}</span></div>
+                     </div>
+                  </ng-template>
+               </list-view>
+            </div>
+         </ng-template>
+         <ng-template #rightPanelTemplate>
+            <div class="right-pane">
+               <div class="header">
+                  <text-input id="as2" *ngIf="selectedPlaylist"[(ngModel)]="selectedPlaylist.playlistName" [validator]="validators.item('playlistname')" (change)="onNameChange()" ></text-input>
+               </div>
+               <ng-container *ngIf="selectedPlaylist">
+                  <list-view [userResequenceAble]="true" [items]="selectedPlaylist.items" [maxRows]="8" (itemMoved)="onPlaylistItemMoved($event)">
+                     <ng-template #itemTemplate let-plItem let-first="firstRow" let-last="lastRow" let-number="rowNumber">
+                        <div class="playlist-item">
+                           <div class="sequence" >{{number}}</div>
+                           <img class="cover-art" [src]="plItem.coverArtUrl"  />
+                           <div class="lines">
+                              <div class="line-1">
+                                 <div *ngIf="plItem.type === PlaylistItemType.SingleItem" class="title">{{plItem.title}}</div>
+                                 <div *ngIf="plItem.type === PlaylistItemType.MultipleItems" class="title">{{plItem.collectionName}}</div>
+                                 <div class="buttons">
+                                    <!--<button class="icon" (click)="move(number - 1, -1)" [ngClass]="{'disabled': first}"><span class="fa fa-arrow-up"></span></button>
+                                    <button class="icon" (click)="move(number - 1, 1)" [ngClass]="{'disabled': last}"><span class="fa fa-arrow-down"></span></button>-->
+                                    <button class="icon danger" (click)="removeItem(plItem)"><span class="fa fa-trash-o"></span></button>
+                                 </div>
+                              </div>
+                              <div class="line-2">
+                                 <span>{{plItem.artistName}}</span>
+                                 <span *ngIf="plItem.type === PlaylistItemType.SingleItem">, {{plItem.collectionName}}</span>
+                                 <span *ngIf="plItem.type === PlaylistItemType.MultipleItems">, {{getSubitemCount(plItem)}}</span>
+                                 <span>{{plItem.formattedTotalTime}}</span>
+                              </div>
+                           </div>
+                        </div>
+                     </ng-template>
+                  </list-view>
+               </ng-container>
+            </div>
+         </ng-template>
+      </expanding-panels>
    </div>
-   <div dialogcommands>
-      <button >Cancel</button>
+   <div dialogcommands right>
+      <button (click)="onSave()" [ngClass]="{'disabled': !canSave()}">Save Changes</button>
+      <button (click)="onClose()">Close</button>
    </div>
+   <div dialogcommands left>
+      <button (click)="undoChanges()">Undo Changes</button>
+   </div>
+   <popup-message></popup-message>
 </popup-dialog>

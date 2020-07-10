@@ -9,8 +9,8 @@
    padding-left: $theme-gutter;
    padding-right: $theme-gutter;
    display: grid;
-   //grid-template-columns: auto auto auto auto 1fr auto;
-   grid-template-columns: auto auto auto 1fr auto;
+   grid-template-columns: auto auto auto auto 1fr auto;
+   //grid-template-columns: auto auto auto 1fr auto;
    align-items: center;
    grid-column-gap: $theme-gutter-narrow;
    justify-items: center;
@@ -60,6 +60,11 @@
       padding: $theme-gutter;
    }
 
+   list-view {
+      border: 1px solid theme-colour('accent');
+      border-radius: 2px;
+   }
+
    .save-type-selection {
       border-bottom: 1px solid theme-colour('surface');
       margin-bottom: $theme-gutter;
@@ -86,6 +91,5 @@
          padding-left: $theme-gutter-narrow;
          padding-right: $theme-gutter-narrow;
       }
-
    }
 }

@@ -102,36 +102,39 @@ namespace Fastnet.Apollo.Web
     public abstract class ExtendedPlaylistItem
     {
         private long coverArtId;
+        public MusicStyles MusicStyle;
         public long PlaylistItemId { get; set; } // can be zero for PlaylistTrackItem when they are SubItems
+        public string ArtistName { get; set; }
         /// <summary>
-        /// Titles is an array because it can include multiple lines depending on the type of ExtendedPlaylistItem:
-        /// (1) for a track or a music file there are 3 entries: artist, work/performance name, track/movement title
-        /// (2) for a work or a performance at position (x, 0) there is one entry which is the work/performance name
+        /// can be album name, composition name, or raga name
         /// </summary>
-        public IEnumerable<string> Titles { get; private set; }
+        public string CollectionName { get; set; }
+        public IEnumerable<string> Titles => GetTitles();// { get; private set; }
         public PlaylistPosition Position { get; private set; }
         public TimeSpan Duration => GetDuration();
         public string CoverArtUrl => $"lib/get/work/coverart/{coverArtId}";
         public ExtendedPlaylistItem(PlaylistItem pli)
         {
-            //this.libraryService = ls;
-            this.PlaylistItemId = pli.Id;
-            //this.Title = pli.Title;
-            //this.ItemId = pli.ItemId;
-        }
-        public ExtendedPlaylistItem()
-        {
+            if (pli != null)
+            {
+                this.PlaylistItemId = pli.Id;
+            }
 
         }
+        //public ExtendedPlaylistItem()
+        //{
+
+        //}
+        protected abstract IEnumerable<string> GetTitles();
         public void SetPosition(PlaylistPosition position)
         {
             this.Position = position;
             AfterPositionSet();
         }
-        protected void SetTitles(IEnumerable<string> titles)
-        {
-            this.Titles = titles;
-        }
+        //protected void SetTitles(IEnumerable<string> titles)
+        //{
+        //    this.Titles = titles;
+        //}
         protected void SetCoverArtId(long id)
         {
             coverArtId = id;
@@ -143,10 +146,11 @@ namespace Fastnet.Apollo.Web
     public abstract class SingleTrackPlaylistItem : ExtendedPlaylistItem
     {
         protected MusicFile musicFile;
+        public string Title { get; set; }
         public long MusicFileId => musicFile.Id;
-        public SingleTrackPlaylistItem()
-        {
-        }
+        //public SingleTrackPlaylistItem()
+        //{
+        //}
 
         public SingleTrackPlaylistItem(PlaylistItem pli) : base(pli)
         {
@@ -161,6 +165,33 @@ namespace Fastnet.Apollo.Web
             AudioProperties = musicFile.GetAudioProperties();
             SampleRate = musicFile.SampleRate ?? 0;
         }
+        protected override IEnumerable<string> GetTitles()
+        {
+            return new string[] { this.ArtistName, this.CollectionName, this.Title };
+        }
+        protected void SetNames(Track t)
+        {
+            this.ArtistName = this.MusicStyle switch
+            {
+                MusicStyles.WesternClassical => t.Performance.Composition.Artist.Name,
+                MusicStyles.IndianClassical => t.Performance.GetNames().artistNames,
+                _ => t.Work.GetArtistNames()
+            };
+            this.CollectionName = this.MusicStyle switch
+            {
+                MusicStyles.WesternClassical => t.Performance.Composition.Name,
+                MusicStyles.IndianClassical => t.Performance.GetRaga().Name,
+                _ => t.Work.Name
+            };
+        }
+        protected void SetNames(MusicFile mf)
+        {
+            SetNames(mf.Track);
+        }
+        //public override string ToString()
+        //{
+        //    return new string[] { this.ArtistName, this.CollectionName, this.Title}
+        //}
     }
     public abstract class MultiTrackPlaylistItem : ExtendedPlaylistItem
     {
@@ -169,20 +200,40 @@ namespace Fastnet.Apollo.Web
         public MultiTrackPlaylistItem(PlaylistItem pli, LibraryService ls) : base(pli)
         {
             this.InnerSubItems = new List<PlaylistTrackItem>();
-            var artistName = string.Empty;
+            //var artistName = string.Empty;
             switch(pli.Type)
             {
                 case PlaylistItemType.Performance:
+
                     var performance = ls.GetEntityAsync<Performance>(pli.ItemId).Result;
+                    this.MusicStyle = performance.StyleId;
                     var names = performance.GetNames();
-                    artistName = names.artistNames;// performance.Composition.Artist.Name;
+                    this.ArtistName = names.artistNames;// performance.Composition.Artist.Name;
+                    this.CollectionName = this.MusicStyle switch
+                    {
+                        MusicStyles.WesternClassical => performance.Composition.Name,
+                        MusicStyles.IndianClassical => performance.GetRaga().Name,
+                        _ => throw new Exception($"unexpected style {MusicStyle}")
+                    };
                     break;
                 case PlaylistItemType.Work:
                     var work = ls.GetEntityAsync<Work>(pli.ItemId).Result;
-                    artistName = work.GetArtistNames();// work.Artists.Select(x => x.Name).ToCSV();
+                    this.MusicStyle = work.StyleId;
+                    this.ArtistName = work.GetArtistNames();// work.Artists.Select(x => x.Name).ToCSV();
+                    this.CollectionName = this.MusicStyle switch
+                    {
+                        MusicStyles.Popular => work.Name,
+                        _ => throw new Exception($"unexpected style {MusicStyle}")
+                    };
                     break;
             }
-            SetTitles(new string[] { artistName,  pli.Title });
+            //this.ArtistName = artistName;
+            //this.CollectionName =  this.MusicStyle switch {
+            //    MusicStyles.Popular => 
+            //    _ => ""
+            //};
+
+            //SetTitles(new string[] { artistName,  pli.Title });
         }
         public void AddSubItem(PlaylistTrackItem subItem)
         {
@@ -203,6 +254,10 @@ namespace Fastnet.Apollo.Web
 
             return TimeSpan.FromMilliseconds(this.InnerSubItems.Sum(x => x.Duration.TotalMilliseconds));
         }
+        protected override IEnumerable<string> GetTitles()
+        {
+            return new string [] {  this.ArtistName, this.CollectionName};
+        }
     }
     public class PlaylistMusicFileItem : SingleTrackPlaylistItem
     {
@@ -211,12 +266,15 @@ namespace Fastnet.Apollo.Web
         {
             var mf = ls.GetEntityAsync<MusicFile>(pli.MusicFileId).Result;
             SetMusicFile(mf);
-            var titles = new string[] {
-                                musicFile.Track.Performance?.GetParentArtistsName() ?? musicFile.Track.Work.GetArtistNames(),//.Artists.Select(a => a.Name).ToCSV(),
-                                musicFile.Track.Performance?.GetParentEntityDisplayName() ?? musicFile.Track.Work.Name,
-                                musicFile.Track.Title
-                            };
-            SetTitles(titles);
+            MusicStyle = mf.Style;
+            SetNames(mf);
+            this.Title = mf.Track.Title;
+            //var titles = new string[] {
+            //                    musicFile.Track.Performance?.GetParentArtistsName() ?? musicFile.Track.Work.GetArtistNames(),//.Artists.Select(a => a.Name).ToCSV(),
+            //                    musicFile.Track.Performance?.GetParentEntityDisplayName() ?? musicFile.Track.Work.Name,
+            //                    musicFile.Track.Title
+            //                };
+            //SetTitles(titles);
             SetCoverArtId(this.musicFile.Track.Work.Id);
 
         }
@@ -233,14 +291,22 @@ namespace Fastnet.Apollo.Web
     public class PlaylistTrackItem : SingleTrackPlaylistItem
     {
         private readonly Track track;
-        public PlaylistTrackItem(PlaylistItem pli, LibraryService ls) : base(pli)
+        public PlaylistTrackItem(PlaylistItem pli, LibraryService ls) : this(ls.GetEntityAsync<Track>(pli.ItemId).Result, pli)// : base(pli)
         {
-            this.track = ls.GetEntityAsync<Track>(pli.ItemId).Result;
+            //this.track = ls.GetEntityAsync<Track>(pli.ItemId).Result;
         }
-        public PlaylistTrackItem(Track track) //: base(track.Title)
+        public PlaylistTrackItem(Track track, PlaylistItem pli = null) : base(pli)
         {
             this.track = track;
-            
+            this.MusicStyle = track.Work.StyleId;
+            SetNames(this.track);
+            this.Title = track.Title;
+            //this.Title = this.MusicStyle switch
+            //{
+            //    MusicStyles.WesternClassical => track.Title,
+            //    MusicStyles.IndianClassical => track.Title,
+            //    _ => this.Title
+            //};
         }
         public void SelectMusicFile(DeviceRuntime dr)
         {
@@ -254,24 +320,24 @@ namespace Fastnet.Apollo.Web
         }
         protected override void AfterPositionSet()
         {
-            SetTitlesAndCoverArt();
-        }
-        private void SetTitlesAndCoverArt()
-        {
-            var title = track.Title;
-            if (Position.Minor > 0 && title.Contains(':'))
-            {
-                title = title.Split(':').Skip(1).First();
-            }
-            var titles = new string[]
-            {
-                track.Performance?.GetParentArtistsName() ?? track.Work.GetArtistNames(),//.Artists.Select(a => a.Name).ToCSV(),
-                track.Performance?.GetParentEntityDisplayName() ?? track.Work.Name,
-                title
-            };
-            SetTitles(titles);
             SetCoverArtId(this.track.Work.Id);
         }
+        //private void SetTitlesAndCoverArt()
+        //{
+        //    var title = track.Title;
+        //    if (Position.Minor > 0 && title.Contains(':'))
+        //    {
+        //        title = title.Split(':').Skip(1).First();
+        //    }
+        //    var titles = new string[]
+        //    {
+        //        track.Performance?.GetParentArtistsName() ?? track.Work.GetArtistNames(),//.Artists.Select(a => a.Name).ToCSV(),
+        //        track.Performance?.GetParentEntityDisplayName() ?? track.Work.Name,
+        //        title
+        //    };
+        //    SetTitles(titles);
+
+        //}
 
         public override string ToString()
         {
@@ -286,12 +352,13 @@ namespace Fastnet.Apollo.Web
         public PlaylistWorkItem(PlaylistItem pli, LibraryService ls) : base(pli, ls)
         {
             this.work = ls.GetEntityAsync<Work>(pli.ItemId).Result;
+            //this.MusicStyle = this.work.StyleId;
             var titles = new string[]
             {
                 work.GetArtistNames(),//work.Artists.Select(a => a.Name).ToCSV(),
                 work.Name
             };
-            SetTitles(titles);
+            //SetTitles(titles);
             SetCoverArtId(this.work.Id);
         }
         public override string ToString()
@@ -310,14 +377,42 @@ namespace Fastnet.Apollo.Web
         public PlaylistPerformanceItem(PlaylistItem pli, LibraryService ls) : base(pli, ls)
         {
             this.performance = ls.GetEntityAsync<Performance>(pli.ItemId).Result;
-
+            //this.MusicStyle = this.performance.StyleId;
             SetCoverArtId(this.performance.Movements.First().Work.Id);
         }
         protected override void AfterPositionSet()
         {
             base.AfterPositionSet();
             LoadSubItems(this.performance.Movements.OrderBy(x => x.MovementNumber));
+            foreach(var si in this.SubItems)
+            {
+                si.Title = CollapseTitle(si);
+            }
         }
+
+        private string CollapseTitle(PlaylistTrackItem si)
+        {
+            string stripPrefix(string text, string separator)
+            {
+                var parts = text.Split(separator);
+                if (parts.Count() > 1 && parts[1].Trim().Length > 0)
+                {
+                    if (parts[0].IsEqualIgnoreAccentsAndCase(si.CollectionName))
+                    {
+                        return parts[1].Trim();
+                    }
+                }
+
+                return text;
+            }
+            return this.MusicStyle switch
+            {
+                MusicStyles.WesternClassical => stripPrefix(si.Title, ":"),
+                MusicStyles.IndianClassical => stripPrefix(si.Title, ": "),
+                _ => throw new Exception($"unexpected music style {this.MusicStyle}")
+            };
+        }
+
         public override string ToString()
         {
             return $"{Position} performance {Titles.ToCSV()} {Duration.ToDuration()} {SubItems.Count()} movements, {CoverArtUrl}";

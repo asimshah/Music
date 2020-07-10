@@ -1,4 +1,4 @@
-﻿import { Input } from "@angular/core";
+import { Input, ElementRef } from "@angular/core";
 import { EnumValue } from "../core/core.types";
 import { ControlBase } from "./controlbase.type";
 /**
@@ -31,7 +31,7 @@ export class EnumControlBase<T> extends ControlBase {
         this.console(`_selectedValue set to ${v}`);
     }
     private _selectedValue: T | null;
-    constructor() {
+   constructor() {
         super();
         this.localChangeCallBack = (v) => { this.selectedValue = v; };
     }

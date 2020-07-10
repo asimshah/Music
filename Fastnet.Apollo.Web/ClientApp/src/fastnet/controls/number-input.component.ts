@@ -37,8 +37,8 @@ export class NumberInputControl extends InputControlBase {
     @Input() minNumber: number;
     @Input() maxNumber: number;
     @ViewChild('focushere', { static: false }) element: ElementRef;
-    constructor() {
-        super();
+   constructor(elem: ElementRef) {
+        super(elem);
         this.setReference("number");
         this.setPrevalidator((ctx, val) => this.validateNumberAsync(ctx, val));
     }

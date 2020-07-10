@@ -1,2 +1,92 @@
 @import "../../fastnet/themes/_themes";
 @include theme-buttons();
+.main-panel {
+    height: 100%;
+}
+.left-pane, .right-pane {
+    height: 100%;
+    //margin: $theme-gutter-narrow;
+}
+.right-pane {
+    display: grid;
+    grid-template-rows: auto 1fr;
+}
+.header {
+   //height: 24px;
+   background-color: darken(theme-colour('primary', 'dark'), 10%);
+   padding: $theme-gutter-fine;
+}
+.pl-details {
+    display: grid;
+    grid-template-columns: 1fr auto;
+    font-style: italic;
+    font-size: smaller;
+}
+.playlist-item {
+   display: grid;
+   grid-template-columns: 24px auto 1fr;
+   grid-column-gap: $theme-gutter-narrow;
+   padding: $theme-gutter-fine;
+
+   .cover-art {
+      height: 60px;
+      width: 60px;
+
+      &.to-be-deleted {
+         filter: grayscale(100%);
+      }
+   }
+
+   .sequence {
+      text-align: right;
+      font-size: 13px;
+
+      &.to-be-deleted {
+         text-decoration: line-through;
+         color: theme-colour('background', 'light');
+      }
+   }
+
+   .title {
+      font-size: 14px;
+
+      &.to-be-deleted {
+         text-decoration: line-through;
+         color: theme-colour('background', 'light');
+      }
+   }
+
+   .line-1 {
+      display: grid;
+      grid-template-columns: 1fr auto;
+   }
+
+   .line-2 {
+      font-style: italic;
+      font-size: smaller;
+      display: grid;
+      grid-template-columns: auto 1fr auto;
+
+      &.to-be-deleted {
+         text-decoration: line-through;
+         color: theme-colour('background', 'light');
+      }
+   }
+
+   .buttons {
+      //background-color: theme-colour('background');
+      display: grid;
+      grid-template-columns: auto auto auto;
+   }
+
+
+
+
+   .details {
+      font-style: italic;
+      font-size: smaller;
+      display: grid;
+      grid-template-columns: auto 1fr auto;
+      //grid-column-gap: $theme-gutter-narrow;
+   }
+}

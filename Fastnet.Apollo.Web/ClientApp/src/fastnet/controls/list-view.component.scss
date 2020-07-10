@@ -2,11 +2,12 @@
 
 :host {
    display: block;
+   height: 100%;
 }
 
 .list-view {
-    border: 1px solid theme-colour('accent');
-    border-radius: 2px;
+   /*border: 1px solid theme-colour('accent');
+    border-radius: 2px;*/
    .list-view-header, .list-view-item {
       display: grid;
       grid-column-gap: $theme-gutter;
@@ -19,9 +20,28 @@
    }
 
    .list-view-body {
-       overflow-y: auto;
+      overflow-y: auto;
+
       .list-view-item {
-         padding: $theme-gutter-narrow;
+         .drop-location {
+            display: grid;
+            grid-template-columns: auto 1fr auto;
+            align-items: center;
+            color: theme-colour('background', 'light');
+            height: 0;
+            opacity: 0;
+            background-color: black;
+
+            .fa {
+               margin-bottom: 2px;
+            }
+
+            .insertion-line {
+               background-color: theme-colour('background', 'light');
+               height: 1px;
+            }
+         }
+
          background-color: theme-colour('primary', 'light');
 
          &:nth-child(odd) {
@@ -34,6 +54,25 @@
 
          &:hover {
             background-color: darken(theme-colour('primary', 'dark'), 5%);
+         }
+
+         &.drop-target {
+            .drop-location {
+               height: 20px;
+               opacity: 1;
+               transition: 0.5s ease-in-out;
+               transition-property: all;
+               padding: $theme-gutter-narrow;
+
+               &.highlight {
+                  color: $high-accent-colour;
+                  transition: none;
+
+                  .insertion-line {
+                     background-color: $high-accent-colour;
+                  }
+               }
+            }
          }
       }
    }

@@ -250,7 +250,8 @@ namespace Fastnet.Music.Data
             modelBuilder.Entity<Device>()
                .HasOne(x => x.Playlist)
                .WithMany()
-               .OnDelete(DeleteBehavior.Restrict);
+               .HasForeignKey(x => x.PlaylistId);
+               //.OnDelete(DeleteBehavior.Restrict);
 
             modelBuilder.Entity<PlaylistItem>()
                 .HasOne(x => x.Playlist)

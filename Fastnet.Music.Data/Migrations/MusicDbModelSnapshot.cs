@@ -200,7 +200,7 @@ namespace Fastnet.Music.Data.Migrations
                     b.Property<string>("PlayerUrl")
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<long>("PlaylistId")
+                    b.Property<long?>("PlaylistId")
                         .HasColumnType("bigint");
 
                     b.Property<int>("Type")
@@ -879,9 +879,7 @@ namespace Fastnet.Music.Data.Migrations
                 {
                     b.HasOne("Fastnet.Music.Data.Playlist", "Playlist")
                         .WithMany()
-                        .HasForeignKey("PlaylistId")
-                        .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired();
+                        .HasForeignKey("PlaylistId");
                 });
 
             modelBuilder.Entity("Fastnet.Music.Data.IdTag", b =>

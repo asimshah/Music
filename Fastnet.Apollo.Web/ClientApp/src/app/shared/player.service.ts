@@ -10,6 +10,7 @@ import { MessageService } from "./message.service";
 import { PlayerStates, LocalStorageKeys, AudioDeviceType } from "./common.enums";
 import { removeLocalStorageValue, setLocalStorageValue, getLocalStorageValue } from "./common.functions";
 import { ParameterService } from "./parameter.service";
+import { promise } from "protractor";
 
 export function playerServiceFactory(ps: PlayerService) {
    return () => ps.init();
@@ -213,8 +214,18 @@ export class PlayerService extends BaseService implements OnDestroy {
       return this.getAsync<string[]>(`get/all/playlist/names`);
    }
    public async getAllPlaylists() {
-      return this.getAsync<Playlist[]>(`get/all/playlists`);
+      return new Promise<Playlist[]>(async (resolve) => { 
+         let list = await this.getAsync<Playlist[]>(`get/all/playlists`);
+         let result: Playlist[] = [];
+         for (let item of list) {
+            let pl = new Playlist();
+            pl.copyProperties(item);
+            result.push(pl);
+         }
+         resolve(result);
+      });
    }
+   //
    public async setPlaylist(devicekey: string, playlistId: number) {
       await this.getAsync<void>(`select/playlist/${devicekey}/${playlistId}`);
    }
@@ -226,6 +237,9 @@ export class PlayerService extends BaseService implements OnDestroy {
    }
    public async replacePlaylist(device: AudioDevice, name: string) {
       return this.getAsync<void>(`replace/playlist/${device.key}/${name}`);
+   }
+   public async updatePlaylist(pl: Playlist) {
+      await this.postAsync<Playlist, void>(`update/playlist`, pl);
    }
    public async deletePlaylist(playlistId: number) {
       await this.getAsync(`delete/playlist/${playlistId}`);

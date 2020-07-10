@@ -195,10 +195,6 @@ namespace Fastnet.Apollo.Web
             log.Debug($"returning a list of {devices.Count()} active devices");
             return devices;
         }
-        //public Device GetDevice(AudioDevice audioDevice)
-        //{
-        //    return GetDevice(audioDevice.Key);
-        //}
         public Device GetDevice(string deviceKey)
         {
             //using var musicDb = new MusicDb(connectionString);
@@ -310,6 +306,7 @@ namespace Fastnet.Apollo.Web
                     LastModified = DateTimeOffset.Now,
                 };
                 musicDb.Playlists.Add(device.Playlist);
+                await musicDb.SaveChangesAsync();
             }
             foreach(var item in playlistItems)
             {
@@ -317,8 +314,8 @@ namespace Fastnet.Apollo.Web
                 device.Playlist.Items.Add(item);
             }
 
-            //var playlistState = musicDb.Entry(device.Playlist).State;
-            //var deviceState = musicDb.Entry(device).State;
+            var playlistState = musicDb.Entry(device.Playlist).State;
+            var deviceState = musicDb.Entry(device).State;
             await musicDb.SaveChangesAsync();
             return device.Playlist;
         }
@@ -396,7 +393,7 @@ namespace Fastnet.Apollo.Web
             musicDb.PlaylistItems.RemoveRange(items);
             musicDb.Playlists.Remove(pl);
             //await musicDb.SaveChangesAsync();
-            log.Information($"[{pl.ToIdent()}] {pl.Type}{(pl.Type == PlaylistType.UserCreated ? " " + pl.Name : "")} deleted");
+            log.Information($"{pl.ToIdent()} {pl.Type}{(pl.Type == PlaylistType.UserCreated ? " " + pl.Name : "")} deleted");
         }
         public async Task<PlaylistItem> AddPlaylistItemAsync<T>(Playlist playlist, T entity) where T : EntityBase
         {
@@ -414,7 +411,15 @@ namespace Fastnet.Apollo.Web
             await musicDb.SaveChangesAsync();
             return pli;
         }
-
+        public async Task UpdatePlaylistItems(Playlist playlist, IEnumerable<PlaylistItem> items)
+        {
+            playlist.Items.Clear();
+            foreach(var item in items)
+            {
+                playlist.Items.Add(item);
+            }
+            await musicDb.SaveChangesAsync();
+        }
         public IEnumerable<Playlist> GetAllPlaylists()
         {
            return musicDb.Playlists;

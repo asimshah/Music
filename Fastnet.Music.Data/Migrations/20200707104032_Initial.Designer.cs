@@ -10,7 +10,7 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace Fastnet.Music.Data.Migrations
 {
     [DbContext(typeof(MusicDb))]
-    [Migration("20200627113357_Initial")]
+    [Migration("20200707104032_Initial")]
     partial class Initial
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -202,7 +202,7 @@ namespace Fastnet.Music.Data.Migrations
                     b.Property<string>("PlayerUrl")
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<long>("PlaylistId")
+                    b.Property<long?>("PlaylistId")
                         .HasColumnType("bigint");
 
                     b.Property<int>("Type")
@@ -881,9 +881,7 @@ namespace Fastnet.Music.Data.Migrations
                 {
                     b.HasOne("Fastnet.Music.Data.Playlist", "Playlist")
                         .WithMany()
-                        .HasForeignKey("PlaylistId")
-                        .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired();
+                        .HasForeignKey("PlaylistId");
                 });
 
             modelBuilder.Entity("Fastnet.Music.Data.IdTag", b =>

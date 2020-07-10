@@ -265,7 +265,7 @@ namespace Fastnet.Music.Data.Migrations
                     MaxSampleRate = table.Column<int>(nullable: false),
                     LastSeenDateTime = table.Column<DateTimeOffset>(nullable: false),
                     Volume = table.Column<float>(nullable: false),
-                    PlaylistId = table.Column<long>(nullable: false)
+                    PlaylistId = table.Column<long>(nullable: true)
                 },
                 constraints: table =>
                 {

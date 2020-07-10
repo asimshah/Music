@@ -32,11 +32,12 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Fastnet.Core", "..\Core\Fas
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Fastnet.Core.Web", "..\Core\Fastnet.Core.Web\Fastnet.Core.Web.csproj", "{B8005F14-C336-4571-8AC9-4407F49843FA}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "StartupForMigrations", "StartupForMigrations\StartupForMigrations.csproj", "{472214A1-42AF-4093-85C4-C209A84E1DDF}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "StartupForMigrations", "StartupForMigrations\StartupForMigrations.csproj", "{472214A1-42AF-4093-85C4-C209A84E1DDF}"
 EndProject
 Global
 	GlobalSection(SharedMSBuildProjectFiles) = preSolution
 		..\SharedWeb\SharedWeb.projitems*{080852f5-8880-42cd-8a4c-03c8f0b69e2b}*SharedItemsImports = 13
+		..\SharedWeb\SharedWeb.projitems*{101cb8f0-a6d6-4c58-a575-d556ba87ab2f}*SharedItemsImports = 5
 	EndGlobalSection
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU

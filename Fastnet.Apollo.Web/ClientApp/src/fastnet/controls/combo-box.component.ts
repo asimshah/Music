@@ -37,8 +37,8 @@ export class ComboBoxComponent extends InputControlBase implements AfterViewInit
   filteredItems: { name: string, index: number }[];
   private prefix = "";
   private guard = false;
-  constructor(private renderer: Renderer2) {
-    super();
+  constructor(elem: ElementRef, private renderer: Renderer2) {
+    super(elem);
     this.setReference("combo-box");
     ComboBoxComponent.allComboBoxes.push(this);
   }

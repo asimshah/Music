@@ -344,6 +344,14 @@ namespace Fastnet.Apollo.Web
         //        await SendPlaylist(dr.ToPlaylistDTO());
         //    }
         //}
+        public async Task ResetDevicePlaylistItems(Playlist playlist)
+        {
+            var deviceRuntimes = FindDevicesUsingPlaylist(playlist.Id);
+            foreach (var dr in deviceRuntimes)
+            {
+                await SetPlaylistAsync(dr, playlist);
+            }
+        }
         public async Task DeletePlaylistAsync(long playlistId)
         {
             var deviceRuntimes = FindDevicesUsingPlaylist(playlistId);
@@ -351,11 +359,6 @@ namespace Fastnet.Apollo.Web
             {
                 var playlist = await this.libraryService.CreateDevicePlaylistAsync(dr.Key);
                 await SetPlaylistAsync(dr, playlist);
-                //var device = this.libraryService.GetDevice(dr.Key);
-                //var pl = await this.libraryService.SetEmptyDevicePlaylist(device);
-                //await this.playManager.SetPlaylist(dr, device.Playlist);
-                ////await this.playManager.SetRuntimePlaylist(device, dr);
-                //await this.playManager.SendPlaylist(dr.ToPlaylistDTO());
             }
             await this.libraryService.DeletePlaylist(playlistId);
         }
@@ -380,10 +383,6 @@ namespace Fastnet.Apollo.Web
             {
                 var copiedItems = playlist.Items.Select(pl => pl.Clone());
                 playlist = await this.libraryService.CreateDevicePlaylistAsync(toDeviceKey, copiedItems);
-                //this.libraryService.CopyPlaylist(fromDeviceKey, toDeviceKey);
-                //await ClearPlaylist(toDeviceKey);
-                ////var playlist = this.libraryService.GetDevice(toDeviceKey).Playlist;
-                //await AddPlaylistItems(toDeviceKey, playlist.Items);
             }
             await SetPlaylistAsync(to, playlist);
         }

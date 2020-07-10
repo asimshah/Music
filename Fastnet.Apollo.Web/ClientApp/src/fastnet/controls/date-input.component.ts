@@ -1,5 +1,5 @@
 
-import { Component, forwardRef, Input, EventEmitter, Output, ViewEncapsulation, OnDestroy, AfterViewInit, OnInit } from '@angular/core';
+import { Component, forwardRef, Input, EventEmitter, Output, ViewEncapsulation, OnDestroy, AfterViewInit, OnInit, ElementRef } from '@angular/core';
 
 import { NG_VALUE_ACCESSOR } from '@angular/forms';
 import { ControlBase } from './controlbase.type';
@@ -81,8 +81,8 @@ export class DateInputControl extends InputControlBase implements OnInit, AfterV
       console.log(`Dic index ${item.dateControlIndex}`);
     }
   }
-  constructor() {
-    super();
+   constructor(elem: ElementRef) {
+    super(elem);
     this.setReference("date");
     this.dateControlIndex = DateInputControl.allDateControls.length;// DateInput2Control.counter;
     DateInputControl.allDateControls.push(this);

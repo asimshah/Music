@@ -1,4 +1,4 @@
-import { Component, ElementRef, OnInit, ViewChild, Input } from '@angular/core';
+import { Component, ElementRef, OnInit, ViewChild, Input, AfterContentInit } from '@angular/core';
 import { DialogBase } from './dialog-base.type';
 
 const popupZindexBase = 5000;
@@ -9,15 +9,12 @@ export type PopupAfterOpenHandler = () => void;
 @Component({
    selector: 'popup-dialog',
    templateUrl: './popup-dialog.component.html',
-   styleUrls: ['./popup-dialog.component.scss']//,
-   //encapsulation: ViewEncapsulation.None
+   styleUrls: ['./popup-dialog.component.scss']
 })
 export class PopupDialogComponent extends DialogBase implements OnInit {
    // rename this component to something like PopupChromeComponent
    public static openPopupsCount = 0;
    private static counter = 0;
-   //public static thisApp: any;
-   //public static dialogStack: HTMLElement[] = [];
    @Input() nocaption = false;
    @Input() caption: string;// = "no caption provided";
    @Input() warning = false;
@@ -25,14 +22,14 @@ export class PopupDialogComponent extends DialogBase implements OnInit {
    @Input() width: string = this.isMobileDevice() ? "90%" : "50%";
    
    @ViewChild('overlay', { static: false }) overlay: ElementRef;
-   protected popupComponentElement: HTMLElement;
+   private popupComponentElement: HTMLElement;
    public ready = true; // the popup is shown by default
    public reference: string = `pdc-${PopupDialogComponent.counter++}`;
    private isInitialised: boolean = false;
    private closeHandler: PopupCloseHandler;
    //private widthAsSet: number | null = null;
    constructor(pdc: ElementRef) {
-      super();
+      super(pdc);
       this.popupComponentElement = pdc.nativeElement;
       //console.log('new PopupDialogComponent');
    }
@@ -116,9 +113,6 @@ export class PopupDialogComponent extends DialogBase implements OnInit {
          let overlay = this.overlay.nativeElement as HTMLDivElement;
          overlay.style.zIndex = "0";
          PopupDialogComponent.openPopupsCount--;
-         //PopupDialogComponent.dialogStack.pop();
-         //let underlyingElement = PopupDialogComponent.dialogStack[PopupDialogComponent.dialogStack.length - 1];
-         //underlyingElement.style.pointerEvents = "auto";
       }
    }
 }

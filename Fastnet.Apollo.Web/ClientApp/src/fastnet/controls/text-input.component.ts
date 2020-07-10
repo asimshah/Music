@@ -1,5 +1,5 @@
 import { NG_VALUE_ACCESSOR } from "@angular/forms";
-import { forwardRef, Component, Input, Output, EventEmitter } from "@angular/core";
+import { forwardRef, Component, Input, Output, EventEmitter, ElementRef } from "@angular/core";
 import { ControlBase } from "./controlbase.type";
 import { InputControlBase } from "./inputcontrolbase";
 
@@ -42,8 +42,8 @@ export class TextInputControl extends InputControlBase {
   //   this._alignrightSet = true;
   //   this._alignright = val;
   //}
-  constructor() {
-    super();
+   constructor(elem: ElementRef) {
+    super(elem);
     this.setReference("text");
     //console.log(`${this.getReference()} is TextInputControl`);
   }

@@ -11,21 +11,12 @@ import { ParameterService } from '../shared/parameter.service';
 import { Subscription } from 'rxjs';
 import { PlaylistType } from '../shared/common.enums';
 import { PopupMessageComponent, PopupMessageOptions } from '../../fastnet/controls/popup-message.component';
+import { PlaylistManagerComponent } from './playlist-manager.component';
 
 enum PlaylistSaveType {
    New,
    Replace
 }
-//class SelectableAudioDevice {
-//   selected: boolean = false;
-//   constructor(public device: AudioDevice) { }
-//   public get displayName() {
-//      return this.device.displayName;
-//   }
-
-//}
-
-
 
 @Component({
    selector: 'playlist-bar',
@@ -40,6 +31,7 @@ export class PlaylistBarComponent implements OnInit, OnDestroy {
    @ViewChild('savePlaylist', { static: false }) savePlaylistDialog: PopupDialogComponent;
    @ViewChild('selectPlaylist', { static: false }) selectPlaylistDialog: PopupDialogComponent;
    @ViewChild(PopupMessageComponent, { static: false }) popupMessage: PopupMessageComponent;
+   @ViewChild(PlaylistManagerComponent, { static: false}) playlistManager: PlaylistManagerComponent;
    currentPlaylist: Playlist | null = null;
    transferModel: TransferPlaylistModel = new TransferPlaylistModel();
    saveModel: SavePlaylistModel = new SavePlaylistModel();
@@ -65,7 +57,8 @@ export class PlaylistBarComponent implements OnInit, OnDestroy {
       this.subscriptions = [];
    }
    onPlaylistManager() {
-      this.log.information("[PlaylistBarComponent] onPlaylistManager()");
+      this.playlistManager.open();
+      //this.log.information("[PlaylistBarComponent] onPlaylistManager()");
    }
    onDeletePlaylist() {
       let mdOptions = new PopupMessageOptions();

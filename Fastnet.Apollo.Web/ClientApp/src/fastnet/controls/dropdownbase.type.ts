@@ -16,8 +16,8 @@ export class DropdownBase extends InputControlBase implements OnDestroy, AfterVi
   public itemType: 'string' | 'listitem' = 'listitem';
   private dropPanelWidth: number;
   private dropPanelHeight: number;
-  constructor(private renderer: Renderer2) {
-    super();
+   constructor(elem: ElementRef, private renderer: Renderer2) {
+    super(elem);
     //this.setReference("combo-box");
     DropdownBase.allDropdownControls.push(this);
   }
