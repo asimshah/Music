@@ -57,7 +57,7 @@ export class PopularCatalogComponent extends BaseCatalogComponent {
       ps: ParameterService,
       sanitizer: DomSanitizer, playerService: PlayerService, log: LoggingService) {
       super(elementRef, libraryService, ps, sanitizer, playerService, log);
-      console.log('PopularCatalogComponent ctor()');
+      //console.log('PopularCatalogComponent ctor()');
    }
 
    async onPlayAlbum(album: Work) {

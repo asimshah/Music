@@ -35,7 +35,7 @@ export class SettingsComponent implements OnInit {
    }
    set showGeneratedMusic(val: boolean) {
       this.parameterService.showGeneratedMusic = val;
-      console.log(`showGeneratedMusic = ${this.parameterService.showGeneratedMusic}`);
+      //console.log(`showGeneratedMusic = ${this.parameterService.showGeneratedMusic}`);
    }
    private closeHandler: (r: EditorResult) => void;
    constructor(private parameterService: ParameterService, private ls: LibraryService, private playerService: PlayerService) {

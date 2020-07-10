@@ -39,7 +39,7 @@
 
       .album {
          display: grid;
-         grid-template-rows: auto minmax(0, 1fr) minmax(0, 1fr);
+         grid-template-rows: auto minmax(0, 1fr);
 
          .artist-name {
             font-size: 0.8rem;
