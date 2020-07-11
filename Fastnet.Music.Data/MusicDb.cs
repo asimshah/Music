@@ -21,8 +21,10 @@ namespace Fastnet.Music.Data
 
     public class RetryStrategy : SqlServerRetryingExecutionStrategy
     {
+        private readonly ILogger log;
         public RetryStrategy( ExecutionStrategyDependencies dependencies, int maxRetryCount) : base(dependencies, maxRetryCount)
         {
+            log = ApplicationLoggerFactory.CreateLogger<RetryStrategy>();
         }
 
         public int RetryNumber { get; set; } = 0;
@@ -33,6 +35,7 @@ namespace Fastnet.Music.Data
         }
         protected override bool ShouldRetryOn(Exception exception)
         {
+            log.Error(exception);
             //Debug.WriteLine($"ShouldRetryOn() called with {exception.GetType().Name}, retry number is {RetryNumber}");
             return true;
         }

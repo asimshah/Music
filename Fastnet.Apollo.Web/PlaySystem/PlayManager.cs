@@ -48,6 +48,7 @@ namespace Fastnet.Apollo.Web
             this.messenger = messenger;
             this.messenger.EnableMulticastSend();
             var connectionString = environment.LocaliseConnectionString(cfg.GetConnectionString("MusicDb"));
+            // playmanager is a singleton, so it cannot use an injected scoped LibraryService
             this.libraryService = new LibraryService(serverOptions, messageHub, loggerFactory.CreateLogger<LibraryService>(), new MusicDb(connectionString));
             this.lf = loggerFactory;
             this.taskList = new List<Task>();
@@ -65,8 +66,15 @@ namespace Fastnet.Apollo.Web
             {
                 var playlist = await this.libraryService.GetEntityAsync<Playlist>(dr.ExtendedPlaylist.PlaylistId);
                 var pli = await this.libraryService.AddPlaylistItemAsync(playlist, entity);
-                dr.ExtendedPlaylist.AddItem(pli, libraryService);
-                await SendPlaylist(dr.ToPlaylistDTO());
+                if (pli != null)
+                {
+                    dr.ExtendedPlaylist.AddItem(pli, libraryService);
+                    await SendPlaylist(dr.ToPlaylistDTO());
+                }
+                else
+                {
+                    log.Error("playlistitem not created");
+                }
             }
             else
             {

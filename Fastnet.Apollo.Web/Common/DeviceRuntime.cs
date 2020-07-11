@@ -104,7 +104,7 @@ namespace Fastnet.Apollo.Web
                 }
             }
             var newPosition = result?.Position ?? PlaylistPosition.ZeroPosition;
-            log.Information($"current position changed from {CurrentPosition} to {newPosition}, next item is {result?.ToString() ?? ""}");
+            log.Debug($"current position changed from {CurrentPosition} to {newPosition}, next item is {result?.ToString() ?? ""}");
             CurrentPosition = newPosition;
             if (CurrentPosition.Major == 0 && CurrentPosition.Major == 0)
             {
@@ -157,7 +157,7 @@ namespace Fastnet.Apollo.Web
                 }
             }
             var newPosition = result?.Position ?? PlaylistPosition.ZeroPosition;
-            log.Information($"current position changed from {CurrentPosition} to {newPosition}, next item is {result?.ToString() ?? ""}");
+            //log.Information($"current position changed from {CurrentPosition} to {newPosition}, next item is {result?.ToString() ?? ""}");
             CurrentPosition = newPosition;
             var stpli = result as SingleTrackPlaylistItem;
             if (stpli.NotPlayableOnCurrentDevice)
@@ -195,12 +195,19 @@ namespace Fastnet.Apollo.Web
             if(resettingExistingPlaylist && currentPlaylistItemId.HasValue)
             {
                 var matchingItem = this.ExtendedPlaylist.Items.SingleOrDefault((x) => x.PlaylistItemId == currentPlaylistItemId.Value);
-                var index = this.ExtendedPlaylist.Items.IndexOf(matchingItem);
-                savedPosition.SetMajor(index + 1);
+                if (matchingItem != null)
+                {
+                    var index = this.ExtendedPlaylist.Items.IndexOf(matchingItem);
+                    savedPosition.SetMajor(index + 1);
+                }
+                else
+                {
+                    savedPosition = PlaylistPosition.ZeroPosition;
+                }
             }
-            if(resettingExistingPlaylist)
+            if (resettingExistingPlaylist)
             {
-                log.Information($"{this}, setting current position from {CurrentPosition} to {savedPosition}");
+                log.Debug($"{this}, setting current position from {CurrentPosition} to {savedPosition}");
             }
             this.CurrentPosition = savedPosition.Clone();// PlaylistPosition.ZeroPosition;
             this.ExtendedPlaylist.AttachItemsChangedHandler(PlaylistItems_CollectionChanged);

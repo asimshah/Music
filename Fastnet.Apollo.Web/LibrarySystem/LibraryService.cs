@@ -397,19 +397,27 @@ namespace Fastnet.Apollo.Web
         }
         public async Task<PlaylistItem> AddPlaylistItemAsync<T>(Playlist playlist, T entity) where T : EntityBase
         {
-            PlaylistItem pli = entity switch
+            try
             {
-                MusicFile mf => CreateNewPlaylistItem(mf),
-                Track t => CreateNewPlaylistItem(t),
-                Work w => CreateNewPlaylistItem(w),
-                Performance p => CreateNewPlaylistItem(p),
-                _ => throw new Exception($"Entity type {entity.GetType().Name} is not playable"),
-            };
-            pli.Sequence = playlist.Items.Count() + 1;
-            playlist.Items.Add(pli);
-            playlist.LastModified = DateTimeOffset.Now;
-            await musicDb.SaveChangesAsync();
-            return pli;
+                PlaylistItem pli = entity switch
+                {
+                    MusicFile mf => CreateNewPlaylistItem(mf),
+                    Track t => CreateNewPlaylistItem(t),
+                    Work w => CreateNewPlaylistItem(w),
+                    Performance p => CreateNewPlaylistItem(p),
+                    _ => throw new Exception($"Entity type {entity.GetType().Name} is not playable"),
+                };
+                pli.Sequence = playlist.Items.Count() + 1;
+                playlist.Items.Add(pli);
+                playlist.LastModified = DateTimeOffset.Now;
+                await musicDb.SaveChangesAsync();
+                return pli;
+            }
+            catch (Exception xe)
+            {
+                log.Error(xe);
+            }
+            return null;
         }
         public async Task UpdatePlaylistItems(Playlist playlist, IEnumerable<PlaylistItem> items)
         {
