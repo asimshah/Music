@@ -20,37 +20,30 @@ namespace Fastnet.Music.Messages
         /// <summary>
         /// primary key in music database
         /// </summary>
-        //[JsonProperty(PropertyName = "id")]
         public long Id { get; set; }
         /// <summary>
         /// string key that uniquely identifies the device (a guid in practice)
         /// </summary>
-        //[JsonProperty(PropertyName = "key")]
         public string Key { get; set; }
         /// <summary>
         /// 
         /// </summary>
-        //[JsonProperty(PropertyName = "type")]
         public AudioDeviceType Type { get; set; }
         /// <summary>
         /// Allows a user to enable of disable an audio device
         /// </summary>
-        //[JsonProperty(PropertyName = "enabled")]
         public bool Enabled { get; set; }
         /// <summary>
         /// Friendly name for the device
         /// </summary>
-        //[JsonProperty(PropertyName = "displayName")]
         public string DisplayName { get; set; }
         /// <summary>
         /// system name for the device
         /// </summary>
-        //[JsonProperty(PropertyName = "name")]
         public string Name { get; set; }
         /// <summary>
         /// MACAddress if required (e.g. for Logitech devices)
         /// </summary>
-        //[JsonProperty(PropertyName = "macAddress")]
         public string MACAddress { get; set; }
         /// <summary>
         /// Url for the Music player agent for this device
@@ -58,9 +51,8 @@ namespace Fastnet.Music.Messages
         //[JsonProperty(PropertyName = "url")]
         public string Url { get; set; }
         /// <summary>
-        /// possibly not used???
+        /// 
         /// </summary>
-        //[JsonProperty(PropertyName = "isDefault")]
         public bool IsDefault { get; set; }
         /// <summary>
         /// possibly not used???
@@ -105,18 +97,12 @@ namespace Fastnet.Music.Messages
         /// <returns></returns>
         public override int GetHashCode()
         {
-            unchecked
-            {
-                int hash = 17;
-                hash = hash * 31 + Name.GetHashCode();
-                hash = hash * 31 + Type.GetHashCode();
-                //hash = hash * 31 + IsDefault.GetHashCode();
-                return hash;
-            }
+            return HashCode.Combine(Name, Type);
         }
+
         public override string ToString()
         {
-            return $"{Type.ToString()}, {Name}, {MACAddress}";
+            return $"{Type}, {Name}, {MACAddress}";
         }
     }
 #pragma warning restore CS1591 // Missing XML comment for publicly visible type or member

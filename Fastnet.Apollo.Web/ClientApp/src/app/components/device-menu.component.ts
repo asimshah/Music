@@ -38,7 +38,7 @@ export class DeviceMenuComponent implements OnInit, OnDestroy {
       //this.subscriptions.push(this.playerService.currentDeviceChanged.subscribe((d) => {
       //   this.currentDevice = d;
       //}));
-      this.subscriptions.push(this.messageService.deviceDisabled.subscribe((d) => {
+      this.subscriptions.push(this.messageService.deviceDisabled.subscribe((key) => {
          this.updateDevices();
          //console.log(`device ${d.displayName} disabled, list is now ${this.devices.length}`);
       }));

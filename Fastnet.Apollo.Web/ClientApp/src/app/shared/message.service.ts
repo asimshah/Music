@@ -18,7 +18,7 @@ export function messageFactory(ms: MessageService) {
 @Injectable()
 export class MessageService {
    deviceEnabled = new Subject<AudioDevice>();
-   deviceDisabled = new Subject<AudioDevice>();
+   deviceDisabled = new Subject<string>();
    deviceNameChanged = new Subject<AudioDevice>();
    deviceStatusUpdate = new Subject<DeviceStatus>();
    playlistUpdate = new Subject<Playlist>();
@@ -103,10 +103,10 @@ export class MessageService {
          device.copyProperties(d);
          this.deviceNameChanged.next(device);
       });
-      this.hubConnection.on("SendDeviceDisabled", (d: AudioDevice) => {
-         let device = new AudioDevice();
-         device.copyProperties(d);
-         this.deviceDisabled.next(device);
+      this.hubConnection.on("SendDeviceDisabled", (key: string) => {
+         //let device = new AudioDevice();
+         //device.copyProperties(d);
+         this.deviceDisabled.next(key);
       });
       this.hubConnection.on("SendDeviceStatus", (ds: DeviceStatus) => {
          let t = new DeviceStatus();

@@ -36,13 +36,16 @@ namespace Fastnet.Apollo.Web
 
             services.AddSingleton<FileSystemMonitorFactory>();
             services.AddSingleton<Messenger>();
+
+            services.AddService<DeviceService>();
             services.AddService<MusicFolderChangeMonitor>();
-            services.AddService<TaskRunner>();
-            services.AddService<TaskPublisher>();
-            services.AddService<PlayManager>();
-            //services.AddSingleton<SingletonLibraryService>();
-            services.AddScoped<LibraryService>();
             services.AddService<Resampler>();
+            services.AddService<TaskPublisher>();
+            services.AddService<TaskRunner>();
+
+            services.AddScoped<PlayManager>();
+            services.AddScoped<LibraryService>();
+
             if (!so.SuspendScheduling)
             {
                 foreach (var s in so.Schedules)

@@ -71,21 +71,6 @@ namespace Fastnet.Apollo.Web
             foreach (var item in playlist.Items.OrderBy(x => x.Sequence))
             {
                 ep.AddItem(item, libraryService);
-                //switch (item.Type)
-                //{
-                //    case PlaylistItemType.MusicFile:
-                //        ep.AddItem(new PlaylistMusicFileItem(item, libraryService));
-                //        break;
-                //    case PlaylistItemType.Track:
-                //        ep.AddItem(new PlaylistTrackItem(item, libraryService));
-                //        break;
-                //    case PlaylistItemType.Work:
-                //        ep.AddItem(new PlaylistWorkItem(item, libraryService));
-                //        break;
-                //    case PlaylistItemType.Performance:
-                //        ep.AddItem(new PlaylistPerformanceItem(item, libraryService));
-                //        break;
-                //}
             }
             return ep;
         }

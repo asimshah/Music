@@ -266,8 +266,8 @@ export class PlayerService extends BaseService implements OnDestroy {
          this.messageSubscriptions.push(this.messageService.deviceEnabled.subscribe(async (d) => {
             await this.onDeviceEnabled(d);
          }));
-         this.messageSubscriptions.push(this.messageService.deviceDisabled.subscribe(async (d) => {
-            await this.onDeviceDisabled(d);
+         this.messageSubscriptions.push(this.messageService.deviceDisabled.subscribe(async (key) => {
+            await this.onDeviceDisabled(key);
          }));
          this.messageSubscriptions.push(this.messageService.deviceNameChanged.subscribe(async (d) => {
             await this.onDeviceNameChanged(d);
@@ -300,9 +300,9 @@ export class PlayerService extends BaseService implements OnDestroy {
          await this.setInitialDevice();
       }
    }
-   private async onDeviceDisabled(d: AudioDevice) {
+   private async onDeviceDisabled(key: string) {
       //this.log.information(`device ${d.displayName} removed`);
-      let index = this.devices.findIndex(x => x.key === d.key);
+      let index = this.devices.findIndex(x => x.key === key);
       if (index > -1) {
          let device = this.devices[index];
          this.devices.splice(index, 1);
@@ -310,9 +310,9 @@ export class PlayerService extends BaseService implements OnDestroy {
             await this.setInitialDevice();
          }
       } else {
-         if (d.type !== AudioDeviceType.Browser) {
-            this.log.error(`disabled device ${d.displayName} not found in local list`);
-         }
+         //if (d.type !== AudioDeviceType.Browser) {
+         //   this.log.error(`disabled device ${key} not found in local list`);
+         //}
       }
    }
    private async onDeviceNameChanged(d: AudioDevice) {

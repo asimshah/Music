@@ -342,16 +342,17 @@ namespace Fastnet.Apollo.Web
         {
             return new AudioDevice
             {
-                Id = d.Id,
-                Key = d.KeyName,
-                Name = d.Name,
-                DisplayName = d.DisplayName,
+                CanReposition = d.CanReposition,
                 Capability = new AudioCapability { MaxSampleRate = d.MaxSampleRate },
-                Type = d.Type,
+                DisplayName = d.DisplayName,
                 Enabled = !d.IsDisabled,
                 HostMachine = d.HostMachine,
+                Id = d.Id,
+                Key = d.KeyName,
                 MACAddress = d.MACAddress,
-                CanReposition = d.CanReposition
+                Name = d.Name,
+                Type = d.Type,
+                Url = d.PlayerUrl
             };
         }
         public static DeviceStatusDTO ToDTO(this DeviceStatus ds, DeviceRuntime dr)

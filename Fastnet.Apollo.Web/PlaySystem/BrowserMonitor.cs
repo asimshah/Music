@@ -1,5 +1,4 @@
 ﻿using Fastnet.Core;
-using Fastnet.Core.Web;
 using Microsoft.Extensions.Logging;
 using System.Collections.Generic;
 using System.Linq;
@@ -24,12 +23,14 @@ namespace Fastnet.Apollo.Web
         /// </summary>
         private IDictionary<string, BrowserData> browsers = new Dictionary<string, BrowserData>();
         private readonly ILogger log;
-        private readonly PlayManager playManager;
-        public BrowserMonitor(ILogger<BrowserMonitor> logger, PlayManager pm /*Microsoft.Extensions.Hosting.IHostedService hs*/)
+        //private readonly PlayManager playManager;
+        private readonly DeviceService deviceService;
+        public BrowserMonitor(ILogger<BrowserMonitor> logger, DeviceService ds)
         {
             this.log = logger;
             //playManager = (hs as SchedulerService).GetRealtimeTask<PlayManager>();
-            playManager = pm;// schedulerService.GetRealtimeTask<PlayManager>();
+            //playManager = pm;// schedulerService.GetRealtimeTask<PlayManager>();
+            this.deviceService = ds;
         }
         public void ConnectBrowser(string signalRConnectionId, string browserKey, string ipAddress, string browserName)
         {
@@ -56,7 +57,8 @@ namespace Fastnet.Apollo.Web
             {
                 var bd = this.browsers[signalRConnectionId];
                 this.browsers.Remove(signalRConnectionId);
-                await this.playManager.BrowserDisconnectedAsync(bd.BrowserKey);
+                //await this.playManager.BrowserDisconnectedAsync(bd.BrowserKey);
+                await this.deviceService.BrowserDisconnectedAsync(bd.BrowserKey);
                 log.Debug($"{signalRConnectionId} removed: browser key {bd.BrowserKey}, ip address {bd.IPAddressString}, brower name {bd.BrowserName}");
             }
             else
