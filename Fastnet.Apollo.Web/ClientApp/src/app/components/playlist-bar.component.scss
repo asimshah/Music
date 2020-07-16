@@ -10,10 +10,14 @@
    padding-right: $theme-gutter;
    display: grid;
    grid-template-columns: auto auto auto auto 1fr auto;
-   //grid-template-columns: auto auto auto 1fr auto;
+
    align-items: center;
    grid-column-gap: $theme-gutter-narrow;
    justify-items: center;
+
+   &.is-mobile {
+      grid-template-columns: auto auto auto 1fr auto;
+   }
 
    button.icon {
       border: 1px solid theme-colour('background', 'light');

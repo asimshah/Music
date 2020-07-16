@@ -28,30 +28,25 @@ namespace Fastnet.Apollo.Web.Controllers
     public class LibraryController : BaseController
     {
         private static readonly Regex ipadRegex = new Regex(@"(android|ipad|playbook|silk|bb\d+|meego).+mobile|avantgo|bada\/|blackberry|blazer|compal|elaine|fennec|hiptop|iemobile|ip(hone|od)|iris|kindle|lge |maemo|midp|mmp|mobile.+firefox|netfront|opera m(ob|in)i|palm( os)?|phone|p(ixi|re)\/|plucker|pocket|psp|series(4|6)0|symbian|treo|up\.(browser|link)|vodafone|wap|windows ce|xda|xiino", RegexOptions.IgnoreCase | RegexOptions.Multiline | RegexOptions.Compiled);
-        private MusicOptions musicOptions;
-        private readonly string contentRootPath;
-        private readonly MusicServerOptions musicServerOptions;
+        private IOptionsMonitor<MusicOptions> musicOptions;
+        //private readonly string contentRootPath;
+        private readonly IOptionsMonitor<MusicServerOptions> musicServerOptionsMonitor;
         private readonly MusicDb musicDb;
-        private readonly TaskRunner taskRunner;
+        //private readonly TaskRunner taskRunner;
         private readonly TaskPublisher taskPublisher;
         //private IndianClassicalInformation ici;
         //private readonly IOptionsMonitor<IndianClassicalInformation> monitoredIci;
-        public LibraryController( IWebHostEnvironment env,
-            IOptions<MusicServerOptions> mso,
-            TaskPublisher tp,  TaskRunner tr,
+        public LibraryController(IWebHostEnvironment env,
+            IOptionsMonitor<MusicServerOptions> mso,
+            TaskPublisher tp,  /*TaskRunner tr,*/
             IOptionsMonitor<MusicOptions> mo, ILogger<LibraryController> logger, MusicDb mdb) : base(logger, env)
         {
-            this.musicOptions = mo.CurrentValue;
-            mo.OnChangeWithDelay((opt) =>
-            {
-                this.musicOptions = opt;
-            });
-            this.contentRootPath = env.ContentRootPath;
+            this.musicOptions = mo;//.CurrentValue;
             this.log = logger;
-            this.musicServerOptions = mso.Value;
+            this.musicServerOptionsMonitor = mso;
             this.musicDb = mdb;
             this.taskPublisher = tp;
-            this.taskRunner = tr;
+            //this.taskRunner = tr;
         }
         [HttpGet("parameters/get/{key?}")]
         public IActionResult GetParameters()
@@ -62,14 +57,8 @@ namespace Fastnet.Apollo.Web.Controllers
             {
                 clientIPAddress = NetInfo.GetLocalIPAddress().ToString();
             }
-            //if (string.IsNullOrWhiteSpace(key))
-            //{
-                
-            //    //key = Guid.NewGuid().ToString().ToLower();
-            //    //log.Information($"new browser key {key} allocated");
-            //}
             var key = GetBrowserKey(clientIPAddress);
-            var styles = this.musicOptions.Styles.Select(s => new StyleDTO
+            var styles = this.musicOptions.CurrentValue.Styles.Select(s => new StyleDTO
             {
                 Id = s.Style,
                 Enabled = s.Enabled,
@@ -83,10 +72,10 @@ namespace Fastnet.Apollo.Web.Controllers
                 BrowserKey = key,
                 AppName = this.environment.IsDevelopment() ? "Apollo Dev" : "Apollo",
                 IsMobile = this.Request.IsMobileBrowser(),
-                IsIpad = this.Request.IsIpad(),// this.IsMobile == false && ipadRegex.IsMatch(Request.UserAgent()),
+                IsIpad = this.Request.IsIpad(),
                 Browser = this.Request.GetBrowser().ToString(),
-                ClientIPAddress = clientIPAddress,// this.Request.HttpContext.GetRemoteIPAddress(),
-                CompactLayoutWidth = this.musicServerOptions.CompactLayoutWidth,
+                ClientIPAddress = clientIPAddress,
+                CompactLayoutWidth = this.musicServerOptionsMonitor.CurrentValue.CompactLayoutWidth,
                 Styles = styles
             };
 
@@ -121,7 +110,7 @@ namespace Fastnet.Apollo.Web.Controllers
         [HttpGet("music/options")]
         public IActionResult GetMusicOptions()
         {
-            return SuccessResult(musicOptions);
+            return SuccessResult(musicOptions.CurrentValue);
         }
         [HttpGet("information/{style}")]
         public IActionResult GetStyleInformation(MusicStyles style)
@@ -177,7 +166,7 @@ namespace Fastnet.Apollo.Web.Controllers
         {
             await Task.Delay(0);
             log.Debug($"Search for {searchText} ...");
-            var cs = CatalogueSearcher.GetSearcher(this.musicOptions, style, this.musicDb, this.log);
+            var cs = CatalogueSearcher.GetSearcher(this.musicOptions.CurrentValue, style, this.musicDb, this.log);
             using (new TimedAction((t) => log.Debug($"    ... completed in {t.ToString("c")}")))
             {
                 var (prefixMode, results) = cs.Search(searchText);
@@ -287,7 +276,7 @@ namespace Fastnet.Apollo.Web.Controllers
             {
                 return ErrorResult($"performance with id {id} not found");
             }
-            var result = await performance.ToWesternClassicalAlbumTEO(musicOptions);
+            var result = await performance.ToWesternClassicalAlbumTEO(musicOptions.CurrentValue);
             return SuccessResult(result);
         }
         [HttpGet("edit/work/{id}")]
@@ -298,7 +287,7 @@ namespace Fastnet.Apollo.Web.Controllers
             {
                 return ErrorResult($"work with id {id} not found");
             }
-            var result = await work.ToPopularAlbumTEO(musicOptions);
+            var result = await work.ToPopularAlbumTEO(musicOptions.CurrentValue);
             return SuccessResult(result);
         }
         [HttpPost("update/work/{style}")]
@@ -408,19 +397,6 @@ namespace Fastnet.Apollo.Web.Controllers
             result.Add(b);
             return result.ToArray();
         }
-        //private IEnumerable<ArtistSetRagaPerformance> GetRagaPerformancesForArtistSet(long[] artistIds)
-        //{
-        //    artistIds = artistIds.OrderBy(k => k).ToArray();
-        //    // get all performances by these artists singly or jointly
-        //    var allPerformancesByTheseArtists = musicDb.RagaPerformances
-        //        .Where(x => artistIds.Contains(x.ArtistId))
-        //        .Select(x => x.Performance).Distinct();
-        //    var rpListForThesePerformances = allPerformancesByTheseArtists.AsEnumerable()
-        //        .Join(musicDb.RagaPerformances, p => p.Id, rp => rp.PerformanceId, (p, rp) => rp);
-        //    return rpListForThesePerformances.GroupBy(x => x.Performance)
-        //        .Where(x => x.Select(r => r.ArtistId).OrderBy(n => n).SequenceEqual(artistIds))
-        //        .Select(x => new ArtistSetRagaPerformance { Performance = x.Key, Raga = x.First().Raga, Artists = x.Select(z => z.Artist).ToArray() });            
-        //}
         [HttpGet("get/raga/{id}")]
         public async Task<IActionResult> GetRaga(long id)
         {
@@ -609,38 +585,6 @@ namespace Fastnet.Apollo.Web.Controllers
             log.Information($"{performance.ToLogIdentity()}  {performance.GetAllPerformersCSV()} resampled");
             return SuccessResult();
         }
-        //[HttpPost("update/performance")]
-        //public async Task<IActionResult> UpdatePerformance()
-        //{
-        //    var dto = this.Request.FromBody<PerformanceDTO>();
-        //    //var text = dto.ToJson();
-        //    //log.Information(text);
-
-        //    try
-        //    {
-        //        var performance = await musicDb.Performances.FindAsync(dto.Id);
-        //        Debug.Assert(performance.Movements.Count() == dto.Movements.Count(), "UpdatePerformance() does not supprt changing the number of movements");
-        //        performance.Performers = dto.Performers;
-        //        foreach (var item in dto.Movements)
-        //        {
-        //            var movement = performance.Movements.Single(x => x.Id == item.Id);
-        //            movement.Number = item.Number;
-        //            movement.Title = item.Title;
-        //        }
-        //        if (musicDb.ChangeTracker.HasChanges())
-        //        {
-        //            log.Information($"Composer {performance.Composition.Artist.Name}, Composition {performance.Composition.Name}, performance {performance.Performers} metadata changed");
-        //        }
-        //        await musicDb.SaveChangesAsync();
-        //        return SuccessResult();
-        //    }
-        //    catch (Exception xe)
-        //    {
-        //        log.Error(xe);
-        //        return ExceptionResult(xe);
-        //    }
-        //}
-        //
         [HttpGet("reset/artist/{id}")]
         public async Task<IActionResult> ResetArtist(long id)
         {
@@ -720,7 +664,7 @@ namespace Fastnet.Apollo.Web.Controllers
                             // second check all names against the alias list
                             foreach (var performer in allPerformers)
                             {
-                                var aliasName = musicOptions.ReplaceAlias(performer.Name);
+                                var aliasName = musicOptions.CurrentValue.ReplaceAlias(performer.Name);
                                 if (aliasName != performer.Name)
                                 {
                                     if (aliasName.IsEqualIgnoreAccentsAndCase(performer.Name))
@@ -764,7 +708,7 @@ namespace Fastnet.Apollo.Web.Controllers
         {
             log.Information("Music scanner started");
 
-            foreach (var si in new MusicStyleCollection(musicOptions))
+            foreach (var si in new MusicStyleCollection(musicOptions.CurrentValue))
             {
                 await taskPublisher.AddTask(si.Style);
             }
@@ -796,79 +740,6 @@ namespace Fastnet.Apollo.Web.Controllers
             var ms = new MemoryStream(image.Data);
             return CacheableResult(new FileStreamResult(ms, image.MimeType), image.LastModified);
         }
-        //private bool CheckDbIntegrity(MusicDb db)
-        //{
-        //    var result = true;
-        //    var artistsWithoutWorks = db.Artists.Where(a => a.Works.Count() == 0);
-        //    if (artistsWithoutWorks.Count() > 0)
-        //    {
-        //        // result = false;
-        //        // artist without works is possible in the case
-        //        // where a collection has been recorded as a work and the individual artists
-        //        // may not have works themselves
-
-        //        foreach (var artist in artistsWithoutWorks)
-        //        {
-        //            log.Trace($"Artist {artist.Name} has no works");
-        //        }
-        //    }
-        //    var worksWithoutTracks = db.Works.Where(a => a.Tracks.Count() == 0);
-        //    if (worksWithoutTracks.Count() > 0)
-        //    {
-        //        result = false;
-        //        foreach (var work in worksWithoutTracks)
-        //        {
-        //            log.Error($"Artist(s) {work.GetArtistNames()}, work {work.Name} has no tracks");
-        //        }
-        //    }
-        //    var tracksWithoutMusic = db.Tracks.Where(a => a.MusicFiles.Count() == 0);
-        //    if (tracksWithoutMusic.Count() > 0)
-        //    {
-        //        result = false;
-        //        foreach (var track in tracksWithoutMusic)
-        //        {
-        //            log.Error($"Artist(s) {track.Work.GetArtistNames()}, work {track.Work.Name}, track {track.Title}  has no tracks");
-        //        }
-        //    }
-        //    var tracksWithOnlyGeneratedMusic = db.Tracks.Where(a => a.MusicFiles.All(x => x.IsGenerated));
-        //    if (tracksWithOnlyGeneratedMusic.Count() > 0)
-        //    {
-        //        result = false;
-        //        foreach (var track in tracksWithOnlyGeneratedMusic)
-        //        {
-        //            log.Error($"Artist(s) {track.Work.GetArtistNames()}, work {track.Work.Name}, track {track.Title} only has generated music");
-        //        }
-        //    }
-        //    var compositionsWithoutPerformances = db.Compositions.Where(a => a.Performances.Count() == 0);
-        //    if (compositionsWithoutPerformances.Count() > 0)
-        //    {
-        //        result = false;
-        //        foreach (var composition in compositionsWithoutPerformances)
-        //        {
-        //            log.Error($"Artist {composition.Artist.Name}, composition {composition.Name},  has no performances");
-        //        }
-        //    }
-        //    var performancesWithoutMovements = db.Performances.Where(a => a.Movements.Count() == 0);
-        //    if (performancesWithoutMovements.Count() > 0)
-        //    {
-        //        result = false;
-        //        foreach (var performance in performancesWithoutMovements)
-        //        {
-        //            log.Error($"Artist(s) {performance.GetParentArtistsName()}, {performance.GetParentEntityName()},  {performance.GetAllPerformersCSV()} has no movemenents");
-        //        }
-        //    }
-        //    var performancesWhereMovementsAreInvalid = db.Performances.Where(p => p.Movements.Where(m => m.Performance != p).Count() > 0);
-        //    if (performancesWhereMovementsAreInvalid.Count() > 0)
-        //    {
-        //        result = false;
-        //        foreach (var performance in performancesWhereMovementsAreInvalid)
-        //        {
-        //            log.Error($"Artist {performance.GetParentArtistsName()}, {performance.GetParentEntityName()},  {performance.GetAllPerformersCSV()} has suspect movements");
-        //        }
-        //    }
-        //    return result;
-        //}
-        // move this to Fastnet.Core
         private string GetPackageVersion()
         {
             //var assemblyLocation = System.Reflection.Assembly.GetExecutingAssembly().Location;

@@ -25,27 +25,19 @@ namespace Fastnet.Apollo.Web
         private BlockingCollection<TaskQueueItem> TaskQueue;
         private List<long> itemList = new List<long>();
         private CancellationToken cancellationToken;
-        private readonly MusicOptions options;
+        private readonly IOptionsMonitor<MusicOptions> options;
         private readonly IServiceProvider serviceProvider;
         private readonly string connectionString;
         private readonly IOptionsMonitor<IndianClassicalInformation> monitoredIndianClassicalInformation;
-        //private IndianClassicalInformation indianClassicalInformation;
-        public TaskRunner(IServiceProvider sp, IOptions<MusicOptions> options, /*IOptions<IndianClassicalInformation> iciOptions,*/
+        public TaskRunner(IServiceProvider sp, IOptionsMonitor<MusicOptions> options, /*IOptions<IndianClassicalInformation> iciOptions,*/
             IOptionsMonitor<IndianClassicalInformation> monitoredIci,
             IConfiguration cfg, IWebHostEnvironment environment,
             ILogger<TaskRunner> logger) : base(logger)
         {
             this.serviceProvider = sp;
-            this.options = options.Value;
+            this.options = options;//.Value;
             monitoredIndianClassicalInformation = monitoredIci;
-            //monitoredIndianClassicalInformation.OnChangeWithDelay((x) =>
-            //{
-            //    this.indianClassicalInformation = x;
-            //    this.indianClassicalInformation.PrepareNames();
-            //    log.Information("IndianClassicalInformation changed");
-            //});
-            //this.indianClassicalInformation = monitoredIci.CurrentValue;
-            maxConsumerThreads = Math.Max(1, this.options.MaxTaskThreads);
+            maxConsumerThreads = Math.Max(1, this.options.CurrentValue.MaxTaskThreads);
             connectionString = environment.LocaliseConnectionString(cfg.GetConnectionString("MusicDb"));
         }
 

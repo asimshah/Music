@@ -21,10 +21,10 @@ namespace Fastnet.Apollo.Web
         private readonly ILogger log;
         private readonly string connectionString;
         private readonly BlockingCollection<TaskQueueItem> taskQueue;
-        private readonly MusicOptions options;
+        private readonly IOptionsMonitor<MusicOptions> options;
         private readonly IServiceProvider serviceProvider;
         private readonly IOptionsMonitor<IndianClassicalInformation> monitoredIndianClassicalInformation;
-        public TaskHost(IServiceProvider sp, MusicOptions options, BlockingCollection<TaskQueueItem> taskQueue,
+        public TaskHost(IServiceProvider sp, IOptionsMonitor<MusicOptions> options, BlockingCollection<TaskQueueItem> taskQueue,
             IOptionsMonitor<IndianClassicalInformation> monitoredIndianClassicalInformation,
             string connectionString, CancellationToken cancellationToken)
         {
@@ -79,20 +79,20 @@ namespace Fastnet.Apollo.Web
                     switch (item.Type)
                     {
                         case TaskType.DiskPath:
-                            tb = new CataloguePath(options, item.TaskItemId, connectionString, monitoredIndianClassicalInformation.CurrentValue, taskQueue,
+                            tb = new CataloguePath(options.CurrentValue, item.TaskItemId, connectionString, monitoredIndianClassicalInformation.CurrentValue, taskQueue,
                                 this.serviceProvider.GetService<IOptions<MusicServerOptions>>(), this.serviceProvider.GetService<IHubContext<MessageHub, IHubMessage>>(),
                                 this.serviceProvider.GetService<ILoggerFactory>());
                             break;
                         case TaskType.Portraits:
-                            tb = new UpdatePortraits(options, item.TaskItemId, connectionString);
+                            tb = new UpdatePortraits(options.CurrentValue, item.TaskItemId, connectionString);
                             break;
                         case TaskType.ArtistFolder:
                         case TaskType.ArtistName:
                         case TaskType.MusicStyle:
-                            tb = new ExpandTask(options, item.TaskItemId, connectionString, taskQueue);
+                            tb = new ExpandTask(options.CurrentValue, item.TaskItemId, connectionString, taskQueue);
                             break;
                         case TaskType.DeletedPath:
-                            tb = new DeletePath(options, item.TaskItemId, connectionString,
+                            tb = new DeletePath(options.CurrentValue, item.TaskItemId, connectionString,
                                 this.serviceProvider.GetService<IOptions<MusicServerOptions>>(), this.serviceProvider.GetService<IHubContext<MessageHub, IHubMessage>>(),
                                 this.serviceProvider.GetService<ILoggerFactory>());
                             break;
@@ -111,7 +111,7 @@ namespace Fastnet.Apollo.Web
             using (var db = new MusicDb(connectionString))
             {
                 var taskItem = db.TaskItems.Find(itemId);
-                var maxRetries = options.MaxTaskRetries;
+                var maxRetries = options.CurrentValue.MaxTaskRetries;
                 bool requeue = false;
                 if (taskItem.RetryCount < maxRetries)
                 {
