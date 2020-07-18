@@ -57,19 +57,16 @@ export class WesternClassicalCatalogComponent extends BaseCatalogComponent {
       c.showPerformances = !c.showPerformances;
    }
    onTapPerformance(p: Performance) {
-      //if (this.isTouchDevice() && p.movements.length > 1) {
-      //   this.commandPanel.open(MusicStyles.WesternClassical, c, p, null, async (r) => await this.executeCommand(r));
-      //}
       if (this.isTouchDevice()) {
-         if (p.movements.length > 1) {
-            this.commandPanel.open2(p,
-               //c, p, null, null,
-               async (r) => await this.executeCommand(r));
-         } else {
-            this.commandPanel.open2(p.movements[0],
-               //c, p, p.movements[0], null,
-               async (r) => await this.executeCommand(r));
-         }
+         this.commandPanel.open2(p,
+            async (r) => await this.executeCommand(r));
+         //if (p.movements.length > 1) {
+         //   this.commandPanel.open2(p,
+         //      async (r) => await this.executeCommand(r));
+         //} else {
+         //   this.commandPanel.open2(p.movements[0],
+         //      async (r) => await this.executeCommand(r));
+         //}
       }
    }
    onTapMovement(c: Composition, p: Performance, t: Track) {

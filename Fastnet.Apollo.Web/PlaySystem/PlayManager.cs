@@ -136,7 +136,7 @@ namespace Fastnet.Apollo.Web
             //    }
             //    return;
             //}
-            if (this.deviceService.IsValid(fromDeviceKey) && this.deviceService.IsValid(toDeviceKey))
+            if (this.deviceService.IsPresentInRuntime(fromDeviceKey) && this.deviceService.IsPresentInRuntime(toDeviceKey))
             {
                 //var playlist = await this.libraryService.GetEntityAsync<Playlist>(from.ExtendedPlaylist.PlaylistId);
                 //var epl = this.deviceService.GetExtendedPlaylist(fromDeviceKey);
@@ -519,54 +519,12 @@ namespace Fastnet.Apollo.Web
         }
         public async Task AddDeviceToRuntime(Device device)
         {
-            if (!device.IsDisabled)
+            if (!device.IsDisabled && !this.deviceService.IsPresentInRuntime(device.KeyName))
             {
                 var epl = this.libraryService.CreateExtendedPlaylist(device.Playlist);
                 await this.deviceService.AddDevice(device.ToDTO(), epl);
-
                 await this.deviceService.SetExtendedPlaylist(device.KeyName, epl);
             }
-            //if (true /*this.keepAlive != null*/)
-            //{
-            //    DeviceRuntime dr = GetDeviceRuntime(device.KeyName);
-            //    if (dr == null)
-            //    {
-            //        dr = new DeviceRuntime
-            //        {
-            //            Key = device.KeyName,
-            //            Type = device.Type,
-            //            DisplayName = device.DisplayName,
-            //            MaxSampleRate = device.MaxSampleRate,
-            //            PlayerUrl = device.PlayerUrl,
-            //            CommandSequenceNumber = 0,
-            //            Status = new DeviceStatus
-            //            {
-            //                Key = device.KeyName,
-            //                State = PlayerStates.Idle
-            //            }
-            //        };
-            //        await this.SetPlaylistAsync(dr, device.Playlist);
-            //        if (this.runtimeDevices.TryAdd(dr.Key, dr))
-            //        {
-            //            log.Information($"{device} added to run time");
-            //            await PlayerResetAsync(dr.Key);
-            //        }
-            //        else
-            //        {
-            //            log.Error($"failed to add device {device} to run time");
-            //        }
-            //    }
-            //    else
-            //    {
-            //        log.Warning($"{device} already present in run time");
-            //    }
-
-            //    //this.keepAlive.SetPlayerUrls(this.GetPlayerUrls());
-            //}
-            //else
-            //{
-            //    //log.Warning($"not ready to add a device - keepAlive not yet started");
-            //}
         }
         //private async Task<int> ExecuteCommandAsync(string key, PlayerCommand playerCommand/*, Action<DeviceRuntime> afterExecute = null*/)
         //{

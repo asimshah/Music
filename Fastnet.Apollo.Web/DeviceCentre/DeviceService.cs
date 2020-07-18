@@ -102,7 +102,7 @@ namespace Fastnet.Apollo.Web
             var dr = GetDeviceRuntime(deviceKey);
             return dr.Status.ToDTO(dr);
         }
-        public bool IsValid(string deviceKey)
+        public bool IsPresentInRuntime(string deviceKey)
         {
             var dr = GetDeviceRuntime(deviceKey);
             return dr != null;
