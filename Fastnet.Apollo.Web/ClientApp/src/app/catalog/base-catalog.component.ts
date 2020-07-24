@@ -32,7 +32,7 @@ export abstract class BaseCatalogComponent implements OnInit, OnDestroy, AfterVi
    private subscriptions: Subscription[] = [];
    constructor(private elementRef: ElementRef, protected readonly library: LibraryService,
       //private messageService: MessageService,
-      protected parameterService: ParameterService, private sanitizer: DomSanitizer,
+      protected parameterService: ParameterService, /*private sanitizer: DomSanitizer,*/
       private readonly playerService: PlayerService, protected log: LoggingService) {
    }
    ngOnDestroy() {

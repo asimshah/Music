@@ -28,6 +28,7 @@ import { TooltipContentComponent } from './tooltip-content.component';
 import { TabComponent } from './tab.component';
 import { TabsComponent } from './tabs.component';
 import { ExpandingPanelsComponent } from './expanding-panels.component';
+import { SliderComponent } from './slider.component';
 
 @NgModule({
    imports: [
@@ -65,7 +66,8 @@ import { ExpandingPanelsComponent } from './expanding-panels.component';
       TooltipContentComponent,
       TabComponent,
       TabsComponent,
-      ExpandingPanelsComponent
+      ExpandingPanelsComponent,
+      SliderComponent
    ],
    declarations: [
       TextInputControl,
@@ -98,7 +100,8 @@ import { ExpandingPanelsComponent } from './expanding-panels.component';
       TooltipContentComponent,
       TabComponent,
       TabsComponent,
-      ExpandingPanelsComponent
+      ExpandingPanelsComponent,
+      SliderComponent
    ],
    providers: [
 

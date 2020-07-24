@@ -1,4 +1,4 @@
-import { Component, ViewChild, ElementRef } from '@angular/core';
+import { Component, ElementRef } from '@angular/core';
 import { BaseCatalogComponent } from '../base-catalog.component';
 import { SearchKey, PerformanceResult } from '../../shared/common.types';
 import { LibraryService } from '../../shared/library.service';
@@ -6,7 +6,7 @@ import { Artist, Composition, Performance, Movement, MusicFile, Track, Work } fr
 import { PlayerService } from '../../shared/player.service';
 import { LoggingService } from '../../shared/logging.service';
 import { ParameterService } from '../../shared/parameter.service';
-import { DomSanitizer } from '@angular/platform-browser';
+//import { DomSanitizer } from '@angular/platform-browser';
 //import { MusicStyles } from '../../shared/common.enums';
 //import { WesternClassicalTagEditorComponent } from './western-classical-tag-editor/western-classical-tag-editor.component';
 //import { CommandPanelResult, SelectedCommand, TargetEntity } from '../command-panel/command-panel.component';
@@ -44,9 +44,9 @@ export class WesternClassicalCatalogComponent extends BaseCatalogComponent {
    //private guardShowMovementsClosure = false;
    constructor(elementRef: ElementRef, library: LibraryService,
       //messageService: MessageService,
-      ps: ParameterService, sanitizer: DomSanitizer,
+      ps: ParameterService, /*sanitizer: DomSanitizer,*/
       playerService: PlayerService, log: LoggingService) {
-      super(elementRef, library,  ps, sanitizer, playerService, log);
+      super(elementRef, library,  ps, /*sanitizer,*/ playerService, log);
    }
    async onTapComposition(c: Composition) {
       // also called by mouse click

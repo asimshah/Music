@@ -6,18 +6,13 @@
             <div class="title artist-name">{{currentItem.artistName}}</div>
             <div class="title">{{currentItem.collectionName}}</div>
             <div class="title track-name">{{currentItem.title}}</div>
-            <!--<ng-container *ngFor="let title of currentItem.titles; let first = first; let last = last">
-      <div class="title" [ngClass]="{'artist-name': first, 'track-name': last}">{{title}}</div>
-   </ng-container>-->
             <div class="audio-properties">{{currentItem.audioProperties}}</div>
          </ng-container>
       </div>
       <ng-container *ngIf="deviceStatus">
          <div class="playing-slider">
             <div class="duration">{{deviceStatus.formattedCurrentTime}}</div>
-            <div #playSlider class="groove" [ngClass]="{'repositioning-disabled': canReposition() === false}" (mouseup)="onPlayingSliderMouseUp($event)">
-               <div #playBead class="bead fa fa-circle" [ngStyle]="{left: playBeadPosition}"></div>
-            </div>
+            <slider name="playingslider" [minimum]="0" [maximum]="100" [current]="playPosition" [canslide]="canReposition()" (currentChange)="onPlayPositionChanged($event)"></slider>
             <div class="duration">{{deviceStatus.formattedRemainingTime}}</div>
          </div>
       </ng-container>
@@ -25,15 +20,13 @@
    <ng-container>
       <div class="audio-controls">
          <div class="fa fa-fast-backward skip-back" title="Skip to previous" (click)="skipBackward()"></div>
-         <div class="fa  fa-2x toggle-play-pause" title="Toggle play/pause" [ngClass]="{'fa-pause-circle-o' : isPlaying(), 'fa-play-circle-o': !isPlaying()}" (click)="togglePlayPause()"></div>
+         <div class="fa fa-2x toggle-play-pause" title="Toggle play/pause" [ngClass]="{'fa-pause-circle-o' : isPlaying(), 'fa-play-circle-o': !isPlaying()}" (click)="togglePlayPause()"></div>
          <div class="fa fa-fast-forward skip-forward" title="Skip to next" (click)="skipForward()"></div>
       </div>
-      <div class="volume-slider">
-         <i class="fa fa-volume-off volume-down" (click)="volumeDown()"></i>
-         <div #volumeSlider class="groove" (mouseup)="onVolumeSliderMouseUp($event)">
-            <div #volumeBead class="bead fa fa-circle" [ngStyle]="{left: volumeBeadPosition}"></div>
-         </div>
-         <i class="fa fa-volume-up volume-up" (click)="volumeUp()"></i>
+      <div *ngIf="device && device.type !== AudioDeviceType.Browser" class="volume-slider">
+         <i class="fa fa-volume-off volume-down"></i>
+         <slider name="volumeslider" [minimum]="0" [maximum]="1" [current]="volume" (currentChange)="onVolumeChange($event)" ></slider>
+         <i class="fa fa-volume-up volume-up"></i>
       </div>
    </ng-container>
    <playlist-bar></playlist-bar>

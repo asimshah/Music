@@ -137,7 +137,7 @@ $accent-colour: $high-accent-colour; // #f9ca06;// theme-colour('accent');
    }
 
    .volume-down, .volume-up {
-      @include make-clickable();
+      //@include make-clickable();
       margin-left: $theme-gutter;
       margin-right: $theme-gutter;
    }
@@ -145,8 +145,8 @@ $accent-colour: $high-accent-colour; // #f9ca06;// theme-colour('accent');
 
 .mobile-device {
    .playing-slider, .volume-slider {
-      margin-top: $theme-gutter;
-      margin-bottom: $theme-gutter;
+      margin-top: $theme-gutter * 2;
+      margin-bottom: $theme-gutter * 2;
    }
 
    .audio-controls {

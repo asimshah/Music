@@ -1,15 +1,14 @@
-import { Component, OnInit, ElementRef } from '@angular/core';
+import { Component, ElementRef } from '@angular/core';
 import { BaseCatalogComponent } from '../base-catalog.component';
 import { LibraryService } from '../../shared/library.service';
-import { MessageService } from '../../shared/message.service';
+//import { MessageService } from '../../shared/message.service';
 import { ParameterService } from '../../shared/parameter.service';
-import { DomSanitizer } from '@angular/platform-browser';
 import { PlayerService } from '../../shared/player.service';
 import { LoggingService } from '../../shared/logging.service';
 import { Artist, Raga, ArtistSet, Performance, Track } from '../../shared/catalog.types';
 import { sortedInsert } from '../../../fastnet/core/common.functions';
 import { SearchKey, PerformanceResult } from '../../shared/common.types';
-import { MusicStyles } from '../../shared/common.enums';
+//import { MusicStyles } from '../../shared/common.enums';
 
 class IndianClassicalRagaResult {
    raga: SearchKey;
@@ -36,9 +35,9 @@ export class IndianClassicalCatalogComponent extends BaseCatalogComponent {
    artistSets: ArtistSet[] = [];
    constructor(elementRef: ElementRef, library: LibraryService,
       //messageService: MessageService,
-      ps: ParameterService, sanitizer: DomSanitizer,
+      ps: ParameterService, /*sanitizer: DomSanitizer,*/
       playerService: PlayerService, log: LoggingService) {
-      super(elementRef, library, ps, sanitizer, playerService, log);
+      super(elementRef, library, ps, /*sanitizer,*/ playerService, log);
    }
    getArtistStats(a: Artist) {
       let parts: string[] = [];
@@ -83,19 +82,20 @@ export class IndianClassicalCatalogComponent extends BaseCatalogComponent {
    //      async (r) => await this.executeCommand(r));
    //}
    onTapPerformance(r: Raga, p: Performance) {
-      //if (this.isTouchDevice() && p.movements.length > 1) {
-      //   this.commandPanel.open(MusicStyles.IndianClassical, r, p, null, async (r) => await this.executeCommand(r));
-      //}
       if (this.isTouchDevice()) {
-         if (p.movements.length > 1) {
-            this.commandPanel.open2(p,
-               //r, p, null, null,
-               async (r) => await this.executeCommand(r));
-         } else {
-            this.commandPanel.open2(p.movements[0],
-               //r, p, p.movements[0], null,
-               async (r) => await this.executeCommand(r));
-         }
+         this.commandPanel.open2(p,
+            //r, p, null, null,
+            async (r) => await this.executeCommand(r));
+
+         //if (p.movements.length > 1) {
+         //   this.commandPanel.open2(p,
+         //      //r, p, null, null,
+         //      async (r) => await this.executeCommand(r));
+         //} else {
+         //   this.commandPanel.open2(p.movements[0],
+         //      //r, p, p.movements[0], null,
+         //      async (r) => await this.executeCommand(r));
+         //}
       }
    }
    async onRightClick(e: Event, r:Raga, p: Performance) {

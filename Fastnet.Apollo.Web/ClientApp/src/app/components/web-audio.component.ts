@@ -186,6 +186,8 @@ export class WebAudioComponent implements AfterViewInit, OnDestroy {
    }
    async ngAfterViewInit() {
       this.audio = this.audioElement.nativeElement;
+      this.audio.volume = 0.5;
+      console.log(`WebAudioComponent::ngAfterViewInit(), volume is ${this.audio.volume}`);
       //this.createAudio();
    }
    private onEvent(event: PlayerEvents, ...args: any[]) {
@@ -232,6 +234,7 @@ export class WebAudioComponent implements AfterViewInit, OnDestroy {
    }
    private async onDeviceStatusUpdateInterval() {
       let state = this.stateMachine.getState();
+      //console.log(`onDeviceStatusUpdateInterval(): volume is ${this.audio.volume}`);
       switch (state) {
          case PlayerStates.Fault:
          case PlayerStates.Initial:

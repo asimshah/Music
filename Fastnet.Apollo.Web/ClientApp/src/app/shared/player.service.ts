@@ -29,12 +29,11 @@ export class PlayerService extends BaseService implements OnDestroy {
    private timerStarted = false;
    private awaitedSequenceNumber = 0;
    private storageKeyForCurrentDevice: string; // i.e. as stored in local storage
-   //private currentDeviceKey: string | null = null;
-   //private currentPlaylist: PlaylistItem[] = [];
    private devices: AudioDevice[] = [];
    private selectedDevice: AudioDevice | null = null;
    private selectedDevicePlaylist: Playlist | null = null;
    private selectedDeviceStatus: DeviceStatus | null = null;
+   private volumeUpdateSuspended = false;
    constructor(http: HttpClient, private messageService: MessageService,
       private parameterService: ParameterService,
       private log: LoggingService) {
@@ -169,7 +168,12 @@ export class PlayerService extends BaseService implements OnDestroy {
    }
    public async setVolume(level: number) {
       if (this.selectedDevice) {
+         this.volumeUpdateSuspended = true;
+         if (this.selectedDeviceStatus) {
+            this.selectedDeviceStatus.volume = level;
+         }
          this.awaitedSequenceNumber = await this.getAsync<number>(`set/volume/${this.selectedDevice.key}/${level}`);
+         setTimeout(() => { this.volumeUpdateSuspended = false;}, 2000);
       } else {
          this.awaitedSequenceNumber = 0;
       }
@@ -183,22 +187,6 @@ export class PlayerService extends BaseService implements OnDestroy {
       }
       return this.awaitedSequenceNumber;
    }
-   //async triggerUpdates() {
-   //   //// why do i need this method??????????????????????
-   //   //if (this.selectedDevice) {
-   //   //   //this.currentDeviceChanged.next(this.selectedDevice);
-   //   //   //let ds = await this.getSelectedDeviceStatus();
-   //   //   //this.deviceStatusUpdate.next(ds);
-   //   //   //this.deviceStatusUpdate.next(this.localiseDeviceStatus(ds));
-   //   //   //this.currentPlaylist = await this.getCurrentPlaylistInternal();
-   //   //   //this.currentPlaylistChanged.next(this.currentPlaylist);
-   //   //   //console.log(`currentPlaylistChanged ${this.currentDeviceBeingControlled.displayName}, has ${this.currentPlaylist.length} items`);
-   //   //} else {
-   //   //   //this.currentDeviceChanged.next();
-   //   //   //this.currentPlaylist = [];
-   //   //   //this.currentPlaylistChanged.next(this.currentPlaylist);
-   //   //}
-   //}
    async setDevice(d: AudioDevice | null) {
       this.selectedDevice = d;
       this.selectedDeviceStatus = null;
@@ -246,6 +234,7 @@ export class PlayerService extends BaseService implements OnDestroy {
    }
    //
    public async enableWebAudio() {
+      console.log(`enableWebAudio(): webaudio/start/${this.parameterService.getBrowserKey()}`);
       let d = await this.getAsync<AudioDevice>(`webaudio/start/${this.parameterService.getBrowserKey()}`);
       let device = new AudioDevice();
       device.copyProperties(d);
@@ -330,6 +319,10 @@ export class PlayerService extends BaseService implements OnDestroy {
    private onDeviceStatusUpdate(ds: DeviceStatus) {
       let device = this.getDevice(ds.key);
       if (device && ds.key === device.key) {
+         let cs = this.selectedDeviceStatus;
+         if (this.volumeUpdateSuspended) {
+            ds.volume = this.selectedDeviceStatus ? this.selectedDeviceStatus.volume : 0;
+         }
          this.selectedDeviceStatus = ds;
       } else {
          //this.selectedDeviceStatus = null;
@@ -365,7 +358,6 @@ export class PlayerService extends BaseService implements OnDestroy {
    }
    private localDeviceStatusUpdate(): any {
       if (this.selectedDeviceStatus && this.awaitedSequenceNumberArrived(this.selectedDeviceStatus)) {
-         //let ds = this.localiseDeviceStatus(this.selectedDeviceStatus);
          this.deviceStatusUpdate.next(this.selectedDeviceStatus);
          //console.log(`deviceStatusUpdate for ${ds.key}, state = ${PlayerStates[ds.state]}, major = ${ds.playlistPosition.major}`);
       }
@@ -376,11 +368,6 @@ export class PlayerService extends BaseService implements OnDestroy {
          || ds.commandSequence < this.awaitedSequenceNumber;
       return r;
    }
-   //private localiseDeviceStatus(ds: DeviceStatus): DeviceStatus {
-   //   let temp = new DeviceStatus();
-   //   temp.copyProperties(ds);
-   //   return temp;
-   //}
    private async setInitialDevice() {
       this.devices = await this.getActiveDevices();
       let savedkey = this.getDeviceKeyFromStorage();
@@ -394,15 +381,6 @@ export class PlayerService extends BaseService implements OnDestroy {
       }
       await this.setDevice(d);
    }
-   //private async getSelectedDeviceStatus() {
-   //   if (this.selectedDevice) {
-   //      let r = await this.getAsync<DeviceStatus>(`get/device/${this.selectedDevice.key}/status`);
-   //      let ds = new DeviceStatus();
-   //      ds.copyProperties(r);
-   //      return ds;
-   //   }
-   //   throw "no device available";
-   //}
    private async requestSelectedDeviceStatus() {
       if (this.selectedDevice) {
          await this.getAsync<DeviceStatus>(`send/device/${this.selectedDevice.key}/status`);
@@ -417,24 +395,6 @@ export class PlayerService extends BaseService implements OnDestroy {
       }
       throw "no device available";
    }
-   //private async getCurrentPlaylistInternal() {
-   //   let list: PlaylistItem[] = [];
-   //   let device = this.selectedDevice;
-   //   if (device) {
-   //      let result = await this.getAsync<PlaylistItem[]>(`get/playlist/${device.key}`);
-   //      return new Promise<PlaylistItem[]>((resolve) => {
-   //         for (let item of result) {
-   //            let pli = new PlaylistItem();
-   //            pli.copyProperties(item);
-   //            list.push(pli);
-   //         }
-   //         resolve(list);
-   //      });
-   //   }
-   //   else {
-   //      return list;
-   //   }
-   //}
    private getDeviceKeyFromStorage(): string | null {
       return  localStorage.getItem(this.storageKeyForCurrentDevice);
       //if (this.currentDeviceKey === null) {

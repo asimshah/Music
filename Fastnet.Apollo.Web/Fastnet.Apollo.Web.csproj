@@ -49,17 +49,13 @@
   </ItemGroup>
 
   <ItemGroup>
-    <None Remove="ClientApp\src\fastnet\core\timespan.types.ts" />
+    <None Remove="ClientApp\src\tsconfig.app.json" />
+    <None Remove="ClientApp\tsconfig.json" />
   </ItemGroup>
 
   <ItemGroup>
-    <None Include="..\.editorconfig" Link=".editorconfig" />
-    <None Include="Fastnet.Core.csproj" />
-    <None Include="Fastnet.Core.csproj.user" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <TypeScriptCompile Include="ClientApp\src\fastnet\core\timespan.types.ts" />
+    <Content Include="ClientApp\src\tsconfig.app.json" />
+    <TypeScriptCompile Include="ClientApp\tsconfig.json" />
   </ItemGroup>
 
   <ItemGroup>
