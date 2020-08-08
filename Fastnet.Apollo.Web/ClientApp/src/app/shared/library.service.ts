@@ -23,6 +23,18 @@ export class LibraryService extends BaseService {
    public async getAllArtists(style: Style) {
       return this.getAsync<number[]>(`get/${style.id}/allartists`);
    }
+   public async getAllArtistsFull(style: Style) {
+      let list = await this.getAsync<Artist[]>(`get/${style.id}/allartistsFull`);
+      return new Promise<Artist[]>(resolve => {
+         let result: Artist[] = [];
+         for (let a of list) {
+            let artist = new Artist();
+            artist.copyProperties(a); // so local properties and methods are present
+            result.push(artist);
+         }
+         resolve(result);
+      });
+   }
    public async getArtist(style: Style, id: number): Promise<Artist> {
       let a = await this.getAsync<Artist>(`get/${style.id}/artist/${id}`);
       return new Promise<Artist>(resolve => {

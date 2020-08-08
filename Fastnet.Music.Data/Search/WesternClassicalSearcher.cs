@@ -123,19 +123,21 @@ namespace Fastnet.Music.Data
                     };
                     wcr.Compositions.Add(cr);
 
-                    var pr = wcr.Compositions.SelectMany(x => x.Performances).SingleOrDefault(x => x.Performance.Key == mr.Performance.Key);
-                    if (pr == null)
-                    {
-                        pr = new PerformanceResult
-                        {
-                            Performance = mr.Performance,
-                            PerformanceIsMatched = false,
-                            Movements = new List<TrackResult>()
-                        };
-                        cr.Performances.Add(pr);
-                    }
-                    /*pr.Movements = */pr.Movements.Add(new TrackResult { Track = mr.Movement });
+
                 }
+                var pr = wcr.Compositions.SelectMany(x => x.Performances).SingleOrDefault(x => x.Performance.Key == mr.Performance.Key);
+                if (pr == null)
+                {
+                    pr = new PerformanceResult
+                    {
+                        Performance = mr.Performance,
+                        PerformanceIsMatched = false,
+                        Movements = new List<TrackResult>()
+                    };
+                    cr.Performances.Add(pr);
+                }
+                /*pr.Movements = */
+                pr.Movements.Add(new TrackResult { Track = mr.Movement });
             }
 
             SortNaturalResults(finalList);

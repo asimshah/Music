@@ -180,6 +180,22 @@ namespace Fastnet.Apollo.Web.Controllers
                 .Select(x => x.Artist.Id);
                 return SuccessResult(artists);
         }
+        [HttpGet("get/{style}/allartistsFull")]
+        public IActionResult GetAllArtistsFull(MusicStyles style)
+        {
+            IEnumerable<Artist> artists = musicDb.ArtistStyles.Where(x => x.StyleId == style && x.Artist.Type != ArtistType.Various)
+                .Select(x => x.Artist);
+            switch(style)
+            {
+                case MusicStyles.WesternClassical:
+                    artists = artists.ToArray().OrderBy(x => x.Name.GetLastName());
+                    break;
+                default:
+                    artists = artists.OrderBy(x => x.Name);
+                    break;
+            }
+            return SuccessResult(artists.Select(x => x.ToDTO(style)));
+        }
         [HttpGet("get/{style}/artist/{id}")]
         public async Task<IActionResult> GetArtistInfo(MusicStyles style, long id)
         {

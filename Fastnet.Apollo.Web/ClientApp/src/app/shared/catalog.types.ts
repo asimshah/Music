@@ -121,7 +121,7 @@ export class Work extends BaseEntity {
    public year: number;
    public trackCount: number;
    public coverArtUrl: string;
-   public quality: MetadataQuality;
+   //public quality: MetadataQuality;
    public tracks: Track[];
    public formattedDuration: string;
    public showTracks: boolean = false;
@@ -135,7 +135,7 @@ export class Work extends BaseEntity {
       this.partName = w.partName;
       this.trackCount = w.trackCount;
       this.coverArtUrl = w.coverArtUrl;
-      this.quality = w.quality;
+      //this.quality = w.quality;
       this.opusType = w.opusType;
       this.formattedDuration = w.formattedDuration;
       if (w.tracks) {

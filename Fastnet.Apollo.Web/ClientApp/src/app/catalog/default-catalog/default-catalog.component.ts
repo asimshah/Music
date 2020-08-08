@@ -5,7 +5,7 @@ import { LibraryService } from '../../shared/library.service';
 import { PlayerService } from '../../shared/player.service';
 import { LoggingService } from '../../shared/logging.service';
 import { ParameterService } from '../../shared/parameter.service';
-import { DomSanitizer } from '@angular/platform-browser';
+//import { DomSanitizer } from '@angular/platform-browser';
 //import { MessageService } from '../../shared/message.service';
 
 @Component({
@@ -18,8 +18,8 @@ export class DefaultCatalogComponent extends BaseCatalogComponent implements OnI
     constructor(elementRef: ElementRef, library: LibraryService,
         //messageService: MessageService,
         playerService: PlayerService, ps: ParameterService,
-        sanitizer: DomSanitizer, log: LoggingService) {
-        super(elementRef, library,  ps, sanitizer, playerService, log);
+       /* sanitizer: DomSanitizer, */log: LoggingService) {
+        super(elementRef, library,  ps, /*sanitizer,*/ playerService, log);
         //console.log(`constructor()`);
     }
 

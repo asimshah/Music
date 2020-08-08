@@ -103,11 +103,12 @@ export class ArtistsViewComponent implements OnInit, OnDestroy {
    }
    private async init() {
       this.currentStyle = this.parameterService.getCurrentStyle();
-      let artistIdList = await this.library.getAllArtists(this.currentStyle);
-      for (let id of artistIdList) {
-         let a = await this.library.getArtist(this.currentStyle, id);
-         this.addArtistToDefaultView(a);
-      }
+      //let artistIdList = await this.library.getAllArtists(this.currentStyle);
+      //for (let id of artistIdList) {
+      //   let a = await this.library.getArtist(this.currentStyle, id);
+      //   this.addArtistToDefaultView(a);
+      //}
+      this.allArtists = await this.library.getAllArtistsFull(this.currentStyle);
    }
    private onDeletedArtist(id: number) {
       //console.log(`onDeletedArtist() called with artist id ${id}`);

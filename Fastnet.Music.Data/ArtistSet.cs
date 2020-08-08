@@ -111,6 +111,26 @@ namespace Fastnet.Music.Data
                 return string.Join(" & ", Artists.Select(x => x.Name));
             }
         }
+        public string GetCompressedNames()
+        {
+            if(artists.Any(x => x.CompressedName == null))
+            {
+                return null;
+            }
+            if (Artists.Count() == 1)
+            {
+                return Artists.First().CompressedName;
+            }
+            else if (Artists.Count() > 2)
+            {
+                var x = string.Join(", ", Artists.Take(Artists.Count() - 1).Select(x => x.CompressedName));
+                return string.Join(" & ", x, Artists.Last().CompressedName);
+            }
+            else
+            {
+                return string.Join(" & ", Artists.Select(x => x.CompressedName));
+            }
+        }
         public override string ToString()
         {
             return $"[{string.Join(", ", ArtistIds)}]";

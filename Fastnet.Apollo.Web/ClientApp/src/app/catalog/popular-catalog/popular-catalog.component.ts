@@ -6,7 +6,7 @@ import { SearchKey } from '../../shared/common.types';
 import { PlayerService } from '../../shared/player.service';
 import { LoggingService } from '../../shared/logging.service';
 import { ParameterService } from '../../shared/parameter.service';
-import { DomSanitizer } from '@angular/platform-browser';
+//import { DomSanitizer } from '@angular/platform-browser';
 //import { MusicStyles } from '../../shared/common.enums';
 //import { CommandPanelResult, SelectedCommand, TargetEntity } from '../command-panel/command-panel.component';
 //import { MessageService } from '../../shared/message.service';
@@ -55,8 +55,8 @@ export class PopularCatalogComponent extends BaseCatalogComponent {
    constructor(elementRef: ElementRef, libraryService: LibraryService,
       //messageService: MessageService,
       ps: ParameterService,
-      sanitizer: DomSanitizer, playerService: PlayerService, log: LoggingService) {
-      super(elementRef, libraryService, ps, sanitizer, playerService, log);
+      /*sanitizer: DomSanitizer,*/ playerService: PlayerService, log: LoggingService) {
+      super(elementRef, libraryService, ps, /*sanitizer,*/ playerService, log);
       //console.log('PopularCatalogComponent ctor()');
    }
 
