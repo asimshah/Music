@@ -2,15 +2,12 @@ import { LibraryService } from "../shared/library.service";
 import { Style } from "../shared/common.types";
 import { ViewChild, ElementRef, HostBinding, OnInit, AfterViewInit, OnDestroy } from "@angular/core";
 import { PopupMessageComponent } from "../../fastnet/controls/popup-message.component";
-import { Artist, Work, MusicFile, Track, Performance, Composition, isMusicFile, isTrack, isWork, isPerformance, Movement } from "../shared/catalog.types";
+import { Artist, Work, MusicFile, Performance, isWork, isPerformance, Movement } from "../shared/catalog.types";
 import { PlayerService } from "../shared/player.service";
 import { LoggingService } from "../shared/logging.service";
 import { ParameterService } from "../shared/parameter.service";
 import { CommandPanelComponent, CommandPanelResult, SelectedCommand } from "./command-panel/command-panel.component";
-import { DomSanitizer } from "@angular/platform-browser";
 import { DialogResult } from "../../fastnet/core/core.types";
-//import { sortedInsert } from "../../fastnet/core/common.functions";
-//import { MessageService } from "../shared/message.service";
 import { Subscription } from "rxjs";
 
 export enum CatalogView {
@@ -18,7 +15,7 @@ export enum CatalogView {
    SearchResults
 }
 
-export abstract class BaseCatalogComponent implements OnInit, OnDestroy, AfterViewInit/*, ITagEditorCallback*/ {
+export abstract class BaseCatalogComponent implements OnInit, OnDestroy, AfterViewInit {
    private guard = false;
    CatalogView = CatalogView;
    prefixMode: boolean = false;
@@ -31,8 +28,7 @@ export abstract class BaseCatalogComponent implements OnInit, OnDestroy, AfterVi
    protected currentStyle: Style;
    private subscriptions: Subscription[] = [];
    constructor(private elementRef: ElementRef, protected readonly library: LibraryService,
-      //private messageService: MessageService,
-      protected parameterService: ParameterService, /*private sanitizer: DomSanitizer,*/
+      protected parameterService: ParameterService,
       private readonly playerService: PlayerService, protected log: LoggingService) {
    }
    ngOnDestroy() {
@@ -59,7 +55,6 @@ export abstract class BaseCatalogComponent implements OnInit, OnDestroy, AfterVi
       await this.onSearch();
    }
    public async clearSearch() {
-      //console.log(`$clear search`);
       this.catalogView = CatalogView.DefaultView;
    }
    // i need these handlers because I need to set swipe events on the
@@ -86,10 +81,7 @@ export abstract class BaseCatalogComponent implements OnInit, OnDestroy, AfterVi
    toggleShowWorks(c: Artist) {
       c.showWorks = !c.showWorks;
    }
-   //onMovementMouse(m: Movement, f: MusicFile, val: boolean) {
-   //   m.isHighLit = val;
-   //   f.isHighLit = val;
-   //}
+
    getPerformanceSource(p: Performance): string {
       let text: string[] = [];
       text.push(`"${p.albumName}"`);
@@ -101,19 +93,8 @@ export abstract class BaseCatalogComponent implements OnInit, OnDestroy, AfterVi
       }
       return text.join(", ");
    }
-   async playMusic(entity: /*MusicFile | Track | Movement |*/ Work | Performance) {
+   async playMusic(entity: Work | Performance) {
       if (this.checkDeviceAvailable()) {
-         //if (isMusicFile(entity)) {
-         //   await this.playerService.playFile(entity as MusicFile);
-         //} else if (isTrack(entity)) { // will also match Movement
-         //   await this.playerService.playTrack(entity as Track);
-         //} else
-         //if (isWork(entity)) {
-         //   await this.playerService.playWork(entity as Work);
-         //} else if (isPerformance(entity)) {
-         //   await this.playerService.playPerformance(entity as Performance);
-         //}
-
          if (isWork(entity)) {
             if (entity.tracks.length === 1) {
                await this.playerService.playTrack(entity.tracks[0]);
@@ -129,13 +110,8 @@ export abstract class BaseCatalogComponent implements OnInit, OnDestroy, AfterVi
          }
       }
    }
-   async queueMusic(entity:/* MusicFile | Track |*/ Work | Performance) {
+   async queueMusic(entity: Work | Performance) {
       if (this.checkDeviceAvailable()) {
-         //if (isMusicFile(entity)) {
-         //   await this.playerService.queueFile(entity as MusicFile);
-         //} else if (isTrack(entity)) {
-         //   await this.playerService.queueTrack(entity as Track);
-         //} else
          if (isWork(entity)) {
             if (entity.tracks.length === 1) {
                await this.playerService.queueTrack(entity.tracks[0]);
@@ -151,24 +127,12 @@ export abstract class BaseCatalogComponent implements OnInit, OnDestroy, AfterVi
          }
       }
    }
-   //async onPlayMusicFile(musicFile: MusicFile) {
-   //   await this.playMusic(musicFile);
-   //}
-   //async onQueueMusicFile(musicFile: MusicFile) {
-   //   await this.queueMusic(musicFile);
-   //}
    async onPlayPerformance(performance: Performance) {
       await this.playMusic(performance);
    }
    async onQueuePerformance(performance: Performance) {
       await this.queueMusic(performance);
    }
-   //async onPlayMovement(movement: Movement) {
-   //   await this.playMusic(movement);
-   //}
-   //async onQueueMovement(movement: Movement) {
-   //   await this.queueMusic(movement);
-   //}
    onPerformanceMouse(p: Performance, val: boolean) {
       p.isHighLit = val;
     }
@@ -191,39 +155,14 @@ export abstract class BaseCatalogComponent implements OnInit, OnDestroy, AfterVi
          case SelectedCommand.Queue:
             await this.queueMusic(<Work | Performance>cmd.entity);
             break;
-         //case SelectedCommand.TagEditor:
-         //   //if (cmd.targetEntity === TargetEntity.Performance) {
-         //   //   // await this.westernClassicalTagEditor.initialise(cmd.entity as Performance);
-         //   //   this.westernClassicalTagEditor.open(cmd.entity as Performance, async (changesMade) => {
-         //   //      if (changesMade) {
-         //   //         await this.onSearch();
-         //   //      }
-         //   //   });
-         //   //}
-         //   break;
          case SelectedCommand.Reset:
-            //switch (cmd.targetEntity) {
-            //   case TargetEntity.Work:
-            //      await this.library.resetWork((cmd.entity as Work).id);
-            //      break;
-            //   case TargetEntity.Performance:
-            //      await this.library.resetPerformance((cmd.entity as Performance).id);
-            //      break;
-            //}
+            break;
          case SelectedCommand.Resample:
             if (isWork(cmd.entity)) {
                await this.library.resampleWork((cmd.entity).id);
             } else if (isPerformance(cmd.entity)) {
                await this.library.resamplePerformance((cmd.entity as Performance).id);
             }
-            //switch (cmd.targetEntity) {
-            //   case TargetEntity.Work:
-            //      await this.library.resampleWork((cmd.entity as Work).id);
-            //      break;
-            //   case TargetEntity.Performance:
-            //      await this.library.resamplePerformance((cmd.entity as Performance).id);
-            //      break;
-            //}
             break;
       }
    }

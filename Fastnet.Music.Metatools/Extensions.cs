@@ -785,6 +785,11 @@ namespace Fastnet.Music.Metatools
                     }
                     break;
             }
+            if(mf.Style == MusicStyles.Popular)
+            {
+                // do not re-order names for popular music
+                return performers;
+            }
             return performers.OrderBy(x => x.Type)
                 .ThenBy(x =>  x.Type == PerformerType.Orchestra ? x.Name : x.Name.GetLastName());
         }

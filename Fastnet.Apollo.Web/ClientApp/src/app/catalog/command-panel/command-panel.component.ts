@@ -1,35 +1,23 @@
 import { Component, ViewChild } from '@angular/core';
-import { Performance, Track, MusicFile, Work, Composition, isWork, isTrack, isComposition, isPerformance, Raga, isRaga, isMusicFile, Movement, isMovement } from "../../shared/catalog.types";
+import { Performance, Track, MusicFile, Work, Composition, isWork, isTrack, isPerformance, Raga, isMusicFile, Movement, isMovement } from "../../shared/catalog.types";
 import { PlayerService } from '../../shared/player.service';
-//import { LoggingService } from '../../shared/logging.service';
 import { ParameterService } from '../../shared/parameter.service';
-//import { MusicStyles } from '../../shared/common.enums';
 import { PopupDialogComponent } from '../../../fastnet/controls/popup-dialog.component';
 
 
 // *** DO NOT use (tap) events for the meni-items
 // as Hammerjs fails to work with stopPropagation()
 
-
-
-//export enum TargetEntity {
-//   MusicFile,
-//   Track,
-//   Work,
-//   Performance
-//}
 export enum SelectedCommand {
    Cancel,
    Play,
    Queue,
-   //Details,
    TagEditor,
    Reset,
    Resample
 }
 export class CommandPanelResult {
    selectedCommand: SelectedCommand;
-   //targetEntity: TargetEntity;
    entity: Work | Track | Performance
 }
 @Component({
@@ -40,7 +28,6 @@ export class CommandPanelResult {
 export class CommandPanelComponent {
    @ViewChild(PopupDialogComponent, { static: false }) popup: PopupDialogComponent;
    audioDeviceAvailable: boolean = false;
-   //description = "";
    private target: MusicFile | Track| Movement | Work | Performance;
    private coverArtUrl: string;
    constructor(private parameterService: ParameterService, private playerService: PlayerService) { }
@@ -66,10 +53,8 @@ export class CommandPanelComponent {
       cpr.selectedCommand = SelectedCommand.Resample;
       if (isWork(this.target)) {
          cpr.entity = this.target;
-         //cpr.targetEntity = TargetEntity.Work;
       } else if (isPerformance(this.target)) {
          cpr.entity = this.target;
-         //cpr.targetEntity = TargetEntity.Performance;
       }
       this.popup.close(cpr);
    }
@@ -89,13 +74,10 @@ export class CommandPanelComponent {
 
       } else if (isTrack(this.target) || isMovement(this.target)) {
          cpr.entity = this.target;
-         //cpr.targetEntity = TargetEntity.Track;
       } else if (isWork(this.target)) {
          cpr.entity = this.target;
-         //cpr.targetEntity = TargetEntity.Work;
       } else if (isPerformance(this.target)) {
          cpr.entity = this.target;
-         //cpr.targetEntity = TargetEntity.Performance;
       }
       this.popup.close(cpr);
    }

@@ -4,7 +4,6 @@ import { ParameterService } from '../shared/parameter.service';
 import { PlayerService } from '../shared/player.service';
 import { PopupMessageComponent } from '../../fastnet/controls/popup-message.component';
 import { DialogResult } from '../../fastnet/core/core.types';
-//import { MusicStyles } from '../shared/common.enums';
 import { CommandPanelComponent, CommandPanelResult, SelectedCommand } from './command-panel/command-panel.component';
 
 @Component({
@@ -48,13 +47,7 @@ export class TrackListComponent implements OnInit {
             async (r) => await this.executeCommand(r));
       }
    }
-   //onTapTrack(e: any, t: Track) { // e is a hammer event - where are the typescript types for this?
-   //   e.srcEvent.stopPropagation();
-   //   if (this.isTouchDevice()) {
-   //      this.commandPanel.open2(t,
-   //         async (r) => await this.executeCommand(r));
-   //   }
-   //}
+
    async onPlayTrack(track: Track) {
       await this.playMusic(track);
    }
@@ -96,33 +89,6 @@ export class TrackListComponent implements OnInit {
             await this.queueMusic(<MusicFile | Track>cmd.entity);
             break;
          case SelectedCommand.TagEditor:
-            ////if (cmd.targetEntity === TargetEntity.Performance) {
-            ////   // await this.westernClassicalTagEditor.initialise(cmd.entity as Performance);
-            ////   this.westernClassicalTagEditor.open(cmd.entity as Performance, async (changesMade) => {
-            ////      if (changesMade) {
-            ////         await this.onSearch();
-            ////      }
-            ////   });
-            ////}
-            //break;
-            //case SelectedCommand.Reset:
-            //   switch (cmd.targetEntity) {
-            //      case TargetEntity.Work:
-            //         await this.library.resetWork((cmd.entity as Work).id);
-            //         break;
-            //      case TargetEntity.Performance:
-            //         await this.library.resetPerformance((cmd.entity as Performance).id);
-            //         break;
-            //   }
-            //case SelectedCommand.Resample:
-            //   switch (cmd.targetEntity) {
-            //      case TargetEntity.Work:
-            //         await this.library.resampleWork((cmd.entity as Work).id);
-            //         break;
-            //      case TargetEntity.Performance:
-            //         await this.library.resamplePerformance((cmd.entity as Performance).id);
-            //         break;
-            //   }
             break;
       }
    }

@@ -1,14 +1,12 @@
 import { Component, ElementRef } from '@angular/core';
 import { BaseCatalogComponent } from '../base-catalog.component';
 import { LibraryService } from '../../shared/library.service';
-//import { MessageService } from '../../shared/message.service';
 import { ParameterService } from '../../shared/parameter.service';
 import { PlayerService } from '../../shared/player.service';
 import { LoggingService } from '../../shared/logging.service';
-import { Artist, Raga, ArtistSet, Performance, Track } from '../../shared/catalog.types';
+import { Artist, Raga, ArtistSet, Performance } from '../../shared/catalog.types';
 import { sortedInsert } from '../../../fastnet/core/common.functions';
 import { SearchKey, PerformanceResult } from '../../shared/common.types';
-//import { MusicStyles } from '../../shared/common.enums';
 
 class IndianClassicalRagaResult {
    raga: SearchKey;
@@ -34,10 +32,8 @@ export class IndianClassicalCatalogComponent extends BaseCatalogComponent {
    searchFoundNothing = false;
    artistSets: ArtistSet[] = [];
    constructor(elementRef: ElementRef, library: LibraryService,
-      //messageService: MessageService,
-      ps: ParameterService, /*sanitizer: DomSanitizer,*/
-      playerService: PlayerService, log: LoggingService) {
-      super(elementRef, library, ps, /*sanitizer,*/ playerService, log);
+      ps: ParameterService, playerService: PlayerService, log: LoggingService) {
+      super(elementRef, library, ps, playerService, log);
    }
    getArtistStats(a: Artist) {
       let parts: string[] = [];
@@ -75,34 +71,17 @@ export class IndianClassicalCatalogComponent extends BaseCatalogComponent {
    toggleShowMovements(performance: Performance) {
       performance.showMovements = !performance.showMovements;
    }
-   //onTapMovement(r: Raga, p: Performance, t: Track) {
-   //   //this.log.information("onTapTrack()");
-   //   this.commandPanel.open2(t,
-   //      //r, p, t, null,
-   //      async (r) => await this.executeCommand(r));
-   //}
+
    onTapPerformance(r: Raga, p: Performance) {
       if (this.isTouchDevice()) {
          this.commandPanel.open2(p,
-            //r, p, null, null,
             async (r) => await this.executeCommand(r));
-
-         //if (p.movements.length > 1) {
-         //   this.commandPanel.open2(p,
-         //      //r, p, null, null,
-         //      async (r) => await this.executeCommand(r));
-         //} else {
-         //   this.commandPanel.open2(p.movements[0],
-         //      //r, p, p.movements[0], null,
-         //      async (r) => await this.executeCommand(r));
-         //}
       }
    }
    async onRightClick(e: Event, r:Raga, p: Performance) {
       e.preventDefault();
       if (!this.isTouchDevice()) {
          this.commandPanel.open2(p,
-            //r, p, null, null,
             async (r) => await this.executeCommand(r));
       }
       return false;
@@ -119,19 +98,10 @@ export class IndianClassicalCatalogComponent extends BaseCatalogComponent {
          this.searchFoundNothing = true;
       }
    }
-   //protected addArtistToDefaultView(a: Artist) {
-   //   sortedInsert(this.allArtists, a, (l, r) => {
-   //      return l.name.localeCompare(r.name);
-   //   });
-   //}
 
    private async processSearchResults(r: IndianClassicalResults, prefixMode: boolean) {
-      //let text = JSON.stringify(r, null, 2);
-      //console.log(text);
       r.results.forEach(async (icr) => {
          let set = await this.getArtists(icr.artists);
-         //console.log(JSON.stringify(set, null, 2));
-         //artist.highlightSearch(this.searchText, artist.name, prefixMode);
          this.addArtists(set);
          if (icr.artistIsMatched) {
             // get all the ragas for this artist set

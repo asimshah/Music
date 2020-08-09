@@ -2,18 +2,11 @@ import { Component, ElementRef } from '@angular/core';
 import { BaseCatalogComponent } from '../base-catalog.component';
 import { SearchKey, PerformanceResult } from '../../shared/common.types';
 import { LibraryService } from '../../shared/library.service';
-import { Artist, Composition, Performance, Movement, MusicFile, Track, Work } from "../../shared/catalog.types";
+import { Artist, Composition, Performance, Track } from "../../shared/catalog.types";
 import { PlayerService } from '../../shared/player.service';
 import { LoggingService } from '../../shared/logging.service';
 import { ParameterService } from '../../shared/parameter.service';
-//import { DomSanitizer } from '@angular/platform-browser';
-//import { MusicStyles } from '../../shared/common.enums';
-//import { WesternClassicalTagEditorComponent } from './western-classical-tag-editor/western-classical-tag-editor.component';
-//import { CommandPanelResult, SelectedCommand, TargetEntity } from '../command-panel/command-panel.component';
 import { sortedInsert } from '../../../fastnet/core/common.functions';
-//import { MessageService } from '../../shared/message.service';
-
-
 
 class CompositionResult {
    composition: SearchKey;
@@ -30,7 +23,6 @@ class WesternClassicalResults {
    results: WesternClassicalResult[];
 }
 
-
 @Component({
    selector: 'app-western-classical-catalog',
    templateUrl: './western-classical-catalog.component.html',
@@ -41,12 +33,9 @@ class WesternClassicalResults {
 export class WesternClassicalCatalogComponent extends BaseCatalogComponent {
    composers: Artist[] = [];
    searchFoundNothing = false;
-   //private guardShowMovementsClosure = false;
    constructor(elementRef: ElementRef, library: LibraryService,
-      //messageService: MessageService,
-      ps: ParameterService, /*sanitizer: DomSanitizer,*/
-      playerService: PlayerService, log: LoggingService) {
-      super(elementRef, library,  ps, /*sanitizer,*/ playerService, log);
+      ps: ParameterService, playerService: PlayerService, log: LoggingService) {
+      super(elementRef, library,  ps, playerService, log);
    }
    async onTapComposition(c: Composition) {
       // also called by mouse click
@@ -60,13 +49,6 @@ export class WesternClassicalCatalogComponent extends BaseCatalogComponent {
       if (this.isTouchDevice()) {
          this.commandPanel.open2(p,
             async (r) => await this.executeCommand(r));
-         //if (p.movements.length > 1) {
-         //   this.commandPanel.open2(p,
-         //      async (r) => await this.executeCommand(r));
-         //} else {
-         //   this.commandPanel.open2(p.movements[0],
-         //      async (r) => await this.executeCommand(r));
-         //}
       }
    }
    onTapMovement(c: Composition, p: Performance, t: Track) {
@@ -77,7 +59,6 @@ export class WesternClassicalCatalogComponent extends BaseCatalogComponent {
       e.preventDefault();
       if (!this.isTouchDevice()) {
          this.commandPanel.open2(p,
-            //c, p, null, null,
             async (r) => await this.executeCommand(r));
       }
       return false;
@@ -86,25 +67,6 @@ export class WesternClassicalCatalogComponent extends BaseCatalogComponent {
       performance.showMovements = !performance.showMovements;
    }
 
-
-   //getArtistStats(a: Artist) {
-   //   let parts: string[] = [];
-   //   if (a.compositionCount > 0) {
-   //      if (a.compositionCount > 1) {
-   //         parts.push(`${a.compositionCount} compositions`);
-   //      } else {
-   //         parts.push(`1 composition`);
-   //      }
-   //   }
-   //   if (a.performanceCount > 0) {
-   //      if (a.performanceCount > 1) {
-   //         parts.push(`${a.performanceCount} performances`);
-   //      } else {
-   //         parts.push(`1 performance`);
-   //      }
-   //   }
-   //   return parts.join(", ");
-   //}
    getComposerDetails(a: Artist): string {
       let p_part = a.performanceCount === 1 ? `${a.performanceCount} performance` : `${a.performanceCount} performances`;
       let c_part = a.compositionCount === 1 ? `of ${a.compositionCount} composition` : `of ${a.compositionCount} compositions`;
@@ -112,16 +74,6 @@ export class WesternClassicalCatalogComponent extends BaseCatalogComponent {
       return t;
    }
 
-   //public async editorCallback(item: Performance) {
-   //    this.log.information(`editorCallback()!!`);
-   //    await this.westernClassicalTagEditor.open(item);
-
-   //}
-   //protected addArtistToDefaultView(a: Artist) {
-   //   sortedInsert(this.allArtists, a, (l, r) => {
-   //      return l.lastname.localeCompare(r.lastname);
-   //   });
-   //}
    protected async onSearch() {
       this.searchFoundNothing = false;
       let r = await this.library.search<WesternClassicalResults>(this.parameterService.getCurrentStyle(), this.searchText);
@@ -155,7 +107,6 @@ export class WesternClassicalCatalogComponent extends BaseCatalogComponent {
                   }
                } else {
                   composition.performances = [];
-                  //let performances: Performance[] = [];
                   for (let pr of cr.performances) {
                      let p = await this.library.getPerformance(pr.performance.key, true);
                      p.highlightSearch(this.searchText, p.performers, prefixMode);
@@ -179,14 +130,7 @@ export class WesternClassicalCatalogComponent extends BaseCatalogComponent {
          c.highlightSearch(this.searchText, c.name, prefixMode);
       }
    }
-   //private async getPerformanceResults(list: PerformanceResult[]): Promise<Performance[]> {
-   //   let performances: Performance[] = [];
-   //   for (let pr of list) {
-   //      let p = await this.library.getPerformance(pr.performance.key);
-   //      performances.push(p);
-   //   }
-   //   return performances;
-   //}
+
    private async getCompositionResults(list: CompositionResult[]): Promise<Composition[]> {
       let compositions: Composition[] = [];
       for (let cr of list) {
@@ -198,7 +142,6 @@ export class WesternClassicalCatalogComponent extends BaseCatalogComponent {
 
    private addComposer(composer: Artist) {
       sortedInsert(this.composers, composer, (l, r) => {
-         //console.log(`${l.name} with ${r.name}`);
          return l.name.localeCompare(r.name);
       });
    }
