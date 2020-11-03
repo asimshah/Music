@@ -1,6 +1,9 @@
 ﻿using Fastnet.Core;
+using Fastnet.Core.Logging;
+using Fastnet.Core.Web.Controllers;
 using Fastnet.Music.Core;
 using Fastnet.Music.Data;
+using Microsoft.Extensions.Logging;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
@@ -17,7 +20,7 @@ namespace Fastnet.Apollo.Web
     /// </summary>
     public class ExtendedPlaylist
     {
-        //private List<ExtendedPlaylistItem> InnerItems { get; set; } = new List<ExtendedPlaylistItem>();
+        private ILogger log = ApplicationLoggerFactory.CreateLogger<ExtendedPlaylist>();
         private ObservableCollection<ExtendedPlaylistItem> InnerItems { get; set; } = new ObservableCollection<ExtendedPlaylistItem>();
         public string DeviceKey { get; set; }
         public long PlaylistId { get; private set; }
@@ -38,22 +41,33 @@ namespace Fastnet.Apollo.Web
         }
         public void AddItem(PlaylistItem item, LibraryService libraryService)
         {
-            //item.SetPosition(new PlaylistPosition(this.InnerItems.Count() + 1, 0));
-            //this.InnerItems.Add(item);
+            ExtendedPlaylistItem epli = null;
             switch (item.Type)
             {
                 case PlaylistItemType.MusicFile:
-                    AddItem(new PlaylistMusicFileItem(item, libraryService));
+                    epli = new PlaylistMusicFileItem(item, libraryService);
+                    //AddItem(new PlaylistMusicFileItem(item, libraryService));
                     break;
                 case PlaylistItemType.Track:
-                    AddItem(new PlaylistTrackItem(item, libraryService));
+                    epli = new PlaylistTrackItem(item, libraryService);
+                    //AddItem(new PlaylistTrackItem(item, libraryService));
                     break;
                 case PlaylistItemType.Work:
-                    AddItem(new PlaylistWorkItem(item, libraryService));
+                    epli = new PlaylistWorkItem(item, libraryService);
+                    //AddItem(new PlaylistWorkItem(item, libraryService));
                     break;
                 case PlaylistItemType.Performance:
-                    AddItem(new PlaylistPerformanceItem(item, libraryService));
+                    epli = new PlaylistPerformanceItem(item, libraryService);
+                    //AddItem(new PlaylistPerformanceItem(item, libraryService));
                     break;
+            }
+            if (epli.ItemFound)
+            {
+                AddItem(epli);
+            }
+            else
+            {
+                log.Warning($"{item} skipped as entity {item.Type} id {item.ItemId} was not found");
             }
         }
         public void AttachItemsChangedHandler(NotifyCollectionChangedEventHandler handler)
@@ -87,6 +101,7 @@ namespace Fastnet.Apollo.Web
     public abstract class ExtendedPlaylistItem
     {
         private long coverArtId;
+        private bool itemFound = true;
         public MusicStyles MusicStyle;
         public long PlaylistItemId { get; set; } // can be zero for PlaylistTrackItem when they are SubItems
         public string ArtistName { get; set; }
@@ -98,6 +113,9 @@ namespace Fastnet.Apollo.Web
         public PlaylistPosition Position { get; private set; }
         public TimeSpan Duration => GetDuration();
         public string CoverArtUrl => $"lib/get/work/coverart/{coverArtId}";
+
+        public bool ItemFound { get => itemFound; set => itemFound = value; }
+
         public ExtendedPlaylistItem(PlaylistItem pli)
         {
             if (pli != null)
@@ -106,20 +124,12 @@ namespace Fastnet.Apollo.Web
             }
 
         }
-        //public ExtendedPlaylistItem()
-        //{
-
-        //}
         protected abstract IEnumerable<string> GetTitles();
         public void SetPosition(PlaylistPosition position)
         {
             this.Position = position;
             AfterPositionSet();
         }
-        //protected void SetTitles(IEnumerable<string> titles)
-        //{
-        //    this.Titles = titles;
-        //}
         protected void SetCoverArtId(long id)
         {
             coverArtId = id;
@@ -133,10 +143,6 @@ namespace Fastnet.Apollo.Web
         protected MusicFile musicFile;
         public string Title { get; set; }
         public long MusicFileId => musicFile.Id;
-        //public SingleTrackPlaylistItem()
-        //{
-        //}
-
         public SingleTrackPlaylistItem(PlaylistItem pli) : base(pli)
         {
         }
@@ -282,16 +288,17 @@ namespace Fastnet.Apollo.Web
         }
         public PlaylistTrackItem(Track track, PlaylistItem pli = null) : base(pli)
         {
-            this.track = track;
-            this.MusicStyle = track.Work.StyleId;
-            SetNames(this.track);
-            this.Title = track.Title;
-            //this.Title = this.MusicStyle switch
-            //{
-            //    MusicStyles.WesternClassical => track.Title,
-            //    MusicStyles.IndianClassical => track.Title,
-            //    _ => this.Title
-            //};
+            if (track != null)
+            {
+                this.track = track;
+                this.MusicStyle = track.Work.StyleId;
+                SetNames(this.track);
+                this.Title = track.Title;
+            }
+            else
+            {
+                ItemFound = false;
+            }
         }
         public void SelectMusicFile(DeviceRuntime dr)
         {
@@ -337,14 +344,19 @@ namespace Fastnet.Apollo.Web
         public PlaylistWorkItem(PlaylistItem pli, LibraryService ls) : base(pli, ls)
         {
             this.work = ls.GetEntityAsync<Work>(pli.ItemId).Result;
-            //this.MusicStyle = this.work.StyleId;
-            var titles = new string[]
+            if (this.work != null)
             {
-                work.GetArtistNames(),//work.Artists.Select(a => a.Name).ToCSV(),
+                var titles = new string[]
+                {
+                work.GetArtistNames(),
                 work.Name
-            };
-            //SetTitles(titles);
-            SetCoverArtId(this.work.Id);
+                };
+                SetCoverArtId(this.work.Id);
+            }
+            else
+            {
+                this.ItemFound = false;
+            }
         }
         public override string ToString()
         {
@@ -362,8 +374,14 @@ namespace Fastnet.Apollo.Web
         public PlaylistPerformanceItem(PlaylistItem pli, LibraryService ls) : base(pli, ls)
         {
             this.performance = ls.GetEntityAsync<Performance>(pli.ItemId).Result;
-            //this.MusicStyle = this.performance.StyleId;
-            SetCoverArtId(this.performance.Movements.First().Work.Id);
+            if (this.performance != null)
+            {
+                SetCoverArtId(this.performance.Movements.First().Work.Id);
+            }
+            else
+            {
+                this.ItemFound = false;
+            }
         }
         protected override void AfterPositionSet()
         {

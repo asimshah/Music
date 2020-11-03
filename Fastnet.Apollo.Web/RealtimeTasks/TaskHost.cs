@@ -75,30 +75,42 @@ namespace Fastnet.Apollo.Web
             {
                 if (SetTaskItemStatus(item.TaskItemId, Music.Core.TaskStatus.InProgress, out TaskType _))
                 {
+                    TaskBaseOld tbo = null;
                     TaskBase tb = null;
                     switch (item.Type)
                     {
                         case TaskType.DiskPath:
-                            tb = new CataloguePath(options.CurrentValue, item.TaskItemId, connectionString, monitoredIndianClassicalInformation.CurrentValue, taskQueue,
-                                this.serviceProvider.GetService<IOptions<MusicServerOptions>>(), this.serviceProvider.GetService<IHubContext<MessageHub, IHubMessage>>(),
-                                this.serviceProvider.GetService<ILoggerFactory>());
+                            //tbo = new CataloguePathOld(options.CurrentValue, item.TaskItemId, connectionString, monitoredIndianClassicalInformation.CurrentValue, taskQueue,
+                            //    this.serviceProvider.GetService<IOptions<MusicServerOptions>>(), this.serviceProvider.GetService<IHubContext<MessageHub, IHubMessage>>(),
+                            //    this.serviceProvider.GetService<ILoggerFactory>());
                             break;
                         case TaskType.Portraits:
-                            tb = new UpdatePortraits(options.CurrentValue, item.TaskItemId, connectionString);
+                            tb = this.serviceProvider.GetRequiredService<UpdatePortraits>();
+                            //tbo = new UpdatePortraits(options.CurrentValue, item.TaskItemId, connectionString);
                             break;
                         case TaskType.ArtistFolder:
-                        case TaskType.ArtistName:
+                        //case TaskType.ArtistName:
                         case TaskType.MusicStyle:
-                            tb = new ExpandTask(options.CurrentValue, item.TaskItemId, connectionString, taskQueue);
+                            tb = this.serviceProvider.GetRequiredService<ExpandTask>();
+                            //tbo = new ExpandTask(options.CurrentValue, item.TaskItemId, connectionString, taskQueue);
                             break;
                         case TaskType.DeletedPath:
-                            tb = new DeletePath(options.CurrentValue, item.TaskItemId, connectionString,
-                                this.serviceProvider.GetService<IOptions<MusicServerOptions>>(), this.serviceProvider.GetService<IHubContext<MessageHub, IHubMessage>>(),
-                                this.serviceProvider.GetService<ILoggerFactory>());
+                            tb = this.serviceProvider.GetRequiredService<DeletePath>();
+
+                            //tb = new DeletePathOld(options.CurrentValue, item.TaskItemId, connectionString,
+                            //    this.serviceProvider.GetService<IOptions<MusicServerOptions>>(), this.serviceProvider.GetService<IHubContext<MessageHub, IHubMessage>>(),
+                            //    this.serviceProvider.GetService<ILoggerFactory>());
                             break;
                     }
-                    log.Debug($"host is executing an instance of {tb.GetType().Name}");
-                    await tb?.RunAsync();
+                    if(tb != null)
+                    {
+                        await tb.RunAsync(item.TaskItemId);
+                    }
+                    else if (tbo != null)
+                    {
+                        log.Debug($"host is executing an instance of {tbo?.GetType().Name}");
+                        await tbo.RunAsync();
+                    }
                 }
                 else
                 {
@@ -144,10 +156,12 @@ namespace Fastnet.Apollo.Web
                 var taskItem = db.TaskItems.Find(itemId);
                 try
                 {
+                    var oldStatus = taskItem.Status;
                     taskItem.Status = status;// Music.Core.TaskStatus.InProgress;
                     type = taskItem.Type;
                     db.SaveChanges();
                     result = true;
+                    log.Debug($"{taskItem} status changed from {oldStatus} to {taskItem.Status}");
                 }
                 catch (Exception xe)
                 {

@@ -18,7 +18,12 @@
     <NoWarn>1701;1702;CS1591</NoWarn>
   </PropertyGroup>
   <ItemGroup>
-    <PackageReference Include="Fastnet.Music.Data" Version="2.216.616" />
+    <Compile Remove="Tag Editor Objects\**" />
+    <EmbeddedResource Remove="Tag Editor Objects\**" />
+    <None Remove="Tag Editor Objects\**" />
+  </ItemGroup>
+  <ItemGroup>
+    <PackageReference Include="Fastnet.Music.Data" Version="2.258.1000" />
     <PackageReference Include="Fastnet.Music.MediaTools" Version="2.151.1272" />
     <PackageReference Include="Fastnet.Music.Taglib" Version="2.151.1274" />
     <PackageReference Include="FlacLibSharp" Version="3.2.0" />

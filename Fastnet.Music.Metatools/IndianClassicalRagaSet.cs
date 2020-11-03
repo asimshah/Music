@@ -14,12 +14,12 @@ namespace Fastnet.Music.Metatools
     public class IndianClassicalRagaSet : BasePerformanceSet
     {
         private readonly string ragaName;
-        private readonly IndianClassicalInformation ici;
-        internal IndianClassicalRagaSet(MusicDb db, MusicOptions musicOptions, IndianClassicalInformation ici,
+        //private readonly IndianClassicalInformation ici;
+        internal IndianClassicalRagaSet(EntityHelper entityHelper, /*MusicDb db,*/ MusicOptions musicOptions, /*IndianClassicalInformation ici,*/
             IEnumerable<MusicFile> musicFiles, TaskItem taskItem)
-            : base(db, musicOptions, MusicStyles.IndianClassical, musicFiles, taskItem)
+            : base(entityHelper, musicOptions, MusicStyles.IndianClassical, musicFiles, taskItem)
         {
-            this.ici = ici;
+            //this.ici = ici;
             //this.ici.PrepareNames();
             var ragaNames = musicFiles.Select(x => x.GetRagaName()).Distinct();
             Debug.Assert(ragaNames.Count() == 1, $"{taskItem} music files have more than one raga name");
@@ -28,7 +28,7 @@ namespace Fastnet.Music.Metatools
         public async override Task<BaseCatalogueResult> CatalogueAsync()
         {
             RemoveCurrentPerformance();
-            var Raga = GetRaga(ragaName);
+            var rage = entityHelper.GetRaga(ragaName);
             List<Artist> Artists = new List<Artist>();
             foreach (var performer in otherPerformers.ToArray())
             {
@@ -50,36 +50,30 @@ namespace Fastnet.Music.Metatools
             var performance = GetPerformance(performers);
             foreach (var artist in Artists)
             {
-                var rp = new RagaPerformance
-                {
-                    Artist = artist,
-                    Raga = Raga,
-                    Performance = performance
-                };
-                MusicDb.RagaPerformances.Add(rp);
+                entityHelper.AddRagaPerformance(artist, rage, performance);
             }
-            return new IndianClassicalRagaCatalogueResult(this, CatalogueStatus.Success, Artists, Raga,  performance);
+            return new IndianClassicalRagaCatalogueResult(this, CatalogueStatus.Success, Artists, rage,  performance);
         }
 
-        private Raga GetRaga(string name)
-        {
-            Debug.Assert(MusicDb != null);
-            var lowerAlphaNumericName = name.ToAlphaNumerics().ToLower();
-            var raga = MusicDb.Ragas.SingleOrDefault(r => r.AlphamericName.ToLower() == lowerAlphaNumericName);
-            if (raga == null)
-            {
-                var alphamericName = name.ToAlphaNumerics();
-                raga = new Raga
-                {
-                    Name = name,
-                    DisplayName = string.IsNullOrWhiteSpace(ici.Lookup[alphamericName].DisplayName) ? $"Raga {name}" : ici.Lookup[alphamericName].DisplayName,
-                    //DisplayName = ici.Lookup[alphamericName].DisplayName ?? $"Raga {name}",
-                    AlphamericName = name.ToAlphaNumerics()
-                };
-                MusicDb.Ragas.Add(raga);
-            }
-            return raga;
-        }
+        //private Raga GetRaga(string name)
+        //{
+        //    Debug.Assert(MusicDb != null);
+        //    var lowerAlphaNumericName = name.ToAlphaNumerics().ToLower();
+        //    var raga = MusicDb.Ragas.SingleOrDefault(r => r.AlphamericName.ToLower() == lowerAlphaNumericName);
+        //    if (raga == null)
+        //    {
+        //        var alphamericName = name.ToAlphaNumerics();
+        //        raga = new Raga
+        //        {
+        //            Name = name,
+        //            DisplayName = string.IsNullOrWhiteSpace(ici.Lookup[alphamericName].DisplayName) ? $"Raga {name}" : ici.Lookup[alphamericName].DisplayName,
+        //            //DisplayName = ici.Lookup[alphamericName].DisplayName ?? $"Raga {name}",
+        //            AlphamericName = name.ToAlphaNumerics()
+        //        };
+        //        MusicDb.Ragas.Add(raga);
+        //    }
+        //    return raga;
+        //}
         protected override string GetName()
         {
 

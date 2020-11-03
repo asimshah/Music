@@ -23,8 +23,8 @@ namespace Fastnet.Music.Metatools
         //{
 
         //}
-        internal BaseAlbumSet(MusicDb db, MusicOptions musicOptions, MusicStyles musicStyle, IEnumerable<MusicFile> musicFiles, TaskItem taskItem)
-            : base(db, musicOptions, musicStyle, musicFiles, taskItem)
+        internal BaseAlbumSet(EntityHelper entityHelper, MusicOptions musicOptions, MusicStyles musicStyle, IEnumerable<MusicFile> musicFiles, TaskItem taskItem)
+            : base(entityHelper, musicOptions, musicStyle, musicFiles, taskItem)
         {
             var albumNames = MusicFiles.Select(x => x.GetAlbumName()).Distinct(StringComparer.CurrentCultureIgnoreCase);
             if (albumNames.Count() > 1)
@@ -61,7 +61,7 @@ namespace Fastnet.Music.Metatools
         protected void SetAlbumNameToOpusName(/*TaskItem taskItem*/)
         {
             var opusNames = MusicFiles.Select(x => x.OpusName).Distinct();
-            Debug.Assert(opusNames.Count() == 1, $"{taskItem} more than 1 opus name: {opusNames.ToCSV()}");
+            //Debug.Assert(opusNames.Count() == 1, $"{taskItem} more than 1 opus name: {opusNames.ToCSV()}");
             AlbumName = opusNames.First();
         }
         protected virtual async Task<BaseCatalogueResult> CatalogueAsync(Func<CatalogueStatus, Work, BaseCatalogueResult> catalogueResult)
@@ -78,12 +78,7 @@ namespace Fastnet.Music.Metatools
         {
             var alphamericName = AlbumName.ToAlphaNumerics();
             var artistIdList = artists.Select(a => a.Id).OrderBy(n => n);
-            //var q1 = MusicDb.ArtistWorkList
-            //    .Where(aw => aw.Work.AlphamericName == alphamericName && artistIdList.Contains(aw.Artist.Id)).AsEnumerable();
-            //var q2 = q1.GroupBy(x => x.Work)
-            //    .Where(g => g.Select(x => x.ArtistId).OrderBy(id => id).SequenceEqual(artistIdList));
-            //var work = q2.Select(aw => aw.Key).SingleOrDefault();
-            var work = FindWorkByArtistIdsAndName(MusicDb, artistIdList, AlbumName);
+            var work = entityHelper.FindWorkByArtistIdsAndName(artistIdList, AlbumName);
             if (work == null)
             {
                 work = new Work
@@ -102,7 +97,8 @@ namespace Fastnet.Music.Metatools
                 };
                 foreach (var artist in artists)
                 {
-                    MusicDb.AddWork(artist, work);
+                    entityHelper.AddWork(artist, work);
+                    //MusicDb.AddWork(artist, work);
                 }
             }
             return work;
@@ -117,7 +113,6 @@ namespace Fastnet.Music.Metatools
         }
         protected (CatalogueStatus status, IEnumerable<Track> tracks) CatalogueTracks(Work album)
         {
-            Debug.Assert(MusicDb != null);
             var tracks = new List<Track>();
             var result = CatalogueStatus.Success;
             var filesByPart = MusicFiles.GroupBy(x => x.PartNumber);
@@ -185,7 +180,8 @@ namespace Fastnet.Music.Metatools
                         MusicStyle = this.MusicStyle,
                         TaskString =  taskString //album.UID.ToString()
                     };
-                    await MusicDb.TaskItems.AddAsync(resamplingTask);
+                    await entityHelper.AddEntityAsync(resamplingTask);
+                    //await MusicDb.TaskItems.AddAsync(resamplingTask);
                 }
             }
         }
@@ -237,19 +233,19 @@ namespace Fastnet.Music.Metatools
             album.Tracks.Add(track);
             return track;
         }
-        private Work FindWorkByArtistIdsAndName(MusicDb db,IEnumerable<long> idlist, string name)
-        {
-            idlist = idlist.OrderBy(x => x);
-            var alphamericName = name.ToAlphaNumerics();
-            var q1 = db.ArtistWorkList
-                .Where(aw => aw.Work.AlphamericName == alphamericName && idlist.Contains(aw.Artist.Id))
-                .Select(x => x.Work).Distinct()
-                .Join(db.ArtistWorkList, w => w.Id, awl => awl.WorkId, (w, awl) => awl)
-                .AsEnumerable();
-            var q2 = q1.GroupBy(x => x.Work)
-                .Where(g => g.Select(x => x.ArtistId).OrderBy(id => id).SequenceEqual(idlist));
-            var work = q2.Select(aw => aw.Key).SingleOrDefault();
-            return work;
-        }
+        //private Work FindWorkByArtistIdsAndName(MusicDb db,IEnumerable<long> idlist, string name)
+        //{
+        //    idlist = idlist.OrderBy(x => x);
+        //    var alphamericName = name.ToAlphaNumerics();
+        //    var q1 = db.ArtistWorkList
+        //        .Where(aw => aw.Work.AlphamericName == alphamericName && idlist.Contains(aw.Artist.Id))
+        //        .Select(x => x.Work).Distinct()
+        //        .Join(db.ArtistWorkList, w => w.Id, awl => awl.WorkId, (w, awl) => awl)
+        //        .AsEnumerable();
+        //    var q2 = q1.GroupBy(x => x.Work)
+        //        .Where(g => g.Select(x => x.ArtistId).OrderBy(id => id).SequenceEqual(idlist));
+        //    var work = q2.Select(aw => aw.Key).SingleOrDefault();
+        //    return work;
+        //}
     }
 }

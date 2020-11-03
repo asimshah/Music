@@ -11,7 +11,7 @@ namespace Fastnet.Music.Metatools
 {
     public abstract class BasePerformanceSet : BaseMusicSet
     {
-        public BasePerformanceSet(MusicDb db, MusicOptions musicOptions, MusicStyles musicStyle, IEnumerable<MusicFile> musicFiles, TaskItem taskItem) : base(db, musicOptions, musicStyle, musicFiles, taskItem)
+        public BasePerformanceSet(EntityHelper entityHelper,/*MusicDb db,*/ MusicOptions musicOptions, MusicStyles musicStyle, IEnumerable<MusicFile> musicFiles, TaskItem taskItem) : base(entityHelper, musicOptions, musicStyle, musicFiles, taskItem)
         {
             log.Debug($"Building performance set using {musicFiles.Count()} music files");
             foreach(var mf in musicFiles)
@@ -39,10 +39,10 @@ namespace Fastnet.Music.Metatools
                     log.Warning($"  {performance.ToIdent()}");
                 }
             }
-            var eh = new EntityHelper(MusicDb, taskItem);
+            //var eh = new EntityHelperOld(MusicDb, taskItem);
             foreach (var performance in performances.ToArray())
             {
-                eh.Delete(performance);
+                entityHelper.Delete(performance);
             }
         }
         protected Performance GetPerformance(IEnumerable<Performer> performers)
@@ -66,11 +66,13 @@ namespace Fastnet.Music.Metatools
         }
         internal Performer GetPerformer(MetaPerformer mp)
         {
-            return MusicDb.GetPerformer(mp);
+            return entityHelper.GetPerformer(mp);
+           // return MusicDb.GetPerformer(mp);
         }
         internal IEnumerable<Performer> GetPerformers(IEnumerable<MetaPerformer> list)
         {
-            return MusicDb.GetPerformers(list, taskItem);
+            return entityHelper.GetPerformers(list);
+            //return MusicDb.GetPerformers(list, taskItem);
         }
     }
 }

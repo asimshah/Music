@@ -75,12 +75,19 @@ namespace Fastnet.Music.Core
         /// </summary>
         public bool Filter { get; set; } = false;
         /// <summary>
+        /// used if Filter == true
+        /// names are film names for Hindi Films, artist names for all other styles
+        /// </summary>
+        public string[] IncludeNames { get; set; } = new string[0];
+        /// <summary>
         /// 
         /// </summary>
+        [Obsolete]
         public string[] IncludeFolders { get; set; } = new string[0];
         /// <summary>
         /// 
         /// </summary>
+        [Obsolete]
         public string[] IncludeArtists { get; set; } = new string[0];
     }
     /// <summary>
@@ -106,6 +113,7 @@ namespace Fastnet.Music.Core
         /// <summary>
         /// 
         /// </summary>
+        [Obsolete]
         public string[] MusicFileExtensions { get; set; } = new string[] { ".mp3", ".flac", ".m4a" };
         /// <summary>
         /// 

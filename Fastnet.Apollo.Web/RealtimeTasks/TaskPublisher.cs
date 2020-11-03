@@ -50,10 +50,10 @@ namespace Fastnet.Apollo.Web
         {
             await AddTask(style, TaskType.MusicStyle, style.ToString(),  force);
         }
-        public async Task AddTask(MusicStyles style, string artistName, bool force = false)
-        {
-            await AddTask(style, TaskType.ArtistName, artistName,  force);
-        }
+        //public async Task AddTask(MusicStyles style, string artistName, bool force = false)
+        //{
+        //    await AddTask(style, TaskType.ArtistName, artistName,  force);
+        //}
 
         public async Task<TaskItem> AddTask(MusicStyles style, TaskType type, string taskString, /*bool queueTask = true,*/ bool force = false)
         {

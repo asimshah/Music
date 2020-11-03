@@ -38,8 +38,7 @@ namespace Fastnet.Music.Metatools
         /// <returns></returns>
         public static async Task UpdateTagsAsync(this MusicDb db, MusicFile mf, IndianClassicalInformation ici)
         {
-            if (/*force == true*/
-                /*||*/ mf.ParsingStage == MusicFileParsingStage.Unknown
+            if ( mf.ParsingStage == MusicFileParsingStage.Unknown
                 || mf.ParsingStage == MusicFileParsingStage.Initial
                 || (mf.FileLastWriteTimeUtc != new IO.FileInfo(mf.File).LastWriteTimeUtc))
             {
@@ -61,197 +60,7 @@ namespace Fastnet.Music.Metatools
                 mf.ParsingStage = MusicFileParsingStage.IdTagsComplete;
             }
         }
-        public static bool ValidateTags(this MusicDb db, MusicFile mf)
 
-        {
-            bool result = true;
-            bool isTagPresent(string tagName, bool logIfMissing = false)
-            {
-                var r = mf.IdTags.SingleOrDefault(x => string.Compare(x.Name, tagName, true) == 0) != null;
-                if (!r && logIfMissing)
-                {
-                    log.Error($"{mf.File} tag {tagName} not present");
-                }
-                return r;
-            }
-            if (mf.IsGenerated)
-            {
-                result = true;
-            }
-            else
-            {
-                var standardTags = new string[] { "Artist", "Album", "TrackNumber", "Title" };
-                if (standardTags.Any(t => isTagPresent(t, true) == false))
-                {
-                    result = false;
-                }
-                else
-                {
-                    switch (mf.Style)
-                    {
-                        case MusicStyles.IndianClassical:
-                            var requiredTags = new string[] { "Raga" };
-                            if (requiredTags.Any(t => !isTagPresent(t)))
-                            {
-                                result = false;
-                                if (requiredTags.Count() > 1)
-                                {
-                                    log.Error($"{mf.File} none of {(string.Join(", ", requiredTags))} found");
-                                }
-                                else
-                                {
-                                    log.Error($"{mf.File} tag {requiredTags.First()} not found");
-                                }
-                            }
-                            break;
-                        case MusicStyles.WesternClassical:
-                            // optional tags: these do  not need to be preent but we report if they are not
-                            var optionalTags = new string[] { "Composer", "Composition", "Conductor", "Orchestra" };
-                            var missingOptional = optionalTags.Where(t => isTagPresent(t) == false).ToList();
-                            missingOptional.ForEach(t => log.Trace($"{mf.File} optional tag {t} not present"));
-                            // alternate tags: atleast one of these neeeds to be present
-                            var alternateTags = new string[] { "Performer", "Album Artist", "AlbumArtist", "AlbumArtists" };
-                            if (!alternateTags.Any(t => isTagPresent(t)))
-                            {
-                                result = false;
-                                log.Error($"{mf.File} none of {(string.Join(", ", alternateTags))} found");
-                            }
-                            break;
-                    }
-                }
-            }
-            return result;
-        }
-        public static bool ValidateArtists(this MusicDb db)
-        {
-            var result = true;
-            foreach (var artist in db.Artists)
-            {
-                var styleCount = artist.ArtistStyles.Count();
-                var r = styleCount > 0;
-                if (!r)
-                {
-                    log.Warning($"Artist {artist.Name} [A-{artist.Id}] has no artiststyle entries");
-                    if (result == true)
-                    {
-                        result = false;
-                    }
-                }
-                r = artist.Works.Count() > 0 || artist.Compositions.Count() > 0;
-                if (!r)
-                {
-                    log.Warning($"Artist {artist.Name} [A-{artist.Id}] has neither works nor compositions");
-                    if (result == true)
-                    {
-                        result = false;
-                    }
-                }
-            }
-            log.Information("ValidateArtists() completed");
-            return result;
-        }
-        public static bool ValidateWorks(this MusicDb db)
-        {
-            var result = true;
-            foreach (var work in db.Works)
-            {
-                var r = work.Tracks.Count() > 0;
-                if (!r)
-                {
-                    log.Warning($"Work {work.Name} [W-{work.Id}] has no tracks");
-                    if (result == true)
-                    {
-                        result = false;
-                    }
-                }
-            }
-            log.Information("ValidateWorks() completed");
-            return result;
-        }
-        public static bool ValidateTracks(this MusicDb db)
-        {
-            //var result = true;
-            int errorCount = 0;
-            foreach (var track in db.Tracks)
-            {
-                if (track.MusicFiles.Count() == 0)
-                {
-                    log.Warning($"Track {track.Title} [T-{track.Id}] has no music files");
-                    ++errorCount;
-                }
-                if (track.MusicFiles.All(x => x.IsGenerated))
-                {
-                    log.Warning($"Track {track.Title} [T-{track.Id}] has only generated music files");
-                    ++errorCount;
-                }
-            }
-            log.Information("ValidateTracks() completed");
-            return errorCount == 0;
-        }
-        public static bool ValidateCompositions(this MusicDb db)
-        {
-            var result = true;
-            foreach (var composition in db.Compositions)
-            {
-                var performanceCount = composition.Performances.Count();
-                var r = performanceCount > 0;
-                if (!r)
-                {
-                    log.Warning($"Composition {composition.Name} [C-{composition.Id}] has no performances");
-                    if (result == true)
-                    {
-                        result = false;
-                    }
-                }
-            }
-            log.Information("ValidateCompositions() completed");
-            return result;
-        }
-        public static bool Validate(this MusicDb musicDb)
-        {
-            var list = new List<bool>() {
-                musicDb.ValidateArtists(),
-                musicDb.ValidateWorks(),
-                musicDb.ValidateTracks(),
-                musicDb.ValidateCompositions(),
-                musicDb.ValidatePerformances()
-            };
-            return list.All(x => x == true);
-        }
-        public static bool ValidatePerformances(this MusicDb db)
-        {
-            var result = true;
-            foreach (var performance in db.Performances)
-            {
-                var movementCount = performance.Movements.Count();
-                var r = movementCount > 0;
-                if (!r)
-                {
-                    //                    log.Warning($"{performance.Composition.Artist.Name} [A-{performance.Composition.Artist.Id}], \"{performance.Composition.Name}\" [C-{performance.Composition.Id}] performed by \"{performance.GetAllPerformersCSV()}\" [P-{performance.Id}] has no movements");
-                    log.Warning($"{performance.ToLogIdentity()} performed by \"{performance.GetAllPerformersCSV()}\" has no movements");
-                    if (result == true)
-                    {
-                        result = false;
-                    }
-                }
-                if (movementCount > 0)
-                {
-                    var workCount = performance.Movements.Select(x => x.Work).Distinct().Count();
-                    r = workCount == 1;
-                    if (!r)
-                    {
-                        //                        log.Warning($"{performance.Composition.Artist.Name} [A-{performance.Composition.Artist.Id}], \"{performance.Composition.Name} [C-{performance.Composition.Id}] movements\" in performance by {performance.GetAllPerformersCSV()} [P-{performance.Id}] have a work count of {workCount}");
-                        log.Warning($"{performance.ToLogIdentity()} in performance by {performance.GetAllPerformersCSV()} has a work count of {workCount}");
-                        if (result == true)
-                        {
-                            result = false;
-                        }
-                    }
-                }
-            }
-            log.Information("ValidatePerformances() completed");
-            return result;
-        }
         private static void UpdateFlacTagsAsync(this MusicDb musicDb, MusicFile mf, IndianClassicalInformation ici)
         {
             const string vorbisSeparators = ";\r\n\t";
@@ -797,6 +606,8 @@ namespace Fastnet.Music.Metatools
         {
             return mf.GetAllPerformers(musicOptions).Where(x => x.Type == PerformerType.Artist);
         }
+
+
         [Obsolete("use GetArtists() instead")]
         public static string GetArtistName(this MusicFile mf/*, MusicDb db*/)
         {
@@ -951,42 +762,76 @@ namespace Fastnet.Music.Metatools
             }
             return result;
         }
-        public static CollectionsFolder GetCollectionsFolder(this MusicStyles musicStyle, MusicOptions musicOptions)
+        //[Obsolete]
+        //public static CollectionsFolder GetCollectionsFolder(this MusicStyles musicStyle, MusicOptions musicOptions)
+        //{
+        //    return new CollectionsFolder(musicOptions, musicStyle);
+        //}
+        /// returns a union of TopFolders and collection albums from all music roots
+        /// Topfolders are HindiFilmFolders or ArtistFolders according to music style
+        public static IEnumerable<ITopFolder> GetAllTopFolders(this MusicStyles musicStyle, MusicOptions musicOptions)
         {
-            return new CollectionsFolder(musicOptions, musicStyle);
+            var list = GetTopFoldersExcludingCollections(musicStyle, musicOptions);
+            return list.Union(GetCollectionAlbumFolders(musicStyle, musicOptions));
+        }
+        /// <summary>
+        /// returns AlbumFolders for collections albums from all music roots
+        /// </summary>
+        /// <param name="musicStyle"></param>
+        /// <param name="musicOptions"></param>
+        /// <returns></returns>
+        public static IEnumerable<AlbumFolder> GetCollectionAlbumFolders(this MusicStyles musicStyle, MusicOptions musicOptions)
+        {
+            var roots = MusicRoot.GetMusicRoots(musicOptions, musicStyle);
+            return roots.SelectMany(r => r.GetCollectionAlbumFolders());
+            //var collectionFolders = roots.Select(x => x.GetCollectionsPath());
+            //return collectionFolders.Select(cf => new DirectoryInfo(cf));
+        }
+        /// <summary>
+        /// returns HindiFilmFolders or ArtistFolders according to music style from all music roots
+        /// </summary>
+        /// <param name="musicStyle"></param>
+        /// <param name="musicOptions"></param>
+        /// <returns></returns>
+        public static IEnumerable<ITopFolder> GetTopFoldersExcludingCollections(this MusicStyles musicStyle, MusicOptions musicOptions)
+        {
+            var roots = MusicRoot.GetMusicRoots(musicOptions, musicStyle);
+            return roots.SelectMany(r => r.GetTopFoldersExcludingCollections());
+        }
+        public static string GetPortraitFile(this Artist artist, MusicOptions musicOptions)
+        {
+            bool matchImageFilename(string imageFileName, string artistName)
+            {
+                var ln = artistName.GetLastName();
+                var imagename = Path.GetFileNameWithoutExtension(imageFileName).ToLower();
+                return "portrait" == imagename || artist.Name.IsEqualIgnoreAccentsAndCase(imagename) || ln.IsEqualIgnoreAccentsAndCase(imagename);
+            }
+            var imagesInPortraitsFolders = artist.ArtistStyles.SelectMany(x => x.StyleId.GetPortraits(musicOptions))
+                .Where(f => matchImageFilename(f.FullName, artist.Name));
+            var imagesInArtistFolders = ArtistFolder.GetArtistFolders(artist, musicOptions)
+                .SelectMany(af => StringConstants.ImageFileExtensions.SelectMany(x => Directory.EnumerateFiles(af.Fullpath, $"*{x}")))
+                .Select(f => new FileInfo(f));
+            var artistImage = imagesInPortraitsFolders.Union(imagesInArtistFolders)
+                .OrderByDescending(x => x.LastWriteTime).FirstOrDefault();
+            return artistImage?.FullName;// ?? "";
+        }
+        public static IEnumerable<FileInfo> GetPortraits(this MusicStyles musicStyle, MusicOptions musicOptions)
+        {
+            var roots = MusicRoot.GetMusicRoots(musicOptions, musicStyle);
+            var portraitFolders = roots.Select(x => x.GetPortraitsPath()).Where(x => Directory.Exists(x));
+            return portraitFolders.SelectMany(pf => StringConstants.ImageFileExtensions.SelectMany(x => Directory.EnumerateFiles(pf, $"*{x}")))
+                .Select(x => new FileInfo(x))
+                .OrderByDescending(x => x.LastWriteTime);
+        }
+        public static IEnumerable<HindiFilmFolder> GetFilmFolders(this MusicStyles musicStyle, MusicOptions musicOptions/*, string selectedRootFolder = null*/)
+        {
+            var roots = MusicRoot.GetMusicRoots(musicOptions, musicStyle);
+            return roots.SelectMany(r => r.GetAllTopFolders()).Cast<HindiFilmFolder>();
         }
         public static IEnumerable<ArtistFolder> GetArtistFolders(this MusicStyles musicStyle, MusicOptions musicOptions, string selectedRootFolder = null)
         {
-            var folderList = new List<ArtistFolder>();
-
-            var style = MusicMetaDataMethods.GetStyleInfo(musicOptions, musicStyle);
-            if (style != null)
-            {
-                var list = new List<string>();
-                //foreach (var rootFolder in new MusicSources(musicOptions).Where(s => !s.IsGenerated).OrderBy(s => s.DiskRoot))
-                foreach (var rootFolder in new MusicSources(musicOptions))
-                {
-                    foreach (var setting in style.Settings)
-                    {
-                        var path = Path.Combine(rootFolder.DiskRoot, setting.Path);
-                        if (selectedRootFolder == null || path.StartsWithIgnoreAccentsAndCase(selectedRootFolder))
-                        {
-                            if (Directory.Exists(path))
-                            {
-                                list.AddRange(Directory.EnumerateDirectories(path).Select(d => Path.GetFileName(d)));
-                            }
-                        }
-                    }
-                }
-                var list2 = list.Except(new string[] { "collections", "$portraits" }, StringComparer.CurrentCultureIgnoreCase);
-                if (style.Filter)
-                {
-                    list2 = list2.Intersect(style.IncludeArtists, new AccentAndCaseInsensitiveComparer());
-                }
-                list2 = list2.Distinct(new AccentAndCaseInsensitiveComparer()).OrderBy(x => x);
-                folderList = list2.Select(n => new ArtistFolder(musicOptions, musicStyle, n)).ToList();
-            }
-            return folderList;
+            var roots = MusicRoot.GetMusicRoots(musicOptions, musicStyle);
+            return roots.SelectMany(r => r.GetAllTopFolders()).Cast<ArtistFolder>();
         }
         /// <summary>
         /// get the most applicable cover file for the work, according to the rules
@@ -1015,53 +860,7 @@ namespace Fastnet.Music.Metatools
             }
             return coverFile;
         }
-        public static string GetPortraitFile(this Artist artist, MusicOptions musicOptions)
-        {
-            var ln = artist.Name.GetLastName();
-            bool matchImageFilename(string imageFileName, string artistName)
-            {
-                var imagename = Path.GetFileNameWithoutExtension(imageFileName).ToLower();
-                return "portrait" == imagename || artist.Name.IsEqualIgnoreAccentsAndCase(imagename) || ln.IsEqualIgnoreAccentsAndCase(imagename);
-            }
-            bool matchArtistFolder(string sp, string artistName, string folder)
-            {
-                bool _match(string sp, string name)
-                {
-                    var artistFolder = Path.Combine(sp, name);
-                    if (artistFolder.IsEqualIgnoreAccentsAndCase(folder))
-                    {
-                        return true;
-                    }
-                    return false;
-                }
-                if (_match(sp, artistName))
-                {
-                    return true;
-                }
-                else
-                {
-                    if (artistName.StartsWith("The ", StringComparison.CurrentCultureIgnoreCase))
-                    {
-                        artistName = artistName.Substring(4);
-                    }
-                    else
-                    {
-                        artistName = $"The {artistName}";
-                    }
-                    return _match(sp, artistName);
-                }
-            }
-            var allStylePaths = artist.ArtistStyles.ToArray()
-                .SelectMany(x => x.StyleId.GetPaths(musicOptions, false, false));
-            var allArtistPaths = allStylePaths.SelectMany(
-                sp => Directory.EnumerateDirectories(sp)
-                .Where(d => matchArtistFolder(sp, artist.Name, d) || Path.GetFileNameWithoutExtension(d).ToLower() == "$portraits"));
-            var imageFiles = allArtistPaths.SelectMany(x => Directory.EnumerateFiles(x, "*.jpg")
-                .Union(Directory.EnumerateFiles(x, "*.jpeg"))
-                .Union(Directory.EnumerateFiles(x, "*.png")));
-            var matchedFiles = imageFiles.Where(f => matchImageFilename(f, artist.Name));
-            return matchedFiles.OrderByDescending(x => new FileInfo(x).LastWriteTime).FirstOrDefault();
-        }
+
         public static async Task<Image> GetImage(this string filename)
         {
             (var data, var mimeType, var lastWriteTimeUtc, var length) = await GetImageDetails(filename);

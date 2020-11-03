@@ -40,6 +40,11 @@ namespace Fastnet.Apollo.Web
             services.AddService<DeviceService>();
             services.AddService<MusicFolderChangeMonitor>();
             services.AddService<Resampler>();
+            services.AddSingleton<EntityObserver>();
+            services.AddTransient<EntityHelper>();
+            services.AddTransient<DeletePath>();
+            services.AddTransient<ExpandTask>();
+            services.AddTransient<UpdatePortraits>();
             services.AddService<TaskPublisher>();
             services.AddService<TaskRunner>();
 

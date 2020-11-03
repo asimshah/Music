@@ -184,7 +184,8 @@ $theme-gutter-fine: $theme-gutter-narrow / 2;
    button[disabled], button.disabled, button.icon[disabled], button.icon.disabled {
       cursor: none;
       pointer-events: none;
-      color: theme-colour('disabled');
+      background-color: theme-colour('disabled');
+      border-color: theme-colour('disabled');
    }
    /*a.button {
         text-decoration: none;

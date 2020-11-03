@@ -21,7 +21,8 @@ namespace Fastnet.Music.Metatools
     {
         public string Name => GetName();
         //public ITEOBase WorkTEO { get; protected set; }
-        protected MusicDb MusicDb { get; private set; }
+        //protected MusicDb MusicDb { get; private set; }
+        protected readonly EntityHelper entityHelper;
         protected MusicStyles MusicStyle { get; private set; }
         protected MusicOptions MusicOptions { get; private set; }
         protected IEnumerable<MusicFile> MusicFiles { get; private set; }
@@ -41,17 +42,19 @@ namespace Fastnet.Music.Metatools
         /// <summary>
         /// create a a music set for the given music files in the given music style
         /// </summary>
-        /// <param name="db"></param>
+
+        /// <param name="entityHelper"></param>
         /// <param name="musicOptions"></param>
         /// <param name="musicStyle"></param>
         /// <param name="musicFiles"></param>
         /// <param name="taskItem"></param>
-        public BaseMusicSet(MusicDb db, MusicOptions musicOptions, MusicStyles musicStyle, IEnumerable<MusicFile> musicFiles, TaskItem taskItem)
+        public BaseMusicSet(EntityHelper entityHelper,  /*MusicDb db,*/ MusicOptions musicOptions, MusicStyles musicStyle, IEnumerable<MusicFile> musicFiles, TaskItem taskItem)
         {
-            Debug.Assert(db != null);
+            //Debug.Assert(db != null);
             Debug.Assert(musicFiles.Count() > 0);
             this.log = ApplicationLoggerFactory.CreateLogger(this.GetType());
-            this.MusicDb = db;
+            //this.MusicDb = db;
+            this.entityHelper = entityHelper;
             this.MusicOptions = musicOptions;
             this.MusicStyle = musicStyle;
             this.MusicFiles = musicFiles;
@@ -79,17 +82,18 @@ namespace Fastnet.Music.Metatools
         /// <returns></returns>
         protected Artist FindArtist(string name)
         {
-            // **Outstanding ** should this be looking for an artist with matching music style?
-            MusicDb.Artists.Load();
-            try
-            {
-                return MusicDb.Artists.Local.SingleOrDefault(a => a.Name.IsEqualIgnoreAccentsAndCase(name));
-            }
-            catch (Exception xe)
-            {
-                log.Error($"{xe.Message}");
-                throw;
-            }
+            //// **Outstanding ** should this be looking for an artist with matching music style?
+            //MusicDb.Artists.Load();
+            //try
+            //{
+            //    return MusicDb.Artists.Local.SingleOrDefault(a => a.Name.IsEqualIgnoreAccentsAndCase(name));
+            //}
+            //catch (Exception xe)
+            //{
+            //    log.Error($"{xe.Message}");
+            //    throw;
+            //}
+            return this.entityHelper.FindArtist(name);
         }
         protected async Task<IEnumerable<Artist>> GetArtistsAsync(IEnumerable<MetaPerformer> artistPerformers)
         {
@@ -103,20 +107,26 @@ namespace Fastnet.Music.Metatools
         }
         protected virtual async Task<Artist> GetArtistAsync(MetaPerformer performer)
         {
-            Debug.Assert(MusicDb != null);
-            Artist artist = FindArtist(performer.Name);
-            if (artist == null)
+            var type = ArtistType.Artist;
+            if (this is BaseAlbumSet && OpusType == OpusType.Collection)
             {
-                artist = await CreateNewArtist(performer.Name);
+                type = ArtistType.Various;
             }
-            else
-            {
-                if(artist.ArtistStyles.SingleOrDefault(x => x.StyleId == MusicStyle) == null)
-                {
-                    artist.ArtistStyles.Add(new ArtistStyle { Artist = artist, StyleId = MusicStyle });
-                    log.Information($"Existing artist {artist.ToIdent()} {artist.Name} added to style {MusicStyle}");
-                }
-            }
+            Artist artist = await entityHelper.GetArtistAsync(MusicStyle, performer.Name, type);
+
+            //Artist artist = FindArtist(performer.Name);
+            //if (artist == null)
+            //{
+            //    artist = await CreateNewArtist(performer.Name);
+            //}
+            //else
+            //{
+            //    if(artist.ArtistStyles.SingleOrDefault(x => x.StyleId == MusicStyle) == null)
+            //    {
+            //        artist.ArtistStyles.Add(new ArtistStyle { Artist = artist, StyleId = MusicStyle });
+            //        log.Information($"Existing artist {artist.ToIdent()} {artist.Name} added to style {MusicStyle}");
+            //    }
+            //}
             if (artist.Type != ArtistType.Various)
             {
                 var portrait = artist.GetPortraitFile(MusicOptions);
@@ -128,26 +138,32 @@ namespace Fastnet.Music.Metatools
             artist.LastModified = DateTimeOffset.Now;
             return artist;
         }
-        private async Task<Artist> CreateNewArtist(string name)
-        {
-            Artist artist = new Artist
-            {
-                UID = Guid.NewGuid(),
-                Name = name,
-                AlphamericName = name.ToAlphaNumerics(),
-                Type = ArtistType.Artist,
-                OriginalName = name,
-            };
-            artist.ArtistStyles.Add(new ArtistStyle { Artist = artist, StyleId = MusicStyle });
-            log.Debug($"{taskItem} new artist instance for {name}, {artist.Id}");
-            if (this is BaseAlbumSet && OpusType == OpusType.Collection)
-            {
-                artist.Type = ArtistType.Various;
-            }
-            await MusicDb.Artists.AddAsync(artist);
-            await MusicDb.SaveChangesAsync();
-            return artist;
-        }
+        //private async Task<Artist> CreateNewArtist(string name)
+        //{
+        //    var type = ArtistType.Artist;
+        //    if (this is BaseAlbumSet && OpusType == OpusType.Collection)
+        //    {
+        //        type = ArtistType.Various;
+        //    }
+        //    return await entityHelper.CreateNewArtist(MusicStyle, name, type);
+        //    Artist artist = new Artist
+        //    {
+        //        UID = Guid.NewGuid(),
+        //        Name = name,
+        //        AlphamericName = name.ToAlphaNumerics(),
+        //        Type = ArtistType.Artist,
+        //        OriginalName = name,
+        //    };
+        //    artist.ArtistStyles.Add(new ArtistStyle { Artist = artist, StyleId = MusicStyle });
+        //    log.Debug($"{taskItem} new artist instance for {name}, {artist.Id}");
+        //    if (this is BaseAlbumSet && OpusType == OpusType.Collection)
+        //    {
+        //        artist.Type = ArtistType.Various;
+        //    }
+        //    await MusicDb.Artists.AddAsync(artist);
+        //    await MusicDb.SaveChangesAsync();
+        //    return artist;
+        //}
         //[Obsolete("use GetWork() in BaseAlbumSet")]
         //protected Work GetWork(Artist artist, string name, int year)
         //{

@@ -19,8 +19,8 @@ namespace Fastnet.Music.Metatools
         //{
 
         //}
-        public WesternClassicalAlbumSet(MusicDb db, MusicOptions musicOptions, IEnumerable<MusicFile> musicFiles, TaskItem taskItem)
-            : base(db, musicOptions, MusicStyles.WesternClassical, musicFiles, taskItem)
+        public WesternClassicalAlbumSet(EntityHelper entityHelper, MusicOptions musicOptions, IEnumerable<MusicFile> musicFiles, TaskItem taskItem)
+            : base(entityHelper, musicOptions, MusicStyles.WesternClassical, musicFiles, taskItem)
         {
             if(artistPerformers.Count() == 0)
             {

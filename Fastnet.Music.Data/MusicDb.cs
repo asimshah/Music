@@ -366,27 +366,27 @@ namespace Fastnet.Music.Data
 
         private void EnsureCompositionPerformanceRefactored()
         {
-            var performances = Performances.Where(p => p.CompositionId > 0);
-            foreach (var performance in performances)
-            {
-                var composition = Compositions.Find(performance.CompositionId);
-                var cp = this.AddPerformance(composition, performance);
-                performance.CompositionId = 0;
-                log.Information($"{cp.ToIdent()} added");
-            }
+            //var performances = Performances.Where(p => p.CompositionId > 0);
+            //foreach (var performance in performances)
+            //{
+            //    var composition = Compositions.Find(performance.CompositionId);
+            //    var cp = this.AddPerformance(composition, performance);
+            //    performance.CompositionId = 0;
+            //    log.Information($"{cp.ToIdent()} added");
+            //}
         }
 
         private void EnsureArtistWorkRefactored()
         {
-            var works = Works.AsEnumerable()
-                .Where(w => w.ArtistId > 0); 
-            foreach(var work in works)
-            {
-                var artist = Artists.Find(work.ArtistId);
-                var aw = this.AddWork(artist, work);
-                work.ArtistId = 0;
-                log.Information($"{aw.ToIdent()} added");
-            }
+            //var works = Works.AsEnumerable()
+            //    .Where(w => w.ArtistId > 0); 
+            //foreach(var work in works)
+            //{
+            //    var artist = Artists.Find(work.ArtistId);
+            //    var aw = this.AddWork(artist, work);
+            //    work.ArtistId = 0;
+            //    log.Information($"{aw.ToIdent()} added");
+            //}
         }
 
         private void EnsurePerformersRefactored(MusicOptions musicOptions)

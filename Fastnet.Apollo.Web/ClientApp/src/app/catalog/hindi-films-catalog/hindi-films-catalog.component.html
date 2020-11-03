@@ -1,0 +1,7 @@
+<div class="component-container" (swipeleft)="onSwipeLeft()" (swiperight)="onSwipeRight()">
+   <div *ngIf="catalogView === CatalogView.DefaultView">
+      <artists-view (artistSelected)="onArtistClick($event)"></artists-view>
+   </div>
+   <div *ngIf="catalogView === CatalogView.SearchResults">
+   </div>
+</div>

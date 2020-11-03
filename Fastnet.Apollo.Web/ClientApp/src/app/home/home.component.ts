@@ -11,6 +11,7 @@ import { PopularCatalogComponent } from '../catalog/popular-catalog/popular-cata
 import { WesternClassicalCatalogComponent } from '../catalog/western-classical-catalog/western-classical-catalog.component';
 import { ParameterService } from '../shared/parameter.service';
 import { IndianClassicalCatalogComponent } from '../catalog/indian-classical-catalog/indian-classical-catalog.component';
+import { HindiFilmsCatalogComponent } from '../catalog/hindi-films-catalog/hindi-films-catalog.component';
 
 @Component({
     selector: 'app-home',
@@ -74,6 +75,9 @@ export class HomeComponent implements AfterViewInit, OnDestroy {
                   break;
                case MusicStyles.IndianClassical:
                   this.loadCatalog(IndianClassicalCatalogComponent);
+                  break;
+               case MusicStyles.HindiFilms:
+                  this.loadCatalog(HindiFilmsCatalogComponent);
                   break;
                 default:
                     this.loadCatalog(DefaultCatalogComponent);

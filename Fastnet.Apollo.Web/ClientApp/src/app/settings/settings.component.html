@@ -22,7 +22,15 @@
           </tab>
           <tab tabTitle="Catalogue Operations">
              <div class="operations-list">
-                <button class="secondary" (click)="onStartMusicScanner()">Start Music Scanner</button>
+                <button class="secondary" (click)="onRescanStyle(MusicStyles.Popular)" ngClass>Rescan Popular</button>
+                <div class="description">Rescan the Popular library. Updates the catalogue to the current state of music files in the Popular library</div>
+                <button class="secondary" (click)="onRescanStyle(MusicStyles.WesternClassical)" ngClass>Rescan Western Classical</button>
+                <div class="description">Rescan the Western Classical library. Updates the catalogue to the current state of music files in the Western Classical library</div>
+                <button class="secondary" (click)="onRescanStyle(MusicStyles.IndianClassical)" ngClass>Rescan Indian Classical</button>
+                <div class="description">Rescan the Indian Classical library. Updates the catalogue to the current state of music files in the Indian Classical library</div>
+                <button class="secondary" (click)="onRescanStyle(MusicStyles.HindiFilms)" ngClass>Rescan Hindi Films</button>
+                <div class="description">Rescan the Hindi Films library. Updates the catalogue to the current state of music files in the Hindi Films library</div>
+                <button class="secondary" (click)="onStartMusicScanner()">Rescan All Libraries</button>
                 <div class="description">Rescan the entire catalogue. Updates the catalogue to the current state of all music files</div>
                 <button class="danger" (click)="onResetDatabase()">Reset Database</button>
                 <div class="description">Deletes the existing catalogue and then rescan the entire catalogue. All current contents will be lost (including playlists)</div>

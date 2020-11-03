@@ -9,12 +9,13 @@ using System.Linq;
 namespace Fastnet.Music.Core
 {
 #pragma warning disable CS1591 // Missing XML comment for publicly visible type or member
+
     public static class Extensions
     {
         private static readonly ILogger log = ApplicationLoggerFactory.CreateLogger("Fastnet.Music.Core.Extensions");
         /// <summary>
         /// return a list of valid style paths that exists, i.e. where the style is enabled and for each source that is enabled
-        /// (compare with MusicSet version which does test for enabled in either case - should this replace that?)
+        /// (compare with MusicSet version which does not test for enabled in either case - should this replace that?)
         /// </summary>
         /// <param name="musicStyle"></param>
         /// <param name="musicOptions"></param>
@@ -151,5 +152,6 @@ namespace Fastnet.Music.Core
             return "";
         }
     }
+
 #pragma warning restore CS1591 // Missing XML comment for publicly visible type or member
 }

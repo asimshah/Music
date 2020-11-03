@@ -6,7 +6,7 @@ namespace Fastnet.Music.Metatools
 {
     public class FlacFile : AudioFile
     {
-        public FlacFile(MusicOptions musicOptions, MusicStyles style, FileInfo fi) : base(musicOptions, style, fi)
+        public FlacFile(FileInfo fi) : base(fi)
         {
         }
 

@@ -85,10 +85,10 @@ namespace Fastnet.Apollo.Web.Controllers
         {
             var key = string.Empty;
             IEnumerable<Device> devices = musicDb.Devices.Where(d => d.Type == AudioDeviceType.Browser && d.HostMachine == clientIPAddress);
-            if(devices.Count() > 1)
+            if (devices.Count() > 1)
             {
                 var toRemove = devices.OrderByDescending(x => x.LastSeenDateTime).Skip(1).ToArray();
-                foreach(var d in toRemove)
+                foreach (var d in toRemove)
                 {
                     log.Information($"device {d.Id}, key {d.KeyName}, {d.HostMachine} {d.DisplayName} is a duplicate - removed");
                 }
@@ -96,7 +96,7 @@ namespace Fastnet.Apollo.Web.Controllers
                 musicDb.SaveChanges();
             }
             var device = musicDb.Devices.SingleOrDefault(d => d.Type == AudioDeviceType.Browser && d.HostMachine == clientIPAddress);
-            if(device == null)
+            if (device == null)
             {
                 key = Guid.NewGuid().ToString().ToLower();
                 log.Information($"new browser key {key} allocated to {clientIPAddress}");
@@ -120,7 +120,7 @@ namespace Fastnet.Apollo.Web.Controllers
                 var albums = artists.SelectMany(x => x.ArtistWorkList.Select(x => x.Work));
                 var tracks = albums.SelectMany(x => x.Tracks).ToArray();
                 var duration = TimeSpan.FromMilliseconds(tracks.Select(t => t.GetBestQuality()).Sum(mf => mf.Duration ?? 0));
-                return ($"{artists.Count()} artists, {albums.Count()} works, {tracks.Count()} tracks",  $"{duration.ToDefault()}");
+                return ($"{artists.Count()} artists, {albums.Count()} works, {tracks.Count()} tracks", $"{duration.ToDefault()}");
             }
             (string, string) westernClassicalTotals(IEnumerable<Artist> artists)
             {
@@ -141,8 +141,8 @@ namespace Fastnet.Apollo.Web.Controllers
             }
             var result = new List<string>();
             var artists = musicDb.ArtistStyles.Where(x => x.StyleId == style).Select(x => x.Artist);
-            string a,  b;
-            switch(style)
+            string a, b;
+            switch (style)
             {
                 default:
                 case MusicStyles.Popular:
@@ -178,14 +178,14 @@ namespace Fastnet.Apollo.Web.Controllers
         {
             var artists = musicDb.ArtistStyles.Where(x => x.StyleId == style && x.Artist.Type != ArtistType.Various)
                 .Select(x => x.Artist.Id);
-                return SuccessResult(artists);
+            return SuccessResult(artists);
         }
         [HttpGet("get/{style}/allartistsFull")]
         public IActionResult GetAllArtistsFull(MusicStyles style)
         {
             IEnumerable<Artist> artists = musicDb.ArtistStyles.Where(x => x.StyleId == style && x.Artist.Type != ArtistType.Various)
                 .Select(x => x.Artist);
-            switch(style)
+            switch (style)
             {
                 case MusicStyles.WesternClassical:
                     artists = artists.ToArray().OrderBy(x => x.Name.GetLastName());
@@ -211,7 +211,7 @@ namespace Fastnet.Apollo.Web.Controllers
             }
         }
         [HttpGet("get/{style}/artistSet")]
-        public IActionResult GetArtistInfo(MusicStyles style, [FromQuery(Name="id")] long[] ids)
+        public IActionResult GetArtistInfo(MusicStyles style, [FromQuery(Name = "id")] long[] ids)
         {
             //ids = ids.OrderBy(k => k).ToArray();
             var set = new ArtistSet(ids);
@@ -284,49 +284,49 @@ namespace Fastnet.Apollo.Web.Controllers
                 return SuccessResult(performance.ToDTO(performance.GetParentEntityName()));
             }
         }
-        [HttpGet("edit/performance/{id}/")]
-        public async Task<IActionResult> EditPerformance(long id)
-        {
-            var performance = await musicDb.Performances.SingleOrDefaultAsync(x => x.Id == id);
-            if (performance == null)
-            {
-                return ErrorResult($"performance with id {id} not found");
-            }
-            var result = await performance.ToWesternClassicalAlbumTEO(musicOptions.CurrentValue);
-            return SuccessResult(result);
-        }
-        [HttpGet("edit/work/{id}")]
-        public async Task<IActionResult> EditAlbum(long id)
-        {
-            var work = await musicDb.Works.SingleOrDefaultAsync(x => x.Id == id);
-            if (work == null)
-            {
-                return ErrorResult($"work with id {id} not found");
-            }
-            var result = await work.ToPopularAlbumTEO(musicOptions.CurrentValue);
-            return SuccessResult(result);
-        }
-        [HttpPost("update/work/{style}")]
-        public async Task<IActionResult> UpdateWork(MusicStyles style)
-        {
-            ITEOBase teo = null;
-            switch(style)
-            {
-                case MusicStyles.Popular:
-                    teo = await this.Request.FromBody<PopularAlbumTEO>();
-                    break;
-                case MusicStyles.WesternClassical:
-                    teo = await this.Request.FromBody<WesternClassicalAlbumTEO>();
-                    break;
-            }
-            var id = teo.Id;
-            var work = await musicDb.Works.FindAsync(id);
-            teo.AfterDeserialisation(work);
-            teo.SaveChanges(musicDb, work);
-            work.LastModified = DateTimeOffset.Now;
-            await musicDb.SaveChangesAsync();
-            return SuccessResult();
-        }
+        //[HttpGet("edit/performance/{id}/")]
+        //public async Task<IActionResult> EditPerformance(long id)
+        //{
+        //    var performance = await musicDb.Performances.SingleOrDefaultAsync(x => x.Id == id);
+        //    if (performance == null)
+        //    {
+        //        return ErrorResult($"performance with id {id} not found");
+        //    }
+        //    var result = await performance.ToWesternClassicalAlbumTEO(musicOptions.CurrentValue);
+        //    return SuccessResult(result);
+        //}
+        //[HttpGet("edit/work/{id}")]
+        //public async Task<IActionResult> EditAlbum(long id)
+        //{
+        //    var work = await musicDb.Works.SingleOrDefaultAsync(x => x.Id == id);
+        //    if (work == null)
+        //    {
+        //        return ErrorResult($"work with id {id} not found");
+        //    }
+        //    var result = await work.ToPopularAlbumTEO(musicOptions.CurrentValue);
+        //    return SuccessResult(result);
+        //}
+        //[HttpPost("update/work/{style}")]
+        //public async Task<IActionResult> UpdateWork(MusicStyles style)
+        //{
+        //    ITEOBase teo = null;
+        //    switch (style)
+        //    {
+        //        case MusicStyles.Popular:
+        //            teo = await this.Request.FromBody<PopularAlbumTEO>();
+        //            break;
+        //        case MusicStyles.WesternClassical:
+        //            teo = await this.Request.FromBody<WesternClassicalAlbumTEO>();
+        //            break;
+        //    }
+        //    var id = teo.Id;
+        //    var work = await musicDb.Works.FindAsync(id);
+        //    teo.AfterDeserialisation(work);
+        //    teo.SaveChanges(musicDb, work);
+        //    work.LastModified = DateTimeOffset.Now;
+        //    await musicDb.SaveChangesAsync();
+        //    return SuccessResult();
+        //}
         [HttpGet("get/composition/allperformances/{id}/{full?}")]
         public async Task<IActionResult> GetAllPerformances(long id, bool full = false)
         {
@@ -359,7 +359,7 @@ namespace Fastnet.Apollo.Web.Controllers
             var set = new ArtistSet(ids);
             var list = musicDb.GetRagaPerformancesForArtistSet(set)
                 .Where(x => x.Raga.Id == ragaId);
-            if(list.Count() > 0)
+            if (list.Count() > 0)
             {
                 var raga = list.First().Raga.Name;
                 return SuccessResult(list.Select(x => x.Performance.ToDTO(raga)));
@@ -511,7 +511,7 @@ namespace Fastnet.Apollo.Web.Controllers
             {
                 return ErrorResult($"Artist with id {id} not found");
             }
-            else if(artist.Portrait != null)
+            else if (artist.Portrait != null)
             {
                 return GetImageResult(artist.Portrait);
                 //var image = artist.Portrait.Data;// artist.ImageData;
@@ -533,7 +533,7 @@ namespace Fastnet.Apollo.Web.Controllers
             {
                 return ErrorResult($"Work with id {id} not found");
             }
-            else if(work.Cover != null)
+            else if (work.Cover != null)
             {
                 return GetImageResult(work.Cover);
                 //var image = work.CoverData;
@@ -713,9 +713,28 @@ namespace Fastnet.Apollo.Web.Controllers
         [HttpGet("start/rescan/{style}")]
         public async Task<IActionResult> RescanStyle(MusicStyles style)
         {
+            await Task.Delay(0);
             log.Information($"Rescan started for {style}");
-
-            await taskPublisher.AddTask(style);
+            var mrlist = MusicRoot.GetMusicRoots(musicOptions.CurrentValue, style);
+            foreach (var mr in mrlist)
+            {
+                foreach(var item in mr.GetAllTopFolders())
+                {
+                    switch(item)
+                    {
+                        case HindiFilmFolder hf:
+                            log.Information($"{mr} found {hf.FilmName}");
+                            break;
+                        case AlbumFolder abf:
+                            log.Information($"{mr} found {abf.AlbumName} [{abf.Type}]");
+                            break;
+                        case ArtistFolder af:
+                            log.Information($"{mr} found {af.ArtistName}");
+                            break;
+                    }
+                }
+            }
+            //await taskPublisher.AddTask(style);
 
             return new EmptyResult();
         }
@@ -728,16 +747,16 @@ namespace Fastnet.Apollo.Web.Controllers
             {
                 await taskPublisher.AddTask(si.Style);
             }
-           
+
             return new EmptyResult();
         }
-        [HttpGet("validate/database")]
-        [HttpGet("v/d")]
-        public IActionResult ValidateDatabase()
-        {
-            musicDb.Validate();
-            return new EmptyResult();
-        }
+        //[HttpGet("validate/database")]
+        //[HttpGet("v/d")]
+        //public IActionResult ValidateDatabase()
+        //{
+        //    musicDb.Validate();
+        //    return new EmptyResult();
+        //}
         [HttpGet("reset/database/{startscan?}")]
         public async Task<IActionResult> ResetDatabase(bool startscan = true)
         {

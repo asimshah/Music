@@ -35,70 +35,78 @@ import { PlaylistBarComponent } from './components/playlist-bar.component';
 import { DialogTestComponent } from './components/dialog-test.component';
 import { TrackListComponent } from './catalog/track-list.component';
 import { ArtistsViewComponent } from './catalog/artists-view.component';
+import { HindiFilmsCatalogComponent } from './catalog/hindi-films-catalog/hindi-films-catalog.component';
 
 export class CustomHammerConfig extends HammerGestureConfig {
    overrides = <any>{
       'pinch': { enable: false },
       'rotate': { enable: false }
    };
-   options = { domEvents: true}
+   options = { domEvents: true }
 }
 
 @NgModule({
-    declarations: [
-        AppComponent,
-        HomeComponent,
-        SettingsComponent,
-        SlidingPanelComponent,
-        SlidingPanelsComponent,
-        CommandPanelComponent,
-        MenuPanelComponent,
-        AudioControllerComponent,
-        DeviceMenuComponent,
-        DevicePlaylistComponent,
-        WebAudioComponent,
-        HighlightedTextComponent,
-        DefaultCatalogComponent,
-        MultipleValueEditorComponent,
-        MusicfileEditorComponent,
-        WesternClassicalCatalogComponent,
-        WesternClassicalTagEditorComponent,
-        PopularCatalogComponent,
-        PopularTagEditorComponent,
-        IndianClassicalCatalogComponent,
-        PlaylistManagerComponent,
-        PlaylistBarComponent,
-        DialogTestComponent,
-        TrackListComponent,
-        ArtistsViewComponent
-    ],
-    imports: [
-        BrowserModule.withServerTransition({ appId: 'ng-cli-universal' }),
-        HttpClientModule,
-        FormsModule,
-        ControlsModule,
-        RouterModule.forRoot([
-            { path: '', component: HomeComponent, pathMatch: 'full' },
-        ])
-    ],
-    providers: [
-        {
-            provide: HAMMER_GESTURE_CONFIG,
-            useClass: CustomHammerConfig
-        },
-        ParameterService,
-        {
-            provide: APP_INITIALIZER,
-            useFactory: ParameterServiceFactory,
-            deps: [ParameterService],
-            multi: true
-        },
-        MessageService,
-        LibraryService,
-        PlayerService,
-        LoggingService
-    ],
-    entryComponents: [DefaultCatalogComponent, WesternClassicalCatalogComponent, PopularCatalogComponent, IndianClassicalCatalogComponent],
-    bootstrap: [AppComponent]
+   declarations: [
+      AppComponent,
+      HomeComponent,
+      SettingsComponent,
+      SlidingPanelComponent,
+      SlidingPanelsComponent,
+      CommandPanelComponent,
+      MenuPanelComponent,
+      AudioControllerComponent,
+      DeviceMenuComponent,
+      DevicePlaylistComponent,
+      WebAudioComponent,
+      HighlightedTextComponent,
+      DefaultCatalogComponent,
+      MultipleValueEditorComponent,
+      MusicfileEditorComponent,
+      WesternClassicalCatalogComponent,
+      WesternClassicalTagEditorComponent,
+      PopularCatalogComponent,
+      PopularTagEditorComponent,
+      IndianClassicalCatalogComponent,
+      PlaylistManagerComponent,
+      PlaylistBarComponent,
+      DialogTestComponent,
+      TrackListComponent,
+      ArtistsViewComponent,
+      HindiFilmsCatalogComponent
+   ],
+   imports: [
+      BrowserModule.withServerTransition({ appId: 'ng-cli-universal' }),
+      HttpClientModule,
+      FormsModule,
+      ControlsModule,
+      RouterModule.forRoot([
+         { path: '', component: HomeComponent, pathMatch: 'full' },
+      ])
+   ],
+   providers: [
+      {
+         provide: HAMMER_GESTURE_CONFIG,
+         useClass: CustomHammerConfig
+      },
+      ParameterService,
+      {
+         provide: APP_INITIALIZER,
+         useFactory: ParameterServiceFactory,
+         deps: [ParameterService],
+         multi: true
+      },
+      MessageService,
+      LibraryService,
+      PlayerService,
+      LoggingService
+   ],
+   entryComponents: [
+      DefaultCatalogComponent,
+      WesternClassicalCatalogComponent,
+      PopularCatalogComponent,
+      IndianClassicalCatalogComponent,
+      HindiFilmsCatalogComponent
+   ],
+   bootstrap: [AppComponent]
 })
 export class AppModule { }

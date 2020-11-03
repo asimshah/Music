@@ -5,6 +5,12 @@ using System.Linq;
 
 namespace Fastnet.Music.Metatools
 {
+    public class HindiFilmsCatalogueResult : PopularCatalogueResult
+    {
+        public HindiFilmsCatalogueResult(BaseMusicSet set, CatalogueStatus status, Work work) : base(set, status, work)
+        {
+        }
+    }
     public class PopularCatalogueResult : BaseCatalogueResult
     {
         public int WorkTrackCount { get; set; }
@@ -14,7 +20,6 @@ namespace Fastnet.Music.Metatools
         public string WorkName { get; set; } = String.Empty;
         public PopularCatalogueResult(BaseMusicSet set, CatalogueStatus status, Work work) : base(set, status)
         {
-            //ResampleTaskItem = resampleTask;
             WorkDescr = work.ToIdent();
             WorkName = work?.Name ?? string.Empty;
             WorkTrackCount = work.Tracks?.Count() ?? 0;

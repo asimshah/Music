@@ -10,21 +10,33 @@ using System.Threading.Tasks;
 
 namespace Fastnet.Music.Metatools
 {
+    public class HindiFilmsAlbumSet : BaseAlbumSet
+    {
+        public HindiFilmsAlbumSet(EntityHelper entityHelper, MusicOptions musicOptions, MusicStyles musicStyle, IEnumerable<MusicFile> musicFiles, TaskItem taskItem) : base(entityHelper, musicOptions, musicStyle, musicFiles, taskItem)
+        {
+            SetAlbumNameToOpusName();
+        }
+
+        public override Task<BaseCatalogueResult> CatalogueAsync()
+        {
+            return base.CatalogueAsync((cs, w) => new HindiFilmsCatalogueResult(this, cs, w));
+        }
+        public override string ToString()
+        {
+            return $"{Name}::{MusicFiles.Count()} files";
+        }
+    }
     public class PopularMusicAlbumSet : BaseAlbumSet
     {
-        //internal PopularMusicAlbumSet()
-        //{
-
-        //}
         /// <summary>
         /// internal use by WesternClassicalAlbumSet only
         /// </summary>
-        /// <param name="db"></param>
+        /// <param name="entityHelper"></param>
         /// <param name="musicOptions"></param>
         /// <param name="musicFiles"></param>
         /// <param name="taskItem"></param>
-        internal PopularMusicAlbumSet(MusicDb db, MusicOptions musicOptions, 
-            IEnumerable<MusicFile> musicFiles, TaskItem taskItem) : base(db, musicOptions, MusicStyles.Popular, musicFiles, taskItem)
+        internal PopularMusicAlbumSet(EntityHelper entityHelper, MusicOptions musicOptions, 
+            IEnumerable<MusicFile> musicFiles, TaskItem taskItem) : base(entityHelper, musicOptions, MusicStyles.Popular, musicFiles, taskItem)
         {
             if(artistPerformers.Count() > 1)
             {

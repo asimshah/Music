@@ -13,14 +13,14 @@ namespace Fastnet.Music.Metatools
     /// </summary>
     public class WesternClassicalMusicSetCollection : BaseMusicSetCollection<WesternClassicalAlbumSet, WesternClassicalCompositionSet>
     {
-        public WesternClassicalMusicSetCollection(MusicOptions musicOptions, MusicDb musicDb,
-            OpusFolder musicFolder, List<MusicFile> files, TaskItem taskItem) : base(musicOptions, musicDb, musicFolder, files, taskItem)
+        public WesternClassicalMusicSetCollection(MusicOptions musicOptions, EntityHelper entityHelper,
+            WorkFolder musicFolder, List<MusicFile> files, TaskItem taskItem) : base(musicOptions, entityHelper, musicFolder, files, taskItem)
         {
 
         }
         protected override WesternClassicalCompositionSet CreatePerformanceSet(IEnumerable<MusicFile> files)
         {
-            return new WesternClassicalCompositionSet(musicDb, musicOptions, files, taskItem);
+            return new WesternClassicalCompositionSet(entityHelper, musicOptions, files, taskItem);
         }
         protected override (string firstLevel, string secondLevel) GetPartitioningKeys(MusicFile mf)
         {

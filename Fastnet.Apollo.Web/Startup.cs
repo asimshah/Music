@@ -214,34 +214,6 @@ namespace Fastnet.Apollo.Web
         {
             var assemblyLocation = System.Reflection.Assembly.GetExecutingAssembly().Location;
             return System.Diagnostics.FileVersionInfo.GetVersionInfo(assemblyLocation).ProductVersion;
-            //return System.Reflection.Assembly.GetExecutingAssembly().GetPackageVersion();
         }
-        //// move this to Fastnet.Core
-        //private string GetAssemblyVersion()
-        //{
-        //    //return System.Reflection.Assembly.GetExecutingAssembly().GetName().Version.ToString();
-        //    return System.Reflection.Assembly.GetExecutingAssembly().GetAssemblyVersion();
-        //}
-        //private IEnumerable<string> GetVersions()
-        //{
-        //    var list = new List<string>();
-        //    //foreach(var assemblyName in System.Reflection.Assembly.GetExecutingAssembly().GetReferencedAssemblies())
-        //    //{
-        //    //    if (assemblyName.Name.StartsWith("fastnet", System.Globalization.CompareOptions.IgnoreCase))
-        //    //    {
-        //    //        list.Add($"{assemblyName.Name}, {assemblyName.Version}");
-        //    //    }
-        //    //}
-        //    foreach (var assemblyName in System.Reflection.Assembly.GetExecutingAssembly().GetReferencedAssemblies())
-        //    {
-        //        if (assemblyName.Name.StartsWith("fastnet", System.Globalization.CompareOptions.IgnoreCase))
-        //        {
-        //            var assembly = Assembly.Load(assemblyName);
-        //            list.Add($"{assemblyName.Name}, {assembly.GetPackageVersion()}");
-        //        }
-        //    }
-        //    return list;
-        //}
-
     }
 }

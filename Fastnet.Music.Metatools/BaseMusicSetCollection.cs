@@ -12,7 +12,8 @@ namespace Fastnet.Music.Metatools
 {
     public abstract class BaseMusicSetCollection<ASET, PSET> : BaseMusicSetCollection<ASET> where ASET : BaseAlbumSet where PSET : BasePerformanceSet
     {
-        internal BaseMusicSetCollection(MusicOptions musicOptions, MusicDb musicDb, OpusFolder musicFolder, List<MusicFile> files, TaskItem taskItem) : base(musicOptions, musicDb, musicFolder, files, taskItem)
+        internal BaseMusicSetCollection(MusicOptions musicOptions, EntityHelper entityHelper, WorkFolder musicFolder, List<MusicFile> files, TaskItem taskItem)
+            : base(musicOptions, entityHelper, musicFolder, files, taskItem)
         {
         }
         protected abstract (string firstLevel, string secondLevel) GetPartitioningKeys(MusicFile mf);
@@ -59,23 +60,25 @@ namespace Fastnet.Music.Metatools
         protected readonly ILogger log;
         protected readonly List<MusicFile> files;
         protected readonly MusicOptions musicOptions;
-        protected readonly MusicDb musicDb;
-        protected readonly OpusFolder musicFolder;
+        protected readonly EntityHelper entityHelper;
+        //protected readonly OpusFolder musicFolder;
+        protected readonly WorkFolder musicFolder;
         protected readonly TaskItem taskItem;
 
         /// <summary>
         /// files is a set of music files fom the same opus (ie. originalyl from the same disk folder)
         /// </summary>
         /// <param name="musicOptions"></param>
-        /// <param name="musicDb"></param>
+        /// <param name="entityHelper"></param>
         /// <param name="musicFolder"></param>
         /// <param name="files"></param>
         /// <param name="taskItem"></param>
-        internal BaseMusicSetCollection(MusicOptions musicOptions, MusicDb musicDb, OpusFolder musicFolder, List<MusicFile> files, TaskItem taskItem)
+        //internal BaseMusicSetCollection(MusicOptions musicOptions, MusicDb musicDb, OpusFolder musicFolder, List<MusicFile> files, TaskItem taskItem)
+        internal BaseMusicSetCollection(MusicOptions musicOptions, EntityHelper entityHelper, WorkFolder musicFolder, List<MusicFile> files, TaskItem taskItem)
         {
             this.log = ApplicationLoggerFactory.CreateLogger(this.GetType());
             this.musicOptions = musicOptions;
-            this.musicDb = musicDb;
+            this.entityHelper = entityHelper;
             this.musicFolder = musicFolder;
             this.files = files;
             this.taskItem = taskItem;
@@ -89,7 +92,9 @@ namespace Fastnet.Music.Metatools
         protected virtual IEnumerable<BaseMusicSet> CreateAlbumSets()
         {
             var result = new List<BaseMusicSet>();
-            var fileset =  musicFolder.IsCollection ?
+            //var fileset =  musicFolder.IsCollection ?
+            //    PartitionCollection() : new List<IEnumerable<MusicFile>>() { files };
+            var fileset = musicFolder.Type == AlbumType.Collection ?
                 PartitionCollection() : new List<IEnumerable<MusicFile>>() { files };
             return fileset.Select(fs => CreateAlbumSet(fs));
         }
@@ -114,11 +119,11 @@ namespace Fastnet.Music.Metatools
             switch (type)
             {
                 case Type t when (t == typeof(IndianClassicalAlbumSet)) :
-                    return new IndianClassicalAlbumSet(musicDb, musicOptions, files, taskItem) as T;
+                    return new IndianClassicalAlbumSet(entityHelper, musicOptions, files, taskItem) as T;
                 case Type t when (t == typeof(WesternClassicalAlbumSet)):
-                    return new WesternClassicalAlbumSet(musicDb, musicOptions,  files, taskItem) as T;
+                    return new WesternClassicalAlbumSet(entityHelper, musicOptions,  files, taskItem) as T;
                 case Type t when (t == typeof(PopularMusicAlbumSet)):
-                    return new PopularMusicAlbumSet(musicDb, musicOptions, files, taskItem) as T;
+                    return new PopularMusicAlbumSet(entityHelper, musicOptions, files, taskItem) as T;
 
             };
             throw new Exception($"{typeof(T)} not supported");

@@ -3,18 +3,10 @@ import { PopupDialogComponent, PopupCloseHandler } from '../../fastnet/controls/
 import { EditorResult } from '../shared/catalog.types';
 import { LibraryService } from '../shared/library.service';
 import { PlayerService } from '../shared/player.service';
-import { AudioDevice } from '../shared/common.types';
+import { Parameters, AudioDevice } from '../shared/common.types';
 import { ParameterService } from '../shared/parameter.service';
 import { TabComponent } from '../../fastnet/controls/tab.component';
-import { AudioDeviceType } from '../shared/common.enums';
-
-//enum SettingsSelector {
-//   Popular,
-//   WesternClassical,
-//   CatalogMethods,
-//   AudioDevices,
-//   Colours
-//}
+import { AudioDeviceType, MusicStyles } from '../shared/common.enums';
 
 @Component({
    selector: 'app-settings',
@@ -22,13 +14,11 @@ import { AudioDeviceType } from '../shared/common.enums';
    styleUrls: ['./settings.component.scss']
 })
 export class SettingsComponent implements OnInit {
+   MusicStyles = MusicStyles;
    AudioDeviceType = AudioDeviceType;
-   //SettingsSelector = SettingsSelector;
    @ViewChild('settingsdialog', { static: false }) popup: PopupDialogComponent;
    version: string = "(unknown)";
-   //currentSettings: SettingsSelector = SettingsSelector.Popular;
-   //popularSettings: PopularSettings;
-
+   parameters: Parameters;
    devices: AudioDevice[] = [];
    get showGeneratedMusic(): boolean {
       return this.parameterService.showGeneratedMusic;
@@ -43,8 +33,8 @@ export class SettingsComponent implements OnInit {
    }
 
    ngOnInit() {
-      let para = this.parameterService.getParameters();
-      this.version = para.version;
+      this.parameters = this.parameterService.getParameters();
+      this.version = this.parameters.version;
    }
    open(onClose: PopupCloseHandler) {
       //this.currentSettings = SettingsSelector.Popular;
@@ -57,23 +47,18 @@ export class SettingsComponent implements OnInit {
    onClose() {
       this.popup.close(EditorResult.cancel);
    }
+   isStyleEnabled(ms: MusicStyles) {
+      return this.parameters.styles.find(x => x.id === ms).enabled;
+   }
    async onResetDatabase() {
       await this.ls.resetDatabase();
    }
    async onStartMusicScanner() {
       await this.ls.startMusicScanner();
    }
-   //async onStartCatalogueValidator() {
-   //   await this.ls.startCatalogueValidator();
-   //}
-   //async changeSettings(value: SettingsSelector) {
-   //   this.currentSettings = value;
-   //   switch (this.currentSettings) {
-   //      case SettingsSelector.AudioDevices:
-   //         await this.loadDevices();
-   //         break;
-   //   }
-   //}
+   async onRescanStyle(ms: MusicStyles) {
+      await this.ls.rescanStyle(ms);
+   }
    async onTabChanged(tab: TabComponent) {
       if (tab && tab.title === "Audio Devices") {
          if (this.devices.length === 0) {
@@ -84,11 +69,4 @@ export class SettingsComponent implements OnInit {
    async onDeviceUpdate(d: AudioDevice) {
       await this.playerService.updateDevice(d);
    }
-   //togglePopularShowArtists() {
-   //   this.popularSettings.showArtists = !this.popularSettings.showArtists;
-   //   this.parameterService.setPopularSettings(this.popularSettings);
-   //}
-   //private async loadDevices() {
-   //   this.devices = await this.playerService.getDevices(true);
-   //}
 }

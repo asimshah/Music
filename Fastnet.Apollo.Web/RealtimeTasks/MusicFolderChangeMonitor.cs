@@ -10,7 +10,6 @@ using Microsoft.Extensions.Options;
 using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Threading;
@@ -18,21 +17,20 @@ using System.Threading.Tasks;
 
 namespace Fastnet.Apollo.Web
 {
-    class FolderChange
-    {
-        public PathData PathData { get; set; }
-        public bool Deleted { get; set; } // if false then path is new, or modified
-        //public string Path { get; set; }
-        public override string ToString()
-        {
-            return $"{PathData}{(Deleted ? " (deleted)" : "")}";
-        }
-    }
+    //internal class FolderChange
+    //{
+    //    public PathData PathData { get; set; }
+    //    public bool Deleted { get; set; } // if false then path is new, or modified
+    //    //public string Path { get; set; }
+    //    public override string ToString()
+    //    {
+    //        return $"{PathData}{(Deleted ? " (deleted)" : "")}";
+    //    }
+    //}
+
     public class MusicFolderChangeMonitor : HostedService // RealtimeTask
     {
-        private readonly Queue<List<(string Path, bool Deleted)>> changeListList = new Queue<List<(string Path, bool Deleted)>>();
-        private List<FolderChange> changeList;
-        //private MusicOptions musicOptions;
+        private readonly BlockingCollection<List<(string Path, bool Deleted)>> listOfChangeLists = new BlockingCollection<List<(string Path, bool Deleted)>>();
         private CancellationToken cancellationToken;
         private IDictionary<string, FileSystemMonitor> sources;
         private readonly FileSystemMonitorFactory mf;
@@ -46,13 +44,12 @@ namespace Fastnet.Apollo.Web
             connectionString = environment.LocaliseConnectionString(cfg.GetConnectionString("MusicDb"));
             this.publisher = publisher;
             this.musicOptionsMonitor = musicOptionsMonitor;
-            //this.musicOptions = musicOptionsMonitor.CurrentValue;
+            this.musicOptionsMonitor.OnChange((mo) =>
+                {
+                    Thread.Sleep(10000);
+                    Restart();
+                });
             this.mf = mf;
-            //musicOptionsMonitor.OnChangeWithDelay<MusicOptions>((opt) =>
-            //{
-            //    this.musicOptions = opt;
-            //    Restart();
-            //});
         }
         protected override async Task ExecuteAsync(CancellationToken cancellationToken)
         {
@@ -81,15 +78,15 @@ namespace Fastnet.Apollo.Web
                             catch (Exception xe)
                             {
                                 log.Error(xe, "ProcessChanges() failed");
-                            //throw;
-                        }
+                                //throw;
+                            }
                         }
                     }, cancellationToken);
                 }
                 catch (Exception xe)
                 {
                     log.Error(xe, "Restart failed");
-                } 
+                }
             }
             return;
         }
@@ -142,202 +139,87 @@ namespace Fastnet.Apollo.Web
             {
                 kvp.Value.Start();
             }
-
-            changeList = new List<FolderChange>();
         }
-        private void ProcessChangeList(List<(string Path, bool Deleted)> list)
+        private IEnumerable<MusicPathAnalysis> ProcessChangeList(List<(string Path, bool Deleted)> list)
         {
-            log.Information($"processing list of {list.Count()} items");
-            foreach(var item in list)
+            log.Debug($"processing list of {list.Count()} items");
+            var pathList = new List<MusicPathAnalysis>();
+            foreach (var item in list)
             {
-                ShouldProcess(item.Path, item.Deleted);
-            }
-        }
-        private bool ShouldProcess(string path, bool deleted)
-        {
-            void addIfNotPresent(PathData pd, bool deleted = false)
-            {
-                if (changeList.SingleOrDefault(x => x.PathData == pd && x.Deleted == deleted) == null)
+                var mpa = MusicRoot.AnalysePath(musicOptionsMonitor.CurrentValue, item.Path);
+                if (item.Deleted)
                 {
-                    var fc = new FolderChange { PathData = pd,/* Path = path,*/ Deleted = deleted };
-                    changeList.Add(fc);
-                    log.Debug($"{fc}, changeList total now {changeList.Count()}");
+                    mpa.IsDeletion = true;
                 }
-            }
-            var result = false;
-            switch(Path.GetExtension(path).ToLower())
-            {
-                case ".png":
-                case ".jpg":
-                case ".jpeg":
-                    var oldPath = path;
-                    path = Path.GetDirectoryName(path);
-                    //log.Debug($"{oldPath} changed to {path}");
-                    break;
-            }
-            var pd = MusicMetaDataMethods.GetPathData(musicOptionsMonitor.CurrentValue, path, true);
-            if (pd != null)
-            {
-                if (pd.IsPortraits)
+                log.Information($"{mpa}");
+                if (mpa.IsPortraitsFolder)
                 {
-                    var portraitsPath = pd.GetPortraitsPath();
-                    //addIfNotPresent(portraitsPath);
-                    addIfNotPresent(pd);
+                    // portrait folder deletion is ignored - is that right?
+                    if (!mpa.IsDeletion)
+                    {
+                        if (pathList.SingleOrDefault(x => x.MusicRoot.MusicStyle == mpa.MusicRoot.MusicStyle && x.IsPortraitsFolder) == null)
+                        {
+                            pathList.Add(mpa);
+                        }
+                    }
+                }
+                else if(mpa.IsCollection && mpa.ToplevelName == null)
+                {
+                    // skip changes that are for the collections folder itself
+                    continue;
                 }
                 else
                 {
-                    if (pd.GetFullOpusPath() != null)
-                    {
-                        using (var db = new MusicDb(connectionString))
-                        {
-                            if (!Directory.Exists(pd.GetFullOpusPath()))
-                            {
-                                addIfNotPresent(pd, true);
-                                //log.Warning($"{pd}, deleted folder {pd.GetFullOpusPath()} not yet supported");
-                            }
-                            else
-                            {
-                                var filesOnDisk = Directory.EnumerateFiles(pd.GetFullOpusPath(), "*.flac", SearchOption.AllDirectories)
-                                    .Union(Directory.EnumerateFiles(pd.GetFullOpusPath(), "*.mp3", SearchOption.AllDirectories));
-                                var opusPath = pd.IsCollections ? pd.OpusPath : Path.Combine(pd.ArtistPath, pd.OpusPath);
-                                var filesInDb = db.MusicFiles.Where(mf => mf.DiskRoot.ToLower() == pd.DiskRoot.ToLower()
-                                    && mf.StylePath.ToLower() == pd.StylePath.ToLower()
-                                    && mf.OpusPath.ToLower() == opusPath.ToLower());
-                                if (filesOnDisk.Count() == 0 && filesInDb.Count() == 0)
-                                {
-                                    // how can this happen?
-                                    log.Error($"{pd}, no files on disk and no files in the db!!");
-                                }
-                                else if (filesOnDisk.Count() == filesInDb.Count())
-                                {
-                                    // existing files
-                                    var works = filesInDb.Select(x => x.Track.Work).Distinct();
-                                    if (works.Count() != 1)
-                                    {
-                                        log.Error($"{pd}, has multiple works in the db");
-                                    }
-                                    else
-                                    {
-                                        DateTime getCoverFileDate()
-                                        {
-                                            IEnumerable<string> imageFiles = Enumerable.Empty<string>();// null;
-                                            foreach(var pattern in musicOptionsMonitor.CurrentValue.CoverFilePatterns)
-                                            {
-                                                imageFiles = imageFiles.Union(Directory.EnumerateFiles(path, pattern, SearchOption.AllDirectories));// ?? Directory.EnumerateFiles(path, pattern, SearchOption.AllDirectories);
-                                            }
-                                            if(imageFiles.Count() > 0)
-                                            {
-                                                return imageFiles.Select(f => new FileInfo(f).LastWriteTime).Max();
-                                            }
-                                            return DateTime.MinValue;
-                                        }
-                                        var work = works.First();
-
-                                        var latestWriteDate = filesOnDisk.Select(x => new FileInfo(x)).Max(x => x.LastWriteTime);
-                                        if (work.LastModified < latestWriteDate || work.LastModified < getCoverFileDate())
-                                        {
-                                            addIfNotPresent(pd);
-                                        }
-                                    }
-                                }
-                                else if (filesOnDisk.Count() == 0)
-                                {
-                                    // deletions
-                                    addIfNotPresent(pd, true);
-                                }
-                                else
-                                {
-                                    //new music
-                                    addIfNotPresent(pd);
-                                }
-                            }
-                        }
-                    }
-                    else
-                    {
-                        var artistPath = pd.GetFullArtistPath();//.ToLower();
-                        if (!deleted)
-                        {
-                            //log.Information($"Artist path {artistPath} added");
-                            //addIfNotPresent(artistPath);
-                            addIfNotPresent(pd);
-                        }
-                        else
-                        {
-                            using (var db = new MusicDb(connectionString))
-                            {
-                                var musicFiles = db.MusicFiles.Where(x => x.File.ToLower().StartsWith(artistPath.ToLower())).ToArray();
-                                var deletedMusicFiles = musicFiles.Where(x => !File.Exists(x.File));
-                                var opusPaths = deletedMusicFiles.Select(x => x.OpusPath).Distinct(StringComparer.CurrentCultureIgnoreCase);
-                                foreach (var op in opusPaths)
-                                {
-                                    var fullPath = Path.Combine(pd.DiskRoot, pd.StylePath, op);
-                                    if (!Directory.Exists(fullPath))
-                                    {
-                                        var pdt = MusicMetaDataMethods.GetPathData(musicOptionsMonitor.CurrentValue, fullPath, true);
-                                        log.Information($"{fullPath}, music files on disk deleted");
-                                        addIfNotPresent(pdt, true);
-                                    }
-                                }
-                            }
-                        }
-                    }
+                    pathList.Add(mpa);
                 }
             }
-            return result;
+            return pathList;
         }
         private async Task ProcessChanges()
         {
             log.Information($"{nameof(ProcessChanges)} started");
             while (!cancellationToken.IsCancellationRequested)
             {
-                await Task.Delay(musicOptionsMonitor.CurrentValue.FolderChangePollingInterval, cancellationToken); //default 3 sec
-                if (changeListList.Count() > 0)
+                foreach (var changeList in listOfChangeLists.GetConsumingEnumerable(cancellationToken))
                 {
-                    List<(string Path, bool Deleted)> list = null;
-                    lock (changeListList)
+                    var mpaList = ProcessChangeList(changeList);
+                    foreach (var mpa in mpaList)
                     {
-                        list = changeListList.Dequeue();
-                    }
-                    ProcessChangeList(list);
-                    try
-                    {
-                        while (changeList.Count() > 0)
+                        if (mpa.IsPortraitsFolder)
                         {
-                            foreach (var item in changeList.ToArray())
+                            await publisher.AddPortraitsTask(mpa.MusicRoot.MusicStyle);
+                        }
+                        else
+                        {
+                            if (mpa.IsDeletion)
                             {
-                                var pd = item.PathData;// MusicMetaDataMethods.GetPathData(musicOptions, item.Path, true);
-                                if (pd.IsPortraits)
+                                await publisher.AddTask(mpa.MusicRoot.MusicStyle, Music.Data.TaskType.DeletedPath, mpa.GetPath());
+                            }
+                            else
+                            {
+                                switch (mpa.MusicRoot.MusicStyle)
                                 {
-                                    await publisher.AddPortraitsTask(pd.MusicStyle);
-                                }
-                                else
-                                {
-                                    if (item.Deleted)
-                                    {
-                                        await publisher.AddTask(pd.MusicStyle, Music.Data.TaskType.DeletedPath, pd.GetFullOpusPath() ?? pd.GetFullArtistPath());
-                                    }
-                                    else
-                                    {
-                                        if (pd.GetFullOpusPath() != null)
+                                    case MusicStyles.HindiFilms:
+                                        await publisher.AddTask(mpa.MusicRoot.MusicStyle, TaskType.FilmFolder, mpa.GetPath());
+                                        break;
+
+                                    default:
+                                        if(mpa.IsCollection && mpa.ToplevelName != null)
                                         {
-                                            await publisher.AddTask(pd.MusicStyle, Music.Data.TaskType.DiskPath, pd.GetFullOpusPath());
+                                            await publisher.AddTask(mpa.MusicRoot.MusicStyle, TaskType.DiskPath, mpa.GetPath());
+                                        }
+                                        else if (mpa.SecondlevelName == null)
+                                        {
+                                            await publisher.AddTask(mpa.MusicRoot.MusicStyle, TaskType.ArtistFolder, mpa.GetPath());
                                         }
                                         else
                                         {
-                                            await publisher.AddTask(pd.MusicStyle, Music.Data.TaskType.ArtistFolder, pd.GetFullArtistPath());
+                                            await publisher.AddTask(mpa.MusicRoot.MusicStyle, TaskType.DiskPath, mpa.GetPath());
                                         }
-
-                                    }
+                                        break;
                                 }
-                                changeList.Remove(item);
                             }
                         }
-                    }
-                    catch (Exception xe)
-                    {
-                        log.Error(xe);
-                        throw;
                     }
                 }
             }
@@ -351,15 +233,10 @@ namespace Fastnet.Apollo.Web
                     .Select(x => (Path: x.Path, Deleted: x.Type == WatcherChangeTypes.Deleted))
                     .ToList();
                 log.Debug($"adding new list of {changes.Count()} filesystemmonitor events");
-                lock (changeListList)
-                {
-                    changeListList.Enqueue(list);
-                }
-                //Debugger.Break();
-                //OnChangeOccurred(folderName, changes);
+                listOfChangeLists.Add(list);
             });
             fsm.IncludeSubdirectories = true;
-            //fsm.NotifyFilter = NotifyFilters.FileName | NotifyFilters.LastWrite | NotifyFilters.CreationTime;
+            fsm.NotifyFilter = NotifyFilters.DirectoryName | NotifyFilters.LastWrite | NotifyFilters.CreationTime;
             return fsm;
         }
         private void CleanUp()

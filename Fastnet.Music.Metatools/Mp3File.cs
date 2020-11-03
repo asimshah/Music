@@ -6,7 +6,7 @@ namespace Fastnet.Music.Metatools
 {
     public class Mp3File : AudioFile
     {
-        public Mp3File(MusicOptions musicOptions, MusicStyles style, FileInfo fi) : base(musicOptions, style, fi)
+        public Mp3File(FileInfo fi) : base(fi)
         {
         }
         public override AudioProperties GetAudioProperties()

@@ -263,6 +263,9 @@ export class LibraryService extends BaseService {
    public async startMusicScanner() {
       return this.getAsync("start/musicfilescanner");
    }
+   public async rescanStyle(ms: MusicStyles) {
+      return this.getAsync(`start/rescan/${ms}`);
+   }
    public async startCatalogueValidator() {
       return this.getAsync("start/cataloguevalidator");
    }

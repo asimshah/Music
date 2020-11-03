@@ -18,7 +18,7 @@
         </member>
         <member name="M:Fastnet.Music.Data.EntityHelper.BubbleDelete``1(``0)">
             <summary>
-            Delete entity and any related parent entities that should also be deleted 
+            Delete entity and any related parent entities that should also be deleted
             </summary>
             <typeparam name="T"></typeparam>
             <param name="entity"></param>
@@ -31,6 +31,27 @@
             <param name="musicFile"></param>
         </member>
         <member name="M:Fastnet.Music.Data.EntityHelper.RemoveReferencingEntitiesIfRequired(Fastnet.Music.Data.Track)">
+            <summary>
+            removes any entity that refers to track if that entity is now 'empty'
+            currently checks the Performance and Work properties
+            </summary>
+            <param name="track"></param>
+        </member>
+        <member name="M:Fastnet.Music.Data.EntityHelperOld.BubbleDelete``1(``0)">
+            <summary>
+            Delete entity and any related parent entities that should also be deleted
+            </summary>
+            <typeparam name="T"></typeparam>
+            <param name="entity"></param>
+        </member>
+        <member name="M:Fastnet.Music.Data.EntityHelperOld.RemoveReferencingEntitiesIfRequired(Fastnet.Music.Data.MusicFile)">
+            <summary>
+            removes any entity that refers to music file if that entity is now 'empty'
+            currently checks the Track property
+            </summary>
+            <param name="musicFile"></param>
+        </member>
+        <member name="M:Fastnet.Music.Data.EntityHelperOld.RemoveReferencingEntitiesIfRequired(Fastnet.Music.Data.Track)">
             <summary>
             removes any entity that refers to track if that entity is now 'empty'
             currently checks the Performance and Work properties

@@ -7,12 +7,6 @@ import { BehaviorSubject } from "rxjs";
 import { setLocalStorageValue, getLocalStorageValue } from "./common.functions";
 import { MusicStyles, LocalStorageKeys } from "./common.enums";
 import { LoggingService } from "./logging.service";
-//import { MessageService } from "./message.service";
-//import { PlayerService } from "./player.service";
-
-//export class PopularSettings {
-//   showArtists: boolean = false;
-//}
 
 export function ParameterServiceFactory(ps: ParameterService) {
    return () => ps.init();
@@ -22,7 +16,6 @@ export function ParameterServiceFactory(ps: ParameterService) {
 export class ParameterService extends BaseService {
    private emulateTouchDevice = false;
    private savedStyleStorageKey: string;
-   //private popularSettingsStorageKey: string;
    private parameters: Parameters;
    public ready$ = new BehaviorSubject<boolean>(false);
    public currentStyleChanged$ = new BehaviorSubject<boolean>(false);

@@ -104,6 +104,7 @@ namespace Fastnet.Music.Data
         /// <param name="list"></param>
         /// <param name="taskItem"></param>
         /// <returns></returns>
+        [Obsolete]
         public static IEnumerable<Performer> GetPerformers(this MusicDb db, IEnumerable<MetaPerformer> list, TaskItem taskItem = null)
         {
             return list.Select(n => db.GetPerformer(n, taskItem));
@@ -127,6 +128,7 @@ namespace Fastnet.Music.Data
         /// <param name="mp"></param>
         /// <param name="taskItem"></param>
         /// <returns></returns>
+        [Obsolete]
         public static Performer GetPerformer(this MusicDb db, MetaPerformer mp, TaskItem taskItem = null)
         {
             if(mp.Name == "collections")
@@ -618,14 +620,14 @@ namespace Fastnet.Music.Data
     }
     public static partial class Extensions
     {
-        public static CompositionPerformance AddPerformance(this MusicDb musicDb, Composition composition, Performance performance)
-        {
-            var cp = new CompositionPerformance { Performance = performance, Composition = composition };
-            composition.CompositionPerformances.Add(cp);
-            performance.CompositionPerformances.Add(cp);
-            musicDb.CompositionPerformances.Add(cp);
-            return cp;
-        }
+        //public static CompositionPerformance AddPerformance(this MusicDb musicDb, Composition composition, Performance performance)
+        //{
+        //    var cp = new CompositionPerformance { Performance = performance, Composition = composition };
+        //    composition.CompositionPerformances.Add(cp);
+        //    performance.CompositionPerformances.Add(cp);
+        //    musicDb.CompositionPerformances.Add(cp);
+        //    return cp;
+        //}
         public static void RemovePerformance(this MusicDb musicDb, Composition composition, Performance performance)
         {
             if (composition != null)
@@ -642,14 +644,14 @@ namespace Fastnet.Music.Data
                 } 
             }
         }
-        public static ArtistWork AddWork(this MusicDb musicDb, Artist artist, Work work)
-        {
-            var aw = new ArtistWork { Artist = artist, Work = work };
+        //public static ArtistWork AddWork(this MusicDb musicDb, Artist artist, Work work)
+        //{
+        //    var aw = new ArtistWork { Artist = artist, Work = work };
 
-            artist.ArtistWorkList.Add(aw);
-            musicDb.ArtistWorkList.Add(aw);
-            return aw;
-        }
+        //    artist.ArtistWorkList.Add(aw);
+        //    musicDb.ArtistWorkList.Add(aw);
+        //    return aw;
+        //}
         public static void RemoveWork(this MusicDb musicDb, Artist artist, Work work)
         {
             var aw = artist.ArtistWorkList.FirstOrDefault(x => x.Work == work);
