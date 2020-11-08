@@ -24,7 +24,7 @@
     <NoWarn>1701,1702,1591</NoWarn>
   </PropertyGroup>
   <ItemGroup>
-    <PackageReference Include="Fastnet.Music.Core" Version="2.246.639" />
+    <PackageReference Include="Fastnet.Music.Core" Version="2.311.749" />
     <PackageReference Include="Microsoft.EntityFrameworkCore.Proxies" Version="3.1.5" />
     <PackageReference Include="Microsoft.EntityFrameworkCore.SqlServer" Version="3.1.5" />
     <PackageReference Include="Microsoft.EntityFrameworkCore.Tools" Version="3.1.5">
