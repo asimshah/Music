@@ -29,7 +29,7 @@
 
 
   <ItemGroup>
-    <PackageReference Include="Fastnet.Core.Web" Version="2.311.734" />
+    <PackageReference Include="Fastnet.Core.Web" Version="2.312.946" />
     <PackageReference Include="Fastnet.Music.Messages" Version="2.311.753" />
     <PackageReference Include="Fastnet.Music.Metatools" Version="2.312.790" />
     <PackageReference Include="Fastnet.Music.Resampler" Version="2.312.792" />
