@@ -33,14 +33,15 @@ namespace Fastnet.Apollo.Web
             Configuration = configuration;
             this.log = logger;
             this.environment = env;
-            var name = Process.GetCurrentProcess().ProcessName;
-            var siteVersion = GetSiteVersion();
-            var versions = System.Reflection.Assembly.GetExecutingAssembly().GetVersions();
-            log.Information($"Music {siteVersion} site started ({name}), using versions:");
-            foreach (var item in versions.OrderByDescending(x => x.DateTime))
-            {
-                log.Information($"{item.Name}, {item.DateTime.ToDefaultWithTime()}, [{item.Version}, {item.PackageVersion}]");
-            }
+            log.Versions("Music");
+            //var name = Process.GetCurrentProcess().ProcessName;
+            //var siteVersion = GetSiteVersion();
+            //var versions = System.Reflection.Assembly.GetExecutingAssembly().GetVersions();
+            //log.Information($"Music {siteVersion} site started ({name}), using versions:");
+            //foreach (var item in versions.OrderByDescending(x => x.DateTime))
+            //{
+            //    log.Information($"{item.Name}, {item.DateTime.ToDefaultWithTime()}, [{item.Version}, {item.PackageVersion}]");
+            //}
         }
 
         public IConfiguration Configuration { get; }

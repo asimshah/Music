@@ -119,6 +119,7 @@ namespace Fastnet.Music.Core
         /// 
         /// </summary>
         public int SearchPrefixLength { get; set; } = 3;
+        public bool AutoConfigureSources { get; set; } = true;
         /// <summary>
         /// 
         /// </summary>
