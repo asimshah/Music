@@ -287,7 +287,7 @@ namespace Fastnet.Apollo.Web
         }
         private void PlaylistItems_CollectionChanged(object sender, NotifyCollectionChangedEventArgs e)
         {
-            Debug.WriteLine($"Device [{Key}] {DisplayName} items collection received action : {e.Action}");
+            log.Debug($"Device [{Key}] {DisplayName} items collection received action : {e.Action}");
             switch (e.Action)
             {
                 case NotifyCollectionChangedAction.Add:

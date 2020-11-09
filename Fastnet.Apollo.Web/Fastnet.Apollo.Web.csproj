@@ -25,13 +25,14 @@
     <Copyright>@2020</Copyright>
     <RunAnalyzersDuringBuild>false</RunAnalyzersDuringBuild>
     <RunAnalyzersDuringLiveAnalysis>false</RunAnalyzersDuringLiveAnalysis>
+    <UserSecretsId>6b396328-fd51-449f-aecd-837a98fca735</UserSecretsId>
   </PropertyGroup>
 
 
   <ItemGroup>
     <PackageReference Include="Fastnet.Core.Web" Version="2.312.946" />
-    <PackageReference Include="Fastnet.Music.Messages" Version="2.311.753" />
-    <PackageReference Include="Fastnet.Music.Metatools" Version="2.312.790" />
+    <PackageReference Include="Fastnet.Music.Messages" Version="2.313.733" />
+    <PackageReference Include="Fastnet.Music.Metatools" Version="2.313.735" />
     <PackageReference Include="Fastnet.Music.Resampler" Version="2.312.792" />
     <PackageReference Include="Microsoft.AspNetCore.Mvc.NewtonsoftJson" Version="3.1.5" />
     <PackageReference Include="Microsoft.AspNetCore.SpaServices.Extensions" Version="3.1.5" />

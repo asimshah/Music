@@ -436,7 +436,8 @@ namespace Fastnet.Apollo.Web
             }
             else
             {
-                log.Error($"device {key} not found in run time");
+                // this can occur normally when starting up device has not yet been set up
+                log.Debug($"device {key} not found in run time");
             }
             return null;
         }

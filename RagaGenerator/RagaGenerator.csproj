@@ -6,7 +6,7 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="Fastnet.Music.Core" Version="2.311.749" />
+    <PackageReference Include="Fastnet.Music.Core" Version="2.313.718" />
   </ItemGroup>
 
 </Project>
