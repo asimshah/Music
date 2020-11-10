@@ -32,7 +32,7 @@
   <ItemGroup>
     <PackageReference Include="Fastnet.Core.Web" Version="2.313.1031" />
     <PackageReference Include="Fastnet.Music.Messages" Version="2.313.733" />
-    <PackageReference Include="Fastnet.Music.Metatools" Version="2.313.735" />
+    <PackageReference Include="Fastnet.Music.Metatools" Version="2.314.828" />
     <PackageReference Include="Fastnet.Music.Resampler" Version="2.313.961" />
     <PackageReference Include="Microsoft.AspNetCore.Mvc.NewtonsoftJson" Version="3.1.5" />
     <PackageReference Include="Microsoft.AspNetCore.SpaServices.Extensions" Version="3.1.5" />

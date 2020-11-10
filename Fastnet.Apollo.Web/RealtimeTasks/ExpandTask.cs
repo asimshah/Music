@@ -39,12 +39,12 @@ namespace Fastnet.Apollo.Web
         {
             IEnumerable<TaskItem> taskList = null;// new List<TaskItem>();
             var ti = await db.TaskItems.FindAsync(taskId);
-            var mpa = MusicRoot.AnalysePath(optionsMonitor.CurrentValue, ti.TaskString);
-            if (mpa.MusicRoot.MusicStyle == ti.MusicStyle)
+            switch (ti.Type)
             {
-                switch (ti.Type)
-                {
-                    case TaskType.ArtistFolder:
+                case TaskType.ArtistFolder:
+                    var mpa = MusicRoot.AnalysePath(optionsMonitor.CurrentValue, ti.TaskString);
+                    if (mpa.MusicRoot.MusicStyle == ti.MusicStyle)
+                    {
                         var af = mpa.GetFolder() as ArtistFolder;
                         if (af == null)
                         {
@@ -54,20 +54,49 @@ namespace Fastnet.Apollo.Web
                         {
                             taskList = ExpandArtistFolder(db, af);
                         }
-                        break;
-                    case TaskType.MusicStyle:
-                        taskList = ExpandMusicStyle(db, ti.MusicStyle);
-                        break;
+                    }
+                    else
+                    {
+                        log.Error($"{ti} style {ti.MusicStyle} does not match path ${ti.TaskString}");
+                    }
+                    break;
+                case TaskType.MusicStyle:
+                    taskList = ExpandMusicStyle(db, ti.MusicStyle);
+                    break;
 
-                    default:
-                        log.Warning($"{ti} unexpected task type {ti.Type}");
-                        break;
-                }
+                default:
+                    log.Warning($"{ti} unexpected task type {ti.Type}");
+                    break;
             }
-            else
-            {
-                log.Error($"{ti} style {ti.MusicStyle} does not match path ${ti.TaskString}");
-            }
+            //var mpa = MusicRoot.AnalysePath(optionsMonitor.CurrentValue, ti.TaskString);
+            //if (mpa.MusicRoot.MusicStyle == ti.MusicStyle)
+            //{
+            //    switch (ti.Type)
+            //    {
+            //        case TaskType.ArtistFolder:
+            //            var af = mpa.GetFolder() as ArtistFolder;
+            //            if (af == null)
+            //            {
+            //                log.Error($"{ti} {ti.TaskString} is not an artist folder");
+            //            }
+            //            else
+            //            {
+            //                taskList = ExpandArtistFolder(db, af);
+            //            }
+            //            break;
+            //        case TaskType.MusicStyle:
+            //            taskList = ExpandMusicStyle(db, ti.MusicStyle);
+            //            break;
+
+            //        default:
+            //            log.Warning($"{ti} unexpected task type {ti.Type}");
+            //            break;
+            //    }
+            //}
+            //else
+            //{
+            //    log.Error($"{ti} style {ti.MusicStyle} does not match path ${ti.TaskString}");
+            //}
 
             ti.Status = Music.Core.TaskStatus.Finished;
             ti.FinishedAt = DateTimeOffset.Now;
@@ -85,17 +114,20 @@ namespace Fastnet.Apollo.Web
                 //await db.SaveChangesAsync();
                 if (taskList.Count() > 0)
                 {
+                    log.Information($"{ti.ToDescription()} expanded to {taskList.Count()} items:");
                     foreach (var item in taskList.OrderBy(t => t.Id))
                     {
                         taskRunner.QueueTask(item);
+                        log.Information($"==> {item.ToDescription()}");
                         // QueueTask(item);
                     }
-                    var taskIdList = taskList.Select(t => t.Id).OrderBy(x => x);
-                    log.Information($"{ti} expanded to {taskIdList.Count()} items from [TI-{taskIdList.First()}] to [TI-{taskIdList.Last()}]");
+                    //var taskIdList = taskList.Select(t => t.Id).OrderBy(x => x);
+
+                    //log.Information($"{ti} expanded to {taskIdList.Count()} items from [TI-{taskIdList.First()}] to [TI-{taskIdList.Last()}]");
                 }
                 else
                 {
-                    log.Information($"{ti} expanded to 0 items");
+                    log.Information($"{ti.ToDescription()} expanded to 0 items");
                 }
             }
         }

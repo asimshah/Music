@@ -29,17 +29,19 @@ namespace Fastnet.Apollo.Web
         private TaskItem taskItem;
         private MusicDb musicDb;
         //private readonly LibraryService libraryService;
-        private readonly IndianClassicalInformation indianClassicalInformation;
+        //private readonly IndianClassicalInformation indianClassicalInformation;
+        private readonly IOptionsMonitor<IndianClassicalInformation> monitoredIndianClassicalInformation;
         private readonly IOptionsMonitor<MusicOptions> optionsMonitor;
         private readonly EntityHelper entityHelper;
         public CataloguePath(
             IOptionsMonitor<MusicOptions> optionsMonitor,
-            EntityHelper entityHelper, IndianClassicalInformation ici,
+            EntityHelper entityHelper, IOptionsMonitor<IndianClassicalInformation> monitoredIndianClassicalInformation,// IndianClassicalInformation ici,
             ILogger<CataloguePath> log, IConfiguration cfg, IWebHostEnvironment environment) : base(log, cfg, environment)
         {
             this.optionsMonitor = optionsMonitor;
             this.entityHelper = entityHelper;
-            this.indianClassicalInformation = ici;
+            //this.indianClassicalInformation = ici;
+            this.monitoredIndianClassicalInformation = monitoredIndianClassicalInformation;
         }
 
         //public CataloguePathOld(MusicOptions options, long taskId, string connectionString,
@@ -87,6 +89,7 @@ namespace Fastnet.Apollo.Web
             taskItem = await db.TaskItems.FindAsync(taskId);
             this.entityHelper.Enable(db, taskItem);
             var mpa = MusicRoot.AnalysePath(optionsMonitor.CurrentValue, taskItem.TaskString);
+            var results = new List<BaseCatalogueResult>();
             try
             {
                 ChangesDetected cd = ChangesDetected.None;
@@ -100,7 +103,7 @@ namespace Fastnet.Apollo.Web
                     }
                     return result;
                 };
-                var results = new List<BaseCatalogueResult>();
+
                 //var folder = new OpusFolder(musicOptions, pd);
                 var folder = mpa.GetFolder() as WorkFolder;
                 if (taskItem.Force == true || changesPresent(folder))
@@ -120,7 +123,7 @@ namespace Fastnet.Apollo.Web
                 }
                 taskItem.FinishedAt = DateTimeOffset.Now;
                 await db.SaveChangesAsync();
-                return results;
+                //return results;
             }
             catch (DbUpdateException due)
             {
@@ -140,6 +143,7 @@ namespace Fastnet.Apollo.Web
                 log.Error(xe, $"{taskItem}");
                 throw new CatalogueFailed { TaskId = taskId };
             }
+            return results;
         }
         private async Task<List<BaseCatalogueResult>> ProcessFolderAsync(MusicDb db, WorkFolder folder, ChangesDetected changes)
         {
@@ -251,7 +255,7 @@ namespace Fastnet.Apollo.Web
         {
             foreach (var musicFile in files)
             {
-                await musicDb.UpdateTagsAsync(musicFile, indianClassicalInformation);
+                await musicDb.UpdateTagsAsync(musicFile, monitoredIndianClassicalInformation.CurrentValue);
             }
         }
         //private async Task<List<MusicFile>> WriteAudioFilesAsync(MusicDb db, OpusFolder folder)

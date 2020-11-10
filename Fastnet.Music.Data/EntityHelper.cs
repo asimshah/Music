@@ -5,6 +5,7 @@ using Fastnet.Music.Core;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Options;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -58,14 +59,14 @@ namespace Fastnet.Music.Data
         private TaskItem taskItem;
         private readonly ILogger log;
         private readonly EntityObserver entityObserver;
-        private readonly IndianClassicalInformation ici;
+        private readonly IOptionsMonitor<IndianClassicalInformation> iciMonitor;
         // helps delete
         // MusicFile, Track, Work, Artist
         // Performance, Performer, Composition
         // Raga
-        public EntityHelper(IndianClassicalInformation ici, EntityObserver entityObserver, ILogger<EntityHelper> logger)
+        public EntityHelper(IOptionsMonitor<IndianClassicalInformation> iciMonitor, EntityObserver entityObserver, ILogger<EntityHelper> logger)
         {
-            this.ici = ici;
+            this.iciMonitor = iciMonitor;
             this.log = logger;
             this.entityObserver = entityObserver;
         }
@@ -152,6 +153,7 @@ namespace Fastnet.Music.Data
         public Raga GetRaga(string name)
         {
             //Debug.Assert(MusicDb != null);
+            var ici = iciMonitor.CurrentValue;
             var lowerAlphaNumericName = name.ToAlphaNumerics().ToLower();
             var raga = db.Ragas.SingleOrDefault(r => r.AlphamericName.ToLower() == lowerAlphaNumericName);
             if (raga == null)

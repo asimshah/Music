@@ -42,6 +42,7 @@ namespace Fastnet.Apollo.Web
             services.AddService<Resampler>();
             services.AddSingleton<EntityObserver>();
             services.AddTransient<EntityHelper>();
+            services.AddTransient<CataloguePath>();
             services.AddTransient<DeletePath>();
             services.AddTransient<ExpandTask>();
             services.AddTransient<UpdatePortraits>();

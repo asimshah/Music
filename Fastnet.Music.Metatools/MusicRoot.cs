@@ -15,87 +15,18 @@ namespace Fastnet.Music.Metatools
     }
     public class MusicRoot
     {
+        public static IEnumerable<MusicPathAnalysis> AnalyseStyle(MusicOptions musicOptions, MusicStyles style)
+        {
+            var musicRoots = GetMusicRoots(musicOptions, style);
+            return musicRoots.Select(mr => AnalysePath(mr, mr.GetPath()));
+        }
         public static MusicPathAnalysis AnalysePath(MusicOptions musicOptions, string path)
         {
             var mr = ParsePathForMusicRoot(musicOptions, path);
-            MusicPathAnalysis mpa = new MusicPathAnalysis { MusicRoot = mr };
-
-            if (path.StartsWith(mr.GetPortraitsPath(), StringComparison.InvariantCultureIgnoreCase))
-            {
-                mpa.IsPortraitsFolder = true;
-            }
-            else if (path.StartsWith(mr.GetCollectionsPath(), StringComparison.InvariantCultureIgnoreCase))
-            {
-                mpa.IsCollection = true;
-            }
-            if (mpa.IsPortraitsFolder == false)
-            {
-                var mrPath = mr.GetPath();
-                if ((!mr.IsReservedPath(path)) && path.StartsWith(mrPath, StringComparison.InvariantCultureIgnoreCase))
-                {
-                    var temp = path.Substring(mrPath.Length + 1);
-                    var parts = temp.Split(Path.DirectorySeparatorChar);
-                    if (!mpa.IsCollection)
-                    {
-                        mpa.ToplevelName = parts[0];
-                        if (parts.Length > 1)
-                        {
-                            mpa.SecondlevelName = parts[1];
-                        }
-                    }
-                    else
-                    {
-                        if (parts.Length > 1)
-                        {
-                            mpa.ToplevelName = parts[1];
-                            if (parts.Length > 2)
-                            {
-                                mpa.SecondlevelName = parts[2];
-                            }
-                        }
-                    }
-                }
-            }
+            MusicPathAnalysis mpa = AnalysePath(mr, path);
             return mpa;
         }
-        public static MusicRoot ParsePathForMusicRoot(MusicOptions musicOptions, string path)
-        {
-            var sources = new MusicSources(musicOptions);
-            var styles = new MusicStyleCollection(musicOptions);
-            var found = false;
-            MusicRoot musicRoot = null;
-            foreach (var source in sources)
-            {
-                foreach (var style in styles)
-                {
-                    foreach (var sp in style.Settings.Select(s => s.Path))
-                    {
-                        var temp = Path.Combine(source.DiskRoot, sp);
-                        if (path.StartsWith(temp, StringComparison.InvariantCultureIgnoreCase))
-                        {
-                            // path matches source, style and sp
-                            musicRoot = new MusicRoot(style.Style, source.DiskRoot, sp, source.IsGenerated);
-                            if (style.Filter)
-                            {
-                                musicRoot.IsFiltered = true;
-                                musicRoot.AllowedNames = style.IncludeNames;
-                            }
-                            found = true;
-                            break;
-                        }
-                    }
-                    if (found)
-                    {
-                        break;
-                    }
-                }
-                if (found)
-                {
-                    break;
-                }
-            }
-            return musicRoot;
-        }
+
         public static IEnumerable<MusicRoot> GetMusicRoots(MusicOptions musicOptions, MusicStyles ms, bool includeGenerated = false)
         {
             // for each enabled source, there is a distinct style path
@@ -220,6 +151,88 @@ namespace Fastnet.Music.Metatools
         public override string ToString()
         {
             return $"[{MusicStyle}, {DiskRoot}, {StylePathFragment}{(IsFiltered ? " (F)" : "")}]";
+        }
+
+        private static MusicPathAnalysis AnalysePath(MusicRoot mr, string path)
+        {
+            MusicPathAnalysis mpa = new MusicPathAnalysis { MusicRoot = mr };
+            if (path.StartsWith(mr.GetPortraitsPath(), StringComparison.InvariantCultureIgnoreCase))
+            {
+                mpa.IsPortraitsFolder = true;
+            }
+            else if (path.StartsWith(mr.GetCollectionsPath(), StringComparison.InvariantCultureIgnoreCase))
+            {
+                mpa.IsCollection = true;
+            }
+            if (mpa.IsPortraitsFolder == false)
+            {
+                var mrPath = mr.GetPath();
+                if ((!mr.IsReservedPath(path)) && path.StartsWith(mrPath, StringComparison.InvariantCultureIgnoreCase))
+                {
+                    var temp = path.Substring(mrPath.Length + 1);
+                    var parts = temp.Split(Path.DirectorySeparatorChar);
+                    if (!mpa.IsCollection)
+                    {
+                        mpa.ToplevelName = parts[0];
+                        if (parts.Length > 1)
+                        {
+                            mpa.SecondlevelName = parts[1];
+                        }
+                    }
+                    else
+                    {
+                        if (parts.Length > 1)
+                        {
+                            mpa.ToplevelName = parts[1];
+                            if (parts.Length > 2)
+                            {
+                                mpa.SecondlevelName = parts[2];
+                            }
+                        }
+                    }
+                }
+            }
+
+            return mpa;
+        }
+
+        private static MusicRoot ParsePathForMusicRoot(MusicOptions musicOptions, string path)
+        {
+            var sources = new MusicSources(musicOptions);
+            var styles = new MusicStyleCollection(musicOptions);
+            var found = false;
+            MusicRoot musicRoot = null;
+            foreach (var source in sources)
+            {
+                foreach (var style in styles)
+                {
+                    foreach (var sp in style.Settings.Select(s => s.Path))
+                    {
+                        var temp = Path.Combine(source.DiskRoot, sp);
+                        if (path.StartsWith(temp, StringComparison.InvariantCultureIgnoreCase))
+                        {
+                            // path matches source, style and sp
+                            musicRoot = new MusicRoot(style.Style, source.DiskRoot, sp, source.IsGenerated);
+                            if (style.Filter)
+                            {
+                                musicRoot.IsFiltered = true;
+                                musicRoot.AllowedNames = style.IncludeNames;
+                            }
+                            found = true;
+                            break;
+                        }
+                    }
+                    if (found)
+                    {
+                        break;
+                    }
+                }
+                if (found)
+                {
+                    break;
+                }
+            }
+            return musicRoot;
         }
     }
 }

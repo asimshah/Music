@@ -61,7 +61,7 @@ namespace Fastnet.Apollo.Web
         {
             var tqi = new TaskQueueItem { TaskItemId = item.Id, Type = item.Type};
             TaskQueue.Add(tqi);
-            log.Information($"{item.ToDescription()} queued");
+            //log.Information($"{item.ToDescription()} queued");
         }
 
         private void StartThreads()

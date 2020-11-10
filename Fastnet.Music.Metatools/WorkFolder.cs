@@ -52,7 +52,7 @@ namespace Fastnet.Music.Metatools
             var list = new List<(FileInfo fi, OpusPart part)>();
             var paths = GetMusicFilePaths();
             return paths.SelectMany(p => GetMusicFiles(p.path).Select(f => (fi: f, p.part)))
-                .OrderBy(x => x.part.Number)
+                .OrderBy(x => x.part?.Number ?? 0)
                 .ThenBy(x => x.fi.FullName, StringComparer.CurrentCultureIgnoreCase);
         }
         /// <summary>

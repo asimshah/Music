@@ -83,6 +83,7 @@ namespace Fastnet.Apollo.Web
                             //tbo = new CataloguePathOld(options.CurrentValue, item.TaskItemId, connectionString, monitoredIndianClassicalInformation.CurrentValue, taskQueue,
                             //    this.serviceProvider.GetService<IOptions<MusicServerOptions>>(), this.serviceProvider.GetService<IHubContext<MessageHub, IHubMessage>>(),
                             //    this.serviceProvider.GetService<ILoggerFactory>());
+                            tb = this.serviceProvider.GetRequiredService<CataloguePath>();
                             break;
                         case TaskType.Portraits:
                             tb = this.serviceProvider.GetRequiredService<UpdatePortraits>();
