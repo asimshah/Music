@@ -10,7 +10,6 @@ import { MessageService } from "./message.service";
 import { PlayerStates, LocalStorageKeys, AudioDeviceType } from "./common.enums";
 import { removeLocalStorageValue, setLocalStorageValue, getLocalStorageValue } from "./common.functions";
 import { ParameterService } from "./parameter.service";
-import { promise } from "protractor";
 
 export function playerServiceFactory(ps: PlayerService) {
    return () => ps.init();
