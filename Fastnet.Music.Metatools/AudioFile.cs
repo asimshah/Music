@@ -14,9 +14,9 @@ namespace Fastnet.Music.Metatools
         //protected readonly MusicOptions musicOptions;
         //protected MusicStyles musicStyle { get; private set; }
         protected readonly ILogger log;
-        private bool _isSingle;
+        //private bool _isSingle;
         public FileInfo File { get; set; }
-        public bool IsSingle => _isSingle;//{ get; set; }
+        //public bool IsSingle => _isSingle;//{ get; set; }
         public OpusPart Part { get; set; } = null;
         public AudioFile(FileInfo fi) //: base(musicOptions, musicStyle)
         {
@@ -30,10 +30,10 @@ namespace Fastnet.Music.Metatools
         /// </summary>
         /// <returns></returns>
         public abstract AudioProperties GetAudioProperties();
-        internal void SetAsSingle()
-        {
-            _isSingle = true;
-        }
+        //internal void SetAsSingle()
+        //{
+        //    _isSingle = true;
+        //}
     }
     public static partial class Extensions
     {

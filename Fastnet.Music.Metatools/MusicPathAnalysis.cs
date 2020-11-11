@@ -25,6 +25,7 @@ namespace Fastnet.Music.Metatools
         /// </summary>
         public string ToplevelName { get; set; }
         /// <summary>
+        /// does not exist for Popular if IsSingles
         /// does not exist for Hindi films if not a collection
         /// NB: not present if the given path did not extend to the second level
         /// </summary>
@@ -65,7 +66,8 @@ namespace Fastnet.Music.Metatools
                     }
                     else
                     {
-                        f = new ArtistFolder(MusicRoot, ToplevelName);
+                        f = AlbumFolder.ForArtistSingles(MusicRoot, ToplevelName);
+                        //f = new ArtistFolder(MusicRoot, ToplevelName);
                     }
                 }
                 else

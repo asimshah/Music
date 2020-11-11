@@ -28,18 +28,19 @@ namespace Fastnet.Apollo.Web
     {
         private TaskItem taskItem;
         private MusicDb musicDb;
-        //private readonly LibraryService libraryService;
+        private readonly IHubContext<MessageHub, IHubMessage> messageHub;
         //private readonly IndianClassicalInformation indianClassicalInformation;
         private readonly IOptionsMonitor<IndianClassicalInformation> monitoredIndianClassicalInformation;
         private readonly IOptionsMonitor<MusicOptions> optionsMonitor;
         private readonly EntityHelper entityHelper;
         public CataloguePath(
-            IOptionsMonitor<MusicOptions> optionsMonitor,
+            IOptionsMonitor<MusicOptions> optionsMonitor, IHubContext<MessageHub, IHubMessage> messageHub,
             EntityHelper entityHelper, IOptionsMonitor<IndianClassicalInformation> monitoredIndianClassicalInformation,// IndianClassicalInformation ici,
             ILogger<CataloguePath> log, IConfiguration cfg, IWebHostEnvironment environment) : base(log, cfg, environment)
         {
             this.optionsMonitor = optionsMonitor;
             this.entityHelper = entityHelper;
+            this.messageHub = messageHub;
             //this.indianClassicalInformation = ici;
             this.monitoredIndianClassicalInformation = monitoredIndianClassicalInformation;
         }
@@ -57,30 +58,42 @@ namespace Fastnet.Apollo.Web
             {
                 return await CatalogueAsync(db);
             });
-            //if (results != null)
-            //{
-            //    foreach (var item in results)
-            //    {
-            //        try
-            //        {
-            //            var cr = item;
-            //            if (cr.Status == CatalogueStatus.Success && item.MusicSet != null)
-            //            {
-            //                log.Information($"{taskItem} {cr.MusicSetType.Name} {cr}");
-            //                // send hub message that artist is new/modified
-            //                foreach (var id in cr.ArtistIdListForNotification)
-            //                {
-            //                    await this.libraryService.SendArtistNewOrModified(id);
-            //                }
-            //            }
-            //        }
-            //        catch (Exception xe)
-            //        {
-            //            log.Error(xe, $"[TI-{taskItem}]");
-            //            throw;
-            //        }
-            //    }
-            //}
+            if (results != null)
+            {
+                foreach (var item in results)
+                {
+                    try
+                    {
+                        var cr = item;
+                        if (cr.Status == CatalogueStatus.Success && item.MusicSet != null)
+                        {
+                            log.Information($"{taskItem} {cr.MusicSetType.Name} {cr}");
+                            // send hub message that artist is new/modified
+                            foreach (var id in cr.ArtistIdListForNotification)
+                            {
+                                await SendArtistNewOrModified(id);
+                            }
+                        }
+                    }
+                    catch (Exception xe)
+                    {
+                        log.Error(xe, $"[TI-{taskItem}]");
+                        throw;
+                    }
+                }
+            }
+        }
+        public async Task SendArtistNewOrModified(long id)
+        {
+            try
+            {
+                await this.messageHub.Clients.All.SendArtistNewOrModified(id);
+            }
+            catch (Exception xe)
+            {
+                log.Error(xe);
+            }
+
         }
         private async Task<List<BaseCatalogueResult>> CatalogueAsync(MusicDb db/*, PathData pd*/)
         {
@@ -105,6 +118,10 @@ namespace Fastnet.Apollo.Web
                 };
 
                 //var folder = new OpusFolder(musicOptions, pd);
+                //if(mpa.ToplevelName.IsEqualIgnoreAccentsAndCase("Marcie Blane"))
+                //{
+                //    Debugger.Break();
+                //}
                 var folder = mpa.GetFolder() as WorkFolder;
                 if (taskItem.Force == true || changesPresent(folder))
                 {
@@ -130,7 +147,7 @@ namespace Fastnet.Apollo.Web
                 if (due.InnerException is SqlException)
                 {
                     var se = due.InnerException as SqlException;
-                    log.Error($"{taskItem} DbUpdateException, {se.Message}");
+                    log.Warning($"{taskItem} DbUpdateException, {se.Message}");
                 }
                 else
                 {
@@ -373,19 +390,21 @@ namespace Fastnet.Apollo.Web
         {
             var musicFiles = new List<MusicFile>();
             //foreach (var audioFile in new AudioFileCollection(this))
-            foreach (var item in wf.GetFilesOnDisk())
+            //foreach (var item in wf.GetFilesOnDisk())
+            foreach (var af in wf.GetAudioFiles())
             {
-                AudioFile af = null;
-                switch (item.fi.Extension.ToLower())
-                {
-                    case ".mp3":
-                        af = new Mp3File(item.fi);
-                        break;
-                    case ".flac":
-                        af = new FlacFile(item.fi);
-                        break;
-                }
+                //AudioFile af = null;
+                //switch (item.fi.Extension.ToLower())
+                //{
+                //    case ".mp3":
+                //        af = new Mp3File(item.fi);
+                //        break;
+                //    case ".flac":
+                //        af = new FlacFile(item.fi);
+                //        break;
+                //}
                 var mf = await wf.AddMusicFile(entityHelper, af);
+                musicFiles.Add(mf);
             }
             return musicFiles;
         }

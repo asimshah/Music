@@ -8,7 +8,7 @@ namespace Fastnet.Music.Data
 {
     public enum TaskType
     {
-        DiskPath,
+        DiskPath, // should this be AlbumFolder??
         [Obsolete]
         ArtistName,
         ArtistFolder,
@@ -16,7 +16,8 @@ namespace Fastnet.Music.Data
         Portraits,
         DeletedPath,
         ResampleWork,
-        FilmFolder
+        FilmFolder//,
+        //SinglesFolder
     }
     public class TaskItem : EntityBase
     {

@@ -715,26 +715,26 @@ namespace Fastnet.Apollo.Web.Controllers
         {
             await Task.Delay(0);
             log.Information($"Rescan started for {style}");
-            var mrlist = MusicRoot.GetMusicRoots(musicOptions.CurrentValue, style);
-            foreach (var mr in mrlist)
-            {
-                foreach(var item in mr.GetAllTopFolders())
-                {
-                    switch(item)
-                    {
-                        case HindiFilmFolder hf:
-                            log.Information($"{mr} found {hf.FilmName}");
-                            break;
-                        case AlbumFolder abf:
-                            log.Information($"{mr} found {abf.AlbumName} [{abf.Type}]");
-                            break;
-                        case ArtistFolder af:
-                            log.Information($"{mr} found {af.ArtistName}");
-                            break;
-                    }
-                }
-            }
-            //await taskPublisher.AddTask(style);
+            //var mrlist = MusicRoot.GetMusicRoots(musicOptions.CurrentValue, style);
+            //foreach (var mr in mrlist)
+            //{
+            //    foreach(var item in mr.GetAllTopFolders())
+            //    {
+            //        switch(item)
+            //        {
+            //            case HindiFilmFolder hf:
+            //                log.Information($"{mr} found {hf.FilmName}");
+            //                break;
+            //            case AlbumFolder abf:
+            //                log.Information($"{mr} found {abf.AlbumName} [{abf.Type}]");
+            //                break;
+            //            case ArtistFolder af:
+            //                log.Information($"{mr} found {af.ArtistName}");
+            //                break;
+            //        }
+            //    }
+            //}
+            await taskPublisher.AddTask(style);
 
             return new EmptyResult();
         }

@@ -47,6 +47,10 @@ namespace Fastnet.Music.Metatools
         {
             return GetMusicFilePaths().Any(x => ContainsMusic(x.path));
         }
+        public IEnumerable<AudioFile> GetAudioFiles()
+        {
+            return new AudioFileCollection(this);
+        }
         public IEnumerable<(FileInfo fi, OpusPart part)> GetFilesOnDisk()
         {
             var list = new List<(FileInfo fi, OpusPart part)>();
@@ -70,7 +74,7 @@ namespace Fastnet.Music.Metatools
             {
                 result = result.Union(eh.FindMatchingFiles(path));
             }
-            return result;
+            return result.ToArray();
         }
         public async Task<MusicFile> AddMusicFile(EntityHelper eh, AudioFile audioFile)
         {
@@ -205,7 +209,7 @@ namespace Fastnet.Music.Metatools
             foreach (var ext in StringConstants.MusicFileExtensions)
             {
                 var files = Directory.EnumerateFiles(srcPath, "*" + ext, deep ? SearchOption.AllDirectories : SearchOption.TopDirectoryOnly)
-                        .AsParallel()
+                        //.AsParallel()
                         .Select(x => new FileInfo(x));
                 list.AddRange(files);
             }

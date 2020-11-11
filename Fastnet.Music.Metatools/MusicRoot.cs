@@ -1,4 +1,5 @@
-﻿using Fastnet.Music.Core;
+﻿using Fastnet.Core.Logging;
+using Fastnet.Music.Core;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -15,11 +16,11 @@ namespace Fastnet.Music.Metatools
     }
     public class MusicRoot
     {
-        public static IEnumerable<MusicPathAnalysis> AnalyseStyle(MusicOptions musicOptions, MusicStyles style)
-        {
-            var musicRoots = GetMusicRoots(musicOptions, style);
-            return musicRoots.Select(mr => AnalysePath(mr, mr.GetPath()));
-        }
+        //public static IEnumerable<MusicPathAnalysis> AnalyseStyle(MusicOptions musicOptions, MusicStyles style)
+        //{
+        //    var musicRoots = GetMusicRoots(musicOptions, style);
+        //    return musicRoots.Select(mr => AnalysePath(mr, mr.GetPath()));
+        //}
         public static MusicPathAnalysis AnalysePath(MusicOptions musicOptions, string path)
         {
             var mr = ParsePathForMusicRoot(musicOptions, path);
@@ -174,7 +175,14 @@ namespace Fastnet.Music.Metatools
                     if (!mpa.IsCollection)
                     {
                         mpa.ToplevelName = parts[0];
-                        if (parts.Length > 1)
+                        //if(parts.Length == 1)
+                        //{
+                        //    if(mr.MusicStyle == MusicStyles.Popular)
+                        //    {
+                        //        mpa.IsSingles = true;
+                        //    }
+                        //}
+                        /*else*/ if (parts.Length > 1)
                         {
                             mpa.SecondlevelName = parts[1];
                         }

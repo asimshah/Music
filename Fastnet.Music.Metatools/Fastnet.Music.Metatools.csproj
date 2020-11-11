@@ -23,7 +23,7 @@
     <None Remove="Tag Editor Objects\**" />
   </ItemGroup>
   <ItemGroup>
-    <PackageReference Include="Fastnet.Music.Data" Version="2.314.828" />
+    <PackageReference Include="Fastnet.Music.Data" Version="2.314.1124" />
     <PackageReference Include="Fastnet.Music.MediaTools" Version="2.313.959" />
     <PackageReference Include="Fastnet.Music.Taglib" Version="2.313.963" />
     <PackageReference Include="FlacLibSharp" Version="3.2.0" />

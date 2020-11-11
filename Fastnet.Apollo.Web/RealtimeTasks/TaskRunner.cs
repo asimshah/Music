@@ -31,7 +31,7 @@ namespace Fastnet.Apollo.Web
         private readonly string connectionString;
         private readonly IOptionsMonitor<IndianClassicalInformation> monitoredIndianClassicalInformation;
         private readonly EntityObserver entityObserver;
-        private readonly IHubContext<MessageHub, IHubMessage> messageHub;
+        //private readonly IHubContext<MessageHub, IHubMessage> messageHub;
         public TaskRunner(IServiceProvider sp, IOptionsMonitor<MusicOptions> options, /*IOptions<IndianClassicalInformation> iciOptions,*/
             IOptionsMonitor<IndianClassicalInformation> monitoredIci,
             IConfiguration cfg, IWebHostEnvironment environment,
@@ -45,7 +45,7 @@ namespace Fastnet.Apollo.Web
             maxConsumerThreads = Math.Max(1, this.options.CurrentValue.MaxTaskThreads);
             connectionString = environment.LocaliseConnectionString(cfg.GetConnectionString("MusicDb"));
             this.entityObserver = entityObserver;
-            this.messageHub = messageHub;
+            //this.messageHub = messageHub;
             this.entityObserver.EntityChanged += EntityChanged;
         }
 
@@ -90,30 +90,30 @@ namespace Fastnet.Apollo.Web
             log.Information(e.LogMessage);
         }
         #region hub-messages
-        public async Task SendArtistDeleted(long id)
-        {
-            try
-            {
-                await this.messageHub.Clients.All.SendArtistDeleted(id);
-            }
-            catch (Exception xe)
-            {
-                log.Error(xe);
-            }
+        //public async Task SendArtistDeleted(long id)
+        //{
+        //    try
+        //    {
+        //        await this.messageHub.Clients.All.SendArtistDeleted(id);
+        //    }
+        //    catch (Exception xe)
+        //    {
+        //        log.Error(xe);
+        //    }
 
-        }
-        public async Task SendArtistNewOrModified(long id)
-        {
-            try
-            {
-                await this.messageHub.Clients.All.SendArtistNewOrModified(id);
-            }
-            catch (Exception xe)
-            {
-                log.Error(xe);
-            }
+        //}
+        //public async Task SendArtistNewOrModified(long id)
+        //{
+        //    try
+        //    {
+        //        await this.messageHub.Clients.All.SendArtistNewOrModified(id);
+        //    }
+        //    catch (Exception xe)
+        //    {
+        //        log.Error(xe);
+        //    }
 
-        }
+        //}
         #endregion hub-messages
     }
 }
