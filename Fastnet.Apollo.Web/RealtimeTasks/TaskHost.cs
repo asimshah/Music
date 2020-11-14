@@ -10,6 +10,7 @@ using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Options;
 using Microsoft.AspNetCore.SignalR;
+using System.Linq;
 
 namespace Fastnet.Apollo.Web
 {
@@ -45,7 +46,7 @@ namespace Fastnet.Apollo.Web
                 count++;
                 try
                 {
-                    log.Debug($"started count = {count}");
+                    log.Information($"started count = {count}");
                     await ProcessTaskQueue();
                     log.Information($"finished");
                 }
@@ -73,85 +74,108 @@ namespace Fastnet.Apollo.Web
         {
             foreach (var item in taskQueue.GetConsumingEnumerable(this.cancellationToken))
             {
-                if (SetTaskItemStatus(item.TaskItemId, Music.Core.TaskStatus.InProgress, out TaskType _))
+                if (SetTaskItemStatus(item.TaskItemId, Music.Core.TaskStatus.InProgress/*, out TaskType _*/))
                 {
-                    TaskBaseOld tbo = null;
+                    //TaskBaseOld tbo = null;
                     TaskBase tb = null;
                     switch (item.Type)
                     {
                         case TaskType.DiskPath:
-                            //tbo = new CataloguePathOld(options.CurrentValue, item.TaskItemId, connectionString, monitoredIndianClassicalInformation.CurrentValue, taskQueue,
-                            //    this.serviceProvider.GetService<IOptions<MusicServerOptions>>(), this.serviceProvider.GetService<IHubContext<MessageHub, IHubMessage>>(),
-                            //    this.serviceProvider.GetService<ILoggerFactory>());
-                            tb = this.serviceProvider.GetRequiredService<CataloguePath>();
+                            if (!PostponeIfRequired(item))
+                            {
+                                tb = this.serviceProvider.GetRequiredService<CataloguePath>();
+                            }
                             break;
                         case TaskType.Portraits:
                             tb = this.serviceProvider.GetRequiredService<UpdatePortraits>();
-                            //tbo = new UpdatePortraits(options.CurrentValue, item.TaskItemId, connectionString);
                             break;
                         case TaskType.ArtistFolder:
-                        //case TaskType.ArtistName:
                         case TaskType.MusicStyle:
                             tb = this.serviceProvider.GetRequiredService<ExpandTask>();
-                            //tbo = new ExpandTask(options.CurrentValue, item.TaskItemId, connectionString, taskQueue);
                             break;
                         case TaskType.DeletedPath:
                             tb = this.serviceProvider.GetRequiredService<DeletePath>();
-
-                            //tb = new DeletePathOld(options.CurrentValue, item.TaskItemId, connectionString,
-                            //    this.serviceProvider.GetService<IOptions<MusicServerOptions>>(), this.serviceProvider.GetService<IHubContext<MessageHub, IHubMessage>>(),
-                            //    this.serviceProvider.GetService<ILoggerFactory>());
                             break;
                     }
                     if(tb != null)
                     {
                         await tb.RunAsync(item.TaskItemId);
                     }
-                    else if (tbo != null)
-                    {
-                        log.Debug($"host is executing an instance of {tbo?.GetType().Name}");
-                        await tbo.RunAsync();
-                    }
+                    //else if (tbo != null)
+                    //{
+                    //    log.Debug($"host is executing an instance of {tbo?.GetType().Name}");
+                    //    await tbo.RunAsync();
+                    //}
                 }
                 else
                 {
                     log.Warning($"[TI-{item.TaskItemId}] unable to set as InProgress");
                 }
+                if(taskQueue.Count() == 0)
+                {
+                    log.Information($"task queue is empty");
+                }
             }
         }
-        private void TryAddTaskAgain(long itemId)
+        /// <summary>
+        /// returns true if postponed
+        /// </summary>
+        /// <param name="currentItem"></param>
+        /// <returns></returns>
+        private bool PostponeIfRequired (TaskQueueItem currentItem)
         {
             using (var db = new MusicDb(connectionString))
             {
-                var taskItem = db.TaskItems.Find(itemId);
-                var maxRetries = options.CurrentValue.MaxTaskRetries;
-                bool requeue = false;
-                if (taskItem.RetryCount < maxRetries)
+                var currentTask = db.TaskItems.Find(currentItem.TaskItemId);
+                var runningTasks = db.TaskItems.Where(x => x.Status == Music.Core.TaskStatus.InProgress && x.Id != currentItem.TaskItemId);
+                var otherTaskStrings = runningTasks.Select(x => x.TaskString);
+                var thisTaskString = currentTask.TaskString;
+                var shouldPostpone = otherTaskStrings.Any(t1 => thisTaskString.StartsWith(t1) || t1.StartsWith(thisTaskString));
+                if(shouldPostpone)
                 {
-                    taskItem.Status = Music.Core.TaskStatus.Pending;
-                    taskItem.ScheduledAt = DateTimeOffset.Now;
-                    taskItem.RetryCount++;
-                    requeue = true;
+                    currentTask.Status = Music.Core.TaskStatus.Pending;
+                    db.SaveChanges();
+                    //var tqi = new TaskQueueItem { TaskItemId = item.TaskItemId, Type = item.Type/*, ProcessingId = Guid.NewGuid()*/};
+                    QueueTask(currentItem);
+                    log.Warning($"[TI-{currentItem.TaskItemId}] postponed - {thisTaskString}");
 
-                    log.Information($"{taskItem} requeued, retry {taskItem.RetryCount} of {maxRetries}");
                 }
-                else
-                {
-                    taskItem.Status = Music.Core.TaskStatus.Failed;
-                    taskItem.FinishedAt = DateTimeOffset.Now;
-                    log.Information($"{taskItem} failed - retries exhausted");
-                }
-                db.SaveChanges();
-                if(requeue)
-                {
-                    QueueTask(taskItem);
-                }
+                return shouldPostpone;
             }
         }
-        private bool SetTaskItemStatus(long itemId, Music.Core.TaskStatus status, out TaskType type)
+        //private void TryAddTaskAgain(long itemId)
+        //{
+        //    using (var db = new MusicDb(connectionString))
+        //    {
+        //        var taskItem = db.TaskItems.Find(itemId);
+        //        var maxRetries = options.CurrentValue.MaxTaskRetries;
+        //        bool requeue = false;
+        //        if (taskItem.RetryCount < maxRetries)
+        //        {
+        //            taskItem.Status = Music.Core.TaskStatus.Pending;
+        //            taskItem.ScheduledAt = DateTimeOffset.Now;
+        //            taskItem.RetryCount++;
+        //            requeue = true;
+
+        //            log.Information($"{taskItem} requeued, retry {taskItem.RetryCount} of {maxRetries}");
+        //        }
+        //        else
+        //        {
+        //            taskItem.Status = Music.Core.TaskStatus.Failed;
+        //            taskItem.FinishedAt = DateTimeOffset.Now;
+        //            log.Information($"{taskItem} failed - retries exhausted");
+        //        }
+        //        db.SaveChanges();
+        //        if(requeue)
+        //        {
+        //            QueueTask(taskItem);
+        //        }
+        //    }
+        //}
+        private bool SetTaskItemStatus(long itemId, Music.Core.TaskStatus status/*, out TaskType type*/)
         {
             bool result = false;
-            type = TaskType.DiskPath;
+            //type = TaskType.DiskPath;
             using (var db = new MusicDb(connectionString))
             {
                 var taskItem = db.TaskItems.Find(itemId);
@@ -159,7 +183,7 @@ namespace Fastnet.Apollo.Web
                 {
                     var oldStatus = taskItem.Status;
                     taskItem.Status = status;// Music.Core.TaskStatus.InProgress;
-                    type = taskItem.Type;
+                    //type = taskItem.Type;
                     db.SaveChanges();
                     result = true;
                     log.Debug($"{taskItem} status changed from {oldStatus} to {taskItem.Status}");
@@ -178,11 +202,17 @@ namespace Fastnet.Apollo.Web
             }
             return result;
         }
-        private void QueueTask(TaskItem item)
+        //private void QueueTask(TaskItem item)
+        //{
+        //    var tqi = new TaskQueueItem { TaskItemId = item.Id, Type = item.Type/*, ProcessingId = Guid.NewGuid()*/};
+        //    taskQueue.Add(tqi);
+        //    log.Information($"{item.ToDescription()} queued");
+        //}
+        private void QueueTask(TaskQueueItem item)
         {
-            var tqi = new TaskQueueItem { TaskItemId = item.Id, Type = item.Type/*, ProcessingId = Guid.NewGuid()*/};
-            taskQueue.Add(tqi);
-            log.Information($"{item.ToDescription()} queued");
+            //var tqi = new TaskQueueItem { TaskItemId = item.Id, Type = item.Type/*, ProcessingId = Guid.NewGuid()*/};
+            taskQueue.Add(item);
+            //log.Information($"{item.ToDescription()} queued");
         }
     }
 

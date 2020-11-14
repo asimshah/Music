@@ -10,6 +10,7 @@ using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Diagnostics.Eventing.Reader;
+using System.IO;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
@@ -107,9 +108,22 @@ namespace Fastnet.Music.Data
         {
             return await db.MusicFiles.SingleOrDefaultAsync(x => x.File == filename);
         }
-        public IEnumerable<MusicFile> FindMatchingFiles(string path)
+        public IEnumerable<MusicFile> FindMatchingFiles(string path, bool includeDescendants = false)
         {
-            return db.MusicFiles.Where(x => x.File.ToLower().StartsWith(path.ToLower()))
+            var targetFiles = db.MusicFiles.Where(x => x.File.ToLower().StartsWith(path.ToLower())).ToArray();
+                //.OrderBy(f => f.File);
+            if(includeDescendants)
+            {
+                return targetFiles;
+            }
+            //return targetFiles
+            //    .Where(x => x.IsMultiPart && Path.Combine(x.DiskRoot, x.StylePath, x.OpusPath, x.PartName).ToLower() == path.ToLower()
+            //        || x.IsMultiPart == false && Path.Combine(x.DiskRoot, x.StylePath, x.OpusPath).ToLower() == path.ToLower())
+            //        .OrderBy(f => f.File);
+
+            return targetFiles
+                .Where(x => x.IsMultiPart && Path.Combine(x.GetRootPath(), x.PartName).ToLower() == path.ToLower()
+                    || x.IsMultiPart == false && x.GetRootPath().ToLower() == path.ToLower())
                     .OrderBy(f => f.File);
         }
         public Work FindWorkByArtistIdsAndName(IEnumerable<long> idlist, string name)
@@ -128,10 +142,10 @@ namespace Fastnet.Music.Data
         }
         public Performer GetPerformer(MetaPerformer mp)
         {
-            if (mp.Name == "collections")
-            {
-                Debugger.Break();
-            }
+            //if (mp.Name == "collections")
+            //{
+            //    Debugger.Break();
+            //}
             var alphamericName = mp.Name.ToAlphaNumerics().ToLower();
 
             db.Performers.Load();
@@ -183,7 +197,7 @@ namespace Fastnet.Music.Data
                     UID = Guid.NewGuid(),
                     Name = name,
                     AlphamericName = name.ToAlphaNumerics(),
-                    Type = ArtistType.Artist,
+                    Type = type, // ArtistType.Artist,
                     OriginalName = name,
                 };
                 artist.ArtistStyles.Add(new ArtistStyle { Artist = artist, StyleId = musicStyle });

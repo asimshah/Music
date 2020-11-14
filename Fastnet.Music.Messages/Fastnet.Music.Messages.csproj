@@ -16,6 +16,6 @@
     <NoWarn>1701;1702;CS1591</NoWarn>
   </PropertyGroup>
   <ItemGroup>
-    <PackageReference Include="Fastnet.Music.Core" Version="2.313.718" />
+    <PackageReference Include="Fastnet.Music.Core" Version="2.317.963" />
   </ItemGroup>
 </Project>

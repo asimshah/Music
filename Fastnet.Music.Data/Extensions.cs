@@ -131,10 +131,10 @@ namespace Fastnet.Music.Data
         [Obsolete]
         public static Performer GetPerformer(this MusicDb db, MetaPerformer mp, TaskItem taskItem = null)
         {
-            if(mp.Name == "collections")
-            {
-                Debugger.Break();
-            }
+            //if(mp.Name == "collections")
+            //{
+            //    Debugger.Break();
+            //}
             var alphamericName = mp.Name.ToAlphaNumerics().ToLower();
 
             db.Performers.Load();
@@ -527,8 +527,11 @@ namespace Fastnet.Music.Data
         }
         public static string GetRootPath(this MusicFile mf)
         {
+            //return mf.OpusType == OpusType.Collection ?
+            //    Path.Combine(mf.DiskRoot, mf.StylePath, "Collections", mf.OpusPath)
+            //    : Path.Combine(mf.DiskRoot, mf.StylePath, mf.OpusPath);
             return mf.OpusType == OpusType.Collection ?
-                Path.Combine(mf.DiskRoot, mf.StylePath, "Collections", mf.OpusPath)
+                Path.Combine(mf.DiskRoot, mf.StylePath, StringConstants.Collections, mf.OpusPath)
                 : Path.Combine(mf.DiskRoot, mf.StylePath, mf.OpusPath);
         }
         public static T GetTagValue<T>(this MusicFile mf, string tagName)

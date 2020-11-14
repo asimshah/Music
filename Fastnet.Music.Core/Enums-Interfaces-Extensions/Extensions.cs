@@ -69,7 +69,9 @@ namespace Fastnet.Music.Core
             }
             string getArtistFolder(string stylePath, string name)
             {
-                var path1 = Path.Combine(stylePath, type == ArtistType.Various ? "Collections" : name);
+                //var path1 = Path.Combine(stylePath, type == ArtistType.Various ? "Collections" : name);
+                //return Directory.EnumerateDirectories(stylePath).SingleOrDefault(ap => ap.IsEqualIgnoreAccentsAndCase(path1));
+                var path1 = Path.Combine(stylePath, type == ArtistType.Various ? StringConstants.Collections : name);
                 return Directory.EnumerateDirectories(stylePath).SingleOrDefault(ap => ap.IsEqualIgnoreAccentsAndCase(path1));
             }
             foreach (var stylePath in musicStyle.GetPaths(musicOptions, false, false))

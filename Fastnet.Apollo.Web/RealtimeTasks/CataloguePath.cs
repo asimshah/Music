@@ -112,7 +112,7 @@ namespace Fastnet.Apollo.Web
                     cd = changes;
                     if (result)
                     {
-                        log.Information($"{taskItem} {wf}, change {changes}");
+                        log.Debug($"{taskItem} {wf}, change {changes}");
                     }
                     return result;
                 };
@@ -122,24 +122,38 @@ namespace Fastnet.Apollo.Web
                 //{
                 //    Debugger.Break();
                 //}
-                var folder = mpa.GetFolder() as WorkFolder;
-                if (taskItem.Force == true || changesPresent(folder))
+                var tf = mpa.GetFolder();
+                var folder = tf switch
                 {
-                    var delay = GetRandomDelay();
-                    log.Debug($"{taskItem} starting {folder.ToString()} after delay of {delay}ms");
-                    await Task.Delay(TimeSpan.FromMilliseconds(delay));
-                    results = await ProcessFolderAsync(db, folder, cd);
-                    await db.SaveChangesAsync();
-                    var success = results.All(x => x.Status == CatalogueStatus.Success || x.Status == CatalogueStatus.GeneratedFilesOutOfDate);
-                    taskItem.Status = success ? Music.Core.TaskStatus.Finished : Music.Core.TaskStatus.Failed;
+                    ArtistFolder af => af.GetSinglesFolder() ,//as WorkFolder,
+                    WorkFolder wf => wf,// as WorkFolder,
+                    _ => throw new NotImplementedException()
+                };
+                //var folder = mpa.GetFolder() as WorkFolder; //!!!!!!!!!!!!!!!!! can be an artist folder - means singles?
+                if (folder != null)
+                {
+                    if (taskItem.Force == true || changesPresent(folder))
+                    {
+                        var delay = GetRandomDelay();
+                        log.Debug($"{taskItem} starting {folder.ToString()} after delay of {delay}ms");
+                        await Task.Delay(TimeSpan.FromMilliseconds(delay));
+                        results = await ProcessFolderAsync(db, folder, cd);
+                        await db.SaveChangesAsync();
+                        var success = results.All(x => x.Status == CatalogueStatus.Success || x.Status == CatalogueStatus.GeneratedFilesOutOfDate);
+                        taskItem.Status = success ? Music.Core.TaskStatus.Finished : Music.Core.TaskStatus.Failed;
+                    }
+                    else
+                    {
+                        taskItem.Status = Music.Core.TaskStatus.Finished;
+                        log.Information($"{taskItem} {folder.ToString()} no update required");
+                    }
+                    taskItem.FinishedAt = DateTimeOffset.Now;
+                    await db.SaveChangesAsync(); 
                 }
                 else
                 {
-                    taskItem.Status = Music.Core.TaskStatus.Finished;
-                    log.Information($"{taskItem} starting {folder.ToString()} no update required");
+                    log.Error($"mpa.GetFolder(): {mpa}");
                 }
-                taskItem.FinishedAt = DateTimeOffset.Now;
-                await db.SaveChangesAsync();
                 //return results;
             }
             catch (DbUpdateException due)
@@ -188,7 +202,8 @@ namespace Fastnet.Apollo.Web
                             entityHelper.Delete(mf);
                         }
                         await db.SaveChangesAsync();
-                        log.Information($"{taskItem} {deletedFilesCount} music files removed from db");
+                        var reason = taskItem.Force ? "forced removal" : $"{changes}";
+                        log.Information($"{taskItem} {deletedFilesCount} music files removed from db, reason: {reason}");
                     }
                 }
                 catch (Exception xe)
@@ -204,7 +219,7 @@ namespace Fastnet.Apollo.Web
                 var musicSets = GetMusicSets(/*db,*/ folder, musicFiles);
                 if (musicSets != null)
                 {
-                    int i = 0;
+                    //int i = 0;
                     foreach (var set in musicSets)
                     {
                         var cr = await set.CatalogueAsync();

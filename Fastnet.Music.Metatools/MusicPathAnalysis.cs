@@ -1,4 +1,5 @@
-﻿using System.Diagnostics;
+﻿using Fastnet.Music.Core;
+using System.Diagnostics;
 using System.IO;
 
 namespace Fastnet.Music.Metatools
@@ -66,8 +67,8 @@ namespace Fastnet.Music.Metatools
                     }
                     else
                     {
-                        f = AlbumFolder.ForArtistSingles(MusicRoot, ToplevelName);
-                        //f = new ArtistFolder(MusicRoot, ToplevelName);
+                        //f = AlbumFolder.ForArtistSingles(MusicRoot, ToplevelName);
+                        f = new ArtistFolder(MusicRoot, ToplevelName);
                     }
                 }
                 else

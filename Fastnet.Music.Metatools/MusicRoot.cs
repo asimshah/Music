@@ -7,13 +7,6 @@ using System.Linq;
 
 namespace Fastnet.Music.Metatools
 {
-    internal static class StringConstants
-    {
-        internal const string Portraits = "$Portraits";
-        internal const string Collections = "Collections";
-        internal static string[] MusicFileExtensions = new string[] { ".mp3", ".flac" };
-        internal static string[] ImageFileExtensions = new string[] { ".jpg", ".jpeg", ".png" };
-    }
     public class MusicRoot
     {
         //public static IEnumerable<MusicPathAnalysis> AnalyseStyle(MusicOptions musicOptions, MusicStyles style)

@@ -68,7 +68,7 @@ namespace Fastnet.Apollo.Web.Controllers
             }).ToArray();
             var dto = new ParametersDTO
             {
-                Version = $"{GetPackageVersion()} [{GetAssemblyVersion()}]",
+                Version = $"{VersionMethods.GetSiteVersion()} [{System.Reflection.Assembly.GetEntryAssembly().GetAssemblyVersion()}]",
                 BrowserKey = key,
                 AppName = this.environment.IsDevelopment() ? "Apollo Dev" : "Apollo",
                 IsMobile = this.Request.IsMobileBrowser(),
@@ -775,16 +775,16 @@ namespace Fastnet.Apollo.Web.Controllers
             var ms = new MemoryStream(image.Data);
             return CacheableResult(new FileStreamResult(ms, image.MimeType), image.LastModified);
         }
-        private string GetPackageVersion()
-        {
-            //var assemblyLocation = System.Reflection.Assembly.GetExecutingAssembly().Location;
-            //return System.Diagnostics.FileVersionInfo.GetVersionInfo(assemblyLocation).ProductVersion;
-            return System.Reflection.Assembly.GetExecutingAssembly().GetPackageVersion();
-        }
-        private string GetAssemblyVersion()
-        {
-            //return System.Reflection.Assembly.GetExecutingAssembly().GetName().Version.ToString();
-            return System.Reflection.Assembly.GetExecutingAssembly().GetAssemblyVersion();
-        }
+        //private string GetPackageVersion()
+        //{
+        //    //var assemblyLocation = System.Reflection.Assembly.GetExecutingAssembly().Location;
+        //    //return System.Diagnostics.FileVersionInfo.GetVersionInfo(assemblyLocation).ProductVersion;
+        //    return System.Reflection.Assembly.GetExecutingAssembly().GetPackageVersion();
+        //}
+        //private string GetAssemblyVersion()
+        //{
+        //    //return System.Reflection.Assembly.GetExecutingAssembly().GetName().Version.ToString();
+        //    return System.Reflection.Assembly.GetExecutingAssembly().GetAssemblyVersion();
+        //}
     }
 }

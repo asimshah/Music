@@ -72,17 +72,27 @@ namespace Fastnet.Music.Metatools
         public IEnumerable<MusicFile> GetFilesInDb(EntityHelper eh, string pathToUse = null)
         {
             pathToUse = pathToUse ?? Fullpath;
-            return eh.FindMatchingFiles(pathToUse);
+            return eh.FindMatchingFiles(pathToUse, true);
         }
         public IEnumerable<AlbumFolder> GetAlbumFolders()
         {
             var path = Fullpath;
             var folders = Directory.EnumerateDirectories(path).Select(f => AlbumFolder.ForArtist(musicRoot, ArtistName, Path.GetFileName(f))).ToList();
-            if (ContainsSingles())
+            var sf = GetSinglesFolder();
+            if (sf != null)
             {
-                folders.Add(AlbumFolder.ForArtistSingles(musicRoot, ArtistName));
+                folders.Add(sf);
             }
             return folders;
+        }
+        public AlbumFolder GetSinglesFolder()
+        {
+            return AlbumFolder.ForArtistSingles(musicRoot, ArtistName);
+            //if (ContainsSingles())
+            //{
+            //    return AlbumFolder.ForArtistSingles(musicRoot, ArtistName);
+            //}
+            //return null;
         }
         //[Obsolete]
         //public OpusFolderCollection GetOpusFolders(string requiredPrefix = null)
@@ -122,7 +132,7 @@ namespace Fastnet.Music.Metatools
         }
         public override string ToString()
         {
-            return $"{musicRoot.MusicStyle} ArtistFolder: {ArtistName} in {Fullpath}";
+            return $"{musicRoot.MusicStyle} ArtistFolder: {ArtistName}";
         }
 
 

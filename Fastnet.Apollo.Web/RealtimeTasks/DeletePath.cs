@@ -46,11 +46,19 @@ namespace Fastnet.Apollo.Web
             var mpa = MusicRoot.AnalysePath(optionsMonitor.CurrentValue, taskItem.TaskString);
             var folder = mpa.GetFolder();
             this.entityHelper.Enable(db, taskItem);
+            log.Debug($"{taskItem} starting {folder.ToString()}");
             var musicFileList = folder.GetFilesInDb(this.entityHelper, mpa.GetPath());
-            log.Information($"{taskItem} deleting {musicFileList.Count()} music files");
-            foreach (var mf in musicFileList)
+            if (musicFileList.Count() == 0)
             {
-                this.entityHelper.Delete(mf);
+                log.Warning($"{taskItem} {folder.ToString()} no music files found");
+            }
+            else
+            {
+                log.Information($"{taskItem}  {folder.ToString()} deleting {musicFileList.Count()} music files");
+                foreach (var mf in musicFileList)
+                {
+                    this.entityHelper.Delete(mf);
+                }
             }
             taskItem.Status = Music.Core.TaskStatus.Finished;
             taskItem.FinishedAt = DateTimeOffset.Now;
