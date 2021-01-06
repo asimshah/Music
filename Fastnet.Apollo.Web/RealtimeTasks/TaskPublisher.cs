@@ -120,7 +120,7 @@ namespace Fastnet.Apollo.Web
             }
             else
             {
-                log.Debug($"Task type {type} for target {taskString} skipped as alrerady present");
+                log.Debug($"Task type {type} for target {taskString} skipped as already present");
             }
             return null;
         }

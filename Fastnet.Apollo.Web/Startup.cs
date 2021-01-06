@@ -33,6 +33,7 @@ namespace Fastnet.Apollo.Web
             Configuration = configuration;
             this.log = logger;
             this.environment = env;
+            log.Information($"This web site is running in {this.environment.EnvironmentName}");
             log.Versions("Music");
             //var name = Process.GetCurrentProcess().ProcessName;
             //var siteVersion = GetSiteVersion();

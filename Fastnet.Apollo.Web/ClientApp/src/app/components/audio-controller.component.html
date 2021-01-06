@@ -23,9 +23,14 @@
          <div class="fa fa-2x toggle-play-pause" title="Toggle play/pause" [ngClass]="{'fa-pause-circle-o' : isPlaying(), 'fa-play-circle-o': !isPlaying()}" (click)="togglePlayPause()"></div>
          <div class="fa fa-fast-forward skip-forward" title="Skip to next" (click)="skipForward()"></div>
       </div>
+      <div class="audio-extensions">
+         <div *ngIf="isLocalAirplayDevice()" class="airplay-picker" (click)="showPlaybackTargetPicker()">
+            <span class="iconify" data-icon="uil-airplay" data-inline="false"></span>
+         </div>
+      </div>
       <div *ngIf="device && device.type !== AudioDeviceType.Browser" class="volume-slider">
          <i class="fa fa-volume-off volume-down"></i>
-         <slider name="volumeslider" [minimum]="0" [maximum]="1" [current]="volume" (currentChange)="onVolumeChange($event)" ></slider>
+         <slider name="volumeslider" [minimum]="0" [maximum]="1" [current]="volume" (currentChange)="onVolumeChange($event)"></slider>
          <i class="fa fa-volume-up volume-up"></i>
       </div>
    </ng-container>

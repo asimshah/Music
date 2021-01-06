@@ -52,6 +52,7 @@ export class AudioDevice {
    capability: AudioCapability;
    hostMachine: string;
    canReposition: boolean;
+   playbackTargetAvailable = false;
    public toString(): string {
       return `${this.displayName} (key: ${this.key}) [on ${this.hostMachine}]`;
    }

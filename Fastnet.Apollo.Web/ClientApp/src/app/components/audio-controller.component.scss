@@ -50,13 +50,15 @@ $accent-colour: $high-accent-colour; // #f9ca06;// theme-colour('accent');
 }
 
 .audio-controls {
+   //margin-left: $theme-gutter-narrow;
+   //margin-right: $theme-gutter-narrow;
    display: grid;
    grid-template-columns: 1fr auto 1fr;
    align-items: center;
    grid-column-gap: $theme-gutter;
    justify-items: center;
 
-   .skip-back, .skip-forward, .toggle-play-pause {
+   .skip-back, .skip-forward, .toggle-play-pause, .airplay-picker {
       @include make-clickable();
    }
 
@@ -72,6 +74,20 @@ $accent-colour: $high-accent-colour; // #f9ca06;// theme-colour('accent');
       margin-left: $theme-gutter;
       margin-right: $theme-gutter;
       font-size: 3em;
+   }
+}
+
+.audio-extensions {
+   display: grid;
+   grid-template-columns: 1fr auto 1fr;
+   align-items: center;
+   grid-column-gap: $theme-gutter;
+   justify-items: center;
+
+   .airplay-picker {
+      font-size: 2em;
+      grid-column : 2 / 3;
+      @include make-clickable();
    }
 }
 

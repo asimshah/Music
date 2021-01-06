@@ -75,7 +75,7 @@ namespace Fastnet.Apollo.Web
             ExtendedPlaylistItem result = null;
             if (CurrentPosition.IsZero())
             {
-                result = ExtendedPlaylist.Items.First();
+                result = ExtendedPlaylist.Items.FirstOrDefault();
             }
             else
             {

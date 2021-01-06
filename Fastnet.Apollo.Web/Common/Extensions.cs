@@ -102,16 +102,16 @@ namespace Fastnet.Apollo.Web
         //}
         public static MusicFile GetBestMusicFile(this Track t, DeviceRuntime dr)
         {
-            //TODO:: a more complicated algorithm may be required browsers
-            // i.e. one that tries to decide if they are flac capable, etc
-            if (dr.Type == AudioDeviceType.Browser)
-            {
-                var mp3versions = t.MusicFiles.Where(x => x.Encoding == EncodingType.mp3);
-                if (mp3versions.Count() > 0)
-                {
-                    return mp3versions.OrderByDescending(x => x.AverageBitRate).First();
-                }
-            }
+            ////TODO:: a more complicated algorithm may be required browsers
+            //// i.e. one that tries to decide if they are flac capable, etc
+            //if (dr.Type == AudioDeviceType.Browser)
+            //{
+            //    var mp3versions = t.MusicFiles.Where(x => x.Encoding == EncodingType.mp3);
+            //    if (mp3versions.Count() > 0)
+            //    {
+            //        return mp3versions.OrderByDescending(x => x.AverageBitRate).First();
+            //    }
+            //}
             if (dr.MaxSampleRate == 0)
             {
                 return t.MusicFiles.First();

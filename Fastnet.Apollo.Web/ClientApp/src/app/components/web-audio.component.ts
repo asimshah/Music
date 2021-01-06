@@ -187,6 +187,7 @@ export class WebAudioComponent implements AfterViewInit, OnDestroy {
    async ngAfterViewInit() {
       this.audio = this.audioElement.nativeElement;
       this.audio.volume = 0.5;
+      this.log.debug(`[WebAudioComponent] ${this.playbackTargetAvailable()}`);
       //console.log(`WebAudioComponent::ngAfterViewInit(), volume is ${this.audio.volume}`);
       //this.createAudio();
    }
@@ -222,6 +223,7 @@ export class WebAudioComponent implements AfterViewInit, OnDestroy {
    }
    private async enableWebAudio() {
       this.device = await this.ps.enableWebAudio();
+      this.device.playbackTargetAvailable = this.playbackTargetAvailable();
       this.stateMachine = new FSM(this.device.displayName, this.log);
       this.initialiseFSM();
       //this.log.debug("[WebAudioComponent] webaudio enabled");
@@ -353,6 +355,16 @@ export class WebAudioComponent implements AfterViewInit, OnDestroy {
    onPlayEnded() {
       //this.log.information(`[WebAudioComponent] play ended event`);
       this.onEvent(PlayerEvents.PlayCompleted);
+   }
+   showPlaybackTargetPicker() {
+      //video.webkitShowPlaybackTargetPicker()
+      (<any>this.audio).webkitShowPlaybackTargetPicker();
+   }
+   public playbackTargetAvailable() {
+      if ((<any>window).WebKitPlaybackTargetAvailabilityEvent) {
+         return true;
+      }
+      return false;
    }
 
    //private playV2(streamurl: string, volume: number) {
