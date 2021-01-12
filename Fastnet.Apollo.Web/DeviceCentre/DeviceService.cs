@@ -41,7 +41,10 @@ namespace Fastnet.Apollo.Web
             this.runtimeDevices = new ConcurrentDictionary<string, DeviceRuntime>();
             this.lf = lf;
             this.messenger = messenger;
-            this.messenger.EnableMulticastSend();
+            if (!this.messenger.MulticastEnabled)
+            {
+                this.messenger.EnableMulticastSend();
+            }
             serverInformation = GetMusicServerInformation();
         }
 

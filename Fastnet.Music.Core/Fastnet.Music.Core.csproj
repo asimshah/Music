@@ -14,6 +14,6 @@
     <NoWarn>1701;1702;CS1591</NoWarn>
   </PropertyGroup>
   <ItemGroup>
-    <PackageReference Include="Fastnet.Core" Version="2.312.940" />
+    <PackageReference Include="Fastnet.Core" Version="2.371.523" />
   </ItemGroup>
 </Project>
